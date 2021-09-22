@@ -29,6 +29,7 @@
         //----$ordMode=2[CSV]からの新規登録
         //----$ordMode=3[JSON]からの新規登録
         //----$ordMode=4[ブラウザからの新規登録(SQLトランザクション無し)
+        $g['ModeType'] = $ordMode;
 
         //----返し値:$varRet
         //----処理結果次第で書き換えるグローバル変数：$g['error_flag']

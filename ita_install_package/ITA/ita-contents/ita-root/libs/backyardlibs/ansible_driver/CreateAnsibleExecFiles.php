@@ -127,6 +127,8 @@ class CreateAnsibleExecFiles {
     // テンプレートファイル格納ディレクトリ名
     const LC_ANS_TEMPLATE_FILES_DIR          = "template_files";
 
+    const LC_ANS_UPLOAD_FILES_DIR            = "upload_files";
+
     // ユーザー公開用データリレイストレージパス 変数の名前
     const LC_ANS_OUTDIR_DIR                  = "user_files";
 
@@ -228,6 +230,8 @@ class CreateAnsibleExecFiles {
     private $lv_ita_child_playbooks_Dir;           //子PlayBook格納ディレクトリ(ITA側)
     private $lv_ita_dialog_files_Dir;              //対話ファイル格納ディレクトリ(ITA側)
     private $lv_ita_template_files_Dir;            //テンプレートファイル格納ディレクトリ(ITA側)
+
+    private $lv_Ansible_upload_files_Dir;          //FileUpLoadColumnファイル格納ディレクトリ(ITA側)
 
     // テーブル名定義
     private $lv_ansible_vars_masterDB;             // 変数管理テーブルテーブル名
@@ -853,6 +857,21 @@ class CreateAnsibleExecFiles {
             // ホスト変数ファイル内 copy_filesディレクトリパスを記憶
             $this->setHostvarsfile_copy_file_Dir(self::LC_ANS_COPY_FILES_DIR);
         }
+
+        //upload_filesディレクトリ作成
+        $c_dirwk = $c_indir . "/" . self::LC_ANS_UPLOAD_FILES_DIR;
+        if( !mkdir( $c_dirwk, 0777 ) ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+        if( !chmod( $c_dirwk, 0777 ) ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+        //upload_filesディレクトリ名を記憶
+        $this->setAnsible_upload_files_Dir($c_dirwk);
 
         //ssh_key_filesディレクトリ作成
         $c_dirwk = $c_indir . "/" . self::LC_ANS_SSH_KEY_FILES_DIR;
@@ -6765,13 +6784,13 @@ class CreateAnsibleExecFiles {
     //   $in_operation_id:      オペレーションID
     //   $ina_host_vars:        変数一覧返却配列
     //                          [ホスト名(IP)][ 変数名 ]=>具体値
-    // 
+    //   $in_ans_if_info:       インターフェース情報
     // 戻り値
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function getDBRoleVarList($in_pattern_id,$in_operation_id,&$ina_host_vars,
-                          &$ina_MultiArray_vars_list,&$ina_All_vars_list)
+                          &$ina_MultiArray_vars_list,&$ina_All_vars_list,$in_ans_if_info)
     {
         $vars_assign_seq_list = array();
         $child_vars_list = array();
@@ -6786,6 +6805,7 @@ class CreateAnsibleExecFiles {
                "  TBL_1.ASSIGN_ID,                                                                          \n" .
                "  TBL_1.SYSTEM_ID,                                                                          \n" .
                "  TBL_1.VARS_ENTRY,                                                                         \n" .
+               "  TBL_1.VARS_ENTRY_FILE,                                                                    \n" .
                "  TBL_1.SENSITIVE_FLAG,                                                                     \n" .
                "  TBL_1.ASSIGN_SEQ,                                                                         \n" .
                "  TBL_2.VARS_NAME_ID AS VARS_NAME_ID,                                                       \n" .
@@ -6868,6 +6888,7 @@ class CreateAnsibleExecFiles {
                "      TBL.VARS_LINK_ID,                                                                     \n" .
                "      TBL.COL_SEQ_COMBINATION_ID,                                                           \n" .
                "      TBL.VARS_ENTRY,                                                                       \n" .
+               "      TBL.VARS_ENTRY_FILE,                                                                  \n" .
                "      TBL.SENSITIVE_FLAG,                                                                   \n" .
                "      TBL.ASSIGN_SEQ                                                                        \n" .
                "    FROM                                                                                    \n" .
@@ -6920,6 +6941,11 @@ class CreateAnsibleExecFiles {
         $tgt_row = array();
         $array_tgt_row = array();
         while ( $row = $objQuery->resultFetch() ){
+            $ret = $this->setFileUploadCloumnFileEnv($in_ans_if_info,$row);
+            if($ret !== true) {
+                unset($objQuery);
+                return false;
+            }
             switch($row['VARS_ATTRIBUTE_01']){
             case self::LC_VARS_ATTR_STRUCT:       // 多次元変数
                 array_push( $array_tgt_row, $row );
@@ -7134,6 +7160,7 @@ class CreateAnsibleExecFiles {
     //   $ina_DB_child_vars_list: 
     //                          メンバー変数マスタの配列変数のメンバー変数リスト返却
     //                          [ 変数名 ][メンバー変数名]=0
+    //   $in_ans_if_info:       インターフェース情報
     // 
     // 戻り値
     //   true:   正常
@@ -7142,7 +7169,7 @@ class CreateAnsibleExecFiles {
     function getDBVarList($in_pattern_id,$in_operation_id,&$ina_host_vars,
                          &$ina_pionner_template_host_vars,
                          &$ina_vault_vars,&$ina_vault_host_vars_file_list,
-                         &$ina_child_vars_list,&$ina_DB_child_vars_list)
+                         &$ina_child_vars_list,&$ina_DB_child_vars_list,$in_ans_if_info)
     {
         $vars_assign_seq_list = array();
         $child_vars_list = array();
@@ -7199,6 +7226,7 @@ class CreateAnsibleExecFiles {
                "      TBL_6.DISUSE_FLAG       = '0' \n" .
                "  ) AS VARS_NAME_COUNT, \n" .
                "  TBL_1.VARS_ENTRY, \n" .
+               "  TBL_1.VARS_ENTRY_FILE, \n" .
                "  TBL_1.SENSITIVE_FLAG, \n" .
                "  TBL_1.ASSIGN_SEQ, \n" .
                "  TBL_2.DISUSE_FLAG, \n" .
@@ -7210,6 +7238,7 @@ class CreateAnsibleExecFiles {
                "      TBL_3.SYSTEM_ID, \n" .
                "      TBL_3.VARS_LINK_ID, \n" .
                "      TBL_3.VARS_ENTRY, \n" .
+               "      TBL_3.VARS_ENTRY_FILE, \n" .
                "      TBL_3.SENSITIVE_FLAG, \n" .
                "      TBL_3.ASSIGN_SEQ \n" .
                "    FROM \n" .
@@ -7271,6 +7300,7 @@ class CreateAnsibleExecFiles {
                "      TBL_6.DISUSE_FLAG       = '0' \n" .
                "  ) AS VARS_NAME_COUNT, \n" .
                "  TBL_1.VARS_ENTRY, \n" .
+               "  TBL_1.VARS_ENTRY_FILE, \n" .
                "  TBL_1.SENSITIVE_FLAG, \n" .
                "  TBL_1.ASSIGN_SEQ, \n" .
                "  TBL_2.DISUSE_FLAG, \n" .
@@ -7282,6 +7312,7 @@ class CreateAnsibleExecFiles {
                "      TBL_3.SYSTEM_ID, \n" .
                "      TBL_3.VARS_LINK_ID, \n" .
                "      TBL_3.VARS_ENTRY, \n" .
+               "      TBL_3.VARS_ENTRY_FILE, \n" .
                "      TBL_3.SENSITIVE_FLAG, \n" .
                "      TBL_3.ASSIGN_SEQ \n" .
                "    FROM \n" .
@@ -7331,6 +7362,11 @@ class CreateAnsibleExecFiles {
         $tgt_row = array();
         $array_tgt_row = array();
         while ( $row = $objQuery->resultFetch() ){
+            $ret = $this->setFileUploadCloumnFileEnv($in_ans_if_info,$row);
+            if($ret !== true) {
+                unset($objQuery);
+                return false;
+            }
             array_push( $tgt_row, $row );
         }
 
@@ -10700,6 +10736,30 @@ class CreateAnsibleExecFiles {
     }
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
+    //   inディレクトリからのFileUpLoadColumnファイル格納ディレクトリパス(upload_files)を記憶
+    // パラメータ
+    //   $in_dir:      ssh_key_filesディレクトリ
+    //
+    // 戻り値
+    //   なし
+    ////////////////////////////////////////////////////////////////////////////////
+    function setAnsible_upload_files_Dir($in_indir){
+        $this->lv_Ansible_upload_files_Dir = $in_indir;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   inディレクトリからのSSH秘密鍵ファイル格納ディレクトリパス(upload_files)を取得
+    // パラメータ
+    //   なし
+    //
+    // 戻り値
+    //   copy_filesディレクトリ名
+    ////////////////////////////////////////////////////////////////////////////////
+    function getAnsible_upload_files_Dir(){
+        return($this->lv_Ansible_upload_files_Dir);
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
     //   inディレクトリからのSSH秘密鍵ファイル格納ディレクトリパス(ssh_key_files)を記憶
     // パラメータ
     //   $in_dir:      ssh_key_filesディレクトリ
@@ -13279,6 +13339,81 @@ if(isset($Expansion_root)) {
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             return false;
         }
+        return true;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   代入値管理の具体値に設定されているファイルをansible実行環境に展開
+    // パラメータ
+    //   $in_ans_if_info: インターフェース情報
+    //   $row:            代入値管理の情報
+    //
+    // 戻り値
+    //   true:  正常
+    //   false: 異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function setFileUploadCloumnFileEnv($in_ans_if_info,&$row) {
+        global $root_dir_path;
+
+        if($row['VARS_ENTRY_FILE'] == "") {
+            return true;
+        }
+        $driver_id = $this->getAnsibleDriverID();
+        switch($this->getAnsibleDriverID()) {
+        case DF_LEGACY_DRIVER_ID:
+            $menuID = '2100020109';
+            break;
+        case DF_PIONEER_DRIVER_ID:
+            $menuID = '2100020210';
+            break;
+        case DF_LEGACY_ROLE_DRIVER_ID:
+            $menuID = '2100020311';
+            break;
+        default:
+            break;
+        }
+
+        $srcFilePath = sprintf("%s/uploadfiles/%s/VARS_ENTRY_FILE/%010d/%s",$root_dir_path,$menuID,$row['ASSIGN_ID'],$row['VARS_ENTRY_FILE']);
+
+        if( file_exists($srcFilePath) === false ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55292",array($row['ASSIGN_ID']));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+
+        $ITADestDirPath = sprintf("%s/%010s",$this->getAnsible_upload_files_Dir(),$row['ASSIGN_ID']);
+        $AnsDestDirPath = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                      $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                      $ITADestDirPath);
+
+        if( !is_dir( $AnsDestDirPath) ){
+            //ドライバ区分ディレクトリが存在している場合はなにもしない
+            if( !mkdir( $AnsDestDirPath, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            if( !chmod( $AnsDestDirPath, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+
+        $AnsDestDirPath .= "/" . $row['VARS_ENTRY_FILE'];
+        $cmd = sprintf("/bin/cp -f %s %s  2>&1",escapeshellarg($srcFilePath),escapeshellarg($AnsDestDirPath));
+
+        $outAry = array();
+        exec($cmd ,$outAry, $ret);
+        if($ret != 0) {
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55293",array($row['ASSIGN_ID'],implode("\n",$outAry)));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+
+        $row['VARS_ENTRY'] = $AnsDestDirPath;
+        $row['VARS_ENTRY_FILE'] = "";
+
         return true;
     }
 }

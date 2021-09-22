@@ -8,3 +8,5 @@
 /ita-root/backyards/ansible_driver/ky_ansible_playbook_command_shell_template.sh
 /ita-root/backyards/CICD_for_IaC/ky_GitClone.sh
 /ita-root/backyards/CICD_for_IaC/ky_GitCommand.sh
+/ita-root/backyards/ansible_driver/ky_ansible_FileUploadColumnBackup.sh
+/ita-root/backyards/ansible_driver/ky_ansible_FileUploadColumnRestore.sh

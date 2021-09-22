@@ -1088,6 +1088,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1117,6 +1118,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1852,6 +1854,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1881,6 +1884,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -2818,6 +2822,7 @@ SYSTEM_ID                         %INT%                            , -- 機器(�
 VARS_LINK_ID                      %INT%                            , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        text                             , -- 具体値
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -2848,6 +2853,7 @@ SYSTEM_ID                         %INT%                            , -- 機器(�
 VARS_LINK_ID                      %INT%                            , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        text                             , -- 具体値
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
