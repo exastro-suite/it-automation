@@ -2336,7 +2336,7 @@ class UniqueConstraintValidator extends SingleTextValidator {
                 }
 
                 //メニューIDから、メニューに紐付く項目を取得
-                $query01 = "SELECT CREATE_ITEM_ID, CREATE_MENU_ID "
+                $query01 = "SELECT CREATE_ITEM_ID, CREATE_MENU_ID, INPUT_METHOD_ID "
                             ." FROM F_CREATE_ITEM_INFO "
                             ." WHERE DISUSE_FLAG = '0' AND CREATE_MENU_ID = :CREATE_MENU_ID ";
 
@@ -2349,7 +2349,7 @@ class UniqueConstraintValidator extends SingleTextValidator {
                 if( $retArray01[0] === true ){
                     $objQuery01 =& $retArray01[1];
                     while($row01 = $objQuery01->resultFetch()){
-                        $aryDiscover01[] = $row01;
+                        $aryDiscover01[$row01['CREATE_ITEM_ID']] = $row01; //値を特定しやすいようにkeyをCREATE_ITEM_IDにして格納
                         $targetItemIdArray[] = $row01['CREATE_ITEM_ID'];
                     }
                     unset($objQuery01);
@@ -2367,6 +2367,14 @@ class UniqueConstraintValidator extends SingleTextValidator {
                     if(!in_array($id, $targetItemIdArray)){
                         $retBool = false;
                         $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1179");
+                        $this->setValidRule($strErrAddMsg);
+                        return $retBool;
+                    }
+
+                    //入力方式が「パラメータシート参照」の場合はエラーにする。
+                    if($aryDiscover01[$id]['INPUT_METHOD_ID'] == 11){
+                        $retBool = false;
+                        $strErrAddMsg =  $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1293");
                         $this->setValidRule($strErrAddMsg);
                         return $retBool;
                     }

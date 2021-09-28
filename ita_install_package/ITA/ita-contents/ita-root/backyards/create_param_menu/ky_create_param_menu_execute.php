@@ -365,9 +365,11 @@ try{
         // パラメータシート項目作成情報を特定する
         //////////////////////////
         $itemInfoArray = array();
+        $itemInputMethodCheckArray = array();
         foreach($createItemInfoArray as $ciiData){
             if($targetData['CREATE_MENU_ID'] === $ciiData['CREATE_MENU_ID']){
                 $itemInfoArray[] = $ciiData;
+                $itemInputMethodCheckArray[$ciiData['CREATE_ITEM_ID']] = $ciiData['INPUT_METHOD_ID'];
             }
         }
 
@@ -607,6 +609,7 @@ try{
         //一意制約(複数項目)のloadTableに記載する文字列を生成
         $uniqueConstraintSet = "";
         $noExistUniqueConstraintId = false;
+        $noInputMethodId = false;
         if(!empty($uniqueConstraintTargetArray)){
             foreach($uniqueConstraintTargetArray as $uniqueData){
                 $uniqueConstraintItemArray = explode(",", $uniqueData['UNIQUE_CONSTRAINT_ITEM']);
@@ -615,6 +618,11 @@ try{
                     //項目のIDと一意制約対象のIDが一致しているかどうかを判定
                     if(!in_array($id, $idArray)){
                         $noExistUniqueConstraintId = true;
+                    }
+
+                    //入力方式が「パラメータシート参照(ID:11)」の場合はエラー判定フラグをtrueに
+                    if($itemInputMethodCheckArray[$id] == 11){
+                        $noInputMethodId = true;
                     }
 
                     $columnName = COLUMN_PREFIX . sprintf("%04d", $id);
@@ -635,6 +643,15 @@ try{
         //一意制約の対象IDの中に項目のIDと一致しないものがあった場合エラー処理
         if($noExistUniqueConstraintId == true){
             $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5025');
+            outputLog($msg);
+            // パラメータシート作成管理更新処理を行う
+            updateMenuStatus($targetData, "4", $msg, false, true);
+            continue;
+        }
+
+        //項目の入力方式に「パラメータシート参照」の対象が含まれていた場合エラー処理
+        if($noInputMethodId == true){
+            $msg = $objMTS->getSomeMessage('ITACREPAR-ERR-5027');
             outputLog($msg);
             // パラメータシート作成管理更新処理を行う
             updateMenuStatus($targetData, "4", $msg, false, true);
