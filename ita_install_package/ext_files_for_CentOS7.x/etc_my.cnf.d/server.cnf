@@ -18,7 +18,7 @@ log-error=/var/log/mariadb/mariadb.log
 skip-character-set-client-handshake
 explicit_defaults_for_timestamp = true
 transaction-isolation=READ-COMMITTED
-innodb_buffer_pool_size = 512MB
+innodb_buffer_pool_size = 1024MB
 innodb_log_buffer_size=64M
 innodb_log_file_size=256M
 innodb_read_only_compressed=0
