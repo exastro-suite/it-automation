@@ -859,6 +859,7 @@
                         $resultprm = array();
                         $arrTargetLists = array();
                         $arrTargetUploadLists = array();
+                        $arrTargetUploadListFullpath = array();
                         $intParseTypeID = 1;    //1:yaml
 
                         //対象のファイル有の場合
@@ -901,8 +902,12 @@
                             foreach ($arrTargetUploadfiles as $strTargetUploadfile) {
                                 $targetHosts =  explode( "/", str_replace( $strCollectTargetPath , "" , $strTargetUploadfile ) );
                                 //ホスト名、ファイル名、パス
-                                $arrTargetUploadLists[$targetHosts[1]][basename($strTargetUploadfile)]=$strTargetUploadfile;
-
+                                if ( isset($arrTargetUploadLists[$targetHosts[1]][basename($strTargetUploadfile)]) !== true ){
+                                    $arrTargetUploadLists[$targetHosts[1]][basename($strTargetUploadfile)]=$strTargetUploadfile;
+                                }
+                                if ( isset($arrTargetUploadListFullpath[$targetHosts[1]][$strTargetUploadfile]) !== true ){
+                                    $arrTargetUploadListFullpath[$targetHosts[1]][$strTargetUploadfile]=$strTargetUploadfile;
+                                }
                             }
 
                             //ホスト毎に実施
@@ -1114,8 +1119,36 @@
                                                                                 $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
                                                                             }
                                                                         }else{
-                                                                            $insertData[$parmNO]="";
-                                                                            $UpdateFileData[$parmNO] ="";
+                                                                            $matchflg = "";
+                                                                            foreach ($arrTargetUploadListFullpath[$hostname] as $tmpfilekey => $tmparrfilepath ) {
+                                                                                //フルパス完全一致
+                                                                                if( $tmpfilekey == $tgtSource_row[$pramName] ){
+                                                                                    $matchflg = "FULL";
+                                                                                    #$insertData[$parmNO] = basename($tgtSource_row[$pramName]);
+                                                                                    $upload_filepath = $tmparrfilepath;
+                                                                                    if( is_file( $upload_filepath ) == true && $insertData[$parmNO] != "" ){
+                                                                                        $insertData[$parmNO] = basename($upload_filepath);
+                                                                                        $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                                    }
+                                                                                }else{
+                                                                                    //部分後方一致
+                                                                                    if ( preg_match("<{$tgtSource_row[$pramName]}$>", $tmpfilekey) ) {
+                                                                                        $matchflg = "AFTER";
+                                                                                        #$insertData[$parmNO] = basename($tgtSource_row[$pramName]);
+
+                                                                                        $upload_filepath = $tmparrfilepath;
+                                                                                        if( is_file( $upload_filepath ) == true  && $insertData[$parmNO] != "" ){
+                                                                                            $insertData[$parmNO] = basename($upload_filepath);
+                                                                                            $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                                        }
+                                                                                    } 
+                                                                                }
+                                                                                if( $matchflg != "" )break;
+                                                                            }
+                                                                            if( $matchflg == ""){
+                                                                                $insertData[$parmNO]="";
+                                                                                $UpdateFileData[$parmNO] ="";
+                                                                            }
                                                                         }
                                                                     }                                                                
                                                                 }
@@ -1190,7 +1223,7 @@
                                                                         }
                                                                     }
                                                                     $insertData[$parmNO]=$value;
-                                                                    if(gettype( $value ) == "NULL" ) $insertNullflg[$parmNO] = 1;
+                                                                    if( gettype( $value ) == "NULL" || $value == "" ) $insertNullflg[$parmNO] = 1;
                                                                 //項目名：リピート部分[X]
                                                                 }elseif(mb_strpos($tgtSource_key,$pramName) !== false){
 
@@ -1198,24 +1231,67 @@
                                                                     if( $tmpColname == $pramName ){
                                                                         $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
                                                                         $insertData[$parmNO]=$value;
-                                                                        if(gettype( $value ) == "NULL" ) $insertNullflg[$parmNO] = 1;
+                                                                        if(gettype( $value ) == "NULL" || $value == ""  ) $insertNullflg[$parmNO] = 1;
+                                                                    }
+                                                                //項目名：リピート部分[X]
+                                                                }elseif(mb_strpos($pramName,$tgtSource_key) !== false){
+
+                                                                    $tmpColname =preg_replace('/\[[0-9]+?\]/u',"",$tgtSource_key);
+                                                                    if( $tmpColname == $pramName ){
+                                                                        $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
+                                                                        $insertData[$parmNO]=$value;
+                                                                        if(gettype( $value ) == "NULL" || $value == ""  ) $insertNullflg[$parmNO] = 1;
                                                                     }
                                                                 //その他
                                                                 }else{
                                                                     if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]=null;
                                                                 }
 
-                                                                // #449 ファイルアップロードカラム対応
-                                                                if(isset($arrFileUploadList[$filename][$menuid]) == true ){
+                                                                // #449 ファイルアップロードカラム対応 + #1532
+                                                                if(isset($arrFileUploadList[$filename][$menuid]) == true && ($pramName == $tgtSource_key || mb_strpos($tgtSource_key,$pramName) !== false) ){
+                                                                    //ファイルアップロードカラムの場合
                                                                     if( array_key_exists($pramName, $arrFileUploadList[$filename][$menuid] ) ){
-                                                                        if( isset($arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]] ) == true ){
-                                                                            $upload_filepath = $arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]];
-                                                                            if( is_file( $upload_filepath ) == true ){
+                                                                        
+                                                                        //ファイルアップロード対象リスト（key：ファイル名-valuse:パス）にある場合
+                                                                        if( array_key_exists( $value ,$arrTargetUploadLists[$hostname] )  == true ){
+                                                                            $upload_filepath = $arrTargetUploadLists[$hostname][$value];
+                                                                            if( is_file( $upload_filepath ) == true && $insertData[$parmNO] != ""  ){
+                                                                                $insertData[$parmNO] = basename($upload_filepath);
                                                                                 $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
                                                                             }
                                                                         }else{
+                                                                        //ファイルアップロード対象リスト（key：パス-valuse:パス）にある場合
+                                                                            $matchflg = "";
+                                                                            foreach ($arrTargetUploadListFullpath[$hostname] as $tmpfilekey => $tmparrfilepath ) {
+                                                                                $matchflg = "";
+                                                                                $upload_filepath = $tmparrfilepath;
+                                                                                $upload_filename = basename($upload_filepath);
+                                                                                //ファイルフルパス完全/部分一致
+                                                                                if( $tmpfilekey == $tgtSource_row[$tgtSource_key] ){
+                                                                                    //フルパス完全一致
+                                                                                    $matchflg = "FULL";
+                                                                                }elseif ( preg_match("<{$tgtSource_row[$tgtSource_key]}$>", $tmpfilekey) ) {
+                                                                                    //部分後方一致
+                                                                                    $matchflg = "AFTER";
+                                                                                }
+                                                                                if( $matchflg != "" ){
+                                                                                    if( is_file( $upload_filepath ) == true && $insertData[$parmNO] != ""  ){
+                                                                                        $insertData[$parmNO] = $upload_filename;
+                                                                                        $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                                    }
+                                                                                    break;   
+                                                                                }
+                                                                            }
+                                                                            //不要項目除外
+                                                                            if( $matchflg == ""){
+                                                                                $insertData[$parmNO]="";
+                                                                                unset($UpdateFileData[$parmNO]);
+                                                                            }
+                                                                        }
+
+                                                                        if( $pramName != $tgtSource_key && $tmpColname != $pramName && ( $insertData[10] != 1 && $insertData[10] != null )  ){
+                                                                            unset($insertData[$parmNO]);
                                                                             $insertData[$parmNO]="";
-                                                                            unset($UpdateFileData[$parmNO]);
                                                                         }
                                                                     }else{
                                                                          //値がNULLの項目を除外　#1050,1051
@@ -1264,7 +1340,9 @@
                                                                                 if( $tmpinsertData[10] == $insertData[10] ){
                                                                                     foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
                                                                                         if( $tmpinsertDatavalue == "") {
-                                                                                            $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                            if($tmpFilter[$insertDataNO][$tmpinsertDatakey] === NULL ){
+                                                                                                $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                            }
                                                                                             if( isset($UpdateFileData[$tmpinsertDatakey]) ){
                                                                                                 $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
                                                                                             }
@@ -1290,6 +1368,13 @@
                                                                                 // #449 ファイルアップロードカラム対応
                                                                                 if( $UpdateFileData != array() ){
                                                                                     #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
+
+                                                                                    foreach ($UpdateFileData as $upfileskey => $upfilesval) {
+                                                                                        if( $insertData[$upfileskey] == "" ){
+                                                                                            unset( $UpdateFileData[$upfileskey] );
+                                                                                        }
+                                                                                    }
+
                                                                                     $tmpFilter['UPLOAD_FILE'][$intColmun] = $UpdateFileData;
                                                                                 }
                                                                                 $intColmun++;                                                                                
@@ -1307,7 +1392,7 @@
                                                                                 if( $tmpinsertData[10] == $insertData[10] ){
                                                                                     foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
                                                                                         if( isset($insertData[$tmpinsertDatakey]) ) {
-                                                                                            if( $insertData[$tmpinsertDatakey] != "" ) {
+                                                                                            if( $insertData[$tmpinsertDatakey] != "" && $tmpFilter[$insertDataNO][$tmpinsertDatakey] == "" ) {
                                                                                                 $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
                                                                                                 if( isset($UpdateFileData[$tmpinsertDatakey]) ){
                                                                                                     $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
