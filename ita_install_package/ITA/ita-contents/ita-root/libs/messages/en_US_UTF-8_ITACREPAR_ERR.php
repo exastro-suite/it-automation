@@ -299,6 +299,7 @@ $ary["ITACREPAR-ERR-1289"]          = "\"Parameter Sheet Reference/Menu group:Me
 $ary["ITACREPAR-ERR-1290"]          = "\"Parameter Sheet Reference/Menu group:Menu:Item\" can not be set when \"Password\" is set.";
 $ary["ITACREPAR-ERR-1291"]          = "\"Parameter Sheet Reference/Menu group:Menu:Item\" can not be set when \"File upload\" is set.";
 $ary["ITACREPAR-ERR-1292"]          = "\"Parameter Sheet Reference/Menu group:Menu:Item\" can not be set when \"Link\" is set.";
+$ary["ITACREPAR-ERR-1293"]          = "Items whose Input method is \"Parameter Sheet Reference\" cannot be specified as \"Unique constraint(Multiple items)\".";
 $ary["ITACREPAR-ERR-5001"]          = "File does not exist. File=[{}].";
 $ary["ITACREPAR-ERR-5002"]          = "Failed to read the file. File=[{}].";
 $ary["ITACREPAR-ERR-5003"]          = "Failed to execute SQL. SQL error = [{}].";
@@ -325,5 +326,6 @@ $ary["ITACREPAR-ERR-5023"]          = "Failed to create the table update SQL for
 $ary["ITACREPAR-ERR-5024"]          = "Failed to update the menu creation status.";
 $ary["ITACREPAR-ERR-5025"]          = "\"Unique constraint(Multiple items)\" contains an ID that cannot be specified.";
 $ary["ITACREPAR-ERR-5026"]          = "When \"Data sheet\" is selected as the Creation target, the item of the Input method \"Parameter Sheet reference\" cannot be used.";
+$ary["ITACREPAR-ERR-5027"]          = "The item of Input method \"Parameter Sheet Reference\" is included in \"Unique constraint(Multiple items)\".";
 $ary["ITACREPAR-ERR-6001"]          = "Failed to get Select default value";
 ?>
