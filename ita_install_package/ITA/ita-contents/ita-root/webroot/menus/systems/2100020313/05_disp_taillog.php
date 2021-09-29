@@ -304,6 +304,10 @@
             
             echo '<div id="tail_show" style="display:none;"></div>';
             // tail処理を実施
+            if ( $send_exec_status_id >= 5) {
+                $lines = exec('wc -l '.$temp_file_name_fullpath_2);
+                $lines = trim(str_replace($temp_file_name_fullpath_2, '', $lines));
+            }
             foreach (read_tail( $temp_file_name_fullpath_2, $lines ) as $i => $line){
                 $line = rtrim($line,"\r\n");
                 

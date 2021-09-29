@@ -135,6 +135,16 @@
         
         $lines    = $row_if_info['TAILLOG_LINES']; // 表示する末尾の行数
         $interval = $row_if_info['REFRESH_INTERVAL']; // 最新化のインターバルタイム(msec)
+
+        // 作業インスタンスの状態を取得
+        $execution_no = htmlspecialchars($_GET["execution_no"], ENT_QUOTES, "UTF-8");
+        list($result_code,$send_exec_status_id,$error_msg) = getExecuteStatus($execution_no);
+        if($result_code === false) {
+            $error_flag = 1;
+
+            // 例外処理へ
+            throw new Exception( $error_msg );
+        }
         
         // tail対象をtail(読み込み)
         if (isset($_GET['load'])){
@@ -270,6 +280,10 @@
             
             echo '<div id="tail_show" style="display:none;"></div>';
             // tail処理を実施
+            if ( $send_exec_status_id >= 5) {
+                $lines = exec('wc -l '.$temp_file_name_fullpath_2);
+                $lines = trim(str_replace($temp_file_name_fullpath_2, '', $lines));
+            }
             foreach (read_tail( $temp_file_name_fullpath_2, $lines ) as $i => $line){
                 $line = rtrim($line,"\r\n");
                 
@@ -381,5 +395,76 @@ EOD;
             // アクセスログ出力
             web_log( $objMTS->getSomeMessage("ITAWDCH-STD-603") );
         }
+    }
+    function getExecuteStatus($execution_no) {
+        global $objMTS;
+        global $objDBCA;
+
+        $strExeTableIdForSelect    = 'C_TERRAFORM_EXE_INS_MNG';
+
+        $result_code = false;
+        $result_status = '7';   //初期値を想定外エラーにする。
+        ////////////////////////////////////////////////////////////////
+        // ANSIBLEインタフェース情報を取得                            //
+        ////////////////////////////////////////////////////////////////
+        try {
+            // SQL作成
+            $sql = "SELECT STATUS_ID FROM {$strExeTableIdForSelect} WHERE EXECUTION_NO = :EXECUTION_NO_BV ";
+
+            // SQL準備
+            $objQuery = $objDBCA->sqlPrepare($sql);
+            if( $objQuery->getStatus()===false ){
+                unset($objQuery);
+
+                $error_msg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-501",array($strExeTableIdForSelect));
+                // ログ出力
+                web_log($error_msg);
+                return [$result_code,$result_status,$error_msg];
+            }
+            $objQuery->sqlBind( array( 'EXECUTION_NO_BV'=>$execution_no ) );
+
+            // SQL発行
+            $r = $objQuery->sqlExecute();
+            if (!$r){
+                unset($objQuery);
+
+                $error_msg =$objMTS->getSomeMessage("ITATERRAFORM-ERR-502",array($strExeTableIdForSelect));
+                // ログ出力
+                web_log( $error_msg );
+                return [$result_code,$result_status,$error_msg];
+            }
+
+            // レコードFETCH
+            while ( $row = $objQuery->resultFetch() ){
+                $result_status = $row['STATUS_ID'];
+            }
+            // FETCH行数を取得
+            $num_of_rows = $objQuery->effectedRowCount();
+
+            // 単一行セレクトでない場合はNG
+            if( $num_of_rows != 1 ){
+                unset($objQuery);
+
+                $error_msg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-503",array($strExeTableIdForSelect));
+                // ログ出力
+                web_log( $error_msg );
+                return [$result_code,$result_status,$error_msg];
+            }
+            unset($objQuery);
+            $result_code = true;
+            $error_msg = "";
+            return [$result_code,$result_status,$error_msg];
+        } catch (Exception $e){
+            if(isset($objQuery)) {
+                unset($objQuery);
+            }
+            $error_msg = $e->getMessage();
+            // ログ出力
+            web_log( $objMTS->getSomeMessage("ITAWDCH-ERR-2001",$e->getMessage()) );
+            web_log( $error_msg);
+
+            return [$result_code,$result_status,$error_msg];
+       }
+
     }
 ?>
