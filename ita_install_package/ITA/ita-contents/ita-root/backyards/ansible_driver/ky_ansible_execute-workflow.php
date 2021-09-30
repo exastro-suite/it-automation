@@ -489,9 +489,6 @@
         ////////////////////////////////////////////////////////////////
         require ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
 
-        // usleep time (ms)
-        $sleep_time = 5;
-
         try {
             // psコマンドでky_ansible_execute-child-workflow.phpの起動リストを作成
             // psコマンドがマレに起動プロセスリストを取りこぼすことがあるので3回分を作成
@@ -499,12 +496,12 @@
             $strBuildCommand     = "ps -efw|grep ky_ansible_execute-child-workflow.php|grep -v grep";
             exec($strBuildCommand,$ps_array1,$ret);
 
-            usleep($sleep_time);
+            usleep(50000);   // sleep 50ms
 
             $strBuildCommand     = "ps -efw|grep ky_ansible_execute-child-workflow.php|grep -v grep";
             exec($strBuildCommand,$ps_array2,$ret);
 
-            usleep($sleep_time);
+            usleep(100000);  // sleep 100ms
 
             $strBuildCommand     = "ps -efw|grep ky_ansible_execute-child-workflow.php|grep -v grep";
             exec($strBuildCommand,$ps_array3,$ret);
