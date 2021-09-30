@@ -3370,7 +3370,7 @@ class CreateAnsibleExecFiles {
             // 機器一覧のインベントファイル追加オプションを取得
             $InventryFileAddOptionStr = $row['HOSTS_EXTRA_ARGS'];
             if(strlen(trim($InventryFileAddOptionStr)) != 0) {
-                contionue;
+                continue;
             }
             $out_yaml_array = "";
             $error_line     = "";
