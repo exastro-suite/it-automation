@@ -8887,6 +8887,29 @@ class RowEditByFileColumn extends Column{
 				if($strApiFlg === true){
 				  $boolRequiredColumnCheckSkip = true;
 				}
+				
+				$errFlg = false;
+				foreach($inputArray as $key2 => $value2){
+					if(array_key_exists($key2,$arrayObjColumn) && array_key_exists("uploadfiles_".$arrayObjColumn[$key2]->getIDSOP(),$inputArray)){
+						if($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル値なし"){
+							$errFlg = true;
+							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-5000038');
+						}elseif($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル名なし"){
+							$errFlg = true;
+							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-5000039');
+						}
+					}
+				}
+				if($errFlg === true){
+					$arrayTempRet[0] = "002";
+					$arrayTempRet[1] = "000";
+					$arrayTempRet[2] = $errMsg;
+					$retRetMsgBody = $arrayTempRet[2];
+					$boolExeCountinue = false;
+					$this->arrayCounter['error']['ct']++;
+				}
 
 				if(array_key_exists($this->objTable->getRIColumnID(), $inputArray)){
 					$strNumberForRI = $inputArray[$this->objTable->getRIColumnID()];
@@ -8897,62 +8920,64 @@ class RowEditByFileColumn extends Column{
 
 				$mode = 3;  //実行モード
 
-				//----ここではRIColumnも削除される
-				foreach($inputArray as $key2 => $value2){
-                    if(!array_key_exists($key2, $arrayObjColumn)){
-                        continue;
-                    }
+        if($boolExeCountinue === true){
+					//----ここではRIColumnも削除される
+					foreach($inputArray as $key2 => $value2){
+	                    if(!array_key_exists($key2, $arrayObjColumn)){
+	                        continue;
+	                    }
 
-					if(("FileUploadColumn" !=  get_class($arrayObjColumn[$key2]) && false === $arrayObjColumn[$key2]->isAllowSendFromFile()) ||
-					   ("FileUploadColumn" === get_class($arrayObjColumn[$key2]) && 3 != $dlcOrderMode && false === $arrayObjColumn[$key2]->isAllowSendFromFile()) ||
-					   ("FileUploadColumn" === get_class($arrayObjColumn[$key2]) && 3 == $dlcOrderMode && false === $arrayObjColumn[$key2]->isAllowUploadColmnSendRestApi())
-					  ){
-						unset($inputArray[$key2]);
-					}
-				}
-				//ここではRIColumnも削除される----
-
-				$aryVariant['action_sub_order'] = array('name'=>$strActionSubClassName
-														,'uniqueCheckSkip'=>$boolUniqueCheckSkip
-														,'requiredColumnCheckSkip'=>$boolRequiredColumnCheckSkip
-														);
-				$arrayTempRet = updateTableMain($mode, $strNumberForRI, $inputArray, null, $dlcOrderMode, $aryVariant);
-				$retRetMsgBody = $arrayTempRet[2];
-
-                if( isset($arrayTempRet[99]) ){
-                    $tmparrayTempRet = $arrayTempRet[99];
-                    unset($arrayTempRet[99]);
-                }
-
-				//----switch
-				switch($arrayTempRet[0]){
-					case "000":
-						switch($arrayTempRet[1]){
-							case "200":
-								//----更新が成功した
-								$this->arrayCounter['update']['ct']++;
-								$boolValue = true;
-								$retRetMsgBody = "";
-								break;
-								//更新が成功した----
-							default:
-								$retRetMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-18004",$arrayTempRet[1]);
-								$this->arrayCounter['error']['ct']++;
-								break;
+						if(("FileUploadColumn" !=  get_class($arrayObjColumn[$key2]) && false === $arrayObjColumn[$key2]->isAllowSendFromFile()) ||
+						   ("FileUploadColumn" === get_class($arrayObjColumn[$key2]) && 3 != $dlcOrderMode && false === $arrayObjColumn[$key2]->isAllowSendFromFile()) ||
+						   ("FileUploadColumn" === get_class($arrayObjColumn[$key2]) && 3 == $dlcOrderMode && false === $arrayObjColumn[$key2]->isAllowUploadColmnSendRestApi())
+						  ){
+							unset($inputArray[$key2]);
 						}
-						break;
-					case "001"://権限欠如エラー(mode=3の場合除く)
-					case "002"://バリデーションエラー
-					case "003"://権限欠如エラー・追い越し更新・削除済
-					case "101"://行特定ミス
-					case "201"://追越更新
-					case "212"://廃止済レコードへの更新
-						$this->arrayCounter['error']['ct']++;
-						break;
-					default:
-						$retRetMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-18005",$retRetMsgBody);
-						$this->arrayCounter['error']['ct']++;
-						break;
+					}
+					//ここではRIColumnも削除される----
+			    
+					$aryVariant['action_sub_order'] = array('name'=>$strActionSubClassName
+															,'uniqueCheckSkip'=>$boolUniqueCheckSkip
+															,'requiredColumnCheckSkip'=>$boolRequiredColumnCheckSkip
+															);
+					$arrayTempRet = updateTableMain($mode, $strNumberForRI, $inputArray, null, $dlcOrderMode, $aryVariant);
+					$retRetMsgBody = $arrayTempRet[2];
+
+	                if( isset($arrayTempRet[99]) ){
+	                    $tmparrayTempRet = $arrayTempRet[99];
+	                    unset($arrayTempRet[99]);
+	                }
+
+					//----switch
+					switch($arrayTempRet[0]){
+						case "000":
+							switch($arrayTempRet[1]){
+								case "200":
+									//----更新が成功した
+									$this->arrayCounter['update']['ct']++;
+									$boolValue = true;
+									$retRetMsgBody = "";
+									break;
+									//更新が成功した----
+								default:
+									$retRetMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-18004",$arrayTempRet[1]);
+									$this->arrayCounter['error']['ct']++;
+									break;
+							}
+							break;
+						case "001"://権限欠如エラー(mode=3の場合除く)
+						case "002"://バリデーションエラー
+						case "003"://権限欠如エラー・追い越し更新・削除済
+						case "101"://行特定ミス
+						case "201"://追越更新
+						case "212"://廃止済レコードへの更新
+							$this->arrayCounter['error']['ct']++;
+							break;
+						default:
+							$retRetMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-18005",$retRetMsgBody);
+							$this->arrayCounter['error']['ct']++;
+							break;
+					}
 				}
 				//switch----
 

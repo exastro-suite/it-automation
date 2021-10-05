@@ -1126,7 +1126,6 @@
                         // アップロードファイルを登録する
                         foreach($arrayObjColumn as $objColumn){
                             if($colKey === $objColumn->getID() && "FileUploadColumn" === get_class($objColumn) && $objColumn->isAllowUploadColmnSendRestApi()){
-
                                 // 値が無い場合はファイル削除
                                 if("" === $inputArray[$colKey]){
                                     $inputArray["del_flag_".$objColumn->getIDSOP()] = "on";
@@ -1191,7 +1190,7 @@
                     $strPrimaryKeyName = $objTable->getRowIdentifyColumnID();
                     if(isset($inputArray[$strPrimaryKeyName])){
                         $tmpArraySetting = array('system_function_control'=>array('DTiSFilterCheckValid'=>array('HiddenVars'=>array('DecodeOfSelectTagStringEscape'=>false))));
-                        $tmpArrayVariant['search_filter_data'] = array();
+                        $tmpArrayVariant['search_filter_data'] = array($arrayObjColumn[$strPrimaryKeyName]->getIDSOP() => array($aryRowFromJson[$row_i][array_search($strPrimaryKeyName, $tableHeaderId)]));
                         $tmpArrayVariant['dumpDataFromTable'] = array('vars'=>array('strOutputFileType'=>'arraysForJSON',
                                                                             'strFormatterId'=>"json"
                                                                             )
@@ -1240,6 +1239,56 @@
                               }
                             }
                           }
+                        }
+                        
+                        for($dlcFnv2 = 0; $dlcFnv2 < $intColNoOfLastColumn; $dlcFnv2++ ){
+                            $colKey = $tableHeaderId[$dlcFnv2];
+                            foreach($arrayObjColumn as $objColumn){
+                              if($colKey === $objColumn->getID() && "FileUploadColumn" === get_class($objColumn) && $objColumn->isAllowUploadColmnSendRestApi()){
+                                if(!(array_key_exists("tmp_file_".$objColumn->getIDSOP(),$inputArray))){
+                                  $primaryKey = str_pad($aryRowFromJson[$row_i]["2"],10,0,STR_PAD_LEFT);
+                                  $uploadFilePath = $objColumn->getLAPathToPackageRoot();
+                                  $uploadFilePath = $uploadFilePath .$objColumn->getNRPathAnyToBranchPerFUC() ."/" .$primaryKey;
+                                  
+                                  foreach(glob($uploadFilePath ."/*") as $file) {
+                                    if(is_file($file)){
+                                      // 最新時間を取得（一時ファイル名に利用）
+                                      $now = \DateTime::createFromFormat("U.u", sprintf("%6F", microtime(true)));
+                                      $nowTime = date("YmdHis") . $now->format("u");
+                                      
+                                      $tmpFile = $objColumn->getLAPathToPreUploadSave() . "/" . $inputArray[$colKey] . "_" . $nowTime;
+                                      $tmpNameFile = $objColumn->getLAPathToPreUploadSave() . "/fn_" . $inputArray[$colKey] . "_" . $nowTime;
+
+                                      file_put_contents($tmpFile, file_get_contents($file));
+
+                                      // ダウンロードしたファイルの暗号化が必要か判定
+                                      $FileEncryptFunctionName = $objColumn->getFileEncryptFunctionName();
+                                      if($FileEncryptFunctionName !== false) {
+                                          // ダウンロードしたファイルの暗号化
+                                          $ret = $FileEncryptFunctionName($tmpFile,$tmpFile);
+                                      }
+
+                                      file_put_contents($tmpNameFile, $inputArray[$colKey]);
+
+                                      $arrTempFiles[]=array(
+                                          'tmpFile' => $tmpFile,
+                                          'tmpNameFile' => $tmpNameFile,
+                                      );
+
+                                      $inputArray["tmp_file_".$objColumn->getIDSOP()] = basename($tmpFile);
+                                      $aryRetBodyOfTempFileCheck = $objColumn->checkTempFileBeforeMoveOnPreLoad($tmpFile,  basename($tmpFile), $aryVariant, $arySetting);
+                                      if( $aryRetBodyOfTempFileCheck[0] !== true || $aryRetBodyOfTempFileCheck[1] !== null ){
+                                          // 不正なフォーマット。
+                                          $intErrorType = 374;
+                                          $intErrorPlaceMark = 3500;
+                                          $strErrMsg = $aryRetBodyOfTempFileCheck[3];
+                                          throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
                         }
                     }
                     //JSONモード----
