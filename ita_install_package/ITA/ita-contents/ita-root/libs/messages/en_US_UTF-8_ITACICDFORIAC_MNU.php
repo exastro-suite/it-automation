@@ -40,9 +40,14 @@ $ary["ITACICDFORIAC-MNU-1200010701"] = "Input the Git user.
 The Uses is an required item when \"Private\" is selected for Visibility. 
 [Maximum length] 128 Bytes";
 $ary["ITACICDFORIAC-MNU-1200010800"] = "Password";
-$ary["ITACICDFORIAC-MNU-1200010801"] = "Input the Git password. 
-The Git password is an required item when \"Private\" is selected for Visibility. 
-[Maximum length] 128 Bytes";
+$ary["ITACICDFORIAC-MNU-1200010801"] = "Please input the password needed when running the Git clone command.
+The password is required if the visibility type is set to \"Private\". 
+[Max size] 128 bytes
+Please note that password authentication was disabled by GitHub the 13th of August 2021.
+https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/
+If you are using GitHub with password authentication, you will need to create and enter your own personal access token for the Git account information password.
+Please see the following URL for how to create a personal access token.
+https://docs.github.com/ja/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token";
 $ary["ITACICDFORIAC-MNU-1200010900"] = "Proxy";
 $ary["ITACICDFORIAC-MNU-1200011000"] = "Address";
 $ary["ITACICDFORIAC-MNU-1200011001"] = "If you are using a Proxy server, please enter the Proxy server address.
