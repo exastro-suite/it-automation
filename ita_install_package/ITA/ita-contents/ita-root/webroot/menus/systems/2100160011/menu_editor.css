@@ -604,7 +604,8 @@ border-collapse: collapse;
 .menu-column-config-table[date-select-value="8"] tr.password,
 .menu-column-config-table[date-select-value="7"] tr.select,
 .menu-column-config-table[date-select-value="9"] tr.file,
-.menu-column-config-table[date-select-value="10"] tr.link {
+.menu-column-config-table[date-select-value="10"] tr.link,
+.menu-column-config-table[date-select-value="11"] tr.type3 {
   display: table-row;
 }
 .menu-column-config-table th,

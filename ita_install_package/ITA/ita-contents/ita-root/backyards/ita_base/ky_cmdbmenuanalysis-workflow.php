@@ -266,6 +266,19 @@ $arrayTargetIDColumnClassList = array(
 );
 
 ////////////////////////////////
+// 代入値自動登録設定の項目表示対象のクラス(IDColumnの紐付先/参照項目・パラメータ参照による場合)
+////////////////////////////////
+$arrayTargetIDColumnClassReferenceList = array(
+    "TextColumn",
+    "NumColumn",
+    "MaskColumn",
+    "MultiTextColumn",
+    "PasswordColumn",
+    "HostInsideLinkTextColumn",
+    "FileUploadColumn",
+);
+
+////////////////////////////////
 // ローカル変数(全体)宣言     //
 ////////////////////////////////
 $warning_flag               = 0;        // 警告フラグ(1：警告発生)
@@ -609,19 +622,28 @@ try{
             }
             // IDColumnの場合、紐づけ先のColumn Class取得 
             if($list[5] == 'IDColumn' || $list[5] == 'LinkIDColumn') {
-                $clomn_class = getColumnClass($list[2],$list[4]);
-                if($clomn_class === false) {
+                $column_class = getColumnClass($list[2],$list[4]);
+                if($column_class === false) {
                     continue;
                 }
                 // 対象クラス確認
-                if(!in_array($clomn_class, $arrayTargetIDColumnClassList)){
-                    //カラム名に_CLONE_が含まれている場合、チェックをスキップ
-                    if(!strpos($list[0],'_CLONE_')){
+                if(!strpos($list[0],'_CLONE_')){
+                    //通常のカラムの場合
+                    if(!in_array($column_class, $arrayTargetIDColumnClassList)){
                         continue;
+                    }
+                }else{
+                    //カラム名に_CLONE_が含まれている（参照項目・パラメータ参照用のカラムである）場合
+                    if(!in_array($column_class, $arrayTargetIDColumnClassReferenceList)){
+                        continue;
+                    }
+                    //ファイルアップロードカラムを参照の場合、TextColumnとして登録する。
+                    if($column_class == "FileUploadColumn"){
+                        $column_class = "TextColumn";
                     }
                 }
             } else {
-                $clomn_class = $list[5];
+                $column_class = $list[5];
             }
 
             // カラム情報登録
@@ -630,7 +652,7 @@ try{
                                             'REF_TABLE_NAME'        =>$list[2],
                                             'REF_PKEY_NAME'         =>$list[3],
                                             'REF_COL_NAME'          =>$list[4],
-                                            'COL_CLASS'             =>$clomn_class,
+                                            'COL_CLASS'             =>$column_class,
                                             'ACCESS_AUTH'           =>$access_auth,
                                            );
         }

@@ -59,6 +59,11 @@
 
     $vg_driver_name = DF_PIONEER_DRIVER;
 
+    // 代入値管理メニューID
+    $vg_varass_menuID = 2100020210;
+    // 代入値管理 FileUploadColumnバックアップファイル
+    $vg_FileUPloadColumnBackupFilePath = "";
+
     require ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_valautostup-workflow.php");
 
 

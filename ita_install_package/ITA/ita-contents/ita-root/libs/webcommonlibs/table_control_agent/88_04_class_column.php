@@ -9756,6 +9756,10 @@ class FileUploadColumn extends Column{
 
 			$editTgtRow = $aryVariant['edit_target_row'];
 			$oldFile = array_key_exists($strColId, $editTgtRow)?$editTgtRow[$strColId]:"";
+            if(!array_key_exists($strColId, $exeQueryData)){
+                $exeQueryData[$strColId] = "";
+                $tmpFile = "";
+            }
 
 			if( array_key_exists("del_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_flag_'.$strColMark] == "on" && $oldFile != "" ){
 				//----ファイル削除オーダーがあった場合
