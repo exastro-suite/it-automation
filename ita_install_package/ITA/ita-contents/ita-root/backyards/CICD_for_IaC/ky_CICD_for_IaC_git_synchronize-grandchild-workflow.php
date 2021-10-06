@@ -1075,7 +1075,6 @@
         $RequestData[3] = $row['MATL_LINK_NAME'];
         $RequestData[4] = basename($tgtFileName);
         $RequestData[5] = $DefaultAccessRoleString;
-        $RequestData[6] = "";
         $FilterList     = array();
         $FilterList[3]  = $row['MATL_LINK_NAME'];
         return [$RequestData , $FilterList];
@@ -1088,7 +1087,6 @@
         $RequestData[4] = basename($tgtFileName);
         $RequestData[5] = $row['TEMPLATE_FILE_VARS_LIST'];
         $RequestData[6] = $DefaultAccessRoleString;
-        $RequestData[7] = "";
         $FilterList     = array();
         $FilterList[3]  = $row['MATL_LINK_NAME'];
         return [$RequestData , $FilterList];
@@ -1099,7 +1097,6 @@
         $RequestData[3] = $row['MATL_LINK_NAME'];
         $RequestData[4] = basename($tgtFileName);
         $RequestData[5] = $DefaultAccessRoleString;
-        $RequestData[6] = "";
         $FilterList     = array();
         $FilterList[3]  = $row['MATL_LINK_NAME'];
         return [$RequestData , $FilterList];
@@ -1112,7 +1109,6 @@
         $RequestData[4] = $row['M_OS_TYPE_NAME'];
         $RequestData[5] = basename($tgtFileName);
         $RequestData[6] = $DefaultAccessRoleString;
-        $RequestData[7] = "";
         $FilterList     = array();
         $FilterList[3]  = $row['M_DIALOG_TYPE_ID'];
         $FilterList[4]  = $row['M_OS_TYPE_ID'];
@@ -1125,7 +1121,6 @@
         $RequestData[3] = $row['MATL_LINK_NAME'];
         $RequestData[4] = basename($tgtFileName);
         $RequestData[5] = $DefaultAccessRoleString;
-        $RequestData[6] = "";
         $FilterList     = array();
         $FilterList[3]  = $row['MATL_LINK_NAME'];
         return [$RequestData , $FilterList];
@@ -1137,7 +1132,6 @@
         $RequestData[3] = $row['MATL_LINK_NAME'];
         $RequestData[4] = basename($tgtFileName);
         $RequestData[5] = $DefaultAccessRoleString;
-        $RequestData[6] = "";
         $FilterList     = array();
         $FilterList[3]  = $row['MATL_LINK_NAME'];
         return [$RequestData , $FilterList];
@@ -1149,7 +1143,6 @@
         $RequestData[3] = $row['MATL_LINK_NAME'];
         $RequestData[4] = basename($tgtFileName);
         $RequestData[5] = $DefaultAccessRoleString;
-        $RequestData[6] = "";
         $FilterList     = array();
         $FilterList[3]  = $row['MATL_LINK_NAME'];
         return [$RequestData , $FilterList];
