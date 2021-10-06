@@ -9749,6 +9749,9 @@ class FileUploadColumn extends Column{
 		//ファイル保存処理を実行するかどうかの判定(3.9までの調整用)----
 
 		if( $boolExecute === true ){
+            if(!array_key_exists($strColId, $exeQueryData) && array_key_exists("tmp_file_".$strColMark, $reqOrgData)){
+                unset($reqOrgData['tmp_file_'.$strColMark]);
+            }
 			$tmpFile = array_key_exists("tmp_file_".$strColMark, $reqOrgData)?$reqOrgData['tmp_file_'.$strColMark]:"";
 			$orgFile = "";
 			$tempFileOfOrgFileName = $this->getLAPathToPreUploadSave()."/fn_".$tmpFile;
@@ -9756,10 +9759,6 @@ class FileUploadColumn extends Column{
 
 			$editTgtRow = $aryVariant['edit_target_row'];
 			$oldFile = array_key_exists($strColId, $editTgtRow)?$editTgtRow[$strColId]:"";
-            if(!array_key_exists($strColId, $exeQueryData)){
-                $exeQueryData[$strColId] = "";
-                $tmpFile = "";
-            }
 
 			if( array_key_exists("del_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_flag_'.$strColMark] == "on" && $oldFile != "" ){
 				//----ファイル削除オーダーがあった場合
