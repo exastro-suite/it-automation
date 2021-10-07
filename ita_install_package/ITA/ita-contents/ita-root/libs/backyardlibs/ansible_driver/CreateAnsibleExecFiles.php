@@ -1507,6 +1507,13 @@ class CreateAnsibleExecFiles {
             return false;
         }
 
+        /////////////////////////////////////////////
+        // Movmentインスタンスステータスファイル変数生成
+        /////////////////////////////////////////////
+        $ret = $this->CreateMovementStatusFileVariables($ina_hostinfolist,$ina_host_vars,$ina_pioneer_template_host_vars);
+        if($ret === false) {
+            return false;
+        }
 
         // 作業パターンに紐づいているグローバル変数を退避
         switch($this->getAnsibleDriverID()){
@@ -13211,6 +13218,48 @@ if(isset($Expansion_root)) {
                 }
             }
 
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $ina_pioneer_template_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+                break;
+            }
+        }
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   Movementステータスファイル変数生成
+    // パラメータ
+    //   $ina_hostinfolist:  機器一覧ホスト情報配列
+    //   $ina_host_vars:     ホスト変数定義配列
+    //   $ina_pioneer_template_host_vars:     
+    //                       pioneer tamplate用 ホスト変数定義配列
+    //
+    // 戻り値
+    //   true:  正常
+    //   false: 異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreateMovementStatusFileVariables($ina_hostinfolist,&$ina_host_vars,&$ina_pioneer_template_host_vars) {
+        $drive_list[DF_LEGACY_DRIVER_ID]      = 'legacy/ns';
+        $drive_list[DF_PIONEER_DRIVER_ID]     = 'pioneer/ns';
+        $drive_list[DF_LEGACY_ROLE_DRIVER_ID] = 'legacy/rl';
+
+        // ドライバ種別
+        $driver_id      = $this->getAnsibleDriverID();
+        // 作業番号
+        $execute_no     = sprintf("%010s",$this->lv_exec_no);
+        // データリレイストレージパス(ITA)
+        $ita_base_dir   = $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA');
+        // データリレイストレージパス(ansible)
+        $ans_base_dir   = $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS');
+
+        foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
+            $hostname = $hostinfo['HOSTNAME'];
+
+            $host_var_name  = "__movement_status_filepath__"; 
+            $host_var_vaule = sprintf("%s/%s/%s/out/MOVEMENT_STATUS_FILE"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
             $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
             switch($this->getAnsibleDriverID()){
             case DF_PIONEER_DRIVER_ID:
