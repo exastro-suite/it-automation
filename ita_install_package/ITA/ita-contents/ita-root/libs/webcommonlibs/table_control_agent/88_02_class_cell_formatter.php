@@ -1788,7 +1788,11 @@ class MainLinkTabBFmt extends BFmt {
 		if($this->strSql != ""){
 			$param = $this->getUrlData($strData);
 		}
+        // URLの上限に引っかからないように値を短縮する
+        $param = mb_strcut($param, 0, 1024, 'UTF-8');
+
 		$param = rawurlencode($param); //エンコード処理
+
 		if(is_array($this->getLinkUrl())){
 			foreach ($this->getLinkUrl() as $value) {
 				$strLinkUrl .=  str_replace(" ","%20",$value.$param);
