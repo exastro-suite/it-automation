@@ -653,6 +653,11 @@
                         if($menuData['type'] === 'update'){
                             if($key !== false){
                                 $changedFlg = false;
+                                $maxbiteFlg = false;
+                                $minvalueFlg = false;
+                                $maxvalueFlg = false;
+                                $maxdigitFlg = false;
+                                $changeErrMsg = "";
                                 foreach($menuData['item'] as &$itemData){
                                     if($itemData['CREATE_ITEM_ID'] == $createItemInfoData['CREATE_ITEM_ID']){
                                         //項目
@@ -665,54 +670,63 @@
                                         //必須チェック
                                         if($itemData['REQUIRED'] != $createItemInfoData['REQUIRED']){
                                             $changedFlg = true;
+                                            $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1159', array($createItemInfoData['ITEM_NAME']));
                                         }
                                         //一意制約チェック
                                         if($itemData['UNIQUED'] != $createItemInfoData['UNIQUED']){
                                             $changedFlg = true;
+                                            $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1159', array($createItemInfoData['ITEM_NAME']));
                                         }
 
                                         //文字列(単一行)の場合
                                         if($itemData['INPUT_METHOD_ID'] == 1){
                                             //最大バイト数
-                                            if($itemData['MAX_LENGTH'] != $createItemInfoData['MAX_LENGTH']){
-                                                $changedFlg = true;
+                                            if($itemData['MAX_LENGTH'] < $createItemInfoData['MAX_LENGTH']){
+                                                $maxbiteFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
                                         //文字列(複数行)の場合
                                         if($itemData['INPUT_METHOD_ID'] == 2){
                                             //最大バイト数
-                                            if($itemData['MULTI_MAX_LENGTH'] != $createItemInfoData['MULTI_MAX_LENGTH']){
-                                                $changedFlg = true;
+                                            if($itemData['MULTI_MAX_LENGTH'] < $createItemInfoData['MULTI_MAX_LENGTH']){
+                                                $maxbiteFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
                                         //整数の場合
                                         if($itemData['INPUT_METHOD_ID'] == 3){
                                             //最小値
-                                            if($itemData['INT_MIN'] != $createItemInfoData['INT_MIN']){
-                                                $changedFlg = true;
+                                            if($itemData['INT_MIN'] > $createItemInfoData['INT_MIN']){
+                                                $minvalueFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1294', array($createItemInfoData['ITEM_NAME']));
                                             }
                                             //最大値
-                                            if($itemData['INT_MAX'] != $createItemInfoData['INT_MAX']){
-                                                $changedFlg = true;
+                                            if($itemData['INT_MAX'] < $createItemInfoData['INT_MAX']){
+                                                $maxvalueFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1295', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
                                         //小数の場合
                                         if($itemData['INPUT_METHOD_ID'] == 4){
                                             //最小値
-                                            if($itemData['FLOAT_MIN'] != $createItemInfoData['FLOAT_MIN']){
-                                                $changedFlg = true;
+                                            if($itemData['FLOAT_MIN'] > $createItemInfoData['FLOAT_MIN']){
+                                                $minvalueFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1294', array($createItemInfoData['ITEM_NAME']));
                                             }
                                             //最大値
-                                            if($itemData['FLOAT_MAX'] != $createItemInfoData['FLOAT_MAX']){
-                                                $changedFlg = true;
+                                            if($itemData['FLOAT_MAX'] < $createItemInfoData['FLOAT_MAX']){
+                                                $maxvalueFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1295', array($createItemInfoData['ITEM_NAME']));
                                             }
                                             //桁数
-                                            if($itemData['FLOAT_DIGIT'] != $createItemInfoData['FLOAT_DIGIT']){
+                                            if($itemData['FLOAT_DIGIT'] < $createItemInfoData['FLOAT_DIGIT']){
                                                 if($itemData['FLOAT_DIGIT'] != 14){
-                                                    $changedFlg = true;
+                                                    $maxdigitFlg = true;
+                                                    $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1296', array($createItemInfoData['ITEM_NAME']));
                                                 }
                                             }
                                         }
@@ -722,36 +736,41 @@
                                             //選択項目
                                             if($itemData['OTHER_MENU_LINK_ID'] != $createItemInfoData['OTHER_MENU_LINK_ID']){
                                                 $changedFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1159', array($createItemInfoData['ITEM_NAME']));
                                             }
 
                                             //参照項目
                                             if(isset($itemData['REFERENCE_ITEM'])){
                                                 if($itemData['REFERENCE_ITEM'] != $createItemInfoData['REFERENCE_ITEM']){
                                                     $changedFlg = true;
+                                                    $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1159', array($createItemInfoData['ITEM_NAME']));
                                                 }
                                             }
                                         }
 
                                         //パスワードの場合
                                         if($itemData['INPUT_METHOD_ID'] == 8){
-                                            if($itemData['PW_MAX_LENGTH'] != $createItemInfoData['PW_MAX_LENGTH']){
-                                                $changedFlg = true;
+                                            if($itemData['PW_MAX_LENGTH'] < $createItemInfoData['PW_MAX_LENGTH']){
+                                                $maxbiteFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
                                         //ファイルアップロードの場合
                                         if($itemData['INPUT_METHOD_ID'] == 9){
                                             //最大バイト数
-                                            if($itemData['UPLOAD_MAX_SIZE'] != $createItemInfoData['UPLOAD_MAX_SIZE']){
-                                                $changedFlg = true;
+                                            if($itemData['UPLOAD_MAX_SIZE'] < $createItemInfoData['UPLOAD_MAX_SIZE']){
+                                                $maxbiteFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
                                         //リンクの場合
                                         if($itemData['INPUT_METHOD_ID'] == 10){
                                             //最大バイト数
-                                            if($itemData['LINK_LENGTH'] != $createItemInfoData['LINK_LENGTH']){
-                                                $changedFlg = true;
+                                            if($itemData['LINK_LENGTH'] < $createItemInfoData['LINK_LENGTH']){
+                                                $maxbiteFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
@@ -760,14 +779,15 @@
                                             //選択項目
                                             if($itemData['TYPE3_REFERENCE'] != $createItemInfoData['TYPE3_REFERENCE']){
                                                 $changedFlg = true;
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1159', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
-                                        //変更があった場合にバリデーションエラー
-                                        if($changedFlg == true){
+                                        //バリデーションエラーが一つでもあった場合
+                                        if($changedFlg == true || $maxbiteFlg == true || $minvalueFlg == true || $maxvalueFlg == true || $maxdigitFlg == true){
                                             $arrayResult[0] = "002";
                                             $arrayResult[1] = "";
-                                            $arrayResult[2] = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1159', array($createItemInfoData['ITEM_NAME']));
+                                            $arrayResult[2] = $changeErrMsg;
                                             throw new Exception();
                                         }
                                     }

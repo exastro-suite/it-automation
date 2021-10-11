@@ -466,7 +466,7 @@ const columnHTML = ''
         + '<table class="menu-column-config-table" date-select-value="1">'
           + '<tr class="multiple single link" title="' + textEntities(getSomeMessage("ITACREPAR_1262"),1) + '">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-number max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="multiple single" title="' + textEntities(getSomeMessage("ITACREPAR_1263"),1) + '">'
             + '<th>' + textCode('0012') + '</th>'
@@ -474,23 +474,23 @@ const columnHTML = ''
           + '</tr>'
           + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1264"),1) + '">'
             + '<th>' + textCode('0013') + '</th>'
-            + '<td><input class="config-number int-min-number" data-min="-2147483648" data-max="2147483647" type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-number int-min-number" data-min="-2147483648" data-max="2147483647" type="number" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1265"),1) + '">'
             + '<th>' + textCode('0014') + '</th>'
-            + '<td><input class="config-number int-max-number" data-min="-2147483648" data-max="2147483647"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-number int-max-number" data-min="-2147483648" data-max="2147483647"  type="number" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1266"),1) + '">'
             + '<th>' + textCode('0013') + '</th>'
-            + '<td><input class="config-number float-min-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-number float-min-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1267"),1) + '">'
             + '<th>' + textCode('0014') + '</th>'
-            + '<td><input class="config-number float-max-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-number float-max-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1268"),1) + '">'
             + '<th>' + textCode('0015') + '</th>'
-            + '<td><input class="config-number digit-number" data-min="1" data-max="14" type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-number digit-number" data-min="1" data-max="14" type="number" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="select" title="' + textEntities(getSomeMessage("ITACREPAR_1269"),1) + '">'
             + '<th>' + textCode('0016') + '<span class="input_required">*</span></th>'
@@ -507,11 +507,11 @@ const columnHTML = ''
           + '</tr>'
           + '<tr class="password" title="' + textEntities(getSomeMessage("ITACREPAR_1262"),1) + '">'
             + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '<tr class="file" title="' + textEntities(getSomeMessage("ITACREPAR_1270"),1) + '">'
             + '<th>' + textCode('0042') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+''+modeKeepData+'></td>'
+            + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+'></td>'
           + '</tr>'
           + '</tr>'
           + '<tr class="type3" title="' + textEntities(getSomeMessage("ITACREPAR_1299"),1) + '">'
@@ -984,15 +984,7 @@ $menuEditor.find('.menu-editor-menu-button').on('click', function() {
       //editの場合disabledを外す。
       if(menuEditorMode === 'edit'){
         $newColumnTarget.find('.menu-column-type-select').prop('disabled', false); //カラムタイプ
-        $newColumnTarget.find('.config-number'+'.max-byte').prop('disabled', false); //最大バイト数
-        $newColumnTarget.find('.config-number'+'.int-min-number').prop('disabled', false); //整数の最小値
-        $newColumnTarget.find('.config-number'+'.int-max-number').prop('disabled', false); //整数の最大値
-        $newColumnTarget.find('.config-number'+'.float-min-number').prop('disabled', false); //少数の最小値
-        $newColumnTarget.find('.config-number'+'.float-max-number').prop('disabled', false); //少数の最大値
-        $newColumnTarget.find('.config-number'+'.digit-number').prop('disabled', false); //少数の桁数
         $newColumnTarget.find('.config-select'+'.pulldown-select').prop('disabled', false); //選択項目
-        $newColumnTarget.find('.config-number'+'.password-max-byte').prop('disabled', false); //パスワード最大バイト数
-        $newColumnTarget.find('.config-number'+'.file-max-size').prop('disabled', false); //ファイル最大バイト数
         $newColumnTarget.find('.config-text'+'.reference-item').prop('disabled', false); //参照項目
         $newColumnTarget.find('.config-select'+'.type3-reference-menu').prop('disabled', false); //パラメータシート参照(メニュー選択)
         $newColumnTarget.find('.config-select'+'.type3-reference-item').prop('disabled', false); //パラメータシート参照(項目選択)

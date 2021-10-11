@@ -299,7 +299,10 @@ $ary["ITACREPAR-ERR-1289"]          = "\"Parameter Sheet Reference/Menu group:Me
 $ary["ITACREPAR-ERR-1290"]          = "\"Parameter Sheet Reference/Menu group:Menu:Item\" can not be set when \"Password\" is set.";
 $ary["ITACREPAR-ERR-1291"]          = "\"Parameter Sheet Reference/Menu group:Menu:Item\" can not be set when \"File upload\" is set.";
 $ary["ITACREPAR-ERR-1292"]          = "\"Parameter Sheet Reference/Menu group:Menu:Item\" can not be set when \"Link\" is set.";
-$ary["ITACREPAR-ERR-1293"]          = "Items whose Input method is \"Parameter Sheet Reference\" cannot be specified as \"Unique constraint(Multiple items)\".";
+$ary["ITACREPAR-ERR-1293"]          = "For editing, the maximum number of bytes for an existing item cannot be set lower than the original value.(Item:{})";
+$ary["ITACREPAR-ERR-1294"]          = "For editing, the minimum value for existing items cannot be set higher than the original value.(Item:{})";
+$ary["ITACREPAR-ERR-1295"]          = "For editing, the maximum value of an existing item cannot be set lower than the original value.(Item:{})";
+$ary["ITACREPAR-ERR-1296"]          = "For editing, the number of digits in an existing item cannot be set lower than the original value.(Item:{})";
 $ary["ITACREPAR-ERR-5001"]          = "File does not exist. File=[{}].";
 $ary["ITACREPAR-ERR-5002"]          = "Failed to read the file. File=[{}].";
 $ary["ITACREPAR-ERR-5003"]          = "Failed to execute SQL. SQL error = [{}].";
