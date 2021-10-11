@@ -8632,28 +8632,31 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                 $restApiResponse = "";
                 $restApiResponseInfo = "";
 
+                //日時(strtotime)
+                $nowDate = strtotime( date('Y/m/d H:i:s.u') );
+                $suppressStartDate = "";
+                $suppressEndDate = "";
+
                 //抑止期間ありなら比較用に
                 if( array_key_exists('SUPPRESS_START', $tmpNotice) &&  array_key_exists('SUPPRESS_END', $tmpNotice) ){
-                    //日時(strtotime)
-                    $nowDate = strtotime( date('Y/m/d H:i:s.u') );
                     $suppressStartDate = strtotime( $tmpNotice['SUPPRESS_START'] );
                     $suppressEndDate = strtotime( $tmpNotice['SUPPRESS_END'] );
                 }
 
-                //抑止期間設定あり
-                if( $suppressStartDate != "" || $suppressEndDate != "" ){
+                //抑止期間設定あり( 開始-終了 / 開始 / 終了 )
+                if( $suppressStartDate != "" && $suppressEndDate != "" ){
                     if( $suppressStartDate < $nowDate && $nowDate < $suppressEndDate  ){
                         //抑止期間中
                         $suppressflg = 1; //抑止
-                    }elseif ( $nowDate < $suppressStartDate && $nowDate > $suppressEndDate ){
-                        //抑止開始が未来 , 抑止終了が過去
-                        $suppressflg = "";
-                    }elseif ( $nowDate > $suppressStartDate ){
-                        $suppressflg = 1;
-                    }elseif ( $nowDate < $suppressEndDate ){
-                        $suppressflg = 1;
                     }
+                }elseif( $suppressStartDate == "" && $suppressEndDate != "" && $nowDate < $suppressEndDate ) {
+                    //　 （抑止開始無し） ～ 抑止終了 
+                        $suppressflg = 1; //抑止
+                }elseif( $suppressStartDate != "" && $suppressEndDate == "" && $nowDate > $suppressStartDate ){
+                    //  抑止開始　～ （抑止終了無し）
+                        $suppressflg = 1; //抑止       
                 }
+
                 //抑止フラグOFF時
                 if( $suppressflg == "" ){
                     //通知名の初期化
