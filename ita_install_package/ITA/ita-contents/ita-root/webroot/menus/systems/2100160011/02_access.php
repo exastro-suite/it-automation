@@ -683,7 +683,7 @@
                                             //最大バイト数
                                             if($itemData['MAX_LENGTH'] < $createItemInfoData['MAX_LENGTH']){
                                                 $maxbiteFlg = true;
-                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1294', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
@@ -692,7 +692,7 @@
                                             //最大バイト数
                                             if($itemData['MULTI_MAX_LENGTH'] < $createItemInfoData['MULTI_MAX_LENGTH']){
                                                 $maxbiteFlg = true;
-                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1294', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
@@ -701,12 +701,12 @@
                                             //最小値
                                             if($itemData['INT_MIN'] > $createItemInfoData['INT_MIN']){
                                                 $minvalueFlg = true;
-                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1294', array($createItemInfoData['ITEM_NAME']));
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1295', array($createItemInfoData['ITEM_NAME']));
                                             }
                                             //最大値
                                             if($itemData['INT_MAX'] < $createItemInfoData['INT_MAX']){
                                                 $maxvalueFlg = true;
-                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1295', array($createItemInfoData['ITEM_NAME']));
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1296', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
@@ -715,18 +715,18 @@
                                             //最小値
                                             if($itemData['FLOAT_MIN'] > $createItemInfoData['FLOAT_MIN']){
                                                 $minvalueFlg = true;
-                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1294', array($createItemInfoData['ITEM_NAME']));
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1295', array($createItemInfoData['ITEM_NAME']));
                                             }
                                             //最大値
                                             if($itemData['FLOAT_MAX'] < $createItemInfoData['FLOAT_MAX']){
                                                 $maxvalueFlg = true;
-                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1295', array($createItemInfoData['ITEM_NAME']));
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1296', array($createItemInfoData['ITEM_NAME']));
                                             }
                                             //桁数
                                             if($itemData['FLOAT_DIGIT'] < $createItemInfoData['FLOAT_DIGIT']){
                                                 if($itemData['FLOAT_DIGIT'] != 14){
                                                     $maxdigitFlg = true;
-                                                    $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1296', array($createItemInfoData['ITEM_NAME']));
+                                                    $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1297', array($createItemInfoData['ITEM_NAME']));
                                                 }
                                             }
                                         }
@@ -752,7 +752,7 @@
                                         if($itemData['INPUT_METHOD_ID'] == 8){
                                             if($itemData['PW_MAX_LENGTH'] < $createItemInfoData['PW_MAX_LENGTH']){
                                                 $maxbiteFlg = true;
-                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1294', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
@@ -761,7 +761,7 @@
                                             //最大バイト数
                                             if($itemData['UPLOAD_MAX_SIZE'] < $createItemInfoData['UPLOAD_MAX_SIZE']){
                                                 $maxbiteFlg = true;
-                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1294', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
@@ -770,7 +770,7 @@
                                             //最大バイト数
                                             if($itemData['LINK_LENGTH'] < $createItemInfoData['LINK_LENGTH']){
                                                 $maxbiteFlg = true;
-                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1293', array($createItemInfoData['ITEM_NAME']));
+                                                $changeErrMsg = $g["objMTS"]->getSomeMessage('ITACREPAR-ERR-1294', array($createItemInfoData['ITEM_NAME']));
                                             }
                                         }
 
