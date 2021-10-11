@@ -316,9 +316,11 @@ class TD_B_CICD_MATERIAL_TYPE_NAME  extends TDBase {
 /////////////////////////////////////////////////////////
 class TD_B_CICD_GIT_PROTOCOL_TYPE_NAME  extends TDBase {
     // Gitプロトコル:PROTOCOL_TYPE_NAME 値リスト
-    const C_GIT_PROTOCOL_TYPE_ROW_ID_HTTPS       = 1;  //https
-    const C_GIT_PROTOCOL_TYPE_ROW_ID_SSH         = 2;  //ssh  現在未サポート
-    const C_GIT_PROTOCOL_TYPE_ROW_ID_LOCAL       = 3;  //Local
+    const C_GIT_PROTOCOL_TYPE_ROW_ID_HTTPS          = 1;  //https
+    const C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_PASS       = 2;  //ssh(パスワード認証)
+    const C_GIT_PROTOCOL_TYPE_ROW_ID_LOCAL          = 3;  //Local
+    const C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_KEY        = 4;  //ssh(鍵認証パスフレーズあり)
+    const C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_KEY_NOPASS = 5;  //ssh(鍵認証パスフレーズなし)
 
     public  $PKColumnName;
     public  $tblColumndefine;

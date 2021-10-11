@@ -48,6 +48,15 @@ https://github.blog/2020-12-15-token-authentication-requirements-for-git-operati
 If you are using GitHub with password authentication, you will need to create and enter your own personal access token for the Git account information password.
 Please see the following URL for how to create a personal access token.
 https://docs.github.com/ja/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token";
+$ary["ITACICDFORIAC-MNU-1200010810"]   = "ssh connection information";
+$ary["ITACICDFORIAC-MNU-1200010820"]   = "Password";
+$ary["ITACICDFORIAC-MNU-1200010821"]   = "Please input the Linux user and password needed in order to run Git clone command.
+The password is not required if you have ssh password authentication selected.
+[Max length] 128 bytes";
+$ary["ITACICDFORIAC-MNU-1200010830"]   = "Passphrase";
+$ary["ITACICDFORIAC-MNU-1200010831"]   = "Please input the passphrase set to the secret keyfile used when running the Git clone command.
+The passphrase is not required if you have ssh key certificate (with passphrase) selected.
+[Max length] 128 bytes";
 $ary["ITACICDFORIAC-MNU-1200010900"] = "Proxy";
 $ary["ITACICDFORIAC-MNU-1200011000"] = "Address";
 $ary["ITACICDFORIAC-MNU-1200011001"] = "If you are using a Proxy server, please enter the Proxy server address.
