@@ -5307,7 +5307,7 @@ class NumRangeFilterTabBFmt extends TextFilterTabBFmt {
 			$data = array_key_exists($strColId, $rowData)?$rowData[$strColId]:"";
 		}
 
-		$aryAddOnDefault["maxLength"] = 10;
+		$aryAddOnDefault["maxLength"] = $this->getMaxInputLength();
 		$aryAddOnDefault["size"] = "10";
 
 		$aryOverWrite["type"] = "text";
