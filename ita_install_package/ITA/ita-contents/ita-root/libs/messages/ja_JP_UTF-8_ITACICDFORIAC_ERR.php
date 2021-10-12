@@ -145,4 +145,6 @@ $ary["ITACICDFORIAC-ERR-5014"]  = "項目、ファイルに差分がないため
 $ary["ITACICDFORIAC-ERR-5015"]  = "対象レコードの最終更新者が実行ログインIDと異なるため、RESTAPI（EDIT）の実施をSKIPします。";
 $ary["ITACICDFORIAC-ERR-5016"]  = "対象レコードが1件以上である為、処理を中断します。";
 $ary["ITACICDFORIAC-ERR-5017"]  = "対話種別、OS種別の設定値が不正です。(対話種別:{},OS種別:{})";
+$ary["ITACICDFORIAC-ERR-6000"]  = "Failed to get CICD interface information.";
+$ary["ITACICDFORIAC-ERR-6001"]  = "CICD interface information is not registered.";
 ?>

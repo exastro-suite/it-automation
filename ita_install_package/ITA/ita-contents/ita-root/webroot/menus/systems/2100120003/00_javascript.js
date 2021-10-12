@@ -1156,7 +1156,7 @@ function buttonDisableControl(mode,strTid,objButton){
 }
 var cicdifinfoURL;
 function getcicdifinfoURL() {
-    const URL = '/common/common_getcicdifinfo.php';
+    const URL = '/common/common_getcicdifinfo.php?user_id=' + gLoginUserID;
     $.ajax({
       type: 'get',
       url: URL,

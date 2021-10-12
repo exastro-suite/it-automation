@@ -67,16 +67,6 @@ try {
     require_once ($root_dir_path . $web_auth_config);
     require_once ($root_dir_path . $web_function_for_get_sysconfig);
 
-    ////////////////////////////////
-    // DBコネクト                 //
-    ////////////////////////////////
-    require ($root_dir_path . $db_connect_php );
-    require_once ($root_dir_path . $common_getInfo_loadTable);
-
-    //クエリデータを保管
-    $user_id = htmlspecialchars($_GET['user_id'], ENT_QUOTES, "UTF-8");
-    $link_id = htmlspecialchars($_GET['link_id'], ENT_QUOTES, "UTF-8");
-
     ///////////////////////////////////////////////////
     // アクセス制限
     ///////////////////////////////////////////////////
@@ -90,6 +80,23 @@ try {
         exit();
     }
 
+    ////////////////////////////////
+    // DBコネクト                 //
+    ////////////////////////////////
+    require ($root_dir_path . $db_connect_php );
+    require_once ($root_dir_path . $common_getInfo_loadTable);
+
+    //クエリデータを保管
+    if(array_key_exists('user_id',$_GET) === false) {
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
+    }
+    $user_id = htmlspecialchars($_GET['user_id'], ENT_QUOTES, "UTF-8");
+
+    if(array_key_exists('link_id',$_GET) === false) {
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
+    }
+    $link_id = htmlspecialchars($_GET['link_id'], ENT_QUOTES, "UTF-8");
+
     //システムコンフィグを取得
     $tmpAryRetBody = getSystemConfigFromConfigList($objDBCA);
     if( $tmpAryRetBody[1] !== null ){
@@ -100,7 +107,7 @@ try {
 
     //Sessionのログインチェックをして、ユーザが一致していたら処理を継続
     $auth = null;
-    saLoginExecute($auth, $objDBCA, $ACRCM_id, false);
+    saLoginExecute($auth, $objDBCA, null, false);
     $loginCheck = $auth->checkAuth();
     if($loginCheck == false){
         throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
@@ -191,17 +198,13 @@ try {
     $obj = new RoleBasedAccessControl($objDBCA);
     $ret = $obj->getAccountInfo($user_id);
     if($ret === false) {
-        web_log( $objMTS->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
-        $arrayResult = array("999","", "");
-        return makeAjaxProxyResultStream($arrayResult);
+        throw new Exception($objMTS->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
     }
 
     // 権限があるデータのみに絞る
     $ret = $obj->chkRecodeArrayAccessPermission($result_default_value_list);
     if($ret === false) {
-        web_log( $objMTS->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
-        $arrayResult = array("999","", "");
-        return makeAjaxProxyResultStream($arrayResult);
+        throw new Exception($objMTS->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
     }
 
     //対象メニューのloadTable解析を利用して、対象カラムのClassTypeを特定する
