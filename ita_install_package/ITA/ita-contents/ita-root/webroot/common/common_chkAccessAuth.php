@@ -51,12 +51,29 @@ try {
     ////////////////////////////////
     $php_req_gate_php                = '/libs/commonlibs/common_php_req_gate.php';
     $db_connect_php                  = '/libs/commonlibs/common_db_connect.php';
+    $web_auth_config                 = '/libs/webcommonlibs/web_auth_config.php';
+    $web_function_for_get_sysconfig  = '/libs/webcommonlibs/web_functions_for_get_sysconfig.php';
 
     ////////////////////////////////
     // 共通モジュールの呼び出し   //
     ////////////////////////////////
     $aryOrderToReqGate = array('DBConnect'=>'LATE');
     require_once ($root_dir_path . $php_req_gate_php );
+    require_once ($root_dir_path . $web_auth_config);
+    require_once ($root_dir_path . $web_function_for_get_sysconfig);
+
+    ///////////////////////////////////////////////////
+    // アクセス制限
+    ///////////////////////////////////////////////////
+    //ブラウザから直接アクセスさせない
+    if(!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest'){
+        // アクセスログ出力(リダイレクト判定NG)
+        web_log($objMTS->getSomeMessage("ITAWDCH-MNU-1190093"));
+        
+        // 不正操作によるアクセス警告画面にリダイレクト
+        webRequestForceQuitFromEveryWhere(403,10000403);
+        exit();
+    }
 
     ////////////////////////////////
     // DBコネクト                 //
@@ -64,35 +81,113 @@ try {
     require ($root_dir_path . $db_connect_php );
         
     $ErrorMsgBase = "([FILE]%s[LINE]%s)%s";
-    ///////////////////////////////////////////////////
-    // ファイル組み込み
-    ///////////////////////////////////////////////////
-    require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
-    $RBACobj = new RoleBasedAccessControl($objDBCA);
 
-    if(array_key_exists('OperationNoUAPK',$_GET)=== false) {
-        $AddMsg = "OperationNoUAPK is not set in URL parameter";
+    //クエリデータを保管
+    if(array_key_exists('UserId',$_GET) === false) {
+        $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60002");
         $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
         $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
         throw new Exception(json_encode($Exception));
     }
+    $UserId = htmlspecialchars($_GET['UserId'], ENT_QUOTES, "UTF-8");
 
+    if(array_key_exists('OperationNoUAPK',$_GET) === false) {
+        $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60003");
+        $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+        $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+        throw new Exception(json_encode($Exception));
+    }
     $OperationNoUAPK = htmlspecialchars($_GET['OperationNoUAPK'], ENT_QUOTES, "UTF-8");
-    if(array_key_exists('PatternId',$_GET)=== false) {
-        $AddMsg = "PatternId is not set in URL parameter";
+
+    if(array_key_exists('PatternId',$_GET) === false) {
+        $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60004");
         $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
         $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
         throw new Exception(json_encode($Exception));
     }
     $PatternId = htmlspecialchars($_GET['PatternId'], ENT_QUOTES, "UTF-8");
 
+    //システムコンフィグを取得
+    $tmpAryRetBody = getSystemConfigFromConfigList($objDBCA);
+    if( $tmpAryRetBody[1] !== null ){
+        $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60005");
+        $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+        $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+        throw new Exception(json_encode($Exception));
+    }
+    $arySYSCON = $tmpAryRetBody[0]['Items'];
+    unset($tmpAryRetBody);
+
+    //Sessionのログインチェックをして、ユーザが一致していたら処理を継続
+    $auth = null;
+    saLoginExecute($auth, $objDBCA, null, false);
+    $loginCheck = $auth->checkAuth();
+    if($loginCheck == false){
+        $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60005");
+        $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+        $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+        throw new Exception(json_encode($Exception));
+    }
+    $loginUserName = $auth->getUsername();
+
+    //D_ACCOUNT_LISTから対象のユーザIDのデータを取得し、ユーザ名が一致するかを確認
+    $sql =        " SELECT USER_ID, USERNAME \n";
+    $sql = $sql . " FROM D_ACCOUNT_LIST \n";
+    $sql = $sql . " WHERE  DISUSE_FLAG = '0' \n";
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if($objQuery->getStatus()===false){
+        $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60005");
+        $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+        $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+        throw new Exception(json_encode($Exception));
+    }
+
+    $result = $objQuery->sqlExecute();
+    if(!$result){
+        $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60005");
+        $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+        $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+        throw new Exception(json_encode($Exception));
+    }
+
+    $accountData = array();
+    while ($row = $objQuery->resultFetch()){
+        if($row['USER_ID'] == $UserId){
+            $accountData = $row; //レコードは1つしかない想定
+        }
+    }
+
+    if(empty($accountData)){
+        $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60005");
+        $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+        $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+        throw new Exception(json_encode($Exception));
+    }
+
+    //クエリパラメータのuser_idとセッションが持つユーザ名情報が不一致
+    if($accountData['USERNAME'] != $loginUserName){       
+        $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60005");
+        $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
+        $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
+        throw new Exception(json_encode($Exception));
+    }
+
+    unset($objQuery);
+
+    ///////////////////////////////////////////////////
+    // ファイル組み込み
+    ///////////////////////////////////////////////////
+    require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
+    $RBACobj = new RoleBasedAccessControl($objDBCA);
+
     $OpeAccessAuthStr = "";
     $ret = $RBACobj->getOperationAccessAuth($OperationNoUAPK,$OpeAccessAuthStr);
     if($ret !== true) {
         if($ret === false) {
-            $AddMsg = "Input operation list access error.";
+            $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60006");
         } else {
-            $AddMsg = "OperationID not found.";
+            $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60007");
         }
         $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
         $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
@@ -103,9 +198,9 @@ try {
     $ret = $RBACobj->getMovementAccessAuth($PatternId,$MovementAccessAuthStr);
     if($ret !== true) {
         if($ret === false) {
-            $AddMsg = "Movement list access error.";
+            $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60008");
         } else {
-            $AddMsg = "MovementID not found.";
+            $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60009");
         }
         $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
         $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー

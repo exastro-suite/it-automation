@@ -146,4 +146,6 @@ $ary["ITACICDFORIAC-ERR-5014"] = "No differences in items and files. Skiping RES
 $ary["ITACICDFORIAC-ERR-5015"] = "Since the last updater of the target record is different from the execution login ID, SKIP the execution of REST API (EDIT).";
 $ary["ITACICDFORIAC-ERR-5016"] = "There are more than one target records. Suspending the process.";
 $ary["ITACICDFORIAC-ERR-5017"] = "The Dialogue type/OS type setting value is invalid. (Dialogue type:{},OS type:{})";
+$ary["ITACICDFORIAC-ERR-6000"]  = "Failed to get CICD interface information.";
+$ary["ITACICDFORIAC-ERR-6001"]  = "CICD interface information is not registered.";
 ?>

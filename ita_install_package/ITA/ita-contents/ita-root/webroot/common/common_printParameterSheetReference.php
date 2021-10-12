@@ -66,16 +66,6 @@ try {
     require_once ($root_dir_path . $web_auth_config);
     require_once ($root_dir_path . $web_function_for_get_sysconfig);
 
-    ////////////////////////////////
-    // DBコネクト                 //
-    ////////////////////////////////
-    require ($root_dir_path . $db_connect_php );
-
-    //クエリデータを保管
-    $user_id = htmlspecialchars($_GET['user_id'], ENT_QUOTES, "UTF-8");
-    $menu_id = htmlspecialchars($_GET['menu_id'], ENT_QUOTES, "UTF-8");
-
-
     ///////////////////////////////////////////////////
     // アクセス制限
     ///////////////////////////////////////////////////
@@ -89,20 +79,36 @@ try {
         exit();
     }
 
+    ////////////////////////////////
+    // DBコネクト                 //
+    ////////////////////////////////
+    require ($root_dir_path . $db_connect_php );
+
+    //クエリデータを保管
+    if(array_key_exists('user_id',$_GET) === false) {
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6003"));
+    }
+    $user_id = htmlspecialchars($_GET['user_id'], ENT_QUOTES, "UTF-8");
+
+    if(array_key_exists('menu_id',$_GET) === false) {
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6003"));
+    }
+    $menu_id = htmlspecialchars($_GET['menu_id'], ENT_QUOTES, "UTF-8");
+
     //システムコンフィグを取得
     $tmpAryRetBody = getSystemConfigFromConfigList($objDBCA);
     if( $tmpAryRetBody[1] !== null ){
-        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6003"));
     }
     $arySYSCON = $tmpAryRetBody[0]['Items'];
     unset($tmpAryRetBody);
 
     //Sessionのログインチェックをして、ユーザが一致していたら処理を継続
     $auth = null;
-    saLoginExecute($auth, $objDBCA, $ACRCM_id, false);
+    saLoginExecute($auth, $objDBCA, null, false);
     $loginCheck = $auth->checkAuth();
     if($loginCheck == false){
-        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6003"));
     }
     $loginUserName = $auth->getUsername();
 
@@ -113,12 +119,12 @@ try {
 
     $objQuery = $objDBCA->sqlPrepare($sql);
     if($objQuery->getStatus()===false){
-        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6003"));
     }
 
     $result = $objQuery->sqlExecute();
     if(!$result){
-        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6003"));
     }
 
     $accountData = array();
@@ -129,12 +135,12 @@ try {
     }
 
     if(empty($accountData)){
-        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6003"));
     }
 
     //クエリパラメータのuser_idとセッションが持つユーザ名情報が不一致
     if($accountData['USERNAME'] != $loginUserName){       
-        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6003"));
     }
 
     unset($objQuery);
@@ -148,7 +154,7 @@ try {
     $sqlBind = array('MENU_ID' => $menu_id);
     $result = $referenceSheetType3View->selectTable($sql, $sqlBind);
     if(!is_array($result)){
-        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
+        throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6003"));
     }
     $result_type3_reference_item = $result;
 
@@ -156,19 +162,14 @@ try {
     $obj = new RoleBasedAccessControl($objDBCA);
     $ret = $obj->getAccountInfo($user_id);
     if($ret === false) {
-        web_log( $objMTS->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
-        $arrayResult = array("999","", "");
-        return makeAjaxProxyResultStream($arrayResult);
+        throw new Exception($objMTS->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
     }
 
     // 権限があるデータのみに絞る
     $ret = $obj->chkRecodeArrayAccessPermission($result_type3_reference_item);
     if($ret === false) {
-        web_log( $objMTS->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
-        $arrayResult = array("999","", "");
-        return makeAjaxProxyResultStream($arrayResult);
+        throw new Exception($objMTS->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
     }
-
 
     //「メニュー作成・定義」用に配列を形成
     $select_type3_reference_list = array();

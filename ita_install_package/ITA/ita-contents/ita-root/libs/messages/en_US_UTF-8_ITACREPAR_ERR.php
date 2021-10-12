@@ -331,5 +331,7 @@ $ary["ITACREPAR-ERR-5024"]          = "Failed to update the menu creation status
 $ary["ITACREPAR-ERR-5025"]          = "\"Unique constraint(Multiple items)\" contains an ID that cannot be specified.";
 $ary["ITACREPAR-ERR-5026"]          = "When \"Data sheet\" is selected as the Creation target, the item of the Input method \"Parameter Sheet reference\" cannot be used.";
 $ary["ITACREPAR-ERR-5027"]          = "The item of Input method \"Parameter Sheet Reference\" is included in \"Unique constraint(Multiple items)\".";
-$ary["ITACREPAR-ERR-6001"]          = "Failed to get Select default value";
+$ary["ITACREPAR-ERR-6001"]          = "Failed to get Select default value.";
+$ary["ITACREPAR-ERR-6002"]          = "Failed to get Reference Item.";
+$ary["ITACREPAR-ERR-6003"]          = "Failed to get Parameter Sheet Reference Item.";
 ?>
