@@ -2453,7 +2453,7 @@ class SingleDefaultValueValidator extends SingleTextValidator {
 
                     // 最大バイト数と初期値の条件一致をチェック
                     if($maxLength != ''){
-                        if((int)$maxLength < strlen($value)){
+                        if((int)$maxLength < strlen(bin2hex($value))/2){
                             $retBool = false;
                             $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1252");
                         }
@@ -2535,7 +2535,10 @@ class MultiDefaultValueValidator extends MultiTextValidator {
 
                     // 最大バイト数と初期値の条件一致をチェック
                     if($maxLength != ''){
-                        if((int)$maxLength < strlen($value)){
+                        //各メニューから「登録」する際にチェックする改行コードに統一するため、改行コードを\r\nに置換(改行は2バイトとして計算する)
+                        $value=str_replace("\r\n", "\n", $value); //一度\r\nを\nに統一
+                        $value=str_replace(["\r","\n"],"\r\n",$value); //\rと\nを再度\r\nに置換
+                        if((int)$maxLength < strlen(bin2hex($value))/2){
                             $retBool = false;
                             $strErrAddMsg = $g['objMTS']->getSomeMessage("ITACREPAR-ERR-1252");
                         }
