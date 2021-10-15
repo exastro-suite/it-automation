@@ -13435,22 +13435,23 @@ if(isset($Expansion_root)) {
                                       $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                       $ITADestDirPath);
 
-        if( !is_dir( $AnsDestDirPath) ){
+        if( !is_dir( $ITADestDirPath) ){
             //ドライバ区分ディレクトリが存在している場合はなにもしない
-            if( !mkdir( $AnsDestDirPath, 0777 ) ){
+            if( !mkdir( $ITADestDirPath, 0777 ) ){
                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 return false;
             }
-            if( !chmod( $AnsDestDirPath, 0777 ) ){
+            if( !chmod( $ITADestDirPath, 0777 ) ){
                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 return false;
             }
         }
 
+        $ITADestDirPath .= "/" . $row['VARS_ENTRY_FILE'];
         $AnsDestDirPath .= "/" . $row['VARS_ENTRY_FILE'];
-        $cmd = sprintf("/bin/cp -f %s %s  2>&1",escapeshellarg($srcFilePath),escapeshellarg($AnsDestDirPath));
+        $cmd = sprintf("/bin/cp -f %s %s  2>&1",escapeshellarg($srcFilePath),escapeshellarg($ITADestDirPath));
 
         $outAry = array();
         exec($cmd ,$outAry, $ret);
