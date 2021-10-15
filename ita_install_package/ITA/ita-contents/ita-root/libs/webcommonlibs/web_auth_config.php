@@ -81,17 +81,24 @@
                 break;
         }
 
+        $getCopy = $_GET;
+        unset($getCopy['login']);
+        $get_parameter = "";
+        if("" != http_build_query($getCopy)){
+            $get_parameter = "?" . http_build_query($getCopy);
+        }
+
         // 登録されているログインID一覧画面へのリンク
         if (isset($arySYSCON['IP_ADDRESS_LIST'])) {
             if ($arySYSCON['IP_ADDRESS_LIST'] == '1') {
-                $strLoginFormTailBody .= "<br><p><a href=\"{$scheme_n_authority}/common/common_account_list_browse.php?no={$ASJTM_id}\">".$strAnchorInnerToLoginIDList."</a>\n";
+                $strLoginFormTailBody .= "<br><p><a href=\"{$scheme_n_authority}/common/common_account_list_browse.php{$get_parameter}\">".$strAnchorInnerToLoginIDList."</a>\n";
             }
         }
 
         // パスワード変更画面へのリンク
         if (isset($arySYSCON['PW_CHG_FROM_OTHER'])) {
             if ($arySYSCON['PW_CHG_FROM_OTHER'] == '1') {
-                $strLoginFormTailBody .= "<br><a href=\"{$scheme_n_authority}/common/common_change_password_form.php?no={$ASJTM_id}\">".$strAnchorInnerToLoginPWUpdate."</a></p>\n";
+                $strLoginFormTailBody .= "<br><a href=\"{$scheme_n_authority}/common/common_change_password_form.php{$get_parameter}\">".$strAnchorInnerToLoginPWUpdate."</a></p>\n";
             }
         }
         // SSO認証用設定の読み込み
