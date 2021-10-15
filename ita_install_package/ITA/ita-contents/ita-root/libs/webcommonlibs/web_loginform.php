@@ -1,6 +1,15 @@
+<?php
+$get_parameter = "";
+$get_parameter_anp = "";
+if("" != http_build_query($_GET)){
+    $get_parameter = "?" . $_SERVER['QUERY_STRING'];
+    $get_parameter_anp = "&" . $_SERVER['QUERY_STRING'];
+}
+?>
+
 <?= $strLoginFormHeadBody ?>
 <div id="gateLoginContainer" class="gateContainer">
- <form id="gateLoginForm" class="inputUserInfoForm" method="POST" name="loginform" action="<?= $strGateUrl ?>?login&grp=<?= $ASJTM_grp_id ?>&no=<?= $ASJTM_id ?>">
+ <form id="gateLoginForm" class="inputUserInfoForm" method="POST" name="loginform" action="<?= $strGateUrl ?><?= $get_parameter ?>">
    <table id="gateLoginItemTable" class="headerLeftTable inputItemTable" border="0" aria-describedby="">
      <tr>
        <th scope="col" class="inputItemExplain"><?= $strLoginIDCaption ?></th>
@@ -23,7 +32,7 @@
       <?php if ($item['visibleFlag'] === '1') { ?>
 
       <li class="ssoLoginItem">
-        <a href="/common/common_sso_auth.php?<?= $item['authType'] ?>&providerId=<?= $item['providerId'] ?>&grp=<?= $ASJTM_grp_id ?>&no=<?= $ASJTM_id ?>">
+        <a href="/common/common_sso_auth.php?<?= $item['authType'] ?>&providerId=<?= $item['providerId'] ?><?= $get_parameter_anp ?>">
           <span class="ssoLoginLinkInner">
           <?php if (!empty($item['providerLogo'])) { ?>
 
