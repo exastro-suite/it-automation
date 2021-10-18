@@ -39,6 +39,11 @@
                 $aryForResultData = ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
                 //EDIT----
             }
+            else if( $strCommand == "GET_PULLDOWN" ){
+                //----EDIT
+                $aryForResultData = ReSTCommandGetPulldownExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
+                //EDIT----
+            }
             else{
                 $aryForResultData = array(array('ResultStatusCode'=>500,
                                                 'ResultData'=>$g['requestByREST']['preResponsContents']['errorInfo']
@@ -459,6 +464,109 @@
         $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
                               'ResultData'=>$aryForResultData);
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+        return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+    }
+    
+    function ReSTCommandGetPulldownExecute($strCommand, $objJSONOfReceptedData, $objTable, $strApiFlg=false){
+        global $g;
+        // ----ローカル変数宣言
+        $intControlDebugLevel01=250;
+
+        $arrayRetBody = array();
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+
+        $intResultStatusCode = null;
+        $aryForResultData = array();
+        $aryPreErrorData = null;
+
+        $intErrorPlaceMark = null;
+        $strErrorPlaceFmt = "%08d";
+
+        $strFxName = __FUNCTION__;
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+        try{
+            $tmpArrayReqHeaderRaw = getallheaders();
+            list($strFormatterId,$boolKeyExists) = isSetInArrayNestThenAssign($tmpArrayReqHeaderRaw,array('Formatter'),"json");
+            unset($tmpArrayReqHeaderRaw);
+
+            $tmpArrayVariant = array();
+            $tmpArraySetting = array();
+
+            $tmpArraySetting = array('system_function_control'=>array('DTiSFilterCheckValid'=>array('HiddenVars'=>array('DecodeOfSelectTagStringEscape'=>false))));
+
+            if( is_array($objJSONOfReceptedData) !== true ){
+                $tmpAryFilterData = array();
+            }
+            else{
+                $tmpAryFilterData = $objJSONOfReceptedData;
+            }
+
+            $objListFormatter = $objTable->getFormatter($strFormatterId);
+            if( is_a($objListFormatter, "ListFormatter") !== true ){
+                // ----リストフォーマッタクラスではない
+                $intErrorPlaceMark = 100;
+                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                // リストフォーマッタクラスではない----
+            }
+
+            if( is_a($objListFormatter, "JSONFormatter") !== true ){
+                $intErrorPlaceMark = 200;
+                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            
+            $arrayObjColumn = $objTable->getColumns();
+            $arrayResultData = array();
+            $tmpResultData = array();
+            $arrayLabel = array();
+            $passwordMaskStr = "********";
+            
+            foreach ($arrayObjColumn as $objColumn) {
+              if( $objColumn->getOutputType("excel")->isVisible()===false ){
+                continue;
+              }
+              array_push($arrayLabel,$objColumn->getColLabel());
+              $printStaticText = "";
+              if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                  $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+              }
+              if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){\
+                array_push($tmpResultData,$objColumn->getMasterTableArrayForInput());
+              }else{
+                array_push($tmpResultData,array());
+              }
+            }
+            
+            array_push($arrayResultData,$arrayLabel);
+            array_push($arrayResultData,$tmpResultData);
+            
+            //----正常終了（リスト全体[ヘッダーとレコード]とレコード行を返す）
+            $intResultStatusCode = 200;
+            $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
+            $aryForResultData['resultdata'] = array('CONTENTS'=>array('BODY'=>$arrayResultData,
+                                                                 )
+                                               );
+            
+            if( headers_sent() === true ){
+                $intErrorType = 900;
+                $intErrorPlaceMark = 1000;
+                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+        }
+        catch (Exception $e){
+            $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+
+            $tmpErrMsgBody = $e->getMessage();
+            dev_log($tmpErrMsgBody, $intControlDebugLevel01);
+            if( $intResultStatusCode === null ) $intResultStatusCode = 500;
+            if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
+            if( 500 <= $intErrorType ) web_log($tmpErrMsgBody);
+        }
+        $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                              'ResultData'=>$aryForResultData);
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);        
         return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
     }
 ?>
