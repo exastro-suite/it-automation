@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2019 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -53,39 +53,30 @@
 
     $root_dir_path = $this->getApplicationRootDirPath();
 
-    require_once ($root_dir_path . '/libs/commonlibs/common_ansible_vault.php');
-    
     $aryReceptData                  = $this->getReceptData();
 
-    $in_OrchestratorSub_Id          = $aryReceptData['ORCHESTRATOR_SUB_ID'];
-    $in_ExeNo                       = $aryReceptData['EXE_NO'];
-    $in_DataRelayStorageTrunkPathNS = $aryReceptData['DATA_RELAY_STORAGE_TRUNK'];
-    $in_ExecUser                    = $aryReceptData['EXEC_USER'];
-    $in_TargetValue                 = $aryReceptData['TARGET_VALUE'];
-    $in_TargetValue                 = $this->ky_decrypt($in_TargetValue);
     $in_engine_virtualenv_name      = $aryReceptData['ANS_ENGINE_VIRTUALENV_NAME'];
 
-    $aryOrchestratorList = array('LEGACY_NS'=>'legacy_ns','PIONEER_NS'=>'pioneer_ns','LEGACY_RL'=>'legacy_rl');
-    $strOutFolderName    = "/out";
-
-    $aryOcheSubDir       = explode("_",$aryOrchestratorList[$in_OrchestratorSub_Id]);
-
-    $strPadExeNo         = sprintf("%010d",$in_ExeNo);
-    $strDRSDirPerExeNoNS = "{$in_DataRelayStorageTrunkPathNS}/{$aryOcheSubDir[0]}/{$aryOcheSubDir[1]}/{$strPadExeNo}";
-    $root_dir_path       = $this->getApplicationRootDirPath();
-    $strOutPutDirPath    = "{$strDRSDirPerExeNoNS}{$strOutFolderName}";
-
-    $obj = new AnsibleVault();
-
-    // Tower経由の場合のデータリレイストレージが一致しない場合があるので、/tmpにpasswordファイル作成
-    $obj->setValutPasswdFileInfo('/tmp','.vault_' . getmypid());
-
-    // ansible-vault passwordファイル作成
-    $obj->CraeteValutPasswdFile('',$PasswordFile);
-
-    // ansible-vault 暗号化
     $EncodeValue = "";
-    $ret = $obj->Vault($in_ExecUser,$PasswordFile,$in_TargetValue,$EncodeValue,'',$in_engine_virtualenv_name,$strDRSDirPerExeNoNS);
+    $ret = false;
+    if(file_exists($in_engine_virtualenv_name) === true) {
+        if(is_dir($in_engine_virtualenv_name) ===false) {
+            $EncodeValue = "Virtualenv path is not a directory.";
+        } else {
+            if(file_exists($in_engine_virtualenv_name . "/bin/activate") === false) {
+                $EncodeValue = "Virtualenv path is not a virtualenv directory.";
+            } else {
+                if(file_exists($in_engine_virtualenv_name . "/bin/ansible-playbook") === false) {
+                    $EncodeValue = "Ansible environment is not found in the virtualenv path.";
+                } else {
+                    $ret = true;
+                }
+           }
+        }
+    } else {
+       $EncodeValue = "Virtualenv path not found.";
+    }
+
     if($ret === true) {
         $this->arySuccessInfo['status'] = "SUCCEED";
     } else {
@@ -93,10 +84,6 @@
     }
     $this->intResultStatusCode = 200;
     $this->arySuccessInfo['resultdata'] = $EncodeValue;
-
-    unlink($PasswordFile);
-
-    unset($obj);
 
     if($vg_log_level == 'DEBUG')  $this->RestAPI_log("END[".basename(__FILE__)."]");
 ?>

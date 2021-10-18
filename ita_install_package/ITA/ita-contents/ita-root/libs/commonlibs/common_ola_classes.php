@@ -639,6 +639,7 @@ class OrchestratorLinkAgent {
         $strPatternMasterOpenst_Template      = 'OPENST_TEMPLATE';
         $strPatternMasterOpenst_Env           = 'OPENST_ENVIRONMENT';
         $strPatternMasterAnsVirtualEnvName    = 'ANS_VIRTUALENV_NAME';
+        $strPatternMasterAnsEngineVirtualEnvName  = 'ANS_ENGINE_VIRTUALENV_NAME';
 
         $strPatternMasterTerraformWorkspaceID = 'TERRAFORM_WORKSPACE_ID';
 
@@ -727,6 +728,7 @@ class OrchestratorLinkAgent {
                   .",{$strPatternMasterAnsPlaybookHedDef} ANS_PLAYBOOK_HED_DEF "
                   .",{$strPatternMasterAnsExecOption} ANS_EXEC_OPTIONS "
                   .",{$strPatternMasterAnsVirtualEnvName} ANS_VIRTUALENV_NAME "
+                  .",{$strPatternMasterAnsEngineVirtualEnvName} ANS_ENGINE_VIRTUALENV_NAME "
                   .",{$strPatternMasterOpenst_Template} OPENST_TEMPLATE "
                   .",{$strPatternMasterOpenst_Env} OPENST_ENVIRONMENT "
                   .",{$strPatternMasterTerraformWorkspaceID} TERRAFORM_WORKSPACE_ID "

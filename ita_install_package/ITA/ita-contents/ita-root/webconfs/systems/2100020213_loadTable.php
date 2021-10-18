@@ -90,9 +90,14 @@ Ansible(Pioneer)作業管理
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203066"));
     $table->addColumn($c);
 
-    //virtualenv
-    $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000016"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000017"));//エクセル・ヘッダでの説明
+    //Ansible virtualenv
+    $c = new TextColumn('I_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000031"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000033"));//エクセル・ヘッダでの説明
+    $table->addColumn($c);
+
+    //Tower virtualenv
+    $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000032"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000034"));//エクセル・ヘッダでの説明
     $table->addColumn($c);
 
     //シンフォニークラス

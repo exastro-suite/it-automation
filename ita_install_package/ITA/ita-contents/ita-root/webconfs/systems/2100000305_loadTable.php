@@ -139,6 +139,14 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true    )であることも必要。
             $cg->addColumn($c);
             
+            /* Ansible virtualenv path*/
+            $objVldt = new SingleTextValidator(0,512,false);
+            $c = new TextColumn('ANS_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
+            $c->setValidator($objVldt);
+            $c->setRequired(false);
+            $cg->addColumn($c);
+
             /* 親Playbookのヘッダーセクション */
             $objVldt = new MultiTextValidator(0,512,false);
             $c = new MultiTextColumn('ANS_PLAYBOOK_HED_DEF',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000008"));
@@ -164,8 +172,8 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITABASEH-MNU-108241") );
 
                 // virtualenv
-                $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-108242"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
-                $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-108243")); //エクセル・ヘッダでの説明
+                $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
+                $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030")); //エクセル・ヘッダでの説明
                 $c->setHiddenMainTableColumn(true); //コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
             $cg->addColumn($c);
 

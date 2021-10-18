@@ -80,6 +80,12 @@
 
     $strExecUser                    = $aryReceptData['EXEC_USER'];  //ansible-playbook実行時のユーザー名
 
+    $in_engine_virtualenv_name      = $aryReceptData['ANS_ENGINE_VIRTUALENV_NAME'];
+
+    if($in_engine_virtualenv_name == "") {
+        $in_engine_virtualenv_name      = "__undefine__";
+    }
+
     // オーケストレータ名で親playbook名を決める
     switch($strOrchestratorSub_Id){
     case 'LEGACY_NS':
@@ -152,7 +158,7 @@
 
     // ky_build_and_follow_side_Ansible.php起動
     if( $boolExeContinue === true ){
-        $strChildPHPProccessCommand = "{$php_command} {$root_dir_path}/backyards/ansible_driver/ky_build_and_follow_side_Ansible.php {$strDRSDirPerExeNoNS} {$strOutPutDirPath} {$strOrchestratorSub_Id} {$strRunMode} {$strExecCount} {$strExecUser} > /dev/null &";
+        $strChildPHPProccessCommand = "{$php_command} {$root_dir_path}/backyards/ansible_driver/ky_build_and_follow_side_Ansible.php {$strDRSDirPerExeNoNS} {$strOutPutDirPath} {$strOrchestratorSub_Id} {$strRunMode} {$strExecCount} {$strExecUser} {$in_engine_virtualenv_name} > /dev/null &";
 
         $err = exec($strChildPHPProccessCommand,$arry_out,$return_var);
         // エラー処理を入れているがバックグラウンド起動なので戻り判定は略意味なし
