@@ -346,6 +346,8 @@ class CreateAnsibleExecFiles {
     private  $lv_vault_value_list;        // ansible-vaultで暗号化した具体値配列
     private  $lv_vault_value_update_list; // ansible-vaultで暗号化した具体値の更新が済んでいる代入値管理のKey配列
 
+    private  $lv_engine_virtualenv_name;  // Ansible Engine virtualenv path
+
     // LegacyRoleCheckConcreteValueIsVarで必要とする情報
     private  $LegacyRoleCheckConcreteValueIsVar_use_host_name;
     private  $LegacyRoleCheckConcreteValueIsVar_use_var_list;
@@ -396,6 +398,7 @@ class CreateAnsibleExecFiles {
     //                      ロール変数管理 テーブル名
     //   $in_ans_if_info:   ansibleインターフェース情報
     //   $in_exec_no:       作業番号
+    //   $in_engine_virtualenv_name:  Ansible Engine virtualenv path
     //   &$in_objMTS:       メッセージ定義クラス変数
     //   &$in_objDBCA:      データベースアクセスクラス変数
     // 
@@ -424,6 +427,7 @@ class CreateAnsibleExecFiles {
                          $in_ansible_role_varsDB,
                          $in_ans_if_info,    
                          $in_exec_no,
+                         $in_engine_virtualenv_name,
                          &$in_objMTS,&$in_objDBCA){
         global $root_dir_path;
 
@@ -500,6 +504,8 @@ class CreateAnsibleExecFiles {
         $this->lv_vault_pass_update_list    = array();
         $this->lv_vault_value_list          = array();
         $this->lv_vault_value_update_list   = array();
+
+        $this->lv_engine_virtualenv_name    = $in_engine_virtualenv_name;
 
         $this->LegacyRoleCheckConcreteValueIsVar_use_host_name = "";
         $this->LegacyRoleCheckConcreteValueIsVar_use_var_list  = array();
@@ -12659,15 +12665,17 @@ class CreateAnsibleExecFiles {
                 $RequestContents
                 = array(
                     //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
-                    'DATA_RELAY_STORAGE_TRUNK'=>'/tmp',
+                    'DATA_RELAY_STORAGE_TRUNK'=>$this->lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],
                     //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
                     "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
                     //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
-                    "EXE_NO"=>"9999999999",
+                    "EXE_NO"=>$this->lv_exec_no,
                     // ansible-vault 実行ユーザー
                     "EXEC_USER"=>$in_exec_user,
                     // 暗号化する文字列
-                    "TARGET_VALUE"=>$enc_in_pass);
+                    "TARGET_VALUE"=>$enc_in_pass,
+                    //Ansible Engin Virtualenv Path
+                    'ANS_ENGINE_VIRTUALENV_NAME'=>$this->lv_engine_virtualenv_name);
 
                 $proxySetting              = array();
                 $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
@@ -12783,15 +12791,17 @@ class CreateAnsibleExecFiles {
             $RequestContents
                 = array(
                     //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
-                    'DATA_RELAY_STORAGE_TRUNK'=>'/tmp',
+                    'DATA_RELAY_STORAGE_TRUNK'=>$this->lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],
                     //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
                     "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
                     //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
-                    "EXE_NO"=>"9999999999",
+                    "EXE_NO"=>$this->lv_exec_no,
                     // ansible-vault 実行ユーザー
                     "EXEC_USER"=>$in_exec_user,
                     // 暗号化する文字列
-                    "TARGET_VALUE"=>$decryptData);
+                    "TARGET_VALUE"=>$decryptData,
+                    //Ansible Engin Virtualenv Path
+                    'ANS_ENGINE_VIRTUALENV_NAME'=>$this->lv_engine_virtualenv_name);
 
             $proxySetting              = array();
             $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
@@ -12886,15 +12896,17 @@ class CreateAnsibleExecFiles {
                 $RequestContents
                 = array(
                         //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
-                        'DATA_RELAY_STORAGE_TRUNK'=>'/tmp',
+                        'DATA_RELAY_STORAGE_TRUNK'=>$this->lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],
                         //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
                         "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
                         //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
-                        "EXE_NO"=>"9999999999",
+                        "EXE_NO"=>$this->lv_exec_no,
                         // ansible-vault 実行ユーザー
                         "EXEC_USER"=>$in_exec_user,
                         // 暗号化する文字列
-                        "TARGET_VALUE"=>$enc_in_pass);
+                        "TARGET_VALUE"=>$enc_in_pass,
+                        //Ansible Engin Virtualenv Path
+                        'ANS_ENGINE_VIRTUALENV_NAME'=>$this->lv_engine_virtualenv_name);
 
                 $proxySetting              = array();
                 $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
@@ -13465,6 +13477,70 @@ if(isset($Expansion_root)) {
         $row['VARS_ENTRY_FILE'] = "";
 
         return true;
+    }
+    function AnsibleEnginVirtualenvPathCheck() {
+        global $root_dir_path;
+        global $vg_OrchestratorSubId;
+
+        if($this->lv_engine_virtualenv_name == "") {
+            return true;
+        }
+        require_once ($root_dir_path . '/libs/commonlibs/common_ansible_restapi.php' );
+
+        $RequestURI = "/restapi/ansible_driver/venvpathcheck.php";
+        $Method     = 'GET';
+
+        $RequestContents = array(
+                    //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
+                    'DATA_RELAY_STORAGE_TRUNK'=>$this->lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],
+                    //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
+                    "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
+                    //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
+                    "EXE_NO"=>$this->lv_exec_no,
+                    //Ansible Engin Virtualenv Path
+                    'ANS_ENGINE_VIRTUALENV_NAME'=>$this->lv_engine_virtualenv_name);
+
+        $proxySetting              = array();
+        $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+        $proxySetting['port']      = $this->lv_ans_if_info["ANSIBLE_PROXY_PORT"];
+
+        ////////////////////////////////////////////////////////////////
+        // Ansible Engin Virtualenv Path確認 REST APIコール           //
+        ////////////////////////////////////////////////////////////////
+        $rest_api_response = ansible_restapi_access( $this->lv_ans_if_info['ANSIBLE_PROTOCOL'],
+                                                     $this->lv_ans_if_info['ANSIBLE_HOSTNAME'],
+                                                     $this->lv_ans_if_info['ANSIBLE_PORT'],
+                                                     $this->lv_ans_if_info['ANSIBLE_ACCESS_KEY_ID'],
+                                                     ky_decrypt( $this->lv_ans_if_info['ANSIBLE_SECRET_ACCESS_KEY'] ),
+                                                     $RequestURI,
+                                                     $Method,
+                                                     $RequestContents,
+                                                     $proxySetting );
+
+        if( $rest_api_response['StatusCode'] == 200 ){
+             $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
+             if($rest_api_response['ResponsContents']['status'] == "SUCCEED") {
+             } elseif($rest_api_response['ResponsContents']['status'] == "FAILED") {
+                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90310");
+                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$rest_api_response['ResponsContents']['resultdata']);
+                 return false;
+             } else {
+                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90310");
+                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                 $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
+                 return false;
+             }
+         } else {
+             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
+             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+             $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
+             return false;
+         }
+         return true;
+    }
+    function GetEngineVirtualenvName() {
+        return $this->lv_engine_virtualenv_name;
     }
 }
 

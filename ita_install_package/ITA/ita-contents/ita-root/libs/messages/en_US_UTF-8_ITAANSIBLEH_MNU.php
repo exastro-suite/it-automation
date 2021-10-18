@@ -1283,6 +1283,20 @@ $ary["ITAANSIBLEH-MNU-9010000022"]  = "Address";
 $ary["ITAANSIBLEH-MNU-9010000023"]  = "Proxy server address";
 $ary["ITAANSIBLEH-MNU-9010000024"]  = "Port";
 $ary["ITAANSIBLEH-MNU-9010000025"]  = "Proxy server port";
+$ary["ITAANSIBLEH-MNU-9010000026"]  = "Proxy server port";
+$ary["ITAANSIBLEH-MNU-9010000027"]  = "virtualenv";
+$ary["ITAANSIBLEH-MNU-9010000028"]  = "f you want to run operations in the ansible execution environment created with the ansible server's virtualenv, input the full path for virtualenv.
+If the virtualenv environment doesnt exist or does not have ansible installed, the operation will end with the status \"Unexpected error\".
+If nothing is input, the operation will be run with the ansible installed in the ansible server.
+[Max length 512 bytes]";
+$ary["ITAANSIBLEH-MNU-9010000029"]  = "virtualenv";
+$ary["ITAANSIBLEH-MNU-9010000030"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible tower server's /var/lib/awx/venv.
+If you want to run operations in the ansible execution environment constructed with virtualenv, please select the full path for \"virtualenv\".
+If nothing is selelcted, the ansible environment that was installed when installing Tower will be used.";
+$ary["ITAANSIBLEH-MNU-9010000031"]  = "Ansible engin virtualenv path";
+$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible tower virtualenv path";
+$ary["ITAANSIBLEH-MNU-9010000033"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible server.";
+$ary["ITAANSIBLEH-MNU-9010000034"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible tower server's /var/lib/awx/venv.";
 $ary["ITAANSIBLEH-MNU-9010001000"]  = "Maintenance (view/update) can be performe Ansible Tower host information.\ncase of cluster configuration, it is necessary to register the host information of ansible tower that constitutes the cluster.";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "No.";
 $ary["ITAANSIBLEH-MNU-9010001002"]  = "AnsibleTowerHostList";

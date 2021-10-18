@@ -472,6 +472,7 @@ $ary["ITAANSIBLEH-ERR-90306"]       = "Registration for backyard processing (var
 $ary["ITAANSIBLEH-ERR-90307"]       = "Specific values of global variables are registered in multiple lines. (Global variable:{})";
 $ary["ITAANSIBLEH-ERR-90308"]       = "Registration for backyard processing ((varsautolistup-workflow) activation failed.";
 $ary["ITAANSIBLEH-ERR-90309"]       = "Specific value of the variable is registered in multiple lines. (variable:{})";
+$ary["ITAANSIBLEH-ERR-90310"]       = "The Ansible user information/virtualenv configured in the Movement list is invalid.";
 $ary["ITAANSIBLEH-ERR-101010"]      = "Function to connect with REST API is not defined.";
 $ary["ITAANSIBLEH-ERR-101020"]      = "Cannot find target execution No. \n Record may have been discarded.";
 $ary["ITAANSIBLEH-ERR-101030"]      = "It is not an emergency stop status. (Status:{})";

@@ -150,6 +150,15 @@ Ansible(Pioneer)作業パターン
         $c->setRequired(true);//登録/更新時には、入力必須
         $cg->addColumn($c);
 
+        /* Ansible virtualenv path*/
+        $objVldt = new SingleTextValidator(0,512,false);
+        $c = new TextColumn('ANS_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
+        $c->setHiddenMainTableColumn(true);
+        $c->setValidator($objVldt);
+        $c->setRequired(false);
+        $cg->addColumn($c);
+
         // 並列実行数
         $c = new NumColumn('ANS_PARALLEL_EXE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-409051"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-409052"));//エクセル・ヘッダでの説明
@@ -167,8 +176,8 @@ Ansible(Pioneer)作業パターン
         $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000013") );
 
         // virtualenv
-        $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000014"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
-        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000015"));
+        $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030"));
         $c->setHiddenMainTableColumn(true);
         $cg->addColumn($c);
 

@@ -1292,6 +1292,20 @@ $ary["ITAANSIBLEH-MNU-9010000022"]  = "Address";
 $ary["ITAANSIBLEH-MNU-9010000023"]  = "Proxyサーバのアドレス";
 $ary["ITAANSIBLEH-MNU-9010000024"]  = "Port";
 $ary["ITAANSIBLEH-MNU-9010000025"]  = "Proxyサーバのポート";
+$ary["ITAANSIBLEH-MNU-9010000026"]  = "Proxyサーバのポート";
+$ary["ITAANSIBLEH-MNU-9010000027"]  = "virtualenv";
+$ary["ITAANSIBLEH-MNU-9010000028"]  = "Ansibleサーバー内にvirtualenvで構築したansible実行環境で作業実行したい場合、virtualenvのフルパスを入力して下さい。
+virtualenv環境が存在しなかったりvirtualenv環境内にansibleがインストールされていない場合、作業実行時に\"想定外エラー\"となります。
+未入力の場合はansibleサーバーにインストールされているansibleで作業実行を行います。
+[最大長 512バイト]";
+$ary["ITAANSIBLEH-MNU-9010000029"]  = "virtualenv";
+$ary["ITAANSIBLEH-MNU-9010000030"]  = "AnsibleTowerサーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。
+virtualenvで構築したansible実行環境で作業実行したい場合に、virtualenvのフルパスを選択して下さい。
+未選択の場合はTowerインストール時にインストールされたansible環境で作業実行を行います。";
+$ary["ITAANSIBLEH-MNU-9010000031"]  = "Ansible engin virtualenv パス";
+$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible tower virtualenv パス";
+$ary["ITAANSIBLEH-MNU-9010000033"]  = "Ansibleサーバ内にvirtualenvで構築したansible実行環境のフルパスが表示されています。";
+$ary["ITAANSIBLEH-MNU-9010000034"]  = "AnsibleTowerサーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。";
 $ary["ITAANSIBLEH-MNU-9010001000"]  = "Ansible Towerのホスト情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>クラスタ構成の場合、クラスタを構成しているAnsible Towerのホスト情報を登録する必要があります。";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "項番";
 $ary["ITAANSIBLEH-MNU-9010001002"]  = "AnsibleTowerホスト一覧";

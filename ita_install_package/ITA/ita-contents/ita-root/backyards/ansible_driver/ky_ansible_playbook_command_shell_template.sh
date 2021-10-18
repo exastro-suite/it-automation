@@ -22,12 +22,21 @@
 ##
 ##  【特記事項】
 ##      <<引数>>
-##       なし
+##       $ virtualenv path
 ##      <<exit code>>
 ##       0:   正常
 ##       他:　異常
 ##
 ######################################################################
+# virtualenv pathの有無判定
+if [ $1 != "__undefine__" ]; then
+    # virtualenvに切り替え
+    source <<virtualenv_path>> 2>> /dev/stderr
+    EXIT_CODE=$?
+    if [ ${EXIT_CODE} -ne 0 ]; then
+        echo "$1/bin/activate command failed." >> /dev/stderr
+    fi
+fi
 # 秘密鍵ファイルとパスフレーズが格納されているファイル
 FILE='<<sshAgentConfigFile>>'
 # ログファイル
