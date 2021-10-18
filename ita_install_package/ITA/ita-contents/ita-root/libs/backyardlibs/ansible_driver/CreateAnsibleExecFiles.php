@@ -839,8 +839,9 @@ class CreateAnsibleExecFiles {
             }
             // template_filesディレクトリ名を記憶
             $this->setAnsible_template_files_Dir($c_dirwk);
+
             // ホスト変数ファイル内 template_filesディレクトリパスを記憶
-            $this->setHostvarsfile_template_file_Dir(self::LC_ANS_TEMPLATE_FILES_DIR);
+            $this->setHostvarsfile_template_file_Dir($c_dirwk);
         }
         // ドライバ区分がLEGACYかPioneer、ROLEの場合にcopy_filesディレクトリを作成する。
         if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
@@ -861,7 +862,8 @@ class CreateAnsibleExecFiles {
             // copy_filesディレクトリ名を記憶
             $this->setAnsible_copy_files_Dir($c_dirwk);
             // ホスト変数ファイル内 copy_filesディレクトリパスを記憶
-            $this->setHostvarsfile_copy_file_Dir(self::LC_ANS_COPY_FILES_DIR);
+
+            $this->setHostvarsfile_copy_file_Dir($c_dirwk);
         }
 
         //upload_filesディレクトリ作成
@@ -10631,9 +10633,16 @@ class CreateAnsibleExecFiles {
             foreach( $tgt_file_list as $tgt_file => $line_no_list ){
                 foreach( $line_no_list as $line_no => $cpf_var_name_list ){
                     foreach( $cpf_var_name_list as $cpf_var_name => $file_info_list ){
+
                         // inディレクトリ配下のcopyファイルバスを取得
                         $cpf_path = $this->getHostvarsfile_copy_file_value($file_info_list['CONTENTS_FILE_ID'],
                                                                            $file_info_list['CONTENTS_FILE']);
+
+                        // ファイルパスをansible側から見たパスに変更する。
+                        $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                $cpf_path);
+
                         // $la_cpf_path[copy変数]=inディレクトリ配下ののcopyファイルパス
                         $la_cpf_path[$cpf_var_name] = $cpf_path;
 
@@ -11085,11 +11094,14 @@ class CreateAnsibleExecFiles {
                 $la_tpf_files[$tpf_key]=$tpf_file_name;
                 switch($this->getAnsibleDriverID()){
                 case DF_LEGACY_DRIVER_ID:
+
                     // テンプレートファイルバスを取得
                     $tpf_path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
+
                     $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
                                             $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                             $tpf_path);
+
                     break;
                 case DF_PIONEER_DRIVER_ID:
                     // templateモジュールのコピー先パス生成 ホスト名は__loginhostname__
@@ -11106,7 +11118,13 @@ class CreateAnsibleExecFiles {
 
                     // templateモジュールのsrc/destパス退避
                     $this->lv_tpf_var_file_path_list[$tpf_var_name] = array();
-                    $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
+
+                    $tpf_src_path = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
+                    $tpf_src_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                $tpf_src_path);
+
+                    $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $tpf_src_path;
                     $this->lv_tpf_var_file_path_list[$tpf_var_name]['dest'] = $tmpmod_tpf_path;
                     break;
                 }
@@ -11186,6 +11204,7 @@ class CreateAnsibleExecFiles {
                 $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
                                         $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                         $cpf_path);
+
                 // $ina_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
                 $ina_cpf_vars_list[$in_host_name][$cpf_var_name] = $cpf_path;
                 $this->lv_cpf_var_file_path_list[$cpf_var_name] = $cpf_path;
@@ -11701,8 +11720,8 @@ class CreateAnsibleExecFiles {
                     $path = $this->getHostvarsfile_copy_file_value($key,$file_name);
 
                     $path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                            $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                            $path);
+                                        $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                        $path);
 
                     // $ina_legacy_Role_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
                     $ina_legacy_Role_cpf_vars_list[$var_name] = $path;
@@ -12239,6 +12258,7 @@ class CreateAnsibleExecFiles {
 
                             // templateモジュールのsrc/destパス退避
                             $this->lv_tpf_var_file_path_list[$tpf_var_name] = array();
+
                             $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $src_tpf_path;
                             $this->lv_tpf_var_file_path_list[$tpf_var_name]['dest'] = $tmpmod_tpf_path;
                             // テンプレートファイル内のホスト変数を確認
@@ -12383,9 +12403,16 @@ class CreateAnsibleExecFiles {
             foreach( $tgt_file_list as $tgt_file => $line_no_list ){
                 foreach( $line_no_list as $line_no => $tpf_var_name_list ){
                     foreach( $tpf_var_name_list as $tpf_var_name => $file_info_list ){
+
                         // inディレクトリ配下のcopyファイルバスを取得
                         $tpf_path = $this->getHostvarsfile_template_file_value($file_info_list['CONTENTS_FILE_ID'],
                                                                                $file_info_list['CONTENTS_FILE']);
+
+                        // ファイルパスをansible側から見たパスに変更する。
+                        $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                $tpf_path);
+
                         // $la_tpf_path[テンプレート変数]=inディレクトリ配下ののcopyファイルパス
                         $la_tpf_path[$tpf_var_name] = $tpf_path;
 
