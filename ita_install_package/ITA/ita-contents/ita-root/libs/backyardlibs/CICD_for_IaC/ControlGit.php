@@ -26,6 +26,8 @@ class ControlGit {
     private $cloneRepoDir;      // Gitクローンディレクトリ
     private $user;              // Gitのユーザー
     private $password;          // Gitのパスワード
+    private $sshPassword;       // Gitのsshパスワード
+    private $sshPassphrase;     // Gitのssh鍵認証パスフレーズ
     private $gitOption;         // Gitのオプション（--git-dir、--work-tree）
     private $tmpDir;            // 作業用ディレクトリ
     private $ClonecloneDir;     // クローンリポジトリのクローンディレクトリ
@@ -43,12 +45,18 @@ class ControlGit {
     /**
      * コンストラクタ
      */
-    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $libPath, $objMTS, $retryCount, $retryWaitTime, $ProxyAddress, $ProxyPort, $GitCmdRsltParsAry) {
+    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $sshPassword, $sshPassphrase, $libPath, $objMTS, $retryCount, $retryWaitTime, $ProxyAddress, $ProxyPort, $GitCmdRsltParsAry) {
         $this->RepoId = $RepoId;
         $this->remortRepoUrl = $remortRepoUrl;
         $this->cloneRepoDir = $cloneRepoDir;
         $this->user = $user;
+        if($this->user == ""){
+            $this->user  = "__undefine_user__";
+        }
         $this->password = ky_decrypt($password);
+        if($this->password == ""){
+            $this->password = "__undefine_password__";
+        }
         $this->gitOption = "--git-dir " . $this->cloneRepoDir . "/.git --work-tree=" . $this->cloneRepoDir;
         $this->tmpDir = "";
         $this->ClonecloneDir = dirname($cloneRepoDir) . "/clonecloneRepo/";
@@ -84,6 +92,14 @@ class ControlGit {
             $this->ProxyURL = "__undefine__";
         }
         $this->GitCmdRsltParsAry = $GitCmdRsltParsAry;
+        $this->sshPassword       = ky_decrypt($sshPassword);
+        if($this->sshPassword == ""){
+            $this->sshPassword = "__undefine_sshPassword__";
+        }
+        $this->sshPassphrase     = ky_decrypt($sshPassphrase);   
+        if($this->sshPassphrase == ""){
+            $this->sshPassphrase = "__undefine_sshPassphrase__";
+        }
     }
 
     function ClearGitCommandLastErrorMsg() {
@@ -165,14 +181,16 @@ class ControlGit {
         // Git Cloneコマンドが失敗した場合、指定時間Waitし指定回数リトライする。
         for($idx =0;$idx < $this->retryCount;$idx++) {
             $shell = sprintf("%s/ky_GitClone.sh",$this->libPath);
-            $cmd = sprintf("sudo -i  %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+            $cmd = sprintf("sudo -i  %s %s %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
                                                       escapeshellarg($this->ProxyURL),
                                                       escapeshellarg($Authtype),
                                                       escapeshellarg($this->remortRepoUrl),
                                                       escapeshellarg($this->cloneRepoDir),
                                                       escapeshellarg($this->branch),
                                                       escapeshellarg($this->user),
-                                                      escapeshellarg($this->password));
+                                                      escapeshellarg($this->password),
+                                                      escapeshellarg($this->sshPassword),
+                                                      escapeshellarg($this->sshPassphrase));
             $output = NULL;
             $this->ClearGitCommandLastErrorMsg();
             exec($cmd, $output, $return_var);
@@ -193,6 +211,22 @@ class ControlGit {
 
             // Git clone commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1021"); 
+            $logaddstr = implode("\n",$output);
+            $logaddstr .= "\nexit code:($return_var)";
+            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+            $this->SetGitCommandLastErrorMsg(implode("\n",$output));
+            $this->SetLastErrorMsg($FREE_LOG);
+            return false;
+        }
+
+        // ssh 設定
+        $output = NULL;
+        $cmd = "sudo git " . $this->gitOption . " config --local  core.sshCommand 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' 2>&1";
+        exec($cmd, $output, $return_var);
+
+        if(0 != $return_var){
+            // Git config の設定に失敗しました。
+            $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1020"); 
             $logaddstr = implode("\n",$output);
             $logaddstr .= "\nexit code:($return_var)";
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
@@ -282,13 +316,15 @@ class ControlGit {
         if($this->branch  == "__undefine_branch__") {
             // デフォルトブランチ確認
             $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
-            $cmd1 = sprintf("sudo -i %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+            $cmd1 = sprintf("sudo -i %s %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
                                                           escapeshellarg($this->ProxyURL),
                                                           escapeshellarg($Authtype),
                                                           escapeshellarg($this->cloneRepoDir),
                                                           escapeshellarg('remote show origin'),
                                                           escapeshellarg($this->user),
-                                                          escapeshellarg($this->password));
+                                                          escapeshellarg($this->password),
+                                                          escapeshellarg($this->sshPassword),
+                                                          escapeshellarg($this->sshPassphrase));
 
             // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
             for($idx =0;$idx < $this->retryCount;$idx++) {
@@ -411,13 +447,15 @@ class ControlGit {
             $output = NULL;
             $return_var = 0;
             $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
-            $cmd = sprintf("sudo -i %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+            $cmd = sprintf("sudo -i %s %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
                                                           escapeshellarg($this->ProxyURL),
                                                           escapeshellarg($Authtype),
                                                           escapeshellarg($this->cloneRepoDir),
                                                           escapeshellarg('pull --rebase --ff'),
                                                           escapeshellarg($this->user),
-                                                          escapeshellarg($this->password));
+                                                          escapeshellarg($this->password),
+                                                          escapeshellarg($this->sshPassword),
+                                                          escapeshellarg($this->sshPassphrase));
 
             exec($cmd, $output, $return_var);
             if(0 != $return_var){

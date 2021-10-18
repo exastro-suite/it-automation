@@ -70,6 +70,11 @@ if (!empty($g['menu_initial_filter'])) {
     $varInitialFilter = $g['menu_initial_filter'];
 }
 
+$get_parameter = "";
+if("" != http_build_query($_GET)){
+    $get_parameter = "?" . http_build_query($_GET);
+}
+
 // 以下コンテンツの表示
 ?>
     </head>
@@ -134,7 +139,7 @@ if (!empty($g['menu_initial_filter'])) {
                         <?php if ($boolVisibleChangePasswordButton) { ?>
 
                         <!----  パスワード変更ボタン  ---->
-                        <form method="POST" style="display:inline" action="<?= $scheme_n_authority ?>/common/common_change_password_form.php?grp=<?= $ACRCM_group_id ?>&no=<?= $ACRCM_id ?>" >
+                        <form method="POST" style="display:inline" action="<?= $scheme_n_authority ?>/common/common_change_password_form.php<?= $get_parameter ?>" >
                           <input type="submit" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-504") ?>" />
                         </form>
                         <!----  /パスワード変更ボタン  ---->
@@ -143,7 +148,7 @@ if (!empty($g['menu_initial_filter'])) {
                         <?php if ($boolIsLogin) { ?>
 
                         <!----  ログアウトボタン  ---->
-                        <form method="POST" style="display:inline" action="<?= $scheme_n_authority ?>/common/common_auth.php?grp=<?= $ACRCM_group_id ?>&no=<?= $ACRCM_id ?>" >
+                        <form method="POST" style="display:inline" action="<?= $scheme_n_authority ?>/common/common_auth.php<?= $get_parameter ?>" >
                           <input type="submit" name="logout" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-503") ?>" />
                         </form>
                         <!----  /ログアウトボタン  ---->

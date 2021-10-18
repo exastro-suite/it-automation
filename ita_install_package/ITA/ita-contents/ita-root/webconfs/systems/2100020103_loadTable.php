@@ -156,6 +156,15 @@ Ansible(Legacy)作業パターン
         $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
         $cg->addColumn($c);
 
+        /* Ansible virtualenv path*/
+        $objVldt = new SingleTextValidator(0,512,false);
+        $c = new TextColumn('ANS_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
+        $c->setHiddenMainTableColumn(true);
+        $c->setValidator($objVldt);
+        $c->setRequired(false);
+        $cg->addColumn($c);
+
         /* 親Playbookのヘッダーセクション */
         $objVldt = new MultiTextValidator(0,512,false);
         $c = new MultiTextColumn('ANS_PLAYBOOK_HED_DEF',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000008"));
@@ -183,8 +192,8 @@ Ansible(Legacy)作業パターン
         $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000013") );
 
         // virtualenv
-        $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000014"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
-        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000015"));
+        $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030"));
         $c->setHiddenMainTableColumn(true);
         $cg->addColumn($c);
 

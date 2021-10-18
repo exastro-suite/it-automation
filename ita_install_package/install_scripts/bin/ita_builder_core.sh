@@ -201,7 +201,7 @@ yum_repository() {
                 dnf config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             elif [ "${LINUX_OS}" == "CentOS8" ]; then
                 yum repolist all > repolist_all.tmp 2>&1
-                POWERTOOLS_NAME=`grep -i powertools repolist_all.tmp | cut -f 1  --delim=" "`
+                POWERTOOLS_NAME=`grep -i powertools repolist_all.tmp | grep -iv powertools- | cut -f 1  --delim=" "`
                 dnf config-manager --set-enabled "${POWERTOOLS_NAME}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
                 rm -rf repolist_all.tmp
             fi

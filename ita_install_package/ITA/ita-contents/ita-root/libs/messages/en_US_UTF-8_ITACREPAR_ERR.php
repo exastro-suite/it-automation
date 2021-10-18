@@ -165,7 +165,7 @@ $ary["ITACREPAR-ERR-1155"]          = "\"Maximum number of bytes in the file\" c
 $ary["ITACREPAR-ERR-1156"]          = "You cannot change the \"Creation target\" in \"Edit\".";
 $ary["ITACREPAR-ERR-1157"]          = "You cannot change the \"Create as hostgroup menu\" in \"Edit\".";
 $ary["ITACREPAR-ERR-1158"]          = "You cannot change the \"Create as vertical menu\" in \"Edit\".";
-$ary["ITACREPAR-ERR-1159"]          = "You cannot change the Settings of existing items in \"Edit\". (Item:{})";
+$ary["ITACREPAR-ERR-1159"]          = "The settings of existing items that cannot be changed by \"Edit\" have been changed. (Item:{})";
 $ary["ITACREPAR-ERR-1160"]          = "String can not be set when \"Reference item\" is set.";
 $ary["ITACREPAR-ERR-1161"]          = "Multi String can not be set when \"Reference item\" is set.";
 $ary["ITACREPAR-ERR-1162"]          = "Integer can not be set when \"Reference item\" is set.";
@@ -300,6 +300,10 @@ $ary["ITACREPAR-ERR-1290"]          = "\"Parameter Sheet Reference/Menu group:Me
 $ary["ITACREPAR-ERR-1291"]          = "\"Parameter Sheet Reference/Menu group:Menu:Item\" can not be set when \"File upload\" is set.";
 $ary["ITACREPAR-ERR-1292"]          = "\"Parameter Sheet Reference/Menu group:Menu:Item\" can not be set when \"Link\" is set.";
 $ary["ITACREPAR-ERR-1293"]          = "Items whose Input method is \"Parameter Sheet Reference\" cannot be specified as \"Unique constraint(Multiple items)\".";
+$ary["ITACREPAR-ERR-1294"]          = "For editing, the maximum number of bytes for an existing item cannot be set lower than the original value.(Item:{})";
+$ary["ITACREPAR-ERR-1295"]          = "For editing, the minimum value for existing items cannot be set higher than the original value.(Item:{})";
+$ary["ITACREPAR-ERR-1296"]          = "For editing, the maximum value of an existing item cannot be set lower than the original value.(Item:{})";
+$ary["ITACREPAR-ERR-1297"]          = "For editing, the number of digits in an existing item cannot be set lower than the original value.(Item:{})";
 $ary["ITACREPAR-ERR-5001"]          = "File does not exist. File=[{}].";
 $ary["ITACREPAR-ERR-5002"]          = "Failed to read the file. File=[{}].";
 $ary["ITACREPAR-ERR-5003"]          = "Failed to execute SQL. SQL error = [{}].";
@@ -327,5 +331,7 @@ $ary["ITACREPAR-ERR-5024"]          = "Failed to update the menu creation status
 $ary["ITACREPAR-ERR-5025"]          = "\"Unique constraint(Multiple items)\" contains an ID that cannot be specified.";
 $ary["ITACREPAR-ERR-5026"]          = "When \"Data sheet\" is selected as the Creation target, the item of the Input method \"Parameter Sheet reference\" cannot be used.";
 $ary["ITACREPAR-ERR-5027"]          = "The item of Input method \"Parameter Sheet Reference\" is included in \"Unique constraint(Multiple items)\".";
-$ary["ITACREPAR-ERR-6001"]          = "Failed to get Select default value";
+$ary["ITACREPAR-ERR-6001"]          = "Failed to get Select default value.";
+$ary["ITACREPAR-ERR-6002"]          = "Failed to get Reference Item.";
+$ary["ITACREPAR-ERR-6003"]          = "Failed to get Parameter Sheet Reference Item.";
 ?>

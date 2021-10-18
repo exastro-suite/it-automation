@@ -472,6 +472,7 @@ $ary["ITAANSIBLEH-ERR-90306"]       = "バックヤード処理(varsautolistup-w
 $ary["ITAANSIBLEH-ERR-90307"]       = "グローバル変数の具体値が複数行で登録されています。(グローバル変数:{})";
 $ary["ITAANSIBLEH-ERR-90308"]       = "バックヤード処理(varsautolistup-workflow)起動の登録に失敗しました。";
 $ary["ITAANSIBLEH-ERR-90309"]       = "変数の具体値が複数行で登録されています。(変数:{})";
+$ary["ITAANSIBLEH-ERR-90310"]       = "Movement一覧に設定されている Ansible利用情報/virtualenv が不正です。";
 $ary["ITAANSIBLEH-ERR-101010"]      = "REST API接続function定義なし";
 $ary["ITAANSIBLEH-ERR-101020"]      = "対象の作業No.が見つかりません。\nレコードが廃止されている可能性があります。";
 $ary["ITAANSIBLEH-ERR-101030"]      = "緊急停止出来るステータスではありません。(ステータス:{})";

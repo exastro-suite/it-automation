@@ -116,6 +116,9 @@
     // ansible-playbook実行ユーザー
     $strExecUser                = $argv[6];
 
+    // Virtualenv name 
+    $strEngineVirtualenvName  = $argv[7];
+
     // Legacy-Roleの場合はplaybookをsite.ymlにする。
     if($strOrchestratorSub_Id == "LEGACY_RL"){
         $strPlayBookFileName = '/site.yml';
@@ -240,8 +243,19 @@
         $ansible_path = file_get_contents($path);
         $ansible_path = str_replace("\n","",$ansible_path);
 
+        // virtualenv が設定されている場合、ansible_vaultのパスを空白にする。
+        if($strEngineVirtualenvName != "__undefine__") {
+            $virtualenv_flg = "__define__";
+            $strEngineVirtualenvName .= "/bin/activate";
+            $ansible_path = "";
+        } else {
+            $virtualenv_flg = "__undefine__";
+            $strEngineVirtualenvName = "__undefine__";
+            $ansible_path .= "/";
+        }
+
         // Ansible実行するshellを作成
-        $strBuildCommand     .= "{$ansible_path}/ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
+        $strBuildCommand     .= "{$ansible_path}ansible-playbook {$stroptions} -i {$strhosts} {$stransibleplaybook_options} --vault-password-file {$vault_password_file} {$strPlaybookPath}";
 
         // sshAgentの設定とPlaybookを実行するshellのテンプレートを読み込み
         $strShell = file_get_contents($strExecshellTemplateName);
@@ -259,6 +273,7 @@
         $strShell = str_replace('<<in_directory_path>>'       ,$strCurrentPath                 ,$strShell);
         $strShell = str_replace('<<ansible_playbook_command>>',$strBuildCommand                ,$strShell);
         $strShell = str_replace('<<sshAgentExec>>'            ,$sshAgentExec                   ,$strShell);
+        $strShell = str_replace('<<virtualenv_path>>'         ,escapeshellarg($strEngineVirtualenvName) ,$strShell);
 
         // Ansible実行shell作成
         $boolFilePut = file_put_contents($strExecshellName, $strShell);
@@ -278,10 +293,9 @@
         }
 
         // Ansible実行Commnad発行
-        $strBuildCommand     = "sudo -u {$strExecUser} -i {$strExecshellName}";
+        $strBuildCommand     = "sudo -u {$strExecUser} -i {$strExecshellName} {$virtualenv_flg}";
 
         $resProcess = proc_open($strBuildCommand, $objDescriptorspec, $aryPipe);
-
 
         // 起動できたかを確認する
         if (is_resource($resProcess)===false ){

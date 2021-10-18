@@ -423,8 +423,7 @@ $ary["ITAWDCH-MNU-4010004"]         = "TOP";
 $ary["ITAWDCH-MNU-4030001"]         = "Unauthorized operations";
 $ary["ITAWDCH-MNU-4030002"]         = "The operation is not allowed. Check your permissions.";
 $ary["ITAWDCH-MNU-4030003"]         = "Contact <a href={}> administrator </a>.";
-$ary["ITAWDCH-MNU-4030004"]         = "You don't have permission to see this menu. \n
-You will now be moved to the top page.";
+$ary["ITAWDCH-MNU-4030004"]         = "You don\'t have permission to see this menu. You will now be moved to the top page.";
 $ary["ITAWDCH-MNU-4030005"]         = "TOP";
 $ary["ITAWDCH-MNU-4040001"]         = "Not Found";
 $ary["ITAWDCH-MNU-4040002"]         = "The requested page or resource can't be found.";

@@ -1153,7 +1153,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1205,7 +1206,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1306,6 +1308,7 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1328,9 +1331,10 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_WINRM_ID                  ,
-        ANS_PLAYBOOK_HED_DEF      ,
+        ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1431,6 +1435,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1484,6 +1489,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1919,7 +1925,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1970,7 +1977,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -2121,6 +2129,7 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2144,6 +2153,7 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2245,7 +2255,8 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
-         TAB_A.I_VIRTUALENV_NAME         ,         
+         TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2298,7 +2309,8 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
-         TAB_A.I_VIRTUALENV_NAME         ,         
+         TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2385,7 +2397,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションNo
 I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -2436,7 +2449,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションNo
 I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -3217,6 +3231,7 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3242,6 +3257,7 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3277,6 +3293,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -3330,6 +3347,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,

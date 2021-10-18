@@ -27,6 +27,36 @@
             $ACRCM_id = "";
             $ACRCM_login_nf = "1";
         }
+        else if( false !== strpos($_SERVER['REQUEST_URI'], "/common/common_account_list_browse.php") ){
+            $ACRCM_group_id = "";
+            $ACRCM_id = "";
+            $ACRCM_login_nf = "1";
+            $ACRCM_representative_file_name = "/common/common_account_list_browse.php";
+        }
+        else if( false !== strpos($_SERVER['REQUEST_URI'], "/common/common_account_list_access.php") ){
+            $ACRCM_group_id = "";
+            $ACRCM_id = "";
+            $ACRCM_login_nf = "1";
+            $ACRCM_representative_file_name = "/common/common_account_list_browse.php";
+        }
+        else if( false !== strpos($_SERVER['REQUEST_URI'], "/common/common_change_password_form.php") ){
+            $ACRCM_group_id = "";
+            $ACRCM_id = "";
+            $ACRCM_login_nf = "1";
+            $ACRCM_representative_file_name = "/common/common_change_password_form.php";
+        }
+        else if( false !== strpos($_SERVER['REQUEST_URI'], "/common/common_change_password_do.php") ){
+            $ACRCM_group_id = "";
+            $ACRCM_id = "";
+            $ACRCM_login_nf = "1";
+            $ACRCM_representative_file_name = "/common/common_change_password_do.php";
+        }
+        else if( false !== strpos($_SERVER['REQUEST_URI'], "/common/common_auth.php") ){
+            $ACRCM_group_id = "";
+            $ACRCM_id = "";
+            $ACRCM_login_nf = "1";
+            $no = "";
+        }
         else if( isset($_GET['no']) && $_GET['no'] == "" ){
             $ACRCM_group_id = "";
             $ACRCM_id = "";

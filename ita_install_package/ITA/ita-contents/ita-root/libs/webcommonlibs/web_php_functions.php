@@ -715,6 +715,11 @@
 
             list($intInsideRedirectMode, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('InsideRedirectMode'),1); // 0
 
+            $get_parameter_anp = "";
+            if("" != http_build_query($_GET)){
+                $get_parameter_anp = "&" . http_build_query($_GET);
+            }
+
             //MDC(NNN)+
             switch ($intForceQuitDatailCode) {
                 // 403
@@ -744,16 +749,14 @@
                     insideRedirectCodePrint("/common/common_access_filter.php",$intInsideRedirectMode);
                     break;
                 case 10610401: // 認証画面にリダイレクト
-                    list($strMenuIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuID'),null);
                     list($aryValueForPost,  $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('ValueForPost'),array());
-                    list($strMenuGroupIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuGroupID'),null);
-                    insideRedirectCodePrint("/common/common_auth.php?login&grp={$strMenuGroupIdNumeric}&no={$strMenuIdNumeric}",$intInsideRedirectMode,$aryValueForPost, true);
+                    insideRedirectCodePrint("/common/common_auth.php?login{$get_parameter_anp}",$intInsideRedirectMode,$aryValueForPost, true);
                     break;
                 case 10710501: // パスワード変更画面にリダイレクト
                     list($strMenuIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuID'),null);
                     list($aryValueForPost,  $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('ValueForPost'),array());
                     list($strMenuGroupIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuGroupID'),null);
-                    insideRedirectCodePrint("/common/common_change_password_form.php?login&grp={$strMenuGroupIdNumeric}&no={$strMenuIdNumeric}",$intInsideRedirectMode,$aryValueForPost);
+                    insideRedirectCodePrint("/common/common_change_password_form.php?login{$get_parameter_anp}",$intInsideRedirectMode,$aryValueForPost);
                     break;
                 case 10310601: // アカウントロック画面にリダイレクト
                 case 10310602: // アカウントロック画面にリダイレクト

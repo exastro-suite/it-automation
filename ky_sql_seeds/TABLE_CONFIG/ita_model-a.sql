@@ -925,7 +925,8 @@ ANS_PARALLEL_EXE                  %INT%                            ,
 ANS_WINRM_ID                      %INT%                            ,
 ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
-ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
+ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , -- Tower virtualenv path
+ANS_ENGINE_VIRTUALENV_NAME        %VARCHR%(512)                    , -- ansible virtualenv path
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報
@@ -959,7 +960,8 @@ ANS_PARALLEL_EXE                  %INT%                            ,
 ANS_WINRM_ID                      %INT%                            ,
 ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
-ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
+ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , -- Tower virtualenv path
+ANS_ENGINE_VIRTUALENV_NAME        %VARCHR%(512)                    , -- ansible virtualenv path
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報

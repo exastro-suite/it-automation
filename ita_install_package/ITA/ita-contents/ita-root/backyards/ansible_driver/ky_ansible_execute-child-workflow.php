@@ -226,7 +226,6 @@
         $cln_execution_row['STATUS_ID']         = "7";  //想定外エラーに設定しておく
         $cln_execution_row['LAST_UPDATE_USER']  = $db_access_user_id;
 
-        
         //////////////////////////////////////////////////////////////////
         // inディレクトリ生成クラス生成
         //////////////////////////////////////////////////////////////////
@@ -254,6 +253,7 @@
                                              $vg_ansible_role_varsDB,
                                              $lv_ans_if_info,
                                              $tgt_execution_no,
+                                             $cln_execution_row['I_ENGINE_VIRTUALENV_NAME'],
                                              $objMTS,
                                              $objDBCA);
 
@@ -515,6 +515,15 @@
                
             return false;
         }
+
+        ///////////////////////////////////////////////////////////////////////////////////////
+        // Ansible Engin /virtualenv Path確認
+        ///////////////////////////////////////////////////////////////////////////////////////
+        $ret = $in_ansdrv->AnsibleEnginVirtualenvPathCheck();
+        if($ret === false) {
+            return false;
+        } 
+
         ///////////////////////////////////////////////////////////////////////////////////////
         // データベースから処理対象ホストの情報を取得
         // $hostlist:              ホスト一覧返却配列
@@ -1301,7 +1310,6 @@
                                                   $exec_option,
                                                   $vg_OrchestratorSubId_dir,
                                                   $root_dir_path,$log_output_php,
-// enomoto
                                                   $in_ans_if_info);
             if($ret !== true) {
                 $prepare_err_flag = 1;
@@ -1434,8 +1442,10 @@
                             "EXE_NO"=>$in_execution_no,
                             "PARALLEL_EXE"=>$tgt_exec_count,
                             "RUN_MODE"=>$tgt_run_mode,
-                            "EXEC_USER"=>$lv_ans_exec_user);
-                        
+                            "EXEC_USER"=>$lv_ans_exec_user,
+                            //Ansible Engin Virtualenv Path
+                            'ANS_ENGINE_VIRTUALENV_NAME'=>$in_ansdrv->GetEngineVirtualenvName());
+
                     $rest_api_response = ansible_restapi_access( $lv_ans_protocol,
                                                                  $lv_ans_hostname,
                                                                  $lv_ans_port,

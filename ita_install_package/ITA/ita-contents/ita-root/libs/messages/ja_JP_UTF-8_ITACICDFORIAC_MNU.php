@@ -43,8 +43,22 @@ $ary["ITACICDFORIAC-MNU-1200010701"]   = "Gitのユーザを入力して下さ�
 VisibilityタイプでPrivateを選択した場合、ユーザの入力は必須です。
 [最大長] 128バイト";
 $ary["ITACICDFORIAC-MNU-1200010800"]   = "パスワード";
-$ary["ITACICDFORIAC-MNU-1200010801"]   = "Gitのパスワードを入力して下さい。
+$ary["ITACICDFORIAC-MNU-1200010801"]   = "Gitのcloneコマンドを実行した際に求められるパスワードを入力してください。
 VisibilityタイプでPrivateを選択した場合、パスワードの入力は必須です。
+[最大長] 128バイト
+尚、GitHubでは2021年8月13日でパスワード認証が廃止されます。
+https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/
+パスワード認証が廃止されているGitHubを利用している場合、Gitアカウント情報のパスワードには、自身で個人アクセストークンを作成し入力して下さい。
+個人アクセストークン作成方法
+https://docs.github.com/ja/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token";
+$ary["ITACICDFORIAC-MNU-1200010810"]   = "ssh接続情報";
+$ary["ITACICDFORIAC-MNU-1200010820"]   = "パスワード";
+$ary["ITACICDFORIAC-MNU-1200010821"]   = "Gitのcloneコマンドを実行した際に求められるLinuxユーザーのパスワードを入力してください。
+プロトコルでsshパスワード認証を選択している場合、パスワードの入力は必須です。
+[最大長] 128バイト";
+$ary["ITACICDFORIAC-MNU-1200010830"]   = "パスフレーズ";
+$ary["ITACICDFORIAC-MNU-1200010831"]   = "Gitのcloneコマンドを実行した際に求められる秘密鍵ファイルに設定されているパスフレーズを入力してください。
+プロトコルでssh鍵認証(パスフレーズあり)を選択している場合、パスフレーズの入力は必須です。
 [最大長] 128バイト";
 $ary["ITACICDFORIAC-MNU-1200010900"]   = "Proxy";
 $ary["ITACICDFORIAC-MNU-1200011000"]   = "Address";
