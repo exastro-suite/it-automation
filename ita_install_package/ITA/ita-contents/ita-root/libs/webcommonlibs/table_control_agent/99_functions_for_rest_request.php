@@ -539,6 +539,10 @@
               }
             }
             
+            $tmpResultData[0] = array($g['objMTS']->getSomeMessage("ITAWDCH-STD-12202"),
+                                      $g['objMTS']->getSomeMessage("ITAWDCH-STD-12203"),
+                                      $g['objMTS']->getSomeMessage("ITAWDCH-STD-12204"),
+                                      $g['objMTS']->getSomeMessage("ITAWDCH-STD-12205"));
             array_push($arrayResultData,$arrayLabel);
             array_push($arrayResultData,$tmpResultData);
             
