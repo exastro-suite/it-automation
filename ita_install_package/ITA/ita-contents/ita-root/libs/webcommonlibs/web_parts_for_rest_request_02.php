@@ -128,6 +128,7 @@
         case "FILTER":
         case "FILTER_DATAONLY":
         case "EDIT":
+        case "GET_PULLDOWN":
             break;
         default:
             //----不正な要求（内容が不正）
