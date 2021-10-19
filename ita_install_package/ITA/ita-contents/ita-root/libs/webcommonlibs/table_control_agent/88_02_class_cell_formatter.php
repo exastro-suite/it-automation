@@ -1790,6 +1790,12 @@ class MainLinkTabBFmt extends BFmt {
 		}
         // URLの上限に引っかからないように値を短縮する
         $param = mb_strcut($param, 0, 1024, 'UTF-8');
+        
+		//改行コード（\n \r \r\n)の前まで取得
+		$matches = "";
+		if( 1 === preg_match('/(.*?)[\n|\r|\r\n]/s',$param,$matches)){
+			$param = $matches[1];
+		}
 
 		$param = rawurlencode($param); //エンコード処理
 
