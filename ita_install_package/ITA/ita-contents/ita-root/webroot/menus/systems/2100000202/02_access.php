@@ -82,9 +82,9 @@
             require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/04_updateTable.php");
             $arrayResult = updateTableMain($mode, $innerSeq, $arrayUpdateData, null, 0, $aryVariant, $arySetting);
             
-            // DESIGN_TYPEだけ$innerSeq101にする
+            // DESIGN_TYPEとROLE_BUTTONだけ$innerSeq101にする
 
-            if($mode == 3 && $arrayUpdateData["COL_IDSOP_9"] == "DESIGN_TYPE"){
+            if($mode == 3 && ($arrayUpdateData["COL_IDSOP_9"] == "DESIGN_TYPE" || $arrayUpdateData["COL_IDSOP_9"] == "ROLE_BUTTON")){
                 $arrayResult[1]=101;
             }
 

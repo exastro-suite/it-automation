@@ -132,6 +132,70 @@ editorFunction.actionMode = {
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+// 「ロール」ボタン用のモーダルを開く
+editorFunction.displayModalOpen = function( headerTitle, bodyFunc, modalType ) {
+    
+  if ( typeof bodyFunc !== 'function' ) return false;
+
+  // 初期値
+  if ( headerTitle === undefined ) headerTitle = 'Undefined title';
+  if ( modalType === undefined ) modalType = 'default';
+
+  $body.addClass('modal-open');
+  
+  let modalHTML = ''
+    + '<div id="editor-modal" class="' + modalType + '">'
+      + '<div class="editor-modal-container">'
+        + '<div class="editor-modal-header">'
+          + '<span class="editor-modal-title">' + editorFunction.textEntities( headerTitle ) + '</span>'
+          + '<button class="editor-modal-header-close"></button>'
+        + '</div>'
+        + '<div class="editor-modal-body">'
+          + '<div class="editor-modal-loading"></div>'
+        + '</div>'
+        + '<div class="editor-modal-footer"></div>'
+      + '</div>'
+    + '</div>';
+
+  const $editorModal = $( modalHTML ),
+        $firstFocus = $editorModal.find('.editor-modal-header-close'),
+        $lastFocus = $editorModal.find('.editor-modal-header-close');
+
+  $body.append( $editorModal );
+  $firstFocus.focus();
+  
+  $window.on('keydown.modal', function( e ) {
+    switch ( e.keyCode ) {
+      case 9: // Tabでの移動をモーダル内に制限する
+        {
+          const $focusElement = $( document.activeElement );
+          if ( $focusElement.is( $firstFocus ) && e.shiftKey ) {
+            e.preventDefault();
+            $lastFocus.focus();
+          } else if ( $focusElement.is( $lastFocus ) && !e.shiftKey ) {
+            e.preventDefault();
+            $firstFocus.focus();
+          }
+        }
+        break;
+      case 27: // Escでモーダルを閉じる
+        editorFunction.modalClose();
+        break;
+    }
+  });
+
+  $firstFocus.on('click', function() {
+    editorFunction.modalClose();
+  });
+  
+  bodyFunc( modalType );
+
+}
+
+
+
+
 // モーダルを開く
 editorFunction.modalOpen = function( headerTitle, bodyFunc, modalType ) {
     

@@ -154,6 +154,7 @@ $ary["ITAWDCC92174"]        = "With notification settings";
 $ary["ITAWDCC92175"]        = "There is no notification destination setting.";
 $ary["ITAWDCC92176"]        = "Click here to register the notification destination definition";
 $ary["ITAWDCC92177"]        = "Conductor notification definition";
+$ary["ITAWDCC92178"]        = "Role";
 $ary["ITAWDCC100000"]       = "Do you want to resume synchronization.";
 $ary["ITAWDCC100001"]       = "Accepted to resume synchronization.";
 ?>
