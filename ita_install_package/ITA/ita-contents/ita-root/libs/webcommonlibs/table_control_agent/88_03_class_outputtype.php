@@ -414,6 +414,8 @@ class OutputType {
 					$arraySelect = array();
 					$dlcCounter1 = 0;
 					$chkobj = null; // RBAC対応
+					$aryDataSetUnique = array();
+					$referenceFlag = (strpos($objColumn->getID(),'_CLONE_')) ? true : false;
 					if( $selectPrintType===1 ){
 						//----DB内値と表示値が食い違う場合
 						
@@ -485,14 +487,35 @@ class OutputType {
 								}
 								//date型の型変換----
 
-								$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody);
+								if($referenceFlag == true){
+									$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody, 'TEMP_KEY_ID'=>$tempValue1);
+									$aryDataSetUnique[$valueHtmlSpeChr] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody, 'TEMP_KEY_ID'=>$tempValue1);
+								}else{
+									$aryDataSet[] = array('KEY_COLUMN'=>$valueHtmlSpeChr,'DISP_COLUMN'=>$valueDispBody);
+								}
 							}
 							// ここまで結果データ作成----
 						}
 						// RBAC対応 ----
 						
 						//最終更新日時----
-						
+
+						//親カラムのID（KEY_COLUMN)は違うが、値（DISP_COLUMN）が一致している対象をチェックし、表示名をDISP_COLUMN(ID)とする。
+						if($referenceFlag == true && !empty($aryDataSet)){
+							$aryTempDataSet = array();
+							foreach($aryDataSet as $data){
+								$newDispColumn = $data['DISP_COLUMN'];
+								foreach($aryDataSetUnique as $data2){
+									if($data['KEY_COLUMN'] != $data2['KEY_COLUMN'] && $data['DISP_COLUMN'] == $data2['DISP_COLUMN']){
+										$newDispColumn = $data['DISP_COLUMN']."(".$data['TEMP_KEY_ID'].")";
+										break;
+									}
+								}
+								$aryTempDataSet[] = array('KEY_COLUMN'=>$data['KEY_COLUMN'],'DISP_COLUMN'=>$newDispColumn);
+							}
+							$aryDataSet = $aryTempDataSet;
+						}
+
 						$retBool = true;
 						//DB内値と表示値が食い違う場合----
 					}
