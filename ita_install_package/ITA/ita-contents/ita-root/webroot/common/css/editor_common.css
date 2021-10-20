@@ -890,6 +890,7 @@ border-radius: 4px;
 .notice-status-6 { background-color: #FFDC00; } /* 緊急停止 */
 .notice-status-7 { background-color: #8227B4; } /* 以上終了 */
 .notice-status-8 { background-color: #E60000; } /* 想定外エラー */
+.notice-status-11 { background-color: #FFB400; } /* 警告終了 */
 
 .modal-checkbox-check-hide {
 display: flex;

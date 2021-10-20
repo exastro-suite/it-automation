@@ -3531,6 +3531,7 @@ class OrchestratorLinkAgent {
             "TIME_END"=>"DATETIME",
             "RELEASED_FLAG"=>"",
             "EXE_SKIP_FLAG"=>"",
+            "END_TYPE"=>"",
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
@@ -3565,6 +3566,7 @@ class OrchestratorLinkAgent {
             "TIME_END"=>"DATETIME",
             "RELEASED_FLAG"=>"",
             "EXE_SKIP_FLAG"=>"",
+            "END_TYPE"=>"",
             "OVRD_OPERATION_NO_UAPK"=>"",
             "OVRD_I_OPERATION_NAME"=>"",
             "OVRD_I_OPERATION_NO_IDBH"=>"",
@@ -3857,6 +3859,17 @@ class OrchestratorLinkAgent {
                     $register_tgt_row['RELEASED_FLAG']  = '1'; //1=未解除
                 }
 
+                //endの場合  [NODE_TYPE_ID(=2)の場合] #467
+                if( $aryDataForMovement['NODE_TYPE_ID'] == 2){
+                    if( isset( $aryDataForMovement['END_TYPE'] ) === true ){
+                        $register_tgt_row['END_TYPE'] = $aryDataForMovement['END_TYPE'];
+                        if( $register_tgt_row['END_TYPE'] == "" ){
+                            $register_tgt_row['END_TYPE'] = "5";
+                        }
+                    }else{
+                        $register_tgt_row['END_TYPE'] = "5";
+                    }
+                }
 
                 //NODE共通パラメータ
                 $register_tgt_row['ABORT_RECEPTED_FLAG']  = 1; //緊急停止受付確認フラグ=未確認[1]
@@ -4164,6 +4177,7 @@ class OrchestratorLinkAgent {
                 "POINT_Y"=>"",
                 "POINT_W"=>"",
                 "POINT_H"=>"",
+                "END_TYPE"=>"",
                 "DISP_SEQ"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
@@ -4191,6 +4205,7 @@ class OrchestratorLinkAgent {
                 "POINT_Y"=>"",
                 "POINT_W"=>"",
                 "POINT_H"=>"",
+                "END_TYPE"=>"",
                 "DISP_SEQ"=>"",
                 "NOTE"=>"",
                 "DISUSE_FLAG"=>"",
@@ -4608,6 +4623,18 @@ class OrchestratorLinkAgent {
             if( $value['NODE_TYPE_ID'] == 9) $arr_json[$value['NODE_NAME']]['type']="blank";
             if( $value['NODE_TYPE_ID'] == 10) $arr_json[$value['NODE_NAME']]['type']="call_s";
 
+            //#587
+            if( $value['NODE_TYPE_ID'] == 11) $arr_json[$value['NODE_NAME']]['type']="status-file-branch";
+
+            //END個別 #467
+            if( $value['NODE_TYPE_ID'] == 2) {
+                if( isset($value['END_TYPE']) === true ){
+                    $arr_json[$value['NODE_NAME']]['END_TYPE']=$value['END_TYPE'];
+                }else{
+                    $arr_json[$value['NODE_NAME']]['END_TYPE']="5";
+                }
+            }
+
             //Movement個別
             if( $value['NODE_TYPE_ID'] == 3) {
                 if( isset( $aryPatternList[$value['PATTERN_ID']] ) ){
@@ -4787,7 +4814,15 @@ class OrchestratorLinkAgent {
             //TERMINAL整形
             foreach ($value['TERMINAL'] as $tkey => $tval) {
 
-                if($tval['CASE_NO'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case']=$tval['CASE_NO'];
+                if( $tval['CASE_NO'] != "" ){
+                    $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case']=$tval['CASE_NO'];
+
+                    //#587
+                    if( $tval['CASE_NO'] == "0" && $value['NODE_TYPE_ID'] == 11 ){
+                        $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case'] = "else";
+                    }
+
+                }
                 if($tval['LINE_NAME'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['edge']=$tval['LINE_NAME'];
                 $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['id']=$tval['TERMINAL_CLASS_NAME'];
                 $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['targetNode']=$tval['CONNECTED_NODE_NAME'];
@@ -5266,6 +5301,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "POINT_Y"=>"",
         "POINT_W"=>"",
         "POINT_H"=>"",
+        "END_TYPE"=>"",
         "DISP_SEQ"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -5292,6 +5328,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
         "POINT_Y"=>"",
         "POINT_W"=>"",
         "POINT_H"=>"",
+        "END_TYPE"=>"",
         "DISP_SEQ"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -5973,6 +6010,18 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row['POINT_W']   = $aryDataForMovement['w'];
             $register_tgt_row['POINT_H']   = $aryDataForMovement['h'];
 
+            //ENDタイプ設定 #467 
+            if( $aryDataForMovement['type'] == "end" ){
+                if( isset( $aryDataForMovement['END_TYPE'] ) === true ){
+                    $register_tgt_row['END_TYPE'] = $aryDataForMovement['END_TYPE'];
+                    if( $register_tgt_row['END_TYPE'] == "" ){
+                        $register_tgt_row['END_TYPE'] = "5";
+                    }
+                }else{
+                    $register_tgt_row['END_TYPE'] = "5";
+                }
+            }
+
             #変換
             if( $aryDataForMovement['type'] == "start" )            $register_tgt_row['NODE_TYPE_ID']=1;
             if( $aryDataForMovement['type'] == "end")               $register_tgt_row['NODE_TYPE_ID']=2;
@@ -5985,6 +6034,9 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             if( $aryDataForMovement['type'] == "blank")             $register_tgt_row['NODE_TYPE_ID']=9;
             if( $aryDataForMovement['type'] == "call_s")             $register_tgt_row['NODE_TYPE_ID']=10;
 
+            //#587
+            if( $aryDataForMovement['type'] == "status-file-branch")$register_tgt_row['NODE_TYPE_ID']=11;
+            
             $register_tgt_row['ACCESS_AUTH'] = "";
             if( isset( $aryExecuteData['ACCESS_AUTH'] ) === true ){
                 $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
@@ -6103,6 +6155,11 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
 
                     $register_tgt_row['CASE_NO']               = $aryDataForTerminal['case'];
+
+                    // #587
+                    if( $aryDataForTerminal['case'] == "else" && $aryDataForMovement['type'] == "status-file-branch" ){
+                        $register_tgt_row['CASE_NO'] = 0 ;
+                    }
 
                     $register_tgt_row['DISUSE_FLAG']       = '0';
                     $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
@@ -6256,7 +6313,7 @@ function nodeDateDecodeForEdit($fxVarsStrSortedData){
     //node分繰り返し
     $aryNode = array();
     $arrpatternDel = array('/__proto__/');
-    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/','/ACCESS_AUTH/' );
+    $arrpatternPrm = array('/node/','/id/','/type/','/note/','/condition/','/case/','/x/','/y/','/w/','/h/','/edge/','/targetNode/','/PATTERN_ID/','/ORCHESTRATOR_ID/','/OPERATION_NO_IDBH/','/SYMPHONY_CALL_CLASS_NO/','/SKIP_FLAG/','/CONDUCTOR_CALL_CLASS_NO/','/CALL_CONDUCTOR_ID/','/CALL_SYMPHONY_ID/','/ACCESS_AUTH/','/END_TYPE/' );
 
     foreach( $fxVarsStrSortedData as $nodename => $nodeinfo ){
         //　nodeの処理開始
@@ -8998,26 +9055,48 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
             $objRBAC = new RoleBasedAccessControl($objDBCA);
             
             if( $getmode == "" ){
-                $arrStatusList = array(3,4,5,6,7,8); //実行中,実行中(遅延),正常終了,緊急停止,異常終了,想定外エラー
+                $arrStatusList = array(3,4,5,11,6,7,8); //実行中,実行中(遅延),正常終了,警告終了,緊急停止,異常終了,想定外エラー
                 $strStatusList = implode(",", $arrStatusList);
             }
-            
-            // 表示データをSELECT
-            $sql =  " SELECT "
-                   ." * "
-                   ." FROM B_SYM_EXE_STATUS TAB_A "
-                   ." WHERE TAB_A.DISUSE_FLAG='0' "
-                   ."";
-            if( $getmode == "" ){
-                $sql .=" AND TAB_A.SYM_EXE_STATUS_ID IN ({$strStatusList}) ";;               
-            }
 
-            $objQuery = $objDBCA->sqlPrepare($sql);
-            $r = $objQuery->sqlExecute();
             $rows = array();
+            // ステータス表示順変更 #587
+            if( $getmode == "" ){
+                foreach ($arrStatusList as $tmpstatusid ) {
+                    // 表示データをSELECT
+                    $sql =  " SELECT "
+                           ." * "
+                           ." FROM B_SYM_EXE_STATUS TAB_A "
+                           ." WHERE TAB_A.DISUSE_FLAG='0' "
+                           ."";
+                    if( $getmode == "" ){
+                        $sql .=" AND TAB_A.SYM_EXE_STATUS_ID = {$tmpstatusid} ";;               
+                    }
 
-            while($row = $objQuery->resultFetch()) {
-                $rows[] = $row;
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                    
+                    while($row = $objQuery->resultFetch()) {
+                        $rows[] = $row;
+                    }
+                }                
+            }else{
+            
+                // 表示データをSELECT
+                $sql =  " SELECT "
+                       ." * "
+                       ." FROM B_SYM_EXE_STATUS TAB_A "
+                       ." WHERE TAB_A.DISUSE_FLAG='0' "
+                       ."";
+
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                $r = $objQuery->sqlExecute();
+                $rows = array();
+
+                while($row = $objQuery->resultFetch()) {
+                    $rows[] = $row;
+                }
+                            
             }
 
             unset($objQuery);
@@ -9034,6 +9113,32 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
     }
 //ステータス一覧を取得する----
 
+
+function getStatusFileInfo(){
+    $arrDriversList = array(
+        3 => array(
+                    "table" => "B_ANSIBLE_IF_INFO",
+                    "column"   => "ANSIBLE_STORAGE_PATH_ANS",
+                    "path"   => "legacy/ns",
+                ),
+        4 => array(
+                    "table" => "B_ANSIBLE_IF_INFO",
+                    "column"   => "ANSIBLE_STORAGE_PATH_ANS",
+                    "path"   => "pioneer/ns",
+                ),
+        5 => array(
+                    "table" => "B_ANSIBLE_IF_INFO",
+                    "column"   => "ANSIBLE_STORAGE_PATH_ANS",
+                    "path"   => "legacy/rl",
+                ),
+        10 => array(
+                    "table" => "B_TERRAFORM_IF_INFO",
+                    "column"   => "",
+                    "path"   => "",
+                ),
+    );
+    return $arrDriversList ;
+}
 //ここまでConductor用----
 
     /////////////////////////////////////////////////////////////

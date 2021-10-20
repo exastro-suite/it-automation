@@ -278,8 +278,10 @@ EOD;
                   <li class="editor-tab-menu-item" data-tab="conditional-branch">Conditional branch</li>
                   <li class="editor-tab-menu-item" data-tab="parallel-branch">Parallel branch</li>
                   <li class="editor-tab-menu-item" data-tab="merge">Parallel merge</li>
+                  <li class="editor-tab-menu-item" data-tab="status-file-branch">Status file branch</li>
                   <li class="editor-tab-menu-item" data-tab="call">Conductor call</li>
                   <li class="editor-tab-menu-item" data-tab="call_s">Symphony call</li>
+                  <li class="editor-tab-menu-item" data-tab="end">End</li>
                   <li class="editor-tab-menu-item" data-tab="multiple">Node</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
@@ -373,6 +375,26 @@ EOD;
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
                       <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="movement-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- End -->
+                <div id="end" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <table class="panel-table">
+                      <tbody>
+                        <tr>
+                          <th class="panel-th">End status :</th>
+                          <td class="panel-td">
+                            <div class="end-status-select"></div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Note</div>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="end-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -476,6 +498,36 @@ EOD;
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
                       <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="merge-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- status-file-branch -->
+                <div id="status-file-branch" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <table class="panel-table">
+                      <tbody>
+                        <tr>
+                          <th class="panel-th">Case :</th>
+                          <td class="panel-td">
+                            <ul class="panel-button-group">
+                              <li class="panel-button-group-item"><button class="branch-add panel-button">Add</button></li>
+                              <li class="panel-button-group-item"><button class="branch-delete panel-button">Delete</button></li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <hr class="panel-hr">
+                    <div id="status-file-case-move">
+                    <table id="status-file-case-list" class="panel-table ">
+                      <tbody>
+                      </tbody>
+                    </table>
+                    </div>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Note</div>
+                      <textarea title="{$g['objMTS']->getSomeMessage("ITABASEH-MNU-309049")}" id="status-file-note" class="panel-note panel-textarea" spellcheck="false"></textarea>
                     </div>
                   </div>
                 </div>
@@ -694,6 +746,7 @@ EOD;
                           <tr><th><span class="add-node function" data-function-type="conditional-branch"></span></th><td><div>Conditional branch</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="parallel-branch"></span></th><td><div>Parallel branch</div></td></tr>
                           <tr><th><span class="add-node function" data-function-type="merge"></span></th><td><div>Parallel merge</div></td></tr>
+                          <tr><th><span class="add-node function" data-function-type="status-file-branch"></span></th><td><div>Status file branch</div></td></tr>
                           <!--<tr><th><span class="add-node function" data-function-type="blank-node"></span></th><td><div>Blank node</div></td></tr>-->
                         </tbody>
                       </table>

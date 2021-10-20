@@ -396,6 +396,10 @@ EOD;
                           <th class="panel-th">Status :</th>
                           <td class="panel-td"><span id="node-status" class="panel-span"></span></td>
                         </tr>
+                        <tr class="type-status-file">
+                          <th class="panel-th">Status file:</th>
+                          <td class="panel-td"><span id="node-status-file" class="panel-span"></span></td>
+                        </tr>
                         <tr>
                           <th class="panel-th">Start time :</th>
                           <td class="panel-td"><span id="node-start" class="panel-span"></span></td>

@@ -2303,6 +2303,7 @@ POINT_X                           %INT%                      ,
 POINT_Y                           %INT%                      ,
 POINT_W                           %INT%                      ,
 POINT_H                           %INT%                      ,
+END_TYPE                          %INT%                      ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2336,6 +2337,7 @@ POINT_X                           %INT%                      ,
 POINT_Y                           %INT%                      ,
 POINT_W                           %INT%                      ,
 POINT_H                           %INT%                      ,
+END_TYPE                          %INT%                      ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2466,6 +2468,7 @@ POINT_X                           %INT%                      ,
 POINT_Y                           %INT%                      ,
 POINT_W                           %INT%                      ,
 POINT_H                           %INT%                      ,
+END_TYPE                          %INT%                      ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 NOTE                              %VARCHR%(4000)             , -- 備考
@@ -2498,6 +2501,7 @@ POINT_X                           %INT%                      ,
 POINT_Y                           %INT%                      ,
 POINT_W                           %INT%                      ,
 POINT_H                           %INT%                      ,
+END_TYPE                          %INT%                      ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 NOTE                              %VARCHR%(4000)             , -- 備考
@@ -2660,6 +2664,7 @@ TIME_END                          %DATETIME6%                ,
 RELEASED_FLAG                     %INT%                      ,
 
 EXE_SKIP_FLAG                     %INT%                      ,
+END_TYPE                          %INT%                      ,
 OVRD_OPERATION_NO_UAPK            %INT%                      ,
 OVRD_I_OPERATION_NAME             %VARCHR%(256)              ,
 OVRD_I_OPERATION_NO_IDBH          %INT%                      ,
@@ -2703,6 +2708,7 @@ TIME_END                          %DATETIME6%                ,
 RELEASED_FLAG                     %INT%                      ,
 
 EXE_SKIP_FLAG                     %INT%                      ,
+END_TYPE                          %INT%                      ,
 OVRD_OPERATION_NO_UAPK            %INT%                      ,
 OVRD_I_OPERATION_NAME             %VARCHR%(256)              ,
 OVRD_I_OPERATION_NO_IDBH          %INT%                      ,
