@@ -41,11 +41,12 @@ class ControlGit {
     private $ProxyAddress;
     private $ProxyPort;
     private $GitCmdRsltParsAry;
+    private $sshExtraArgs;
 
     /**
      * コンストラクタ
      */
-    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $sshPassword, $sshPassphrase, $libPath, $objMTS, $retryCount, $retryWaitTime, $ProxyAddress, $ProxyPort, $GitCmdRsltParsAry) {
+    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $sshPassword, $sshPassphrase, $sshExtraArgs, $libPath, $objMTS, $retryCount, $retryWaitTime, $ProxyAddress, $ProxyPort, $GitCmdRsltParsAry) {
         $this->RepoId = $RepoId;
         $this->remortRepoUrl = $remortRepoUrl;
         $this->cloneRepoDir = $cloneRepoDir;
@@ -100,6 +101,7 @@ class ControlGit {
         if($this->sshPassphrase == ""){
             $this->sshPassphrase = "__undefine_sshPassphrase__";
         }
+        $this->sshExtraArgs = $sshExtraArgs;
     }
 
     function ClearGitCommandLastErrorMsg() {
@@ -203,7 +205,6 @@ class ControlGit {
             }
         }
         if($comd_ok === false) {
-
             // clone失敗時はローカルディレクトリを削除
             $param = escapeshellarg($this->cloneRepoDir);
             $cmd = "sudo /bin/rm -rf " . $param . " 2>&1";
@@ -221,7 +222,7 @@ class ControlGit {
 
         // ssh 設定
         $output = NULL;
-        $cmd = "sudo git " . $this->gitOption . " config --local  core.sshCommand 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' 2>&1";
+        $cmd = "sudo git " . $this->gitOption . " config --local  core.sshCommand 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no $this->sshExtraArgs' 2>&1";
         exec($cmd, $output, $return_var);
 
         if(0 != $return_var){
@@ -274,12 +275,14 @@ class ControlGit {
         }
         if($return_var == 0) {
             $stdout = $output[0];
-            $ret = preg_match("/^origin(\s)/", $stdout);
+            $ret = preg_match("/^origin(\s)*/", $stdout);
             if($ret == 1) {
-                $ret = strstr($stdout,$this->remortRepoUrl);
-                if($ret !== false) {
+                $url = $this->remortRepoUrl;
+                $url = preg_quote($url,'/');
+                $ret = preg_match("/^origin(\s)*$url/", $stdout);
+                if($ret == 1) {
                    $cmd_ok = true;
-                }
+                } 
             }
         } else {
             //Git remote commandに失敗しました。

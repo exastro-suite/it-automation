@@ -180,6 +180,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setHiddenMainTableColumn(true);
         $cg->addColumn($c);
     
+        /////////////////////////////////////////////////////////
+        // ssh core.sshCommand
+        ///////////////////////////////////////////////////////// 
+        $objVldt = new SingleTextValidator(0,512,false);
+        $c = new TextColumn('SSH_EXTRA_ARGS',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010840"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010841"));
+        $c->setValidator($objVldt);
+        $c->setHiddenMainTableColumn(true);
+        $cg->addColumn($c);
     $table->addColumn($cg);
 
     /////////////////////////////////////////////////////////

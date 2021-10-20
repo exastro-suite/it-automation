@@ -97,6 +97,7 @@ GIT_USER                           %VARCHR%(128)                    , -- Git ユ
 GIT_PASSWORD                       TEXT                             , -- Git パスワード
 SSH_PASSWORD                       TEXT                             , -- ssh パスワード
 SSH_PASSPHRASE                     TEXT                             , -- ssh鍵ファイル パスフレーズ
+SSH_EXTRA_ARGS                     TEXT                             , -- ssh接続パラメータ
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
 SYNC_INTERVAL                      %INT%                            , -- 同期周期(単位:分)
 SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
@@ -133,6 +134,7 @@ GIT_USER                           %VARCHR%(128)                    , -- Git ユ
 GIT_PASSWORD                       TEXT                             , -- Git パスワード
 SSH_PASSWORD                       TEXT                             , -- ssh パスワード
 SSH_PASSPHRASE                     TEXT                             , -- ssh鍵ファイル パスフレーズ
+SSH_EXTRA_ARGS                     TEXT                             , -- ssh接続パラメータ
 AUTO_SYNC_FLG                      %INT%                            , -- 自動同期有無
 SYNC_INTERVAL                      %INT%                            , -- 同期周期(単位:分)
 SYNC_STATUS_ROW_ID                 %VARCHR%(16)                     , -- 同期状態
