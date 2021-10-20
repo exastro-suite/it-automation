@@ -286,5 +286,6 @@ $ary["ITAWDCH-STD-50013"]           = "[Process]Execute UPDATE　Item number:{}"
 $ary["ITAWDCH-STD-50014"]           = "[Process]Execute history creation　Item number:{}";
 $ary["ITAWDCH-STD-50015"]           = "[Process]Commit";
 $ary["ITAWDCH-STD-50016"]           = "[Process]Rollback";
+$ary["ITAWDCH-STD-50017"]           = "Role";
 $ary["ITAWDCH-STD-906003"]          = "FUNCTION:{},RESULT:SUCCESS [RESPONSE:{}]";
 ?>

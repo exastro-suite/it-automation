@@ -1477,6 +1477,78 @@ function InsertAccessPermission() {
     setAccessPermission('ins-access-auth-id="access_auth_data"');
 }
 
+
+// モーダル Body HTML(ロールボタン)
+function displayRoleModalBody( roleList, initData, valueType ) {
+    if ( valueType === undefined ) valueType = 'id';
+    const $modalBody = $('.editor-modal-body');
+        let roleHTML = ''
+        + '<div class="modal-table-wrap">'
+          + '<table class="modal-table">'
+            + '<thead>'
+              + '<th class="name">Name</th>'
+            + '</thead>'
+            + '<tbody>';
+
+    const roleLength = roleList.length;
+    for ( let i = 0; i < roleLength; i++ ) {
+      const roleName = roleList[i]['ROLE_NAME'],
+            hideRoleName = getSomeMessage("ITAWDCC92008");
+      // ********は表示しない
+      if ( roleName !== hideRoleName ) {
+        roleHTML += '<tr><th>'
+        + roleName + '</tr></th>';
+      }
+    }
+
+    roleHTML += ''      
+        + '</tbody>'
+      + '</table>'
+    + '</div>';
+
+    $modalBody.html( roleHTML );
+}
+
+
+//「ロール」ボタン用にロール一覧を取得し、選択モーダルを表示する
+function displayAccessPermission( inputDataValue ) {
+  const modal = new itaEditorFunctions,
+        printRoleListURL = '/common/common_printRoleList.php?user_id=' + gLoginUserID;
+
+  // モーダルBody
+  const modalRoleList = function() {
+
+    // ロール一覧を取得する
+    $.ajax({
+        type: 'get',
+        url: printRoleListURL,
+        dataType: 'text'
+    }).done( function( result ) {
+        if ( result !== '') {
+            const roleList = JSON.parse( result ),
+                  $input = $('input[' + inputDataValue + ']');
+            const initValue = $input.val();
+            displayRoleModalBody( roleList, initValue, 'help');
+        } else {
+            modal.modalError('Failed to get the list.');
+        }
+    }).fail( function( result ) {
+        modal.modalError('Failed to get the list.');
+    });
+  };
+  const headerTitle=getSomeMessage("ITAWDCC92178");
+  modal.displayModalOpen(headerTitle, modalRoleList,'help');
+}
+
+
+
+
+
+// 「ロール」ボタン押下時
+function role_display(){
+    displayAccessPermission('ins-access-auth-id="access_auth_data"');
+} 
+
 //////////////////////////////////////////////////////
 // 参照項目一覧取得・選択
 //////////////////////////////////////////////////////

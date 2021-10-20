@@ -154,6 +154,7 @@ $ary["ITAWDCC92174"]        = "通知設定有り";
 $ary["ITAWDCC92175"]        = "通知先の設定がありません。";
 $ary["ITAWDCC92176"]        = "通知先定義の登録はこちら";
 $ary["ITAWDCC92177"]        = "Conductor通知先定義";
+$ary["ITAWDCC92178"]        = "ロール";
 $ary["ITAWDCC100000"]       = "同期を再開しますか？";
 $ary["ITAWDCC100001"]       = "同期の再開を受け付けました。";
 ?>

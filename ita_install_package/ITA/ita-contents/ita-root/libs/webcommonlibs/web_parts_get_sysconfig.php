@@ -95,6 +95,7 @@
         }
         
     }
+    $role_button = array_key_exists('ROLE_BUTTON', $arySYSCON)?$arySYSCON['ROLE_BUTTON']:"1";
 
     //----ここから開発ログ系
     if(array_key_exists('DEV_LOG_DIR', $arySYSCON)){

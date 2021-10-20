@@ -138,6 +138,14 @@ if("" != http_build_query($_GET)){
 
                         <?php if ($boolVisibleChangePasswordButton) { ?>
 
+                        <!----  ロールボタン  ---->
+                        <?php if ($role_button === '1') { ?>
+                          <form  style="display:inline" onclick="role_display()" >
+                            <input type="button" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-50017") ?>" onClick=location.href="javascript:role_register_async(1);" />
+                          </form>
+                        <?php } ?>
+                        <!----  /ロールボタン  ---->
+
                         <!----  パスワード変更ボタン  ---->
                         <form method="POST" style="display:inline" action="<?= $scheme_n_authority ?>/common/common_change_password_form.php<?= $get_parameter ?>" >
                           <input type="submit" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-504") ?>" />
