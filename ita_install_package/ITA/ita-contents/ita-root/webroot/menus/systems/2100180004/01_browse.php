@@ -417,8 +417,10 @@ EOD;
                   <li class="editor-tab-menu-item" data-tab="conditional-branch">Conditional branch</li>
                   <li class="editor-tab-menu-item" data-tab="parallel-branch">Parallel branch</li>
                   <li class="editor-tab-menu-item" data-tab="merge">Parallel merge</li>
+                  <li class="editor-tab-menu-item" data-tab="status-file-branch">Status file branch</li>
                   <li class="editor-tab-menu-item" data-tab="call">Conductor call</li>
                   <li class="editor-tab-menu-item" data-tab="call_s">Symphony call</li>
+                  <li class="editor-tab-menu-item" data-tab="end">End</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
 
@@ -496,6 +498,26 @@ EOD;
                   </div>
                 </div>
                 
+                <!-- End -->
+                <div id="end" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <table class="panel-table">
+                      <tbody>
+                        <tr>
+                          <th class="panel-th">End status :</th>
+                          <td class="panel-td">
+                            <span id="end-status" class="panel-span"></span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Note</div>
+                      <span id="end-note" class="panel-note panel-span"></span>
+                    </div>
+                  </div>
+                </div>
+                
                 <!-- Function -->
                 <div id="function" class="editor-tab-body">
                   <div class="editor-tab-body-inner">
@@ -540,6 +562,22 @@ EOD;
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
                       <span id="merge-note" class="panel-note panel-span"></span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- status-file-branch -->
+                <div id="status-file-branch" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <div id="status-file-case-move">
+                    <table id="status-file-case-list" class="panel-table ">
+                      <tbody>
+                      </tbody>
+                    </table>
+                    </div>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Note</div>
+                      <span id="status-file-note" class="panel-note panel-span"></span>
                     </div>
                   </div>
                 </div>
