@@ -8802,11 +8802,11 @@ class RowEditByFileColumn extends Column{
 						if($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル値なし"){
 							$errFlg = true;
 							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
-							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-5000038');
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITABASEH-ERR-900079');
 						}elseif($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル名なし"){
 							$errFlg = true;
 							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
-							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-5000039');
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITABASEH-ERR-900080');
 						}
 					}
 				}
@@ -8894,11 +8894,11 @@ class RowEditByFileColumn extends Column{
 						if($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル値なし"){
 							$errFlg = true;
 							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
-							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-5000038');
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITABASEH-ERR-900079');
 						}elseif($inputArray["uploadfiles_".$arrayObjColumn[$key2]->getIDSOP()] == "ファイル名なし"){
 							$errFlg = true;
 							$errMsg = $arrayObjColumn[$key2]->getColLabel(true);
-							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-5000039');
+							$errMsg = $errMsg . ':' .$g['objMTS']->getSomeMessage('ITABASEH-ERR-900080');
 						}
 					}
 				}

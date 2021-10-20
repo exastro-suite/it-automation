@@ -1117,7 +1117,7 @@
                         
                         if(array_key_exists($row_i,$uploadFiles)){
                           foreach($uploadFiles[$row_i] as $key => $value){
-                            if($value != "" && !(array_key_exists($key,$aryRowFromJson[$row_i]))){
+                            if(!array_key_exists($key,$aryRowFromJson[$row_i])){
                               $aryRowFromJson[$row_i][$key] = "";
                             }
                           }
@@ -1131,19 +1131,11 @@
                                     $inputArray["del_flag_".$objColumn->getIDSOP()] = "on";
                                     // ファイルの値はあるがファイル名がない場合
                                     if(array_key_exists($row_i, $uploadFiles) && array_key_exists($dlcFnv2, $uploadFiles[$row_i])){
-                                      if($uploadFiles[$row_i][$dlcFnv2] != ""){
-                                        $inputArray["uploadfiles_".$objColumn->getIDSOP()] = "ファイル名なし";
-                                      }
+                                      $inputArray["uploadfiles_".$objColumn->getIDSOP()] = "ファイル名なし";
                                     }
                                 }
                                 else{
                                     if(array_key_exists($row_i, $uploadFiles) && array_key_exists($dlcFnv2, $uploadFiles[$row_i])){
-                                        // ファイルの値がない場合
-                                        if($uploadFiles[$row_i][$dlcFnv2] == ""){
-                                          $inputArray["uploadfiles_".$objColumn->getIDSOP()] = "ファイル値なし";
-                                        }
-                                        // 値がある場合は登録・更新
-                                        else{
                                           // 最新時間を取得（一時ファイル名に利用）
                                           $now = \DateTime::createFromFormat("U.u", sprintf("%6F", microtime(true)));
                                           $nowTime = date("YmdHis") . $now->format("u");
@@ -1176,7 +1168,6 @@
                                               $strErrMsg = $aryRetBodyOfTempFileCheck[3];
                                               throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                                           }
-                                        }    
                                     }
                                     // ファイルの値がない場合
                                     else{
