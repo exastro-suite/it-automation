@@ -426,12 +426,6 @@ class CicdRestAccessAgent {
                 // 例外処理へ
                 $strErrStepIdInFx="00000600";
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-            }elseif ( empty($base64file) === true ) {
-                $strErrMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-5011");#"ファイルが存在しません";
-                $FREE_LOG = $strErrMsg .' ([FILE]'.__FILE__.',[LINE]'.__LINE__.')';
-                // 例外処理へ
-                $strErrStepIdInFx="00000600";
-                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             
             if ( is_array($RequestData) !== true ) {
