@@ -327,7 +327,7 @@ $ary["ITAANSIBLEH-MNU-309060"]      = "The following status states exist.
 ・Completed (error)
 ・Unexpected error
 ・Emergency stop
-・d
+・Unexecuted (schedule)
 ・Schedule canceled";
 $ary["ITAANSIBLEH-MNU-309065"]      = "Movement";
 $ary["ITAANSIBLEH-MNU-309070"]      = "ID";
