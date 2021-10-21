@@ -1737,7 +1737,7 @@ const previewTable = function(){
             let dummyText = selectDummyText[ selectTypeValue ][ 0 ],
                 dummyType = selectDummyText[ selectTypeValue ][ 2 ];
             if ( dummyType === 'select' ) {
-              dummyText = $column.find('.config-select').find('option:selected').text();
+              dummyText = $column.find('.pulldown-select').find('option:selected').text();
             }
             tbodyArray.push('<td class="' + dummyType + '">' + dummyText + '</td>');
 
