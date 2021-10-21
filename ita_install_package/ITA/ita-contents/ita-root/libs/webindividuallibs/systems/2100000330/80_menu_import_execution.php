@@ -26,24 +26,24 @@ function menuImportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
 
     // 各種ローカル定数を定義
     $intControlDebugLevel01 = 250;
-    
+
     $arrayRetBody = array();
-    
+
     $intResultStatusCode = null;
     $aryForResultData = array();
     $aryPreErrorData = null;
-    
+
     $intErrorType = null;
     $aryErrMsgBody = array();
     $strErrMsg = "";
-    
+
     $strSymphonyInstanceId = "";
     $strExpectedErrMsgBodyForUI = "";
-    
+
     $strSysErrMsgBody = '';
     $intErrorPlaceMark = "";
     $strErrorPlaceFmt = "%08d";
-    
+
     $aryOverrideForErrorData = array();
 
     $intResultInfoCode="000";//結果コード(正常終了)
@@ -59,7 +59,7 @@ function menuImportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
     try{
-        //X-command毎の処理 
+        //X-command毎の処理
         switch($strCommand){
             case "UPLOAD":
                 $aryRetBody = menuImportUploadFromRest($objJSONOfReceptedData);
@@ -76,7 +76,7 @@ function menuImportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
                 }else{
                     $aryRetBody["TASK_ID"] = "";
                     $aryRetBody["RESULTCODE"] = "002";
-                    $aryRetBody['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-2100000330_13"); 
+                    $aryRetBody['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-2100000330_13");
                 }
 
                 break;
@@ -164,7 +164,7 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
         $arrayResult["TASK_ID"] = "";
         $arrayResult["RESULTCODE"] = "002";
         $arrayResult['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-900071",$objIntNumVali->getValidRule());
-        return $arrayResult; 
+        return $arrayResult;
     }
 
     //($_POST 利用関数対応)
@@ -221,8 +221,8 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
         $arrayResult["TASK_ID"] = $taskNo;
         $arrayResult["RESULTCODE"] = $intResultCode;
         $arrayResult['RESULTINFO'] = strip_tags(trim($resultMsg));
-    
-        return $arrayResult; 
+
+        return $arrayResult;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -268,8 +268,8 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
                 if (isset($menuInfo["error"])) {
                     $error    = $menuInfo["error"];
                     if (array_key_exists($menuGroupId, $retUnImportAry)) {
-                        $key = array_search($menuId, array_column($tmpRetImportAry[$menuGroupId]["menu"], "menu_id"));
-                        $retUnImportAry[$menuGroupId][$key]["menu"][] = array(
+                        // $key = array_search($menuId, array_column($tmpRetImportAry[$menuGroupId]["menu"], "menu_id"));
+                        $retUnImportAry[$menuGroupId]["menu"][] = array(
                             "menu_id"   => $menuId,
                             "menu_name" => $menuName,
                             "file_name" => $fileName,
@@ -280,17 +280,19 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
                         $retUnImportAry[$menuGroupId] = array(
                             "menu_group_name" => $menuGroupInfo["menu_group_name"],
                             "menu"            => array(
-                                "menu_id"   => $menuId,
-                                "menu_name" => $menuName,
-                                "file_name" => $fileName,
-                                "error"     => $error
+                                array(
+                                    "menu_id"   => $menuId,
+                                    "menu_name" => $menuName,
+                                    "file_name" => $fileName,
+                                    "error"     => $error
+                                )
                             )
                         );
                     }
                 } else {
                     if (array_key_exists($menuGroupId, $retImportAry)) {
-                        $key = array_search($menuId, array_column($tmpRetImportAry[$menuGroupId]["menu"], "menu_id"));
-                        $retImportAry[$menuGroupId][$key]["menu"][] = array(
+                        // $key = array_search($menuId, array_column($tmpRetImportAry[$menuGroupId]["menu"], "menu_id"));
+                        $retImportAry[$menuGroupId]["menu"][] = array(
                             "menu_id"   => $menuId,
                             "menu_name" => $menuName,
                             "file_name" => $fileName,
@@ -300,9 +302,11 @@ function menuImportUploadFromRest($objJSONOfReceptedData){
                         $retImportAry[$menuGroupId] = array(
                             "menu_group_name" => $menuGroupInfo["menu_group_name"],
                             "menu"            => array(
-                                "menu_id"   => $menuId,
-                                "menu_name" => $menuName,
-                                "file_name" => $fileName,
+                                array(
+                                    "menu_id"   => $menuId,
+                                    "menu_name" => $menuName,
+                                    "file_name" => $fileName,
+                                )
                             )
                         );
                     }
@@ -363,7 +367,7 @@ function chkImpotableMenuId($menuGroupId, $menuId, $userId) {
                 A_ACCOUNT_LIST.USER_ID = :USER_ID
             AND
                 A_ROLE_MENU_LINK_LIST.MENU_ID = :MENU_ID
-            AND 
+            AND
                 PRIVILEGE = 1
             AND
                 A_MENU_LIST.MENU_GROUP_ID = :MENU_GROUP_ID
