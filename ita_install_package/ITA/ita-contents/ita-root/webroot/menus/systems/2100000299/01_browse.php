@@ -6,6 +6,8 @@
     //-- サイト個別PHP要素、ここまで--
     require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_01_browse.php");
     require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_html_statement.php");
+    $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITAWDCC', 'STD', '_js');
+    $strTemplateBody = getJscriptMessageTemplate($aryImportFilePath, $g['objMTS']);
     //-- サイト個別PHP要素、ここから--
    
     //リリースファイル読み込み

@@ -58,6 +58,7 @@ $importLabel3 = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900019');
 
 // javascript用のメッセージを用意する
 $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITABASEC', 'STD', '_js');
+$aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITAWDCC', 'STD', '_js');
 $strTemplateBody = getJscriptMessageTemplate($aryImportFilePath, $g['objMTS']);
 
 $menuOn = getMenuOn();
