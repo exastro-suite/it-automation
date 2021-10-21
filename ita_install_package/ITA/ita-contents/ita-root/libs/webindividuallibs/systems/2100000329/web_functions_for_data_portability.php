@@ -22,6 +22,7 @@
 function getJsMessages($msgIdAry){
     global $g;
     $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITABASEC', 'STD', '_js');
+    $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITAWDCC', 'STD', '_js');
     $strTemplateBody = getJscriptMessageTemplate($aryImportFilePath, $g['objMTS']);
     $strTemplateBody = str_replace('dysp0', 'delimiter_dysp0', $strTemplateBody);
     $tmpJsMsgAry = array_reverse(explode('delimiter_', $strTemplateBody));
