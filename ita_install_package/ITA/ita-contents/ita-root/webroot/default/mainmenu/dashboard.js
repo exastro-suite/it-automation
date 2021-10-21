@@ -446,13 +446,13 @@ const getWidgetHTML = function( widgetSetID, widgetData ) {
       case '1':
         if ( Object.keys( widgetInfo['menu'] ).length !== 0 ) {
           contentHTML = '<ul class="widget-menu-list">' + widgetMenu( widgetSetID ) + '</ul>';
-          dataHTML = ' data-menu-col="' + widgetData['data']['menu_col_number'] + '"';
         } else {
           contentHTML = ''
           + '<div id="dashboard-error-message">'
             + '<p class="dashboard-error-message-text">' + getWidgetMessage('39') + '</p>'
           + '</div>';
         }
+        dataHTML = ' data-menu-col="' + widgetData['data']['menu_col_number'] + '"';
         break;
       case '2':
         contentHTML = '<ul class="widget-menu-list">' + widgetMenu( widgetSetID ) + '</ul>';

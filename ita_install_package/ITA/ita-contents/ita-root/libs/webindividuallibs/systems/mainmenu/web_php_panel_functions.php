@@ -182,6 +182,7 @@
                 if ($widget_data != NULL) {
                     foreach ($widget_data as $key => $value) {
                         if ($key == "menu") {
+                            if(empty($value)) $value = get_panel_info(); // $value が空の場合にメニュー情報を格納
                             foreach ($value as $menu_group_id => $menu_data) {
                                 foreach ($panel_list as $panel_menu_group_id) {
                                     if ($panel_menu_group_id == $menu_group_id) {
