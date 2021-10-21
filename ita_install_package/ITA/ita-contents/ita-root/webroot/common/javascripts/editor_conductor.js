@@ -4058,8 +4058,8 @@ const modalNoticeList = function() {
     + '</div>';
   } else {
     //noticelistHTML += '<div class="">通知先の登録が。<a ref="' + noticeListURL + '">Conductor通知一覧</a>より登録してください。</div>';
-    noticelistHTML += '<div class="">' + getSomeMessage("ITAWDCC92175") + '</div>';
-    noticelistHTML += '<div class="">' + getSomeMessage("ITAWDCC92176") + '(<a href="' + noticeListURL + ' " target="_blank" rel="noopener noreferrer">'+  getSomeMessage("ITAWDCC92177") + '</a>)</div>';
+    noticelistHTML += '<div class="notice-blank-messege">' + getSomeMessage("ITAWDCC92175") + '<br>'
+    + getSomeMessage("ITAWDCC92176") + '(<a href="' + noticeListURL + ' " target="_blank" rel="noopener noreferrer">'+  getSomeMessage("ITAWDCC92177") + '</a>)</div>';
   }
   
   $modalBody.html( noticelistHTML );
