@@ -164,9 +164,15 @@ def main():
     #########################################################
     private_fail_json(obj=module,msg='exec_file no found fail exit')
 
+  # PyYAMLのバージョン取得
+  yaml_var = str(yaml.__version__).split('.')[0]
   # 対話ファイルを読み込む
   try:
-    config = yaml.load(open(module.params['exec_file']).read())
+    if yaml_var >= str(5):
+      config = yaml.load(open(module.params['exec_file']).read(), Loader=yaml.FullLoader)
+    else:
+      config = yaml.load(open(module.params['exec_file']).read())
+  
   # パーサーの例外をキャッチするようにする
   except Exception as e:
     msg = "dialog file yaml load failure."
@@ -185,7 +191,10 @@ def main():
   with_tmp = with_tmp.replace("/dialog_files/", "/original_dialog_files/")
 
   try:
-    with_file = yaml.load(open(with_tmp).read())
+    if yaml_var >= str(5):
+      with_file = yaml.load(open(with_tmp).read(), Loader=yaml.FullLoader)
+    else:
+      with_file = yaml.load(open(with_tmp).read())
   # パーサーの例外をキャッチするようにする
   except Exception as e:
     msg = "Original dialog file yaml load failure."
@@ -200,7 +209,10 @@ def main():
 
   # ホスト変数ファイルにyaml文法エラーがない事を確認する。
   try:
-    with_def = yaml.load(open(module.params['host_vars_file']).read())
+    if yaml_var >= str(5):
+      with_def = yaml.load(open(module.params['host_vars_file']).read(), Loader=yaml.FullLoader)
+    else:
+      with_def = yaml.load(open(module.params['host_vars_file']).read())
   # パーサーの例外をキャッチするようにする
   except Exception as e:
     msg = "Host variable file yaml load failure."
@@ -273,10 +285,7 @@ def main():
     loger = str(os.environ)
     exec_log_output(exec_name)
 
-    if sys.version_info.major == 2:
-      p = pexpect.spawn(exec_cmd,  encoding=lang ,codec_errors='replace')
-    else:
-      p = pexpect.spawn(exec_cmd,  encoding=lang ,codec_errors='replace')
+    p = pexpect.spawn(exec_cmd,  encoding=lang ,codec_errors='replace')
 
     # ドライランモードを退避しタイムアウト値を5秒にする。
     if module.check_mode:
@@ -290,7 +299,10 @@ def main():
     vault_vars_file = vault_vars_file.replace("/original_host_vars/", "/vault_host_vars/")
     # パーサーの例外をキャッチするようにする
     try:
-      vault_vars_def = yaml.load(open(vault_vars_file).read())
+      if yaml_var >= str(5):
+        vault_vars_def = yaml.load(open(vault_vars_file).read(), Loader=yaml.FullLoader)
+      else:
+        vault_vars_def = yaml.load(open(vault_vars_file).read())
     except Exception as e:
       msg = "Cryptographic variable file yaml load failure."
       private_log_output(log_file_name,host_name,msg)
@@ -416,7 +428,7 @@ def main():
               private_fail_json(obj=module,msg=host_name + ':' + logstr,exec_log=exec_log)
 
         # localaction実行
-        exec_localaction(module,p,log_file_name,host_name,exec_cmd,ignore_errors)
+        exec_localaction(module,log_file_name,host_name,exec_cmd,ignore_errors)
 
       # state command ?
       elif 'state' in input:
@@ -640,7 +652,11 @@ def main():
             with_tmp = with_tmp.replace("/dialog_files/", "/original_dialog_files/")
 
             try:
-              with_file = yaml.load(open(with_tmp).read())
+              if yaml_var >= str(5):
+                with_file = yaml.load(open(with_tmp).read(), Loader=yaml.FullLoader)
+              else:
+                with_file = yaml.load(open(with_tmp).read())
+
             # パーサーの例外をキャッチするようにする
             except Exception as e:
               msg = "Original dialog file yaml load failure."
@@ -655,7 +671,10 @@ def main():
 
             # ホスト変数ファイルを読み込む
             try:
-              with_def = yaml.load(open(module.params['host_vars_file']).read())
+              if yaml_var >= str(5):
+                with_def = yaml.load(open(module.params['host_vars_file']).read(), Loader=yaml.FullLoader)
+              else:
+                with_def = yaml.load(open(module.params['host_vars_file']).read())
             # パーサーの例外をキャッチするようにする
             except Exception as e:
               msg = "Host variable file yaml load failure."
@@ -4406,7 +4425,7 @@ def exec_command(p,log_file_name,host_name,cmd):
 
   private_log_output(log_file_name,host_name,"Ok")
 
-def exec_localaction(module,p,log_file_name,host_name,cmd,ignore_errors):
+def exec_localaction(module,log_file_name,host_name,cmd,ignore_errors):
   global localaction_log_str
   global exec_log
   global vault_vars_def
