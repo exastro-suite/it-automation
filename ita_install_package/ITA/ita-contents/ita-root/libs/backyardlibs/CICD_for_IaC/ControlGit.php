@@ -349,14 +349,35 @@ class ControlGit {
                 return -1;
             } else {
                 for($idx=0;$idx<count($output1);$idx++) {
-                     // HEAD branch:
-                     $matchstr = "/^(\s)+HEAD(\s)branch:(\s)+/";
+                     $matchstr = "/^(\s)+HEAD(\s)branch/";
                      $ret = preg_match($matchstr, $output1[$idx]);
                      if($ret == 1) {
-                          $retAry = preg_split($matchstr, $output1[$idx]);
-                          $DefaultBranch = $retAry[1];
-                          break;
-                     }
+                         // HEAD branch:
+                         $matchstr = "/^(\s)+HEAD(\s)branch:(\s)+/";
+                         $ret = preg_match($matchstr, $output1[$idx]);
+                         if($ret == 1) {
+                             $retAry = preg_split($matchstr, $output1[$idx]);
+                             $DefaultBranch = $retAry[1];
+                             break;
+                         } else {
+                             // #1600の対応
+                             $matchstr = "/^(\s)+HEAD(\s)branch(\s)\(remote HEAD is ambiguous, may be one of the following\):/";
+                             $ret = preg_match($matchstr, $output1[$idx]);
+                             if($ret == 1) {
+                                 return true;
+                             } else {
+                                 $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024"); 
+                                 $logaddstr = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1032"); 
+                                 $logaddstr .= "\n";
+                                 $logaddstr .= implode("\n",$output1);
+                                 $logaddstr .= "\nexit code:($return_var)";
+                                 $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+                                 $this->SetGitCommandLastErrorMsg($logaddstr);
+                                 $this->SetLastErrorMsg($FREE_LOG);
+                                 return -1;
+                            }
+                        }
+                    }
                 }
             }
         } 
@@ -390,6 +411,9 @@ class ControlGit {
             }
         }
         if($this->branch  == "__undefine_branch__") {
+            if($DefaultBranch == "") {
+                return true;
+            }
             if($DefaultBranch != $CurrentBranch) {
                 return false;
             }

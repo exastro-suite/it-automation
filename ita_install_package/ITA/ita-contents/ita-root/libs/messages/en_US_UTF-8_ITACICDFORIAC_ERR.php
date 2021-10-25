@@ -48,6 +48,7 @@ $ary["ITACICDFORIAC-ERR-1027"] = "Failed to acquire file list from Local Clone."
 $ary["ITACICDFORIAC-ERR-1028"] = "Git Command failed.";
 $ary["ITACICDFORIAC-ERR-1030"] = "Git pull command failed.";
 $ary["ITACICDFORIAC-ERR-1031"] = "Failed to analyse Git pull command results.";
+$ary["ITACICDFORIAC-ERR-1032"] = "I got unexpected information with the Git remote show origin command.";
 $ary["ITACICDFORIAC-ERR-2001"] = "The Remote Repository synchronization process ended unexpectedly. (Remote Repository Item number:{}, File link Item number:{})\n{}";
 $ary["ITACICDFORIAC-ERR-2002"] = "Failed to access the File link.";
 $ary["ITACICDFORIAC-ERR-2003"] = "Failed to link the files in the File link.";
