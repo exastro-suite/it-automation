@@ -48,6 +48,7 @@ $ary["ITACICDFORIAC-ERR-1027"]  = "ローカルクローンのファイル一覧
 $ary["ITACICDFORIAC-ERR-1028"]  = "Git commandに失敗しました。";
 $ary["ITACICDFORIAC-ERR-1030"]  = "Git pull commandに失敗しました。";
 $ary["ITACICDFORIAC-ERR-1031"]  = "Git pull commandの結果解析に失敗しました。";
+$ary["ITACICDFORIAC-ERR-1032"]  = "Git remote show origin commandで想定外の情報を取得しました。";
 $ary["ITACICDFORIAC-ERR-2001"]  = "リモートリポジトリ同期孫プロセスが想定外の終了をしました。(リモートリポジトリ 項番:{}, 資材紐付項番:{})\n{}";
 $ary["ITACICDFORIAC-ERR-2002"]  = "資材紐付のアクセスに失敗しました。";
 $ary["ITACICDFORIAC-ERR-2003"]  = "資材紐付の資材紐付に失敗しました。";
