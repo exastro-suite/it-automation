@@ -58,12 +58,12 @@ $ary["ITACICDFORIAC-MNU-1200010831"]   = "Please input the passphrase set to the
 The passphrase is not required if you have ssh key certificate (with passphrase) selected.
 [Max length] 128 bytes";
 $ary["ITACICDFORIAC-MNU-1200010840"]   = "Connection parameters";
-$ary["ITACICDFORIAC-MNU-1200010841"]   = "Before running the Git clone command
-Use the git config local core.sshCommand=xxxx to configure the parameters that will be set to core.sshCommand.
-core.sshCommand configures the following parameter by default:
+$ary["ITACICDFORIAC-MNU-1200010841"]   = "Configures the parameters that will be set to the \"GIT_SSH_COMMAND\" environment variables when running the Git clone command.
+The \"GIT_SSH_COMMAND\" is an environment variable that can be configured in Git version 2.3 or later.If the ITA server has a Git version earlier than 2.3 installed, the configured parameter will be deactivated.
+\"GIT_SSH_COMMAND\" is set to the following parameter by default.
 UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
-The configured parameter will be added on at the end.
-[Max length] 512 bytes.";
+The configured parameter is added on the end.
+[Max length] 512 bytes";
 $ary["ITACICDFORIAC-MNU-1200010900"] = "Proxy";
 $ary["ITACICDFORIAC-MNU-1200011000"] = "Address";
 $ary["ITACICDFORIAC-MNU-1200011001"] = "If you are using a Proxy server, please enter the Proxy server address.
