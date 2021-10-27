@@ -900,7 +900,7 @@ Terrraform 代入値自動登録設定
             //REST/excel/csv入力用 Key変数　Movement+変数名
             ////////////////////////////////////////////////////////
             // REST/excel/csv入力用 Key変数　Movement+変数名
-            $c = new IDColumn('REST_KEY_VARS_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105120"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_VARS_LINK_ID','PTN_VAR_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_VARS_LINK_ID'));
+            $c = new IDColumn('REST_KEY_VARS_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105120"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','PTN_VAR_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105130"));
             $c->setJournalTableOfMaster('E_TERRAFORM_PTN_VAR_LIST_JNL');
             $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -1165,7 +1165,7 @@ Terrraform 代入値自動登録設定
             //REST/excel/csv入力用 Val変数　Movement+変数名
             ////////////////////////////////////////////////////////
             // REST/excel/csv入力用 Value変数　Movement+変数名
-            $c = new IDColumn('REST_VAL_VARS_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105180"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_VARS_LINK_ID','PTN_VAR_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_VARS_LINK_ID'));
+            $c = new IDColumn('REST_VAL_VARS_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105180"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','PTN_VAR_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105190"));
             $c->setJournalTableOfMaster('E_TERRAFORM_PTN_VAR_LIST_JNL');
             $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
@@ -1463,16 +1463,17 @@ Terrraform 代入値自動登録設定
                (($rg_col_type == '2') || ($rg_col_type == '3')) &&
                (strlen($rg_rest_key_vars_link_id)    !== 0)){
                 $query =  "SELECT                                             "
+                         ."  TBL_A.MODULE_PTN_LINK_ID,                        "
                          ."  TBL_A.MODULE_VARS_LINK_ID,                              "
                          ."  TBL_A.PATTERN_ID,                                "
                          ."  COUNT(*) AS VARS_LINK_ID_CNT                     "
                          ."FROM                                               "
                          ."  E_TERRAFORM_PTN_VAR_LIST TBL_A                     "
                          ."WHERE                                              "
-                         ."  TBL_A.MODULE_VARS_LINK_ID    = :MODULE_VARS_LINK_ID   AND      "
+                         ."  TBL_A.MODULE_PTN_LINK_ID    = :MODULE_PTN_LINK_ID   AND      "
                          ."  TBL_A.DISUSE_FLAG     = '0'                      ";
                 $aryForBind = array();
-                $aryForBind['MODULE_VARS_LINK_ID'] = $rg_rest_key_vars_link_id;
+                $aryForBind['MODULE_PTN_LINK_ID'] = $rg_rest_key_vars_link_id;
                 $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
@@ -1506,16 +1507,17 @@ Terrraform 代入値自動登録設定
                (($rg_col_type == '1') || ($rg_col_type == '3')) &&
                (strlen($rg_rest_val_vars_link_id)    !== 0)){
                 $query =  "SELECT                                             "
+                         ."  TBL_A.MODULE_PTN_LINK_ID,                        "
                          ."  TBL_A.MODULE_VARS_LINK_ID,                              "
                          ."  TBL_A.PATTERN_ID,                                "
                          ."  COUNT(*) AS VARS_LINK_ID_CNT                     "
                          ."FROM                                               "
                          ."  E_TERRAFORM_PTN_VAR_LIST TBL_A                     "
                          ."WHERE                                              "
-                         ."  TBL_A.MODULE_VARS_LINK_ID    = :MODULE_VARS_LINK_ID   AND      "
+                         ."  TBL_A.MODULE_PTN_LINK_ID    = :MODULE_PTN_LINK_ID   AND      "
                          ."  TBL_A.DISUSE_FLAG     = '0'                      ";
                 $aryForBind = array();
-                $aryForBind['MODULE_VARS_LINK_ID'] = $rg_rest_val_vars_link_id;
+                $aryForBind['MODULE_PTN_LINK_ID'] = $rg_rest_val_vars_link_id;
                 $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];
