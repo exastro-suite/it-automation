@@ -2432,10 +2432,10 @@ function exportFileFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
         }
     
         switch($strCommand){
-            case "EXECUTE":
+            case "COMPARE":
                 
                 //パラメータチェック
-                list($intContrastid , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('CONTRAST_ID') ,null);
+                list($intContrastid , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('COMPARE_ID') ,null);
                 list($strBaseTime0  , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('BASE_TIMESTAMP_0') ,null);
                 list($strBaseTime1  , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('BASE_TIMESTAMP_1') ,null);
                 list($strhostlist   , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('HOST_LIST') ,null);
