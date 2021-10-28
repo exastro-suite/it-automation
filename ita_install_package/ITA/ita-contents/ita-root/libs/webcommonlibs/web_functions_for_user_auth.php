@@ -1226,6 +1226,8 @@
         ."    USERNAME IS NOT NULL"
         ."    AND "
         ."    DISUSE_FLAG = :DISUSE_FLAG";
+
+        $strFxName = __FUNCTION__;
         
         $objQuery = $objDBCA->sqlPrepare($tmpStrSql);
         if( $objQuery->getStatus()===false ){
