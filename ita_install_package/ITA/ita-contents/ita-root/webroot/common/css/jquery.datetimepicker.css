@@ -91,6 +91,7 @@
 
 .xdsoft_datetimepicker .xdsoft_mounthpicker {
 	position: relative;
+  z-index: 1;
 	text-align: center;
 }
 
