@@ -2168,7 +2168,11 @@
                         if($returnDataArray['item'][$item]['PARENT'] == $prefix){
                             continue;
                         }
-                        $rootColInRepeat = str_replace($prefix . "/","",$returnDataArray['item'][$item]['PARENT']);
+                        if($repeatCase == 1){
+                            $rootColInRepeat = str_replace($prefix . "/","",$returnDataArray['item'][$item]['PARENT']);
+                        }else{
+                            $rootColInRepeat = $returnDataArray['item'][$item]['PARENT'];
+                        }
                         $rootColInRepeat = substr($rootColInRepeat,0,strpos($rootColInRepeat."/","/"));
                         
                         if($rootColInRepeat != ""){
