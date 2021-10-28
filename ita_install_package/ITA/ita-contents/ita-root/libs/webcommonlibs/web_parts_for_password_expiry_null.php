@@ -80,15 +80,9 @@
     }
 
     if(strpos($loginUrl,'login') !== false){
-        error_log ("tooru:  "."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log");
         $last_log_flg = 1;
-    }else{
-        error_log ("ssss:  "."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log");
     }
-    error_log ("loginUrl:  ".print_r($loginUrl,true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log");
-    error_log ("strpos:  ".print_r(strpos($loginUrl,'login'),true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log");
-    error_log ("pw_l_up_flg:  ".print_r($pw_l_up_flg,true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log");
-    error_log ("last_log_flg:  ".print_r($last_log_flg,true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log");
+
     if($last_log_flg == '1' || $pw_l_up_flg == '1'){
 
         if($pw_l_up_flg == '1'){
@@ -108,7 +102,6 @@
             $objQuery = $objDBCA->sqlPrepare($tmpStrSql);
             $objQuery->sqlBind($tmpArrayBind);
             $r = $objQuery->sqlExecute();
-            error_log ("r:  ".print_r($r,true)."\n", 3, "/exastro/ita-root/logs/webaplogs/my-php-log.log");
         }
         
     }
