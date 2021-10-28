@@ -191,6 +191,8 @@ $ary["ITAWDCH-MNU-1070402"]         = "Multiple lines of character string are no
 $ary["ITAWDCH-MNU-1070501"]         = "Mail address";
 $ary["ITAWDCH-MNU-1070502"]         = "Multiple lines of character string are not allowed, character count is 0 to 256 bytes, mail address format (available symbols from user name section (-_+=.))";
 $ary["ITAWDCH-MNU-1070503"]         = "Mail address format (available symbols from user name section (-_+=.))";
+$ary["ITAWDCH-MNU-1070504"]         = "Password expiration settings";
+$ary["ITAWDCH-MNU-1070505"]         = "Deactivate forced password change upon first login";
 $ary["ITAWDCH-MNU-1070601"]         = "Role information";
 $ary["ITAWDCH-MNU-1070701"]         = "Last update date/time of password";
 $ary["ITAWDCH-MNU-1070702"]         = "Date/time. Date/time when user updated the password.";

@@ -442,7 +442,7 @@
             "USERNAME_JP"=>"",
             "MAIL_ADDRESS"=>"",
             "PW_LAST_UPDATE_TIME"=>"DATETIMEAUTO(6)",
-            "LAST_LOGIN_TIME"=>"",
+            "LAST_LOGIN_TIME"=>"DATETIMEAUTO(6)",
             "AUTH_TYPE"=>"",
             "PROVIDER_ID"=>"",
             "PROVIDER_USER_ID"=>"",
@@ -567,6 +567,7 @@
             $arrayValue['LAST_UPDATE_USER']    = $strFixedId;
             $arrayValue['PASSWORD']            = md5($strRawNewPassword);
             $arrayValue['PW_LAST_UPDATE_TIME'] = $strQueryTimeDate;
+            $arrayValue['LAST_LOGIN_TIME'] = $strQueryTimeDate;
 
             // 最終ログイン日時、認証方式
             $sql = "SELECT LAST_LOGIN_TIME ,"
@@ -592,7 +593,6 @@
             }
 
             while($row = $objQuery->resultFetch() ){
-              $arrayValue['LAST_LOGIN_TIME'] = $row['LAST_LOGIN_TIME'];
               $arrayValue['AUTH_TYPE'] = $row['AUTH_TYPE'];
               $arrayValue['PROVIDER_ID'] = $row['PROVIDER_ID'];
               $arrayValue['PROVIDER_USER_ID'] = $row['PROVIDER_USER_ID'];
@@ -682,8 +682,294 @@
         return array($aryValues,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
     }
 
+    function updateUserLastLogin($strFixedId,$strRawOldPassword,$strRawNewPassword,$objDBCA){
+        //////////////////////////////////////////////////
+        // ユーザ定義メソッドの呼び出し：あり           //
+        // ユーザ定義一般関数の呼び出し：あり           //
+        // 環境変数の直接参照          ：あり           //
+        // DBの直接参照                ：あり           //
+        //////////////////////////////////////////////////
+        
+        $aryValues = array();
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+        $strErrorBuf = "";  
+
+        $boolRetStatus = false;
+
+        $boolTransactionFlag = false;        
+
+        $strFxName = __FUNCTION__; // updateUserPasswordByUserSelf
+
+        $arrayConfig = array(
+            "JOURNAL_SEQ_NO"=>"",
+            "JOURNAL_ACTION_CLASS"=>"",
+            "JOURNAL_REG_DATETIME"=>"",
+            "USER_ID"=>"",
+            "USERNAME"=>"",
+            "PASSWORD"=>"",
+            "USERNAME_JP"=>"",
+            "MAIL_ADDRESS"=>"",
+            "PW_LAST_UPDATE_TIME"=>"",
+            "LAST_LOGIN_TIME"=>"DATETIMEAUTO(6)",
+            "AUTH_TYPE"=>"",
+            "PROVIDER_ID"=>"",
+            "PROVIDER_USER_ID"=>"",
+            "ACCESS_AUTH"=>"",
+            "NOTE"=>"",
+            "DISUSE_FLAG"=>"",
+            "LAST_UPDATE_TIMESTAMP"=>"",
+            "LAST_UPDATE_USER"=>"",
+            "PW_EXPIRATION"=>"",
+            "DEACTIVATE_PW_CHANGE"=>""
+        );
+
+        $arrayValueTmpl = array(
+            "JOURNAL_SEQ_NO"=>"",
+            "JOURNAL_ACTION_CLASS"=>"",
+            "JOURNAL_REG_DATETIME"=>"",
+            "USER_ID"=>"",
+            "USERNAME"=>"",
+            "PASSWORD"=>"",
+            "USERNAME_JP"=>"",
+            "MAIL_ADDRESS"=>"",
+            "PW_LAST_UPDATE_TIME"=>"",
+            "LAST_LOGIN_TIME"=>"",
+            "AUTH_TYPE"=>"",
+            "PROVIDER_ID"=>"",
+            "PROVIDER_USER_ID"=>"",
+            "ACCESS_AUTH"=>"",
+            "NOTE"=>"",
+            "DISUSE_FLAG"=>"",
+            "LAST_UPDATE_TIMESTAMP"=>"",
+            "LAST_UPDATE_USER"=>""
+        );
+
+        try{
+            $db_model_ch = $objDBCA->getModelChannel();
+
+            if( $objDBCA->transactionStart() !== true ){
+                // 例外処理へ
+                throw new Exception( '00000100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $boolTransactionFlag = true;
+
+            $arrayValue = $arrayValueTmpl;
+
+            $temp_array = array('WHERE'=>"USER_ID = :USER_ID AND PASSWORD = :PASSWORD AND DISUSE_FLAG IN ('0','1') ");
+            
+            $retArray = makeSQLForUtnTableUpdate($db_model_ch,
+                                            "SELECT FOR UPDATE",
+                                            "USER_ID",
+                                            "A_ACCOUNT_LIST",
+                                            "A_ACCOUNT_LIST_JNL",
+                                            $arrayConfig,
+                                            $arrayValue,
+                                            $temp_array
+            );
+
+            $aryResult01 = array();
+            if( $retArray[0] === false ){
+                // 例外処理へ
+                throw new Exception( '00000200-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            $sqlUtnBody = $retArray[1];
+            $arrayUtnBind = $retArray[2];
+            
+            $arrayUtnBind['USER_ID']  = $strFixedId;
+
+            $arrayUtnBind['PASSWORD'] = $strRawOldPassword;
+           
+            
+            $objQuery = $objDBCA->sqlPrepare($sqlUtnBody);
+
+            if( $objQuery->getStatus()===false ){
+                // 例外処理へ
+                throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            
+            if( $objQuery->sqlBind($arrayUtnBind) != "" ){
+                // 例外処理へ
+                throw new Exception( '00000400-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            
+            $r = $objQuery->sqlExecute();
+            if(!$r){
+                // 例外処理へ
+                throw new Exception( '00000500-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            
+            //----発見行だけループ
+            while ( $row = $objQuery->resultFetch() ){
+                $aryResult01[] = $row;
+            }
+            //発見行だけループ----
+            $intEffectCount = $objQuery->effectedRowCount();
+            unset($objQuery);
+            
+            if( $intEffectCount == 0 ){
+
+                // 例外処理へl
+                throw new Exception( '00000600-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            else if( $intEffectCount == 1 ){
+
+                $arrayValue           = $aryResult01[0];
+                $org_disuse_flag      = $arrayValue['DISUSE_FLAG'];
+                //
+                if( $org_disuse_flag === '1' ){
+ 
+                    // 例外処理へ
+                    $intErrorType = 504;
+                    throw new Exception( '00000700-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+            }
+            else{
+                // 例外処理へ
+                throw new Exception( '00000800-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+      
+            $retArray = getSequenceValueFromTable('JSEQ_A_ACCOUNT_LIST', 'A_SEQUENCE', FALSE );
+            if( $retArray[1] != 0 ){
+                // 例外処理へ
+                throw new Exception( '00000900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $intJnlSeqNo = $retArray[0];
+
+            $objDBCA->setQueryTime();
+            $strQueryTimeDate = $objDBCA->getQueryTime(1);
+            
+            $arrayValue['JOURNAL_SEQ_NO']      = $intJnlSeqNo;
+            $arrayValue['LAST_UPDATE_USER']    = $strFixedId;
+            
+            $arrayValue['PASSWORD'] = $strRawNewPassword;
+            $arrayValue['LAST_LOGIN_TIME'] = $strQueryTimeDate;
+
+            // 最終ログイン日時、認証方式
+            $sql = "SELECT LAST_LOGIN_TIME ,"
+                  ."       AUTH_TYPE       ,"
+                  ."       PROVIDER_ID     ,"
+                  ."       PROVIDER_USER_ID,"
+                  ."       ACCESS_AUTH,      "
+                  ."       PW_EXPIRATION,     "
+                  ."       DEACTIVATE_PW_CHANGE,      "
+                  ."       PW_LAST_UPDATE_TIME      "
+                  ."FROM   A_ACCOUNT_LIST   "
+                  ."WHERE USER_ID = :USER_ID";
+
+            $tmpArrayBind = array('USER_ID'=>$strFixedId);
+            $objQuery = $objDBCA->sqlPrepare($sql);
+
+            if( $objQuery->getStatus()===false ){
+                throw new Exception( '00000100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            if( $objQuery->sqlBind($tmpArrayBind) != "" ){
+                throw new Exception( '00000200-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $tmpBoolResult = $objQuery->sqlExecute();
+            if($tmpBoolResult!=true){
+                throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            while($row = $objQuery->resultFetch() ){
+              $arrayValue['PW_LAST_UPDATE_TIME'] = $row['PW_LAST_UPDATE_TIME'];
+              $arrayValue['AUTH_TYPE'] = $row['AUTH_TYPE'];
+              $arrayValue['PROVIDER_ID'] = $row['PROVIDER_ID'];
+              $arrayValue['PROVIDER_USER_ID'] = $row['PROVIDER_USER_ID'];
+              $arrayValue['ACCESS_AUTH'] = $row['ACCESS_AUTH'];
+              $arrayValue['PW_EXPIRATION'] = $row['PW_EXPIRATION'];
+              $arrayValue['DEACTIVATE_PW_CHANGE'] = $row['DEACTIVATE_PW_CHANGE'];
+            }
+
+            $retArray = makeSQLForUtnTableUpdate($db_model_ch,
+                                            "UPDATE",
+                                            "USER_ID",
+                                            "A_ACCOUNT_LIST",
+                                            "A_ACCOUNT_LIST_JNL",
+                                            $arrayConfig,
+                                            $arrayValue
+            );
+
+            if( $retArray[0] === false ){
+                throw new Exception( '00001000-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            $sqlUtnBody = $retArray[1];
+            $arrayUtnBind = $retArray[2];
+
+            $sqlJnlBody = $retArray[3];
+            $arrayJnlBind = $retArray[4];
+
+            $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
+            $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
+
+            if( $objQueryUtn->getStatus()===false || $objQueryJnl->getStatus()===false ){
+                // 例外処理へ
+                throw new Exception( '00001100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            if( $objQueryUtn->sqlBind($arrayUtnBind) != "" || $objQueryJnl->sqlBind($arrayJnlBind) != "" ){
+                // 例外処理へ
+                throw new Exception( '00001200-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            //----SQL実行
+            $rUtn = $objQueryUtn->sqlExecute();
+            if($rUtn!=true){
+                // 例外処理へ
+                throw new Exception( '00001300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            $rJnl = $objQueryJnl->sqlExecute();
+            if($rJnl!=true){
+                // 例外処理へ
+                throw new Exception( '00001400-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            $r = $objDBCA->transactionCommit();
+            if (!$r){
+                // 例外処理へ
+                throw new Exception( '00001500-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $boolTransactionFlag = false;
+
+            $r = $objDBCA->transactionExit();
+            if (!$r){
+                // 例外処理へ
+                throw new Exception( '00001600-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            $boolRetStatus = true;
+        }
+        catch (Exception $e){
+            if( $boolTransactionFlag === true ){
+                $tmpBoolValue = $objDBCA->transactionRollBack();
+                if( $tmpBoolValue === false ){
+                    $intErrorType = 502;
+                }
+                else{
+                    // トランザクション終了
+                    $tmpBoolValue = $objDBCA->transactionExit();
+                    if( $tmpBoolValue === false ){
+                        $intErrorType = 503;
+                    }
+                }
+            }
+
+            if( $intErrorType === null ) $intErrorType = 501;
+            $tmpErrMsgBody = $e->getMessage();
+            $aryErrMsgBody[] = $tmpErrMsgBody;
+            $strErrMsg = $tmpErrMsgBody;
+        }
+        $aryValues = array('ResultStatus'=>$boolRetStatus);
+        return array($aryValues,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+    }
+
+
+
     // ----パスワードの有効期限が切れているかどうかを判定する
-    function checkLoginPasswordExpiryOut($username,$p_login_pw_l_update,$pass_word_expiry,$objDBCA){
+    function checkLoginPasswordExpiryOut($user_id,$p_login_pw_l_update,$pass_word_expiry,$objDBCA){
 
         //////////////////////////////////////////////////
         // ユーザ定義メソッドの呼び出し：あり           //
@@ -742,7 +1028,7 @@
                                 ."FROM "
                                 ."    A_ACCOUNT_LIST_JNL "
                                 ."WHERE "
-                                ."    USERNAME = :USERNAME_BV "
+                                ."    USER_ID = :USER_ID_BV "
                                 ."    AND "
                                 ."    USERNAME IS NOT NULL";
 
@@ -750,10 +1036,12 @@
                     if( $objQuery->getStatus()===false ){
                         throw new Exception( '00000100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     }
-                    $tmpArrayBind = array('USERNAME_BV'=>$username);
+
+                    $tmpArrayBind = array('USER_ID_BV'=>$user_id);
                     if( $objQuery->sqlBind($tmpArrayBind) != "" ){
                         throw new Exception( '00000200-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     }
+
                     $tmpBoolResult = $objQuery->sqlExecute();
                     if($tmpBoolResult!=true){
                         throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
@@ -766,9 +1054,9 @@
                     unset($objQuery);
                     unset($tmpArrayBind);
                     unset($tmpBoolResult);
-                    
-                    // テーブル【アカウント履歴】から、リクエストに紐付くユーザがこれまでに設定したパスワード種類数を取得する。■----
 
+                    // テーブル【アカウント履歴】から、リクエストに紐付くユーザがこれまでに設定したパスワード種類数を取得する。■----
+                   
                     // ----■リクエストに紐付くユーザがこれまでに設定したパスワード種類数をチェックする。
                     if($tmpIntCount1 == 0){
                         // ----(2未満だった)何等かの理由で、履歴に、（パスワード）が登録されたレコードが存在していない
@@ -803,14 +1091,14 @@
                                     ."                      FROM "
                                     ."                          A_ACCOUNT_LIST_JNL "
                                     ."                      WHERE "
-                                    ."                          USERNAME = :USERNAME_BV "
+                                    ."                          USER_ID = :USER_ID_BV "
                                     ."                          AND "
                                     ."                          PASSWORD = (SELECT "
                                     ."                                          PASSWORD "
                                     ."                                      FROM "
                                     ."                                          A_ACCOUNT_LIST "
                                     ."                                      WHERE "
-                                    ."                                          USERNAME = :USERNAME_BV "
+                                    ."                                          USER_ID = :USER_ID_BV "
                                     ."                                      AND "
                                     ."                                          DISUSE_FLAG IN ( '0', 'H' ) "
                                     ."                                     ) "
@@ -819,7 +1107,7 @@
                                     ."                     )"; 
                         //今のパスワードと同じ行を、履歴から探して、もっとも古い履歴番号の行を取得する----
 
-                        $tmpArrayBind = array('USERNAME_BV'=>$username);
+                        $tmpArrayBind = array('USER_ID_BV'=>$user_id);
 
                         $objQuery = $objDBCA->sqlPrepare($tmpStrSql);
                         if( $objQuery->getStatus()===false ){
@@ -924,6 +1212,42 @@
         $aryValues = array('ExpiryOut'=>$boolExpiryOut,
                            'ReasonType'=>$strReasonType);
         return array($aryValues,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+    }
+
+    function getPasswordOtherSettings($user_id,$objDBCA){
+
+        $tmpStrSql = "SELECT "
+        ."    PW_EXPIRATION, DEACTIVATE_PW_CHANGE, LAST_LOGIN_TIME, PW_LAST_UPDATE_TIME, USER_ID, PASSWORD "
+        ."FROM "
+        ."    A_ACCOUNT_LIST "
+        ."WHERE "
+        ."    USER_ID = :USERID_BV "
+        ."    AND "
+        ."    USERNAME IS NOT NULL"
+        ."    AND "
+        ."    DISUSE_FLAG = :DISUSE_FLAG";
+        
+        $objQuery = $objDBCA->sqlPrepare($tmpStrSql);
+        if( $objQuery->getStatus()===false ){
+            throw new Exception( '00000100-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        $tmpArrayBind = array('USERID_BV'=>$user_id, 'DISUSE_FLAG'=>'0');
+        if( $objQuery->sqlBind($tmpArrayBind) != "" ){
+            throw new Exception( '00000200-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+        $tmpBoolResult = $objQuery->sqlExecute();
+        if($tmpBoolResult!=true){
+            throw new Exception( '00000300-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+
+        $resultFetch = $objQuery->resultFetch();
+
+        unset($objQuery);
+        unset($tmpArrayBind);
+        unset($tmpBoolResult);
+
+        return $resultFetch;
+
     }
     // パスワードの有効期限が切れているかどうかを判定する----
 
@@ -1937,3 +2261,4 @@
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // ここまでユーザのログインに関する機能                                                           //
     ////////////////////////////////////////////////////////////////////////////////////////////////////
+
