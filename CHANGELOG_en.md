@@ -1,3 +1,20 @@
+Exastro IT Automation 1.8.2 (2021-10-28)
+==================================================
+
+
+インストーラ
+---------------
+ * Updated to Version v1.8.2 #1617
+
+エクスポート/インポート
+---------------
+ * The return value for the REST UPLOAD command for Excel bulk import is different from the one written in the manual. #1604
+
+Ansible-Driver
+---------------
+ * Changed how the yaml.load modules were handled in Pioneer mode.#1584
+
+
 Exastro IT Automation 1.8.1 (2021-08-26)
 ==================================================
 
