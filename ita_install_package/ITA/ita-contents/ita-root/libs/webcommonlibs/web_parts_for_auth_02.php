@@ -32,10 +32,12 @@
     $auth = null;
     saLoginExecute($auth, $objDBCA, $ACRCM_id, true);
 
+    $getCopy = $_GET;
     $get_parameter = "";
-    if("" != http_build_query($_GET)){
-        $get_parameter = "&" . http_build_query($_GET);
+    if("" != http_build_query($getCopy)){
+        $get_parameter = "&" . http_build_query($getCopy);
     }
+    $get_parameter = str_replace('+', '%20', $get_parameter);
 
     // ----■ログアウト処理を行うフラグが、リクエストのPOSTクエリーに含まれているかをチェックする。
     if(isset($_POST['logout'])){

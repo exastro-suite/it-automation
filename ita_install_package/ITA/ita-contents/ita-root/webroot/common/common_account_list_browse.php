@@ -105,10 +105,12 @@
     $timeStamp_common_account_list_00_javascript_js=filemtime("$root_dir_path/webroot/common/javascripts/common_account_list_00_javascript.js");
     $timeStamp_ita_icon_png=filemtime("$root_dir_path/webroot/common/imgs/ita_icon.png");
     
+    $getCopy = $_GET;
     $get_parameter_anp = "";
-    if("" != http_build_query($_GET)){
-        $get_parameter_anp = "&" . http_build_query($_GET);
+    if("" != http_build_query($getCopy)){
+        $get_parameter_anp = "&" . http_build_query($getCopy);
     }
+    $get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
 
     print 
 <<< EOD
