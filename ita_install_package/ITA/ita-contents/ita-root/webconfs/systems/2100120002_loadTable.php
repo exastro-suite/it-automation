@@ -65,6 +65,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('REPO_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200020100"),'B_CICD_REPOSITORY_LIST','REPO_ROW_ID','REPO_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('REPO_ROW_ID'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200020101"));
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('REPO_ROW_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_CICD_REPOSITORY_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'REPO_ROW_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'REPO_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     /////////////////////////////////////////////////////////

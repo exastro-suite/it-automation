@@ -59,7 +59,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('MENU_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-213004"),'D_CMDB_TARGET_MENU_LIST','MENU_ID','MENU_PULLDOWN','',array('OrderByThirdColumn'=>'MENU_ID'));
     $c->setDescription('');//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
-
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENU_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CMDB_TARGET_MENU_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_PULLDOWN',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //カラム

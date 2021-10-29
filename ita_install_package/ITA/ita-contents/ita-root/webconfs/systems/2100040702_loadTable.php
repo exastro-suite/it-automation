@@ -61,6 +61,18 @@ Ansibleインターフェース情報
     $c = new IDColumn('ANSIBLE_EXEC_MODE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203065"),'B_ANSIBLE_EXEC_MODE','ID','NAME','', array('OrderByThirdColumn'=>'ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203066"));
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ANSIBLE_EXEC_MODE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANSIBLE_EXEC_MODE_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
     //実行区分----
 
@@ -148,6 +160,18 @@ Ansibleインターフェース情報
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203042"));//エクセル・ヘッダでの説明
         $c->setValidator($objVldt);
         $c->setRequired(false);//必須チャックはDB登録前処理で実施
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_HOST_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_ANS_TWR_HOST_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'ANSTWR_HOST_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'ANSTWR_HOSTNAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c1->setOutputType('print_journal_table',$objOT);
 	$tcg -> addColumn($c);
         //代表ホスト名----
 
@@ -173,6 +197,18 @@ Ansibleインターフェース情報
 	$c = new IDColumn('ANSTWR_ORGANIZATION',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000002"),'B_ANS_TWR_ORGANIZATION','ORGANIZATION_NAME','ORGANIZATION_NAME','');
 	$c -> setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000003")); // エクセル・ヘッダでの説明
         $c -> setRequired(false); //必須チャックはDB登録前処理で実施
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_ORGANIZATION');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_ORGANIZATION_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'ORGANIZATION_NAME',
+            'TTT_GET_TARGET_COLUMN_ID'=>'ORGANIZATION_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c1->setOutputType('print_journal_table',$objOT);
 	$tcg->addColumn($c);
         //組織----
 
@@ -191,6 +227,18 @@ Ansibleインターフェース情報
 	$c = new IDColumn('ANSTWR_DEL_RUNTIME_DATA',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-907390509"),'B_ANS_TWER_RUNDATA_DEL_FLAG','FLAG_ID','FLAG_NAME','');
 	$c -> setDescription($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-907350509'));//エクセル・ヘッダでの説明
         $c -> setRequired(false);
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_DEL_RUNTIME_DATA');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWER_RUNDATA_DEL_FLAG_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c1->setOutputType('print_journal_table',$objOT);
 	$tcg -> addColumn($c);
 	//実行時データ削除----
 
@@ -279,6 +327,18 @@ Ansibleインターフェース情報
     $c = new IDColumn('NULL_DATA_HANDLING_FLG',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-6000000"),'B_VALID_INVALID_MASTER','FLAG_ID','FLAG_NAME','', array('OrderByThirdColumn'=>'FLAG_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-6000002"));
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('NULL_DATA_HANDLING_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_VALID_INVALID_MASTER_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
     //パラメータシートの具体値がNULLでも代入値管理に登録するかのフラグ----
 

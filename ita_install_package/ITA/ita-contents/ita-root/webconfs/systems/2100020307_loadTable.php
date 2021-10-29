@@ -377,6 +377,19 @@ Ansible（Legacy Role）作業パターン詳細
     // データベース更新前のファンクション登録
     $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ROLE_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_ANSIBLE_LRL_ROLE_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ROLE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'ROLE_NAME_PULLDOWN',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
+
     $table->addColumn($c);
 
     // REST/excel/csv入力用 ロールパッケージ+ロール

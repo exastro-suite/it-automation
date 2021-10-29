@@ -203,6 +203,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $strWebUIText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1071203");
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('update_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('PROVIDER_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_PROVIDER_LIST_JNL',
+	    'TTT_SEARCH_KEY_COLUMN_ID'=>'PROVIDER_ID',
+	    'TTT_GET_TARGET_COLUMN_ID'=>'PROVIDER_NAME',
+	    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+	    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+	    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+	    )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // PROVIDER_USER_ID

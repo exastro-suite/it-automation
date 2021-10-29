@@ -179,6 +179,18 @@ Ansible(Pioneer)作業パターン
         $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030"));
         $c->setHiddenMainTableColumn(true);
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANS_VIRTUALENV_NAME');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_VIRTUALENV_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'VIRTUALENV_NAME',
+            'TTT_GET_TARGET_COLUMN_ID'=>'VIRTUALENV_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c1->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         $table->addColumn($cg);

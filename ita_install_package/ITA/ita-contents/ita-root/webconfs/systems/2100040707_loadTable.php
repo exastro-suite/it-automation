@@ -57,10 +57,34 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = new IDColumn('FILE_ID','File Type','B_ANS_COMVRAS_USLIST_F_ID','ROW_ID','NAME','',array('OrderByThirdColumn'=>'ROW_ID'));
     $c->setDescription("File Type\nPlaybook: Legacy playbook\nDialog file: Pioneer dialog file\nRole package: LegacyRole role package\nTemplate file: Ansible common template file");
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('FILE_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_COMVRAS_USLIST_F_ID_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ROW_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     $c = new IDColumn('VRA_ID','Variable Type','B_ANS_COMVRAS_USLIST_V_ID','ROW_ID','NAME','',array('OrderByThirdColumn'=>'ROW_ID'));
     $c->setDescription("Variable Type\nGBL:Global Variable\nCPF:File Variable\nTPF:Template Variable");
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('VRA_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_COMVRAS_USLIST_V_ID_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ROW_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     $c = new NumColumn('CONTENTS_ID','Primary key');

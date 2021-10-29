@@ -79,6 +79,18 @@ Ansible 共通 Ansible Tower インスタンス一覧
     $c = new IDColumn('ANSTWR_LOGIN_AUTH_TYPE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001020"),'D_TOWER_LOGIN_AUTH_TYPE','LOGIN_AUTH_TYPE_ID','LOGIN_AUTH_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001021"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_LOGIN_AUTH_TYPE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_TOWER_LOGIN_AUTH_TYPE_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'LOGIN_AUTH_TYPE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'LOGIN_AUTH_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
     //認証方式----
 
@@ -131,6 +143,18 @@ Ansible 共通 Ansible Tower インスタンス一覧
     //----isolated Tower
     $c = new IDColumn('ANSTWR_ISOLATED_TYPE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001060"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001061"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_ISOLATED_TYPE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
     //isolated Tower----
 

@@ -43,6 +43,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105046"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENU_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_MENU_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 表示順序
@@ -99,6 +111,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105018"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('INPUT_METHOD_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_INPUT_METHOD_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'INPUT_METHOD_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'INPUT_METHOD_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // SENSITIVE設定
@@ -106,6 +130,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105020"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('SENSITIVE_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_SENSITIVE_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'VARS_SENSITIVE',
+        'TTT_GET_TARGET_COLUMN_ID'=>'VARS_SENSITIVE_SELECT',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //既存メニューフラグ
@@ -113,6 +149,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-105022"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ORIGINAL_MENU_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
 

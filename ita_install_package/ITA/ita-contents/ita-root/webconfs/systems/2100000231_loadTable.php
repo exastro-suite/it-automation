@@ -57,6 +57,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setUnique(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1210032"));//エクセル・ヘッダでの説明
     $c->setSubtotalFlag(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('AUTH_TYPE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_PROVIDER_AUTH_TYPE_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'NAME',
+        'TTT_GET_TARGET_COLUMN_ID'=>'NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // ロゴ(FILE UPLOAD)
@@ -76,6 +88,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setUnique(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1210052"));//エクセル・ヘッダでの説明
     $c->setSubtotalFlag(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('VISIBLE_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_VISIBLE_FLAG_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     $table->fixColumn();

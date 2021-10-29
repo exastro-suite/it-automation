@@ -47,6 +47,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);
     $c->setUnique(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1220022"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('PROVIDER_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_PROVIDER_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'PROVIDER_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'PROVIDER_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 設定項目名
@@ -55,6 +67,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);
     $c->setUnique(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1220032"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('NAME');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_PROVIDER_ATTRIBUTE_NAME_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'NAME',
+        'TTT_GET_TARGET_COLUMN_ID'=>'NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 設定内容

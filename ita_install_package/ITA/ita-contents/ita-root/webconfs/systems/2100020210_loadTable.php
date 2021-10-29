@@ -977,7 +977,18 @@ Ansible（Pioneer）代入値管理
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
     $c->setDefaultValue("register_table", 1);
-
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('SENSITIVE_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_SENSITIVE_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'VARS_SENSITIVE',
+        'TTT_GET_TARGET_COLUMN_ID'=>'VARS_SENSITIVE_SELECT',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c1->setOutputType('print_journal_table',$objOT);
     $cg2->addColumn($c);
 
     //----具体値
