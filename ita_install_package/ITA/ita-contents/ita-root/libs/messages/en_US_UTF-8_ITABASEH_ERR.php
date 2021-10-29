@@ -95,6 +95,7 @@ $ary["ITABASEH-ERR-170039"]         = "End - End type setting is invalid.";
 $ary["ITABASEH-ERR-170040"]         = "Status file branch - Conditional branch is invalid.";
 $ary["ITABASEH-ERR-170041"]         = "Status file branch - Duplicate value is set in conditional branch (if / elseif).";
 $ary["ITABASEH-ERR-170042"]         = "Status file branch - No value is set for conditional branch (if / else if).";
+$ary["ITABASEH-ERR-170043"]         = "OPTION [target node, item name, value] is invalid. ( {} )";
 $ary["ITABASEH-ERR-170101"]         = "Node instance: Not in a status that can be released (pending).";
 $ary["ITABASEH-ERR-170102"]         = "Node instance: Not a Node that can be released.";
 $ary["ITABASEH-ERR-170103"]         = "Conductor interface information is not registered.";

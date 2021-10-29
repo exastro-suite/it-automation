@@ -40,6 +40,11 @@ function conductorNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRec
 
     $intResultInfoCode="000";//結果コード(正常終了)
 
+    $intOrderOvRdchkflg = "";
+    $strOrderOvRdErrMsg = "";
+
+    $tmpForOptionOrderOvRd = array();
+
     // 各種ローカル変数を定義
     
     $strFxName = __FUNCTION__;
@@ -73,10 +78,8 @@ function conductorNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRec
         list($strPreserveDatetime      , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('PRESERVE_DATETIME') ,null);
         $strOptionOrderStream = "";
         list($aryForOptionOrderOvRd    , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('OPTION')            ,array());
-        if( is_array($aryForOptionOrderOvRd) === false ){
-            $aryForOptionOrderOvRd = array();
-        }
-        
+
+
         //----ここから、オペIDからオペNOを取得
         $aryOpRetBody = getInfoOfOneOperation($intOperationId,1);
         //ここから、オペIDからオペNOを取得----
@@ -84,53 +87,102 @@ function conductorNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRec
         if( $aryOpRetBody[0] == 1 ){
             $aryRowOfOperationTable = $aryOpRetBody[4];
             $intOperationNo = $aryRowOfOperationTable['OPERATION_NO_UAPK'];
-            
-            if(  $aryForOptionOrderOvRd == array() ){
-                $aryRetBody = getConductorClassJson($intSymphonyClassId,1);
-                if( $aryRetBody[1] !== null ){
-                    $intErrorType = $aryRetBody[1];
-                    $intErrorPlaceMark = 3000;
-                    if( $intErrorType == 2 || $intErrorType == 3 ){
-                        $strExpectedErrMsgBodyForUI = $aryRetBody[5];
-                        $intResultStatusCode = 400;
-                        $intResultInfoCode="001";
-                    }
-                }else{
-                    // JSON形式の変換、不要項目の削除
-                    $tmpReceptData = json_decode($aryRetBody[4],true);
-                    $strSortedData=$tmpReceptData;
-                    unset($strSortedData['conductor']);
-                    foreach ($strSortedData as $key => $value) {
-                        if( preg_match('/line-/',$key) ){
-                            unset($strSortedData[$key]);
-                        }
-                    }
-                    unset($strSortedData['conductor']);
-                    unset($strSortedData['config']);
-                    $aryForOptionOrderOvRd = $strSortedData;                    
-                }
-            }
 
-            $aryRetBody = conductorInstanceConstuct($intSymphonyClassId, $intOperationNo, $strPreserveDatetime, $strOptionOrderStream, $aryForOptionOrderOvRd);
-
-            $strSymphonyInstanceId = (string)$aryRetBody[4];
-            $intResultStatusCode = 200;
-            
-            //SymphonyクラスIDの不備
+            $aryRetBody = getConductorClassJson($intSymphonyClassId,1);
             if( $aryRetBody[1] !== null ){
                 $intErrorType = $aryRetBody[1];
                 $intErrorPlaceMark = 3000;
                 if( $intErrorType == 2 || $intErrorType == 3 ){
                     $strExpectedErrMsgBodyForUI = $aryRetBody[5];
+                    $intResultStatusCode = 400;
                     $intResultInfoCode="001";
                 }
+            }else{
+                // JSON形式の変換、不要項目の削除
+                $tmpReceptData = json_decode($aryRetBody[4],true);
+                $strSortedData=$tmpReceptData;
+                unset($strSortedData['conductor']);
+                foreach ($strSortedData as $key => $value) {
+                    if( preg_match('/line-/',$key) ){
+                        unset($strSortedData[$key]);
+                    }
+                }
+                unset($strSortedData['conductor']);
+                unset($strSortedData['config']);
+                $tmpForOptionOrderOvRd = $strSortedData;                    
             }
-            
-            if( headers_sent() === true ){
-                $intErrorType = 900;
-                $intErrorPlaceMark = 4000;
-                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+
+            //上書き対象項目（オペレーション、スキップ）
+            if(  $aryForOptionOrderOvRd != array() ){
+                foreach ($aryForOptionOrderOvRd as $tmpNodeId => $aryOpt ) {
+                   list($intOrderOvRdOpeId         , $boolKeyExists) = isSetInArrayNestThenAssign($aryOpt ,array('OPERATION_ID') ,null);
+                   list($intOrderOvRdSkipflg       , $boolKeyExists) = isSetInArrayNestThenAssign($aryOpt ,array('SKIP_FLAG') ,null);
+                    //オペレーション
+                    if( $intOrderOvRdOpeId !== null ){
+                        //---個別指定のオペレーション取得
+                        $aryOrderOpRetBody = getInfoOfOneOperation($intOrderOvRdOpeId,1);
+
+                        if( $aryOrderOpRetBody[0] == 1 ){
+                            $tmpForOptionOrderOvRd[$tmpNodeId]['OPERATION_NO_IDBH'] = $intOrderOvRdOpeId;
+                        }else{
+                            // オペレーションID不備
+                            $intErrorType = $aryOrderOpRetBody[1];
+                            $intErrorPlaceMark = 2000;
+                            if( $intErrorType == 2 || $intErrorType == 3 ){
+                                $strExpectedErrMsgBodyForUI = $aryOrderOpRetBody[5];
+                                $intResultInfoCode="001";
+                            } 
+                            $intOrderOvRdchkflg = "1";
+                            $strNodeMsg = "$tmpNodeId:".json_encode($aryOpt,JSON_UNESCAPED_UNICODE);
+                            $strOrderOvRdErrMsg = $g['objMTS']->getSomeMessage("ITABASEH-ERR-170043" ,array($strNodeMsg) );
+                            #"OPTION[対象ノード、項目名、値]が不正です。  ( $tmpNodeId:" .json_encode($aryOpt,JSON_UNESCAPED_UNICODE)." )";
+                            break;
+                        }
+                    }
+                    //スキップ
+                    if( $intOrderOvRdSkipflg !== null ){
+                        if( $intOrderOvRdSkipflg == 1 || $intOrderOvRdSkipflg == "" ){
+                            $tmpForOptionOrderOvRd[$tmpNodeId]['SKIP_FLAG'] = $intOrderOvRdSkipflg;
+                        }else{
+                            $intOrderOvRdchkflg = "1";
+                            $strNodeMsg = "$tmpNodeId:".json_encode($aryOpt,JSON_UNESCAPED_UNICODE);
+                            $strOrderOvRdErrMsg = $g['objMTS']->getSomeMessage("ITABASEH-ERR-170043" ,array($strNodeMsg) );
+                            #"OPTION[対象ノード、項目名、値]が不正です。  ( $tmpNodeId:" .json_encode($aryOpt,JSON_UNESCAPED_UNICODE)." )";
+                            break;   
+                        }
+                    }
+                }
             }
+
+            $aryForOptionOrderOvRd = $tmpForOptionOrderOvRd;   
+
+            if( $intOrderOvRdchkflg == "" ){
+                $aryRetBody = conductorInstanceConstuct($intSymphonyClassId, $intOperationNo, $strPreserveDatetime, $strOptionOrderStream, $aryForOptionOrderOvRd);
+
+                $strSymphonyInstanceId = (string)$aryRetBody[4];
+                $intResultStatusCode = 200;
+                
+                //SymphonyクラスIDの不備
+                if( $aryRetBody[1] !== null ){
+                    $intErrorType = $aryRetBody[1];
+                    $intErrorPlaceMark = 3000;
+                    if( $intErrorType == 2 || $intErrorType == 3 ){
+                        $strExpectedErrMsgBodyForUI = $aryRetBody[5];
+                        $intResultInfoCode="001";
+                    }
+                }
+                
+                if( headers_sent() === true ){
+                    $intErrorType = 900;
+                    $intErrorPlaceMark = 4000;
+                    throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+            }else{
+                // 上書きオプション-オペレーション,SKIP不備
+                $strExpectedErrMsgBodyForUI = $strOrderOvRdErrMsg;
+                $intResultInfoCode="001";
+            }
+
 
         }else{
             // オペレーションID不備

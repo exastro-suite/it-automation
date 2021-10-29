@@ -211,7 +211,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041402"));
     $c->setSubtotalFlag(false);
-    $c->setValidator(new IntNumValidator(-1, 2147483647));
+    $c->setValidator(new IntNumValidator(0, 1048576));
     $table->addColumn($c);
 
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
