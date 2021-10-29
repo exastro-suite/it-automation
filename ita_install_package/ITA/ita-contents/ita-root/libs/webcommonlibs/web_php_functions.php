@@ -715,10 +715,14 @@
 
             list($intInsideRedirectMode, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('InsideRedirectMode'),1); // 0
 
+            $getCopy = $_GET;
+            unset($getCopy['m']);
+            unset($getCopy['c']);
             $get_parameter_anp = "";
-            if("" != http_build_query($_GET)){
-                $get_parameter_anp = "&" . http_build_query($_GET);
+            if("" != http_build_query($getCopy)){
+                $get_parameter_anp = "&" . http_build_query($getCopy);
             }
+            $get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
 
             //MDC(NNN)+
             switch ($intForceQuitDatailCode) {

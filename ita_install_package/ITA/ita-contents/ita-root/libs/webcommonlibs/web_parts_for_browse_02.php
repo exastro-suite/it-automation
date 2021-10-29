@@ -70,10 +70,12 @@ if (!empty($g['menu_initial_filter'])) {
     $varInitialFilter = $g['menu_initial_filter'];
 }
 
+$getCopy = $_GET;
 $get_parameter = "";
-if("" != http_build_query($_GET)){
-    $get_parameter = "?" . http_build_query($_GET);
+if("" != http_build_query($getCopy)){
+    $get_parameter = "?" . http_build_query($getCopy);
 }
+$get_parameter = str_replace('+', '%20', $get_parameter);
 
 // 以下コンテンツの表示
 ?>

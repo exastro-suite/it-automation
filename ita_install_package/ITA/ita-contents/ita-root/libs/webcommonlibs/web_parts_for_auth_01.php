@@ -20,6 +20,7 @@ $get_parameter = "";
 if("" != http_build_query($getCopy)){
     $get_parameter = "?" . http_build_query($getCopy);
 }
+$get_parameter = str_replace('+', '%20', $get_parameter);
 
 if(array_key_exists("no", $getCopy)){
     $ASJTM_representative_file_name = "/default/menu/01_browse.php{$get_parameter}";

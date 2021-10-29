@@ -87,6 +87,7 @@
         if("" != http_build_query($getCopy)){
             $get_parameter = "?" . http_build_query($getCopy);
         }
+        $get_parameter = str_replace('+', '%20', $get_parameter);
 
         // 登録されているログインID一覧画面へのリンク
         if (isset($arySYSCON['IP_ADDRESS_LIST'])) {
