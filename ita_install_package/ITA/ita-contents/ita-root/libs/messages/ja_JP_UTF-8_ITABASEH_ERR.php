@@ -95,6 +95,7 @@ $ary["ITABASEH-ERR-170039"]         = "End - 終了タイプの設定が不正�
 $ary["ITABASEH-ERR-170040"]         = "Status file branch - 条件分岐が不正です。";
 $ary["ITABASEH-ERR-170041"]         = "Status file branch - 条件分岐(if/elseif)に重複した値が設定されています。";
 $ary["ITABASEH-ERR-170042"]         = "Status file branch - 条件分岐(if/elseif)に値が設定されていません。";
+$ary["ITABASEH-ERR-170043"]         = "OPTION[対象ノード、項目名、値]が不正です。 ( {} )";
 $ary["ITABASEH-ERR-170101"]         = "Nodeインスタンス:保留解除できるステータス(保留中)ではありません。";
 $ary["ITABASEH-ERR-170102"]         = "Nodeインスタンス:保留解除できるNodeではありません。";
 $ary["ITABASEH-ERR-170103"]         = "Conductorインタフェース情報が未登録です。";
