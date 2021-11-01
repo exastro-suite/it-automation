@@ -60,6 +60,13 @@ $ary["ITACICDFORIAC-MNU-1200010830"]   = "パスフレーズ";
 $ary["ITACICDFORIAC-MNU-1200010831"]   = "Gitのcloneコマンドを実行した際に求められる秘密鍵ファイルに設定されているパスフレーズを入力してください。
 プロトコルでssh鍵認証(パスフレーズあり)を選択している場合、パスフレーズの入力は必須です。
 [最大長] 128バイト";
+$ary["ITACICDFORIAC-MNU-1200010840"]   = "接続パラメータ";
+$ary["ITACICDFORIAC-MNU-1200010841"]   = "Gitのcloneコマンドを実行時に環境変数「GIT_SSH_COMMAND」に設定するパラメータを設定します。
+GIT_SSH_COMMANDは、Git2.3以降のバージョンで設定出来る環境変数です。ITAサーバにインストールされているGItバージョンがGit2.3より古い場合は、設定されたパラメータが無効になります。
+環境変数「GIT_SSH_COMMAND」はデフォルトで下記のパラメータを設定してます。
+'UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+設定されたパラメータは、この後ろに追加されます。
+[最大長] 512バイト";
 $ary["ITACICDFORIAC-MNU-1200010900"]   = "Proxy";
 $ary["ITACICDFORIAC-MNU-1200011000"]   = "Address";
 $ary["ITACICDFORIAC-MNU-1200011001"]   = "Proxyサーバを利用する場合、Proxyサーバのアドレスを入力して下さい。

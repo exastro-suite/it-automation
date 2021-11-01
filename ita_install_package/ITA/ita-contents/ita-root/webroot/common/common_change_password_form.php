@@ -112,18 +112,22 @@
     $strDifferBody1 = "";
     $strDifferBody2 = "";
 
+    $getCopy = $_GET;
     $get_parameter = "";
     $get_parameter_anp = "";
-    if("" != http_build_query($_GET)){
-        $get_parameter = "?" . http_build_query($_GET);
-        $get_parameter_anp = "&" . http_build_query($_GET);
+    if("" != http_build_query($getCopy)){
+        $get_parameter = "?" . http_build_query($getCopy);
+        $get_parameter_anp = "&" . http_build_query($getCopy);
     }
-    $getCopy = $_GET;
+    $get_parameter = str_replace('+', '%20', $get_parameter);
+    $get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
+
     unset($getCopy['login']);
     $get_parameter_no_login = "";
     if("" != http_build_query($getCopy)){
         $get_parameter_no_login = "?" . http_build_query($getCopy);
     }
+    $get_parameter_no_login = str_replace('+', '%20', $get_parameter_no_login);
 
     // ---- ■リクエストに紐付くセッションが、ログイン状態かをチェックする。
     if($auth->checkAuth()){

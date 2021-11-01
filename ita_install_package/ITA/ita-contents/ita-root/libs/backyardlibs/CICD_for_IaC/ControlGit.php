@@ -41,11 +41,13 @@ class ControlGit {
     private $ProxyAddress;
     private $ProxyPort;
     private $GitCmdRsltParsAry;
+    private $sshExtraArgs;
+    private $sshExtraArgsStr;
 
     /**
      * コンストラクタ
      */
-    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $sshPassword, $sshPassphrase, $libPath, $objMTS, $retryCount, $retryWaitTime, $ProxyAddress, $ProxyPort, $GitCmdRsltParsAry) {
+    public function __construct($RepoId, $remortRepoUrl, $branch, $cloneRepoDir, $user, $password, $sshPassword, $sshPassphrase, $sshExtraArgs, $libPath, $objMTS, $retryCount, $retryWaitTime, $ProxyAddress, $ProxyPort, $GitCmdRsltParsAry) {
         $this->RepoId = $RepoId;
         $this->remortRepoUrl = $remortRepoUrl;
         $this->cloneRepoDir = $cloneRepoDir;
@@ -100,6 +102,8 @@ class ControlGit {
         if($this->sshPassphrase == ""){
             $this->sshPassphrase = "__undefine_sshPassphrase__";
         }
+        $this->sshExtraArgs = $sshExtraArgs;
+        $this->sshExtraArgsStr = "";
     }
 
     function ClearGitCommandLastErrorMsg() {
@@ -181,7 +185,7 @@ class ControlGit {
         // Git Cloneコマンドが失敗した場合、指定時間Waitし指定回数リトライする。
         for($idx =0;$idx < $this->retryCount;$idx++) {
             $shell = sprintf("%s/ky_GitClone.sh",$this->libPath);
-            $cmd = sprintf("sudo -i  %s %s %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+            $cmd = sprintf("sudo -i  %s %s %s %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
                                                       escapeshellarg($this->ProxyURL),
                                                       escapeshellarg($Authtype),
                                                       escapeshellarg($this->remortRepoUrl),
@@ -190,7 +194,8 @@ class ControlGit {
                                                       escapeshellarg($this->user),
                                                       escapeshellarg($this->password),
                                                       escapeshellarg($this->sshPassword),
-                                                      escapeshellarg($this->sshPassphrase));
+                                                      escapeshellarg($this->sshPassphrase),
+                                                      escapeshellarg($this->sshExtraArgsStr));
             $output = NULL;
             $this->ClearGitCommandLastErrorMsg();
             exec($cmd, $output, $return_var);
@@ -203,7 +208,6 @@ class ControlGit {
             }
         }
         if($comd_ok === false) {
-
             // clone失敗時はローカルディレクトリを削除
             $param = escapeshellarg($this->cloneRepoDir);
             $cmd = "sudo /bin/rm -rf " . $param . " 2>&1";
@@ -211,22 +215,6 @@ class ControlGit {
 
             // Git clone commandに失敗しました。
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1021"); 
-            $logaddstr = implode("\n",$output);
-            $logaddstr .= "\nexit code:($return_var)";
-            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
-            $this->SetGitCommandLastErrorMsg(implode("\n",$output));
-            $this->SetLastErrorMsg($FREE_LOG);
-            return false;
-        }
-
-        // ssh 設定
-        $output = NULL;
-        $cmd = "sudo git " . $this->gitOption . " config --local  core.sshCommand 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' 2>&1";
-        exec($cmd, $output, $return_var);
-
-        if(0 != $return_var){
-            // Git config の設定に失敗しました。
-            $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1020"); 
             $logaddstr = implode("\n",$output);
             $logaddstr .= "\nexit code:($return_var)";
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
@@ -274,12 +262,14 @@ class ControlGit {
         }
         if($return_var == 0) {
             $stdout = $output[0];
-            $ret = preg_match("/^origin(\s)/", $stdout);
+            $ret = preg_match("/^origin(\s)*/", $stdout);
             if($ret == 1) {
-                $ret = strstr($stdout,$this->remortRepoUrl);
-                if($ret !== false) {
+                $url = $this->remortRepoUrl;
+                $url = preg_quote($url,'/');
+                $ret = preg_match("/^origin(\s)*$url/", $stdout);
+                if($ret == 1) {
                    $cmd_ok = true;
-                }
+                } 
             }
         } else {
             //Git remote commandに失敗しました。
@@ -316,7 +306,7 @@ class ControlGit {
         if($this->branch  == "__undefine_branch__") {
             // デフォルトブランチ確認
             $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
-            $cmd1 = sprintf("sudo -i %s %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+            $cmd1 = sprintf("sudo -i %s %s %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
                                                           escapeshellarg($this->ProxyURL),
                                                           escapeshellarg($Authtype),
                                                           escapeshellarg($this->cloneRepoDir),
@@ -324,7 +314,8 @@ class ControlGit {
                                                           escapeshellarg($this->user),
                                                           escapeshellarg($this->password),
                                                           escapeshellarg($this->sshPassword),
-                                                          escapeshellarg($this->sshPassphrase));
+                                                          escapeshellarg($this->sshPassphrase),
+                                                          escapeshellarg($this->sshExtraArgsStr));
 
             // Git コマンドが失敗した場合、指定時間Waitし指定回数リトライする。
             for($idx =0;$idx < $this->retryCount;$idx++) {
@@ -346,14 +337,35 @@ class ControlGit {
                 return -1;
             } else {
                 for($idx=0;$idx<count($output1);$idx++) {
-                     // HEAD branch:
-                     $matchstr = "/^(\s)+HEAD(\s)branch:(\s)+/";
+                     $matchstr = "/^(\s)+HEAD(\s)branch/";
                      $ret = preg_match($matchstr, $output1[$idx]);
                      if($ret == 1) {
-                          $retAry = preg_split($matchstr, $output1[$idx]);
-                          $DefaultBranch = $retAry[1];
-                          break;
-                     }
+                         // HEAD branch:
+                         $matchstr = "/^(\s)+HEAD(\s)branch:(\s)+/";
+                         $ret = preg_match($matchstr, $output1[$idx]);
+                         if($ret == 1) {
+                             $retAry = preg_split($matchstr, $output1[$idx]);
+                             $DefaultBranch = $retAry[1];
+                             break;
+                         } else {
+                             // #1600の対応
+                             $matchstr = "/^(\s)+HEAD(\s)branch(\s)\(remote HEAD is ambiguous, may be one of the following\):/";
+                             $ret = preg_match($matchstr, $output1[$idx]);
+                             if($ret == 1) {
+                                 return true;
+                             } else {
+                                 $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1024"); 
+                                 $logaddstr = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1032"); 
+                                 $logaddstr .= "\n";
+                                 $logaddstr .= implode("\n",$output1);
+                                 $logaddstr .= "\nexit code:($return_var)";
+                                 $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+                                 $this->SetGitCommandLastErrorMsg($logaddstr);
+                                 $this->SetLastErrorMsg($FREE_LOG);
+                                 return -1;
+                            }
+                        }
+                    }
                 }
             }
         } 
@@ -387,6 +399,9 @@ class ControlGit {
             }
         }
         if($this->branch  == "__undefine_branch__") {
+            if($DefaultBranch == "") {
+                return true;
+            }
             if($DefaultBranch != $CurrentBranch) {
                 return false;
             }
@@ -447,7 +462,7 @@ class ControlGit {
             $output = NULL;
             $return_var = 0;
             $shell = sprintf("%s/ky_GitCommand.sh",$this->libPath);
-            $cmd = sprintf("sudo -i %s %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
+            $cmd = sprintf("sudo -i %s %s %s %s %s %s %s %s %s %s 2>&1", escapeshellarg($shell),
                                                           escapeshellarg($this->ProxyURL),
                                                           escapeshellarg($Authtype),
                                                           escapeshellarg($this->cloneRepoDir),
@@ -455,7 +470,8 @@ class ControlGit {
                                                           escapeshellarg($this->user),
                                                           escapeshellarg($this->password),
                                                           escapeshellarg($this->sshPassword),
-                                                          escapeshellarg($this->sshPassphrase));
+                                                          escapeshellarg($this->sshPassphrase),
+                                                          escapeshellarg($this->sshExtraArgsStr));
 
             exec($cmd, $output, $return_var);
             if(0 != $return_var){
@@ -653,6 +669,52 @@ class ControlGit {
                 }
                 unset($UpdateFiles['Update'][$file]);
             }
+        }
+        return true;
+    }
+    function GetGitVersion(&$nowVar) {
+        $nowVar = "";
+        $cmd = "git --version 2>&1";
+        exec($cmd,$output,$exit_code);
+        if($exit_code != 0) {
+            $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1034");
+            $logaddstr = $cmd . "\n" . implode("\n",$output);
+            $logaddstr .= "\nexit code:($exit_code)";
+            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+            $this->SetGitCommandLastErrorMsg($logstr . "\n" . $logaddstr);
+            $this->SetLastErrorMsg($FREE_LOG);
+            return false;
+        }
+        $varAry = explode(" ",$output[0]);
+        $varStr = explode(".",$varAry[2]);
+        $nowVar = sprintf("%03s%03s",$varStr[0],$varStr[1]);
+        return true;
+    }
+    function setSshExtraArgs() {
+        // Gitバージョンはチェックしないで。
+        // 環境変数「GIT_SSH_COMMAND」と git config globalにssh接続オプションを設定する
+        $ret = $this->setSshExtraArgsGit2_3High();
+        $ret = $this->setSshExtraArgsVar2_3Low();
+        return $ret;
+    }
+    function setSshExtraArgsGit2_3High() {
+        $this->sshExtraArgsStr = sprintf("ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no %s",$this->sshExtraArgs);
+        return true;
+    }
+    function setSshExtraArgsVar2_3Low() {
+        // ssh 設定
+        $output = NULL;
+        $cmd = "sudo git config --global core.sshCommand 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' 2>&1";
+        exec($cmd, $output, $return_var);
+
+        if(0 != $return_var){
+            $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1036",array($cmd)); 
+            $logaddstr = $cmd . "\n" . implode("\n",$output);
+            $logaddstr .= "\nexit code:($return_var)";
+            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+            $this->SetGitCommandLastErrorMsg($logstr . "\n" . $logaddstr);
+            $this->SetLastErrorMsg($FREE_LOG);
+            return false;
         }
         return true;
     }

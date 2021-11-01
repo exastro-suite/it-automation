@@ -70,10 +70,12 @@ if (!empty($g['menu_initial_filter'])) {
     $varInitialFilter = $g['menu_initial_filter'];
 }
 
+$getCopy = $_GET;
 $get_parameter = "";
-if("" != http_build_query($_GET)){
-    $get_parameter = "?" . http_build_query($_GET);
+if("" != http_build_query($getCopy)){
+    $get_parameter = "?" . http_build_query($getCopy);
 }
+$get_parameter = str_replace('+', '%20', $get_parameter);
 
 // 以下コンテンツの表示
 ?>
@@ -136,16 +138,16 @@ if("" != http_build_query($_GET)){
                       <!-- FORM AREA  -->
                       <div class="headerMenu">
 
-                        <?php if ($boolVisibleChangePasswordButton) { ?>
 
                         <!----  ロールボタン  ---->
                         <?php if ($role_button === '1') { ?>
                           <form  style="display:inline" onclick="role_display()" >
-                            <input type="button" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-50017") ?>" onClick=location.href="javascript:role_register_async(1);" />
+                            <input type="button" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-50017") ?>" />
                           </form>
                         <?php } ?>
                         <!----  /ロールボタン  ---->
 
+                        <?php if ($boolVisibleChangePasswordButton) { ?>
                         <!----  パスワード変更ボタン  ---->
                         <form method="POST" style="display:inline" action="<?= $scheme_n_authority ?>/common/common_change_password_form.php<?= $get_parameter ?>" >
                           <input type="submit" value="<?= $objMTS->getSomeMessage("ITAWDCH-STD-504") ?>" />

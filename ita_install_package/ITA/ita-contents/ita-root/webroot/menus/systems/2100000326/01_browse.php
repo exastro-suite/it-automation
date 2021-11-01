@@ -82,6 +82,7 @@
     print 
 <<< EOD
     <!-------------------------------- ユーザ・コンテンツ情報 -------------------------------->
+    <script>const gLoginUserID = {$g['login_id']};</script>
     <div id="privilege" style="display:none" class="text">{$privilege}</div>
     <div id="sysJSCmdText01" style="display:none" class="text">{$strCmdWordAreaOpen}</div>
     <div id="sysJSCmdText02" style="display:none" class="text">{$strCmdWordAreaClose}</div>

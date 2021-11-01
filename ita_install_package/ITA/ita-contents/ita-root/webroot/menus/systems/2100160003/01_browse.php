@@ -19,6 +19,8 @@
 $tmpAry = explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);
 require_once ( $root_dir_path . '/libs/webcommonlibs/table_control_agent/web_parts_for_template_01_browse.php');
 require_once ( $root_dir_path . '/libs/webindividuallibs/systems/2100160003/web_parts_for_create_menu.php');
+$aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITAWDCC', 'STD', '_js');
+$strTemplateBody = getJscriptMessageTemplate($aryImportFilePath, $g['objMTS']);
 ?>
 <script type="text/javascript">
 $(function() {

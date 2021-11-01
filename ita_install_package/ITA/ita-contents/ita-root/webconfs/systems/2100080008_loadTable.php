@@ -90,7 +90,7 @@ Terraform代入値管理
     //************************************************************************************
     //----作業パターン
     // REST/excel/csv入力用 Movement+変数名
-    $c = new IDColumn('REST_MODULE_VARS_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103670"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_VARS_LINK_ID','PTN_VAR_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_VARS_LINK_ID'));
+    $c = new IDColumn('REST_MODULE_VARS_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103670"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','PTN_VAR_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103680"));
 
     //コンテンツのソースがヴューの場合、登録/更新の対象外
@@ -595,16 +595,17 @@ Terraform代入値管理
                (strlen($intVarsLinkId)         === 0) &&
                (strlen($intRestVarsLinkId)     !== 0)){
                 $query =  "SELECT                                             "
+                         ."  TBL_A.MODULE_PTN_LINK_ID,                        "
                          ."  TBL_A.MODULE_VARS_LINK_ID,                              "
                          ."  TBL_A.PATTERN_ID,                                "
                          ."  COUNT(*) AS MODULE_VARS_LINK_ID_CNT                     "
                          ."FROM                                               "
                          ."  E_TERRAFORM_PTN_VAR_LIST TBL_A                     "      //モード毎
                          ."WHERE                                              "
-                         ."  TBL_A.MODULE_VARS_LINK_ID    = :MODULE_VARS_LINK_ID   AND      "
+                         ."  TBL_A.MODULE_PTN_LINK_ID    = :MODULE_PTN_LINK_ID   AND      "
                          ."  TBL_A.DISUSE_FLAG     = '0'                      ";
                 $aryForBind = array();
-                $aryForBind['MODULE_VARS_LINK_ID'] = $intRestVarsLinkId;
+                $aryForBind['MODULE_PTN_LINK_ID'] = $intRestVarsLinkId;
                 $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];

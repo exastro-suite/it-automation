@@ -1,5 +1,5 @@
 <?php
-//   Copyright 2019 NEC Corporation
+//   Copyright 2021 NEC Corporation
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -13,20 +13,15 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-
-$getCopy = $_GET;
-unset($getCopy['login']);
-$get_parameter = "";
-if("" != http_build_query($getCopy)){
-    $get_parameter = "?" . http_build_query($getCopy);
-}
-$get_parameter = str_replace('+', '%20', $get_parameter);
-
-if(array_key_exists("no", $getCopy)){
-    $ASJTM_representative_file_name = "/default/menu/01_browse.php{$get_parameter}";
-}
-else{
-    $ASJTM_representative_file_name = "/default/mainmenu/01_browse.php{$get_parameter}";
-}
-
+    //////////////////////////////////////////////////////////////////////
+    //
+    //  【処理概要】
+    //    ・WebDBCore機能を用いたWebページの、動的再描画などを行う。
+    //
+    //////////////////////////////////////////////////////////////////////
+    
+    require_once( dirname(__FILE__) ."/81_contrast_controle.php" );
+    
+    $aryForResultData = exportFileFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
+    
 ?>

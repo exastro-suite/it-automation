@@ -82,6 +82,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $table->addColumn($c);
 
+    // パスワード無期限設定
+    $c = new IDColumn('PW_EXPIRATION',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070504"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102064"));//エクセル・ヘッダでの説明
+    $c->setHiddenMainTableColumn(true);
+    $table->addColumn($c);
+
+    // 初回パスワード再設定無効
+    $c = new IDColumn('DEACTIVATE_PW_CHANGE',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070505"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102065"));//エクセル・ヘッダでの説明
+    $c->setHiddenMainTableColumn(true);
+    $table->addColumn($c);
+
     // ロール情報
     $strLabelText = $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070601");
     $c = new LinkButtonColumn('RoleInfo',$strLabelText, $strLabelText, 'edit_role_list', array(0, ':USER_ID')); 
@@ -211,8 +223,21 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $strErrorBuf = "";
         $strFxName = "";
 
+        global $g;
+
         $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
         if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
+
+            if( $modeValue=="DTUP_singleRecUpdate" ){
+                if( $reqOrgData["PASSWORD"] != "" && $aryVariant['edit_target_row']['AUTH_TYPE'] == "local" ){
+                    $username = $reqOrgData["USERNAME"];
+
+                    $sql = "UPDATE A_ACCOUNT_LIST SET PW_LAST_UPDATE_TIME = NULL WHERE USERNAME = '$username'";
+                    $objDBCA = $g["objDBCA"];
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                }
+            }
 
             $strQuery = "UPDATE A_PROC_LOADED_LIST "
                        ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "

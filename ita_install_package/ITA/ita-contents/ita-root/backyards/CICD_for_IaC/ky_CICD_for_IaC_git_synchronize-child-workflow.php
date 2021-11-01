@@ -314,9 +314,13 @@
 
         $cloneRepoDir = $LFCobj->getLocalCloneDir($RepoId);
         $libPath      = $LFCobj->getLocalShellDir();
-        $Gitobj = new ControlGit($RepoId, $RepoListRow['REMORT_REPO_URL'], $RepoListRow['BRANCH_NAME'], $cloneRepoDir, $RepoListRow['GIT_USER'],  $RepoListRow['GIT_PASSWORD'], $RepoListRow['SSH_PASSWORD'], $RepoListRow['SSH_PASSPHRASE'], $libPath, $objMTS, $RepoListRow['RETRAY_COUNT'], $RepoListRow['RETRAY_INTERVAL'], $RepoListRow['PROXY_ADDRESS'], $RepoListRow['PROXY_PORT'], $GitCmdRsltParsAry);
+        $Gitobj = new ControlGit($RepoId, $RepoListRow['REMORT_REPO_URL'], $RepoListRow['BRANCH_NAME'], $cloneRepoDir, $RepoListRow['GIT_USER'],  $RepoListRow['GIT_PASSWORD'], $RepoListRow['SSH_PASSWORD'], $RepoListRow['SSH_PASSPHRASE'], $RepoListRow['SSH_EXTRA_ARGS'], $libPath, $objMTS, $RepoListRow['RETRAY_COUNT'], $RepoListRow['RETRAY_INTERVAL'], $RepoListRow['PROXY_ADDRESS'], $RepoListRow['PROXY_PORT'], $GitCmdRsltParsAry);
 
         try {
+            // Gitのバージョンをチェックしssh接続パラメータを設定する。
+            $ret = LocalsetSshExtraArgs();
+
+            // 戻り値チェック不要
             // ローカルクローンディレクトリ有無判定
             $ret = $Gitobj->LocalCloneDirCheck();
             if($ret === false) {
@@ -2156,5 +2160,45 @@
             }
         }
         return true;
+    }
+    function LocalsetSshExtraArgs() {
+        global $cmDBobj;
+        global $DBobj;
+        global $LFCobj;
+        global $Gitobj;
+        global $error_flag;
+        global $warning_flag;
+
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+
+        global $objMTS;
+
+        // Gitのバージョンをチェックしssh接続パラメータを設定する。
+        $ret = $Gitobj->setSshExtraArgs();
+        if($ret === false) {
+            // 異常フラグON
+            $error_flag = 1;
+
+            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1033");
+
+            $logaddstr = $Gitobj->GetLastErrorMsg();
+            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+
+            // UIに表示するメッセージ
+            $UIDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1033");
+            $UIDisplayMsg .= "\n" . $Gitobj->GetGitCommandLastErrorMsg();
+
+            // 戻り値編集
+            $retary  = array();
+            $RetCode = false;
+            $retary = makeReturnArray($RetCode,$FREE_LOG,$UIDisplayMsg);
+            throw new Exception($retary);
+        } else {
+            return $ret;
+        }
     }
 ?>

@@ -890,6 +890,7 @@ border-radius: 4px;
 .notice-status-6 { background-color: #FFDC00; } /* 緊急停止 */
 .notice-status-7 { background-color: #8227B4; } /* 以上終了 */
 .notice-status-8 { background-color: #E60000; } /* 想定外エラー */
+.notice-status-11 { background-color: #FFB400; } /* 警告終了 */
 
 .modal-checkbox-check-hide {
 display: flex;
@@ -907,6 +908,24 @@ background-color: hsl( 0,0%,28% )!important;
 }
 .modal-table tbody tr.hide-notice-row td {
 background-color: hsl( 0,0%,20% )!important;
+}
+
+.notice-blank-messege {
+width: calc( 100% - 1px );
+margin: 0; padding: 8px;
+background-image: linear-gradient( #444, #444 8px, #4A4A4A );
+border: solid 1px #222;
+box-shadow: 1px 1px 0 0 rgba( 255,255,255,.1 ),
+            1px 1px 0 0 rgba( 255,255,255,.1 ) inset;
+color: #EEE;
+}
+.notice-blank-messege a:link,
+.notice-blank-messege a:visited {
+color: #337FE0;
+}
+.notice-blank-messege a:hover,
+.notice-blank-messege a:active {
+color: #FF833B;
 }
 
 .editor-modal-footer-menu {

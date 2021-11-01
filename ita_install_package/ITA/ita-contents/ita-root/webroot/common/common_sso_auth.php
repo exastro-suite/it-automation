@@ -52,6 +52,7 @@ $get_parameter = "";
 if("" != http_build_query($getCopy)){
     $get_parameter = "?" . http_build_query($getCopy);
 }
+$get_parameter = str_replace('+', '%20', $get_parameter);
 
 $nextUrl = "/";
 if("" != $get_parameter){

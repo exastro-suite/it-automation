@@ -1,10 +1,13 @@
 <?php
+$getCopy = $_GET;
 $get_parameter = "";
 $get_parameter_anp = "";
-if("" != http_build_query($_GET)){
-    $get_parameter = "?" . $_SERVER['QUERY_STRING'];
-    $get_parameter_anp = "&" . $_SERVER['QUERY_STRING'];
+if("" != http_build_query($getCopy)){
+    $get_parameter = "?" . http_build_query($getCopy);
+    $get_parameter_anp = "&" . http_build_query($getCopy);
 }
+$get_parameter = str_replace('+', '%20', $get_parameter);
+$get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
 ?>
 
 <?= $strLoginFormHeadBody ?>

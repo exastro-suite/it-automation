@@ -51,6 +51,7 @@
     $timeStamp_style_css = filemtime("$root_dir_path/webroot/menus/systems/2100190003/style.css");
 
 print <<< EOD
+    <script>const gLoginUserID = {$g['login_id']};</script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/itabase_orchestrator_drive.js?{$timeStamp_itabase_orchestrator_drive_js}"></script>
     <link rel="Stylesheet" type="text/css" href="{$scheme_n_authority}/common/css/itabase_orchestrator_drive_style.css?{$timeStamp_itabase_orchestrator_drive_style_css}">
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>

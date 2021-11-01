@@ -14,6 +14,18 @@
 //   limitations under the License.
 //
 
+//PhpSpreadsheet関連
+require_once "vendor/autoload.php";
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Collection\CellsFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Settings;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+
 //比較定義用のリスト取得
 function getContrastList($mode=""){
     global $g;
@@ -2214,6 +2226,353 @@ function execsql($strQuery,$bindkeyVlaue){
     if ($aryDataSet != array() )return $retArray[4];
     return $retArray;
 };
+
+//CSV出力
+function exportCSV($filename, $data, $mode=""){
+
+    global $g;
+
+    // ファイル出力用 (03_create_excel) / BASE64出力
+    if( $mode == "" ){
+        $fp = fopen('php://output', 'w');
+
+        stream_filter_append($fp, 'convert.iconv.UTF-8/CP932//TRANSLIT', STREAM_FILTER_WRITE);
+
+        foreach ($data as $row) {
+            fputcsv($fp, $row, ',', '"');
+        }
+        fclose($fp);
+        header('Content-Type: application/octet-stream');
+        header("Content-Disposition: attachment; filename={$filename}");
+        header('Content-Transfer-Encoding: binary');
+        exit;     
+    }else{
+        $tmpStrTempFilename = makeUniqueTempFilename("{$g['root_dir_path']}/temp","temp_csv_rest");
+        $fp = fopen($tmpStrTempFilename, 'w');
+
+        foreach ($data as $row) {
+            fputcsv($fp, $row, ',', '"');
+        }
+        fclose($fp);
+
+        $strbase64file = base64_encode( file_get_contents($tmpStrTempFilename) );
+        unlink($tmpStrTempFilename);
+        return $strbase64file;
+    }
+}
+
+//Excel出力
+function exportExcel($filename, $data, $flgdata,$mode=""){
+
+    global $g;
+    
+    //行の英字取得
+    $maxRow = count( $data );
+    $maxCol = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex( count($data[0]) );
+    
+    //開始、終了セル
+    $startCell = "A1";
+    $endCell = $maxCol.$maxRow;
+
+    //初期設定
+    $spreadsheet = new Spreadsheet();
+    $spreadsheet->getDefaultStyle()->getFont()->setName(  $g['objMTS']->getSomeMessage("ITABASEH-MNU-310222",__FUNCTION__) ); #メイリオ/Arial(jp/en)
+    $spreadsheet->getDefaultStyle()->getFont()->setSize( 8 );
+
+    //アクティブシートを取得
+    $sheet = $spreadsheet->getActiveSheet();
+    //グリッド非表示
+    $sheet->setShowGridlines(false);
+    //列固定
+    $sheet->freezePane( 'D2' );
+
+    //配列からセルへデータ格納
+    $sheet->fromArray($data, NULL, 'A1', true);
+
+    //スタイルの設定
+    //ヘッダー設定
+    $startheaderCell = $startCell;
+    $endheaderCell = $maxCol."1";
+    $targetCell= "${startheaderCell}:${endheaderCell}";
+
+    //ヘッダー、背景色、文字色設定
+    $sheet->getStyle($targetCell)->getFont()->getColor()->setRGB('FFFFFF');
+    $sheet->getStyle($targetCell)->getFill()->setFillType(Fill::FILL_SOLID);
+    $sheet->getStyle($targetCell)->getFill()->getStartColor()->setRGB('0045A7');
+
+    //差分強調表示
+    foreach ( $flgdata as $rownum => $arrcol ) {
+        foreach ($arrcol as $colnum => $contrastflg) {
+
+            //対象セル、値
+            $cellname =  \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex( $colnum + 1 ) . ($rownum + 1) ;
+            $cellval = $sheet->getCell($cellname)->getValue();
+
+            //比較対象項目のみ文字列表記
+            if( $colnum > 6 ){
+                $sheet->setCellValueExplicit($cellname,$cellval,\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            }
+
+            //強調表示
+            if( $contrastflg == 1 ){
+                $sheet->getStyle($cellname)->getFont()->getColor()->setRGB('ff0000');
+                $sheet->getStyle($cellname)->getFont()->setBold(true);
+            }
+        }
+    }
+
+    //格子設定
+    $targetCell= "${startCell}:${endCell}";
+    $sheet->getStyle($targetCell)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+    $sheet->getStyle($targetCell)->getBorders()->getAllBorders()->getColor()->setRGB('7f7f7f');
+
+    //折り返し設定
+    $targetS = "H2";
+    $targetCell= "${targetS}:${endCell}";
+    $sheet->getStyle($targetCell)->getAlignment()->setWrapText(true);
+    $sheet -> setAutoFilter( $sheet -> calculateWorksheetDimension() );
+
+    //幅、高さ設定
+    $maxCol=count($data[0]);
+    for($i_col = 1; $i_col <= $maxCol; ++$i_col){
+        $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i_col))->setAutoSize(true);
+    }
+    $sheet->calculateColumnWidths();
+    for($i_col = 1; $i_col <= $maxCol; ++$i_col){
+        $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i_col))->setAutoSize(false);
+    }
+    for($i_col = 1; $i_col <= $maxCol; ++$i_col){
+        $width = $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i_col))->getWidth();
+
+        //フィルタ▼幅調整
+        $width = $width + 4.5;
+        $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i_col))->setWidth($width);  
+
+    }
+
+    // ファイル出力用 (03_create_excel) / BASE64出力
+    if( $mode == "" ){
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;');
+        header("Content-Disposition: attachment; filename={$filename}");
+        header('Cache-Control: max-age=0');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }else{
+        $tmpStrTempFilename = makeUniqueTempFilename("{$g['root_dir_path']}/temp","temp_excel_rest");
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tmpStrTempFilename);
+        $strbase64file = base64_encode( file_get_contents($tmpStrTempFilename) );
+        unlink($tmpStrTempFilename);
+        return $strbase64file;
+    }
+}
+
+
+//RESTAPI 
+function exportFileFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData){
+    /*
+        $objJSONOfReceptedData = array(
+            'CONTRAST_ID'      => '', // 比較定義No
+            'BASE_TIMESTAMP_0' => '', // 基準日1
+            'BASE_TIMESTAMP_1' => '', // 基準日2
+            'HOST_LIST'        => '', // 対象ホスト
+            'FORMATTER_ID'     => '', //　出力形式(1:CSV/2:EXCEL)        ※デフォルト1
+            'OUTPUT_TYPE'      => '', //　出力内容(1:全件/2:差分あり)      ※デフォルト1
+        );
+    */
+    global $g;
+    
+    // 各種ローカル定数を定義
+    $intControlDebugLevel01 = 250;
+    
+    $arrayRetBody = array();
+    
+    $intResultStatusCode = null;
+    $aryForResultData = array();
+    $aryPreErrorData = null;
+    
+    $intErrorType = null;
+    $aryErrMsgBody = array();
+    $strErrMsg = "";
+
+    $strResultMsg = "";
+    $strResultCode = "";
+
+    $strSysErrMsgBody = '';
+    $intErrorPlaceMark = "";
+    $strErrorPlaceFmt = "%08d";
+
+    $mode = "rest";
+    $tmpfile="";
+    $strbase64Data="";
+    $outputfilename="";
+
+    $strExpectedErrMsgBodyForUI="";
+    
+    $aryOverrideForErrorData = array();
+
+    $intResultInfoCode="000";//結果コード(正常終了)
+
+    $validateErrtype = "";
+
+    // 各種ローカル変数を定義
+    
+    $strFxName = __FUNCTION__;
+    dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+    try{
+        
+        if( is_array($objJSONOfReceptedData) !== true ){
+            $tmpAryOrderData = array();
+        }
+        else{
+            $tmpAryOrderData = $objJSONOfReceptedData;
+        }
+    
+        switch($strCommand){
+            case "COMPARE":
+                
+                //パラメータチェック
+                list($intContrastid , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('COMPARE_ID') ,null);
+                list($strBaseTime0  , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('BASE_TIMESTAMP_0') ,null);
+                list($strBaseTime1  , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('BASE_TIMESTAMP_1') ,null);
+                list($strhostlist   , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('HOST_LIST') ,null);
+                list($strFormat     , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('FORMATTER_ID') ,1);
+                list($outputType    , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('OUTPUT_TYPE') ,1);
+
+                //基準日整形チェック(Y/m/d H:i:s)
+                $validateDateFormat = '/\A[0-9]{4}\/[0-9]{1,2}\/[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}\z/';
+                if( $strBaseTime0 !== null ){
+                    if( preg_match($validateDateFormat, $strBaseTime0 ) ){
+                        $strBaseTime0 = date('Y/m/d H:i', strtotime($strBaseTime0));
+                    }else{
+                        $validateErrtype = 'BASE_TIMESTAMP_0';
+                    }
+                }
+                if( $strBaseTime1 !== null ){
+                    if( preg_match($validateDateFormat, $strBaseTime1 ) ){
+                        $strBaseTime1 = date('Y/m/d H:i', strtotime($strBaseTime1));
+                    }else{
+                        $validateErrtype = 'BASE_TIMESTAMP_1';
+                    }
+                }
+
+                //必須パラメータあり(比較定義ID,出力形式)
+                if ( is_numeric($intContrastid)  ){
+
+                    //比較定義リスト表示用
+                    $arrayResult =  getContrastList(1);
+                    $arrContrastList = $arrayResult[2];
+
+                    $strContrastName="";
+                    if( $arrContrastList[0] != 1  ){
+                        foreach ($arrContrastList as $arrContrast) {
+                            if( $arrContrast['CONTRAST_LIST_ID'] == $intContrastid )$strContrastName = $arrContrast['CONTRAST_LIST_ID']."_".$arrContrast['CONTRAST_NAME'] ;
+                        }
+                    }
+
+                    if( $strContrastName != "" && array_search($strFormat, array(1,2) ) !== false && $validateErrtype == "" ){
+
+                        //出力時、ファイル名文字数制限
+                        $charlimit=128;
+                        if( mb_strlen($strContrastName) > $charlimit ){
+                            //ファイル名短縮                
+                            $strContrastName = mb_substr($strContrastName, 0, $charlimit, "UTF-8");
+                        }
+
+                        $outputdate=date('YmdHis');
+                        $outputfilename = $strContrastName . "_" . $outputdate;
+
+                        //比較結果取得 
+                        $arrayResult =  getContrastResult($intContrastid,$strBaseTime0,$strBaseTime1,$strhostlist,$outputType);
+
+                        $arrmainlist = $arrayResult[2][0];
+                        unset($arrmainlist[0]);
+
+                        //絞り込み等で比較結果がある場合
+                        if( count($arrmainlist) >= 1 ){
+                            //出力処理
+                            switch ( $strFormat ) {
+                                case '1':
+                                    $ext = "csv";
+                                    $outputfilename = $outputfilename .".". $ext;
+                                    //表示用データ
+                                    $arrContrastResult = $arrayResult[2][0];
+                                    $strbase64Data = exportCSV($outputfilename,$arrContrastResult,$mode);
+                                    break;
+                                case '2':
+                                    $ext = "xlsx";
+                                    $outputfilename = $outputfilename .".". $ext;
+                                    //表示用データ
+                                    $arrContrastResult = $arrayResult[2][0];
+                                    //強調表示用フラグデータ
+                                    $arrContrastflg = $arrayResult[2][1];
+                                    $strbase64Data = exportExcel($outputfilename,$arrContrastResult,$arrContrastflg,$mode);
+                                    break;
+                                default:
+                                    break;
+                            }                    
+                        }else{
+                            $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310221");#"指定した条件で比較対象となるデータがありません";
+                            $intResultInfoCode = "001";
+                            $outputfilename = "";
+                        }
+                    }else{
+                        //パラメータ不正時
+                        $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310221");#"指定した条件で比較対象となるデータがありません";
+                        $intResultInfoCode = "001";
+                        $outputfilename = "";      
+                    }
+                }else{
+                    //パラメータ不正時
+                        $intErrorPlaceMark = 1000;
+                        $intResultStatusCode = 400;
+                        $aryOverrideForErrorData['Error'] = 'Forbidden';
+                        web_log($g['objMTS']->getSomeMessage("ITABASEH-ERR-3820101"));
+                        throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+
+                // 成功時のデータテンプレを取得
+                $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
+                $aryForResultData['resultdata'] = array();
+                $aryForResultData['resultdata']['RESULTCODE'] = $intResultInfoCode;
+                $aryForResultData['resultdata']['RESULTINFO'] = $strResultMsg;  
+                $aryForResultData['resultdata']['FILENAME'] = $outputfilename;
+                $aryForResultData['resultdata']['FILE'] = $strbase64Data;
+
+                break;
+            default:
+                $intErrorPlaceMark = 1000;
+                $intResultStatusCode = 400;
+                $aryOverrideForErrorData['Error'] = 'Forbidden';
+                web_log($g['objMTS']->getSomeMessage("ITABASEH-ERR-3820101"));
+                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+        }
+    }
+    catch (Exception $e){
+        // 失敗時のデータテンプレを取得
+        $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+        foreach($aryOverrideForErrorData as $strKey=>$varVal){
+            $aryForResultData[$strKey] = $varVal;
+        }
+        if( 0 < strlen($strExpectedErrMsgBodyForUI) ){
+            $aryPreErrorData[] = $strExpectedErrMsgBodyForUI;
+        }
+        $tmpErrMsgBody = $e->getMessage();
+        dev_log($tmpErrMsgBody, $intControlDebugLevel01);
+        if( $intResultStatusCode === null ) $intResultStatusCode = 500;
+        if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
+        if( 500 <= $intErrorType ) $strSysErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
+    }
+    $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                          'ResultData'=>$aryForResultData);
+    dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+    return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+
+}
 
 
 ?>

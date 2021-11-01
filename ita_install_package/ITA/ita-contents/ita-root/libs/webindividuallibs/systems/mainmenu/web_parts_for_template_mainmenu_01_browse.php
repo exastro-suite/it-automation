@@ -72,6 +72,7 @@ $timeStamp_00_javascript_js = filemtime("$jsFile_Absolute_path");
 
     print 
 <<< EOD
+    <script>const gLoginUserID = {$g['login_id']};</script>
     <script type="text/javascript" src="/default/mainmenu/02_access.php?client=all$url_add_param"></script>
     <script type="text/javascript" src="/default/mainmenu/02_access.php?stub=all$url_add_param"></script>
     <script type="text/javascript" src="{$jsFile}?$timeStamp_00_javascript_js"></script>

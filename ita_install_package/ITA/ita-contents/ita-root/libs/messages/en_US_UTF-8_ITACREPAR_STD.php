@@ -20,5 +20,5 @@ $ary["ITACREPAR-STD-10003"]         = "[{}] END(ERROR)";
 $ary["ITACREPAR-STD-10004"]         = "No target record";
 $ary["ITACREPAR-STD-50001"]         = "For Host";
 $ary["ITACREPAR-STD-50002"]         = "For HostGroup";
-$ary["ITACREPAR-STD-50003"]         = "for the history table.";
+$ary["ITACREPAR-STD-50003"]         = "For the history table.";
 ?>

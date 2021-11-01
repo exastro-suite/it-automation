@@ -1841,7 +1841,11 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
         }
         $aryOrcListRow = $aryRetBody[0];
-        
+
+        //各ドライバのインターフェース情報設定　#587
+        $arrDataRelaystoragePath = array();
+        $arrDriversList = $objOLA->getStatusFileInfo();
+
         $aryPatternListPerOrc = array();
         //----存在するオーケストレータ分回る
         foreach($aryOrcListRow as $arySingleOrcInfo){
@@ -1870,6 +1874,31 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             //オーケストレータカラーを取得----
             
             $aryPatternListPerOrc[$varOrcId]['ThemeColor'] = $strThemeColor;
+
+            //　ステータスファイル参照先ディレクトリの取得 #587
+            if( array_key_exists($varOrcId, $arrDriversList) ){
+                //各ドライバのインターフェース情報取得　#587  
+                $strDriverTable = $arrDriversList[$varOrcId]["table"];
+                $strDriverCol = $arrDriversList[$varOrcId]["column"];
+                $strDriverPath = $arrDriversList[$varOrcId]["path"];
+                $sql =   " SELECT * FROM {$strDriverTable} TAB_A "
+                        ." WHERE TAB_A.DISUSE_FLAG = '0' "
+                        ."";
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                $r = $objQuery->sqlExecute();
+                if( $r == 1 && $strDriverCol != "" ){
+                    $row = $objQuery->resultFetch();
+                    $arrDataRelaystoragePath[$varOrcId] = $row[$strDriverCol] ."/". $strDriverPath ;
+                }else{
+                    $arrDataRelaystoragePath[$varOrcId] = "";
+                }                
+            }else{
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000600";
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            }
+
         }
         //存在するオーケストレータ分回る----
 
@@ -2030,6 +2059,33 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
                 $aryInstanceItems['JUMP']                   = $aryJumpInfo[0];
                 //----ジャンプ用(ITA-ROOTからの)相対URL-
 
+                //　ステータスファイル(status-file-branch用) #587
+                $strgetStatusfile = "";
+                if( $arrDataRelaystoragePath[$varOrcIdFromMovInstanceTable] != "" ){
+                    $strDataRelaystoragePath = $arrDataRelaystoragePath[$varOrcIdFromMovInstanceTable]."/". str_pad($varOrchInstanceId, 10, '0', STR_PAD_LEFT)."/out/MOVEMENT_STATUS_FILE";
+                    if( file_exists($strDataRelaystoragePath) ) {
+                        //ステータスファイル取得
+                        $tmpgetStatusfile = file_get_contents( $strDataRelaystoragePath );
+                        
+                        //BOM削除
+                        $bomcode = hex2bin('EFBBBF');
+                        $tmpgetStatusfile = preg_replace("/^{$bomcode}/", '', $tmpgetStatusfile);
+                        
+                        //ステータス取得
+                        $tmpgetStatusfile = str_replace(array("\r\n", "\r", "\n"), PHP_EOL, $tmpgetStatusfile);
+                        $tmpgetStatusfile = explode( PHP_EOL , $tmpgetStatusfile);
+                        //行頭から最初の値を評価対象
+                        foreach ($tmpgetStatusfile as $tmpStatus) {
+                            if( $tmpStatus != "" ){
+                                $strgetStatusfile = $tmpStatus;
+                                break;   
+                            }
+                        }
+
+                        $aryInstanceItems['STATUS_FILE'] = $strgetStatusfile;
+
+                    }
+                }
             }
 
             if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" && $row['I_NODE_TYPE_ID'] == 4  ){

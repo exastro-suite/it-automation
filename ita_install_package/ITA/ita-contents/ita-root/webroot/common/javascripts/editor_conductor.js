@@ -362,7 +362,8 @@ const conductorStatus = {
   '7': ['fail', getSomeMessage("ITABASEC020307")],    //異常終了:7
   '8': ['error', getSomeMessage("ITABASEC020308")],    //想定外エラー:8
   '9': ['cancel', getSomeMessage("ITABASEC020309")],    //予約取消:9
-  '10': ['error', getSomeMessage("ITABASEC020310")]    //想定外エラー(ループ):10
+  '10': ['error', getSomeMessage("ITABASEC020310")],  //想定外エラー(ループ):10
+  '11': ['error', getSomeMessage("ITABASEC020311")]   //警告終了:11
 };
 
 // Nodeステータス
@@ -392,6 +393,13 @@ const movementEndStatus = {
   '11': ['error', getSomeMessage("ITABASEC010307") ], // 想定外エラー
   '14': ['skip', getSomeMessage("ITABASEC010702") ], // Skip完了
   '9999': ['other', 'Other'],
+};
+
+// End flag
+const endType = {
+  '5': ['done', getSomeMessage("ITABASEC020305")], // 正常
+  '11': ['warning', getSomeMessage("ITABASEC020311")], // 警告
+  '7': ['error', getSomeMessage("ITABASEC020307")] // 異常
 };
 
 // MERGEテータス
@@ -439,10 +447,11 @@ let editorValue = {
 
 // 接続禁止パターン（ out Type : [in Types] ）
 const connectablePattern = {
-  'start' : ['conditional-branch','merge','pause'],
-  'conditional-branch' : ['conditional-branch','merge'],
-  'parallel-branch' : ['conditional-branch','parallel-branch','pause'],
-  'merge' : ['conditional-branch','merge'],
+  'start' : ['conditional-branch','merge','pause','status-file-branch'],
+  'conditional-branch' : ['conditional-branch','merge','status-file-branch'],
+  'parallel-branch' : ['conditional-branch','parallel-branch','pause','status-file-branch'],
+  'status-file-branch': ['conditional-branch','pause','status-file-branch','merge'],
+  'merge' : ['conditional-branch','merge','status-file-branch'],
   'pause' : ['pause','end']
 };
 
@@ -1210,6 +1219,7 @@ const nodeSet = function( $node, x, y ){
       if (
         ( nodeType === 'conditional-branch' && terminalType === 'out' ) ||
         ( nodeType === 'parallel-branch' && terminalType === 'out' ) ||
+        ( nodeType === 'status-file-branch' && terminalType === 'out' ) ||
         ( nodeType === 'merge' && terminalType === 'in' )
       ) {
         // 条件分岐Case情報をセット
@@ -1220,7 +1230,9 @@ const nodeSet = function( $node, x, y ){
           });
           conductorData[ nodeID ].terminal[ terminalID ].condition = branchArray;
         }
-        conductorData[ nodeID ].terminal[ terminalID ].case = branchCount++;
+        if ( conductorData[ nodeID ].terminal[ terminalID ].case !== 'else') {
+          conductorData[ nodeID ].terminal[ terminalID ].case = branchCount++;
+        }
       }
       
       conductorData[ nodeID ].terminal[ terminalID ].id = terminalID;
@@ -1369,12 +1381,14 @@ const createNodeHTML = function( nodeID ) {
       'call_s' : ['Sc', 'Symphony call', 'Not selected', 'symphony-call'],
       'conditional-branch' : ['', '', '', 'function function-conditional'],
       'parallel-branch' : ['', '', '', 'function function-parallel'],
+      'status-file-branch' : ['', '', '', 'function function-status-file'],
       'merge' : ['', '', '', 'function function-merge']
     };
 
     let nodeHTML = '',
         typeCheck = [],
-        nodeClass = ['node'];
+        nodeClass = ['node'],
+        attrData = [];
 
     if ( nodeData.type !== 'movement') {
       nodeClass.push( nodeText[ nodeData.type ][ 3 ] );
@@ -1434,6 +1448,15 @@ const createNodeHTML = function( nodeID ) {
       nodeType = nodeText[ nodeData.type ][1];
       nodeName = nodeText[ nodeData.type ][2];
     }
+    
+    if ( nodeData.type === 'end') {
+      const endStatus = endType[conductorData[ nodeID ].END_TYPE][1],
+            endID = endType[conductorData[ nodeID ].END_TYPE][0];
+      if ( conductorData[ nodeID ].END_TYPE !== '5') {
+        nodeName += ' : ' + endStatus;
+      }
+      attrData.push('data-end-status="' + endID + '"');
+    }
 
     // Node circle & Node type
     typeCheck = ['start', 'end', 'movement', 'call', 'call_s'];
@@ -1442,8 +1465,9 @@ const createNodeHTML = function( nodeID ) {
       + '<div class="node-circle">'
         + '<span class="node-gem"><span class="node-gem-inner node-gem-length-' + nodeCircle.length + '">' + nodeCircle + '</span></span>'
         + '<span class="node-running"></span>'
-        + '<span class="node-result" data-result-text="" data-href="#"></span>'
-      + '</div>'
+        + '<span class="node-result" data-result-text="" data-href="#"></span>';
+      if ( nodeData.type === 'end') nodeHTML += '<span class="node-end-status"><span class="node-end-status-inner"></span></span>';
+      nodeHTML += '</div>'
       + '<div class="node-type"><span>' + nodeType + '</span></div>';
     }
     // Node name
@@ -1471,13 +1495,19 @@ const createNodeHTML = function( nodeID ) {
     if ( nodeData.type === 'pause' ) {
       nodeHTML += pauseStatusHTML();
     }
+    // Status file
+    if ( nodeData.type === 'status-file-branch' ) {
+      nodeHTML += '<div class="node-type"><span>Status file</span></div>'
+        + '<div class="node-name">'
+          + '<span class="status-file-result"><span class="status-file-result-inner"></span></span>'
+        + '</div>';
+    }
     
-
     // Node body END
     nodeHTML += '</div>';
 
     // Terminal out CAP
-    typeCheck = ['end', 'parallel-branch', 'conditional-branch'];
+    typeCheck = ['end', 'parallel-branch', 'conditional-branch', 'status-file-branch'];
     if ( typeCheck.indexOf( nodeData.type ) !== -1 ) {
       nodeHTML += createTerminalHTML('out');
     } else {
@@ -1489,24 +1519,29 @@ const createNodeHTML = function( nodeID ) {
     nodeHTML += '</div>';
 
     // Branch
-    typeCheck = ['parallel-branch', 'conditional-branch'];
+    typeCheck = ['parallel-branch', 'conditional-branch', 'status-file-branch'];
     if ( typeCheck.indexOf( nodeData.type ) !== -1 ) {
       nodeHTML += '<div class="branch-line"><svg></svg></div>'
       + '<div class="node-branch">';
       const terminalIDList = terminalInOutID( nodeData.terminal, 'out'),
             terminalLength = terminalIDList.length;
-      let caseNumberHTML = [];
+      let caseNumberHTML = {};
       for ( let i = 0; i < terminalLength; i++ ) {
-        const conditionList = nodeData.terminal[ terminalIDList[ i ] ].condition;
-        let caseNumber = nodeData.terminal[ terminalIDList[ i ] ].case;
-        if ( caseNumber === undefined ) caseNumber = i;
+        let conditionList = nodeData.terminal[ terminalIDList[ i ] ].condition,
+            caseNumber = nodeData.terminal[ terminalIDList[ i ] ].case;
+        
+        if ( caseNumber === undefined ) caseNumber = 'undefined' + i;
+        
         if ( conditionList !== undefined && Number( conditionList[0] ) === 9999 ) {
+          caseNumberHTML[ caseNumber ] = '<div class="node-sub default">';
+        } else if ( nodeData.terminal[ terminalIDList[ i ] ].case === 'else') {
           caseNumberHTML[ caseNumber ] = '<div class="node-sub default">';
         } else {
           caseNumberHTML[ caseNumber ] = '<div class="node-sub">';
         }
         caseNumberHTML[ caseNumber ] += '<div class="branch-cap branch-in"></div>';
-        // 条件
+        
+        // ムーブメント結果条件
         if ( nodeData.type === 'conditional-branch' ) {
           const conditionLength = conditionList.length;
           caseNumberHTML[ caseNumber ] += '<div class="node-body">'
@@ -1519,9 +1554,18 @@ const createNodeHTML = function( nodeID ) {
           caseNumberHTML[ caseNumber ] += '</ul></div>'
           + '</div>';
         }
+        // ステータスファイル分岐
+        if ( nodeData.type === 'status-file-branch' ) {
+          if ( conditionList === undefined ) conditionList = [''];
+          caseNumberHTML[ caseNumber ] += statuFileBranchBodyHTML( caseNumber, (caseNumber === 'else')? true: false, conditionList.join('') );
+        }        
         caseNumberHTML[ caseNumber ] += createTerminalHTML('out', terminalIDList[ i ] ) + '</div>';
       }
-      nodeHTML += caseNumberHTML.join('') + '</div>';
+      
+      for ( const html in caseNumberHTML ) {
+        nodeHTML += caseNumberHTML[html];
+      }
+      nodeHTML += '</div>';
     }
 
     // Note
@@ -1576,7 +1620,7 @@ const createNodeHTML = function( nodeID ) {
     }
 
     // Node wrap
-    nodeHTML = '<div id="' + nodeID + '" class="' + nodeClass.join(' ') + '">' + nodeHTML + '</div>';
+    nodeHTML = '<div id="' + nodeID + '" class="' + nodeClass.join(' ') + '" ' + attrData.join(' ') + '>' + nodeHTML + '</div>';
 
     return $( nodeHTML );
 
@@ -1619,7 +1663,7 @@ const initialNode = function( nodeType, movementID ){
     }
     
     // Branch
-    typeCheck = ['parallel-branch', 'conditional-branch'];
+    typeCheck = ['parallel-branch', 'conditional-branch', 'status-file-branch'];
     if ( typeCheck.indexOf( nodeType ) !== -1 ) {
       const outTerminalID1 = 'terminal-' + terminalCounter(),
             outTerminalID2 = 'terminal-' + terminalCounter();
@@ -1634,10 +1678,13 @@ const initialNode = function( nodeType, movementID ){
       if ( nodeType === 'conditional-branch') {
         conductorData[ nodeID ]['terminal'][ outTerminalID1 ]['condition'] = [ 9 ];
         conductorData[ nodeID ]['terminal'][ outTerminalID2 ]['condition'] = [ 9999 ];
+      } else if ( nodeType === 'status-file-branch') {
+        conductorData[ nodeID ]['terminal'][ outTerminalID1 ]['case'] = 1;
+        conductorData[ nodeID ]['terminal'][ outTerminalID2 ]['case'] = 'else';
       }
     }
       
-    typeCheck = ['end', 'parallel-branch', 'conditional-branch'];
+    typeCheck = ['end', 'parallel-branch', 'conditional-branch', 'status-file-branch'];
     if ( typeCheck.indexOf( nodeType ) === -1 ) {
       const outTerminalID = 'terminal-' + terminalCounter();
       conductorData[ nodeID ]['terminal'][ outTerminalID ] = {
@@ -1662,6 +1709,10 @@ const initialNode = function( nodeType, movementID ){
       conductorData[ nodeID ]['SKIP_FLAG'] = 0;
       conductorData[ nodeID ]['CALL_SYMPHONY_ID'] = null;
       conductorData[ nodeID ]['OPERATION_NO_IDBH'] = null;
+    }
+    
+    if ( nodeType === 'end' ) {
+      conductorData[ nodeID ]['END_TYPE'] = '5';
     }
 
     return createNodeHTML( nodeID );
@@ -1703,6 +1754,7 @@ const branchLine = function( nodeID, setMode ) {
   $branchNode.find('.node-sub').each( function( index ){
   
     const $subNode = $( this ).find('.node-terminal'),
+          terminalID = $subNode.attr('id'),
           $branchLine = $( document.createElementNS( xmlns, 'path') ),
           $branchInLine = $( document.createElementNS( xmlns, 'path') ),
           $branchOutLine = $( document.createElementNS( xmlns, 'path') ),
@@ -1722,10 +1774,11 @@ const branchLine = function( nodeID, setMode ) {
     $branchSVG.prepend( $branchBackLine );
     $branchSVG.append( $branchOutLine, $branchInLine, $branchLine );
     // class
-    $branchLine.attr('class','branch-line');
-    $branchInLine.attr('class','branch-in-line');
-    $branchOutLine.attr('class','branch-out-line');
-    $branchBackLine.attr('class','branch-back-line');
+    const terminalClass = terminalID + '-branch-line';
+    $branchLine.attr('class','branch-line ' + terminalClass );
+    $branchInLine.attr('class','branch-in-line ' + terminalClass );
+    $branchOutLine.attr('class','branch-out-line ' + terminalClass );
+    $branchBackLine.attr('class','branch-back-line ' + terminalClass );
     // 座標設定
     if ( branchType === 'merge' ) {
       order = svgOrder('M',[[0,startY]]) + svgOrder('C',[[30,startY],[width-30,endY],[width,endY]]);
@@ -1746,48 +1799,54 @@ const branchLine = function( nodeID, setMode ) {
 //   ノード分岐追加・削除
 // 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+const statuFileBranchBodyHTML = function( index, elseFlag, value ){
+  if ( index === undefined ) index = 2;
+  if ( value === undefined ) value = '';
+  value = $('<div/>', {'text': value }).html();
+  
+  let html = '<div class="node-body">';
+  if ( elseFlag === true ) {
+    html += '<div class="branch-if-type branch-if-else">else</div>';
+  } else {
+    const ifText = ( Number( index ) === 1 )? 'if': 'else if';
+    html += '<div class="branch-if-type">' + ifText + '</div>'
+    + '<div class="branch-if-body"><span class="branch-if-value"><span class="branch-if-value-inner">' + value + '</span></span></div>';
+  }
+  html += '</div>';
+  return html;
+};
 const addBranch = function( nodeID ) {
     const $branchNode = $('#' + nodeID );
     let branchType = '',
-        nodeHTML = '',
-        panelHTML = '';
+        nodeHTML = '<div class="node-sub">';
     
     if ( $branchNode.is('.function-conditional') ) {
       branchType = 'conditional';
-      nodeHTML = ''
-        + '<div class="node-sub">'
+      nodeHTML += ''
           + '<div class="branch-cap branch-in"></div>'
           + '<div class="node-body">'
             + '<div class="branch-type"><ul></ul></div>'
           + '</div>'
-          + createTerminalHTML('out', 'terminal-' + g_TerminalCounter )
-        + '</div>';
-      panelHTML = ''
-        + '<tr>'
-          + '<th class="panel-th">Case {{n}} :</th>'
-          + '<td class="panel-td"><ul class="branch-case"></ul></td>'
-        + '</tr>';
+          + createTerminalHTML('out', 'terminal-' + g_TerminalCounter );
     } else if ( $branchNode.is('.function-parallel') ) {
       branchType = 'parallel';
-      nodeHTML = ''
-        + '<div class="node-sub">'
+      nodeHTML += ''
           + '<div class="branch-cap branch-in"></div>'
-          + createTerminalHTML('out', 'terminal-' + g_TerminalCounter )
-        + '</div>';
-      panelHTML = ''
-        + '<tr>'
-          + '<th class="panel-th">Case :</th>'
-          + '<td class="panel-td"><ul class="branch-case"></ul></td>'
-        + '</tr>';
+          + createTerminalHTML('out', 'terminal-' + g_TerminalCounter );
+    } else if ( $branchNode.is('.function-status-file') ) {
+      branchType = 'status-file';
+      nodeHTML += ''
+          + '<div class="branch-cap branch-in"></div>'
+          + statuFileBranchBodyHTML()
+          + createTerminalHTML('out', 'terminal-' + g_TerminalCounter );
     } else if ( $branchNode.is('.function-merge') ) {
       branchType = 'merge';
-      nodeHTML = ''
-        + '<div class="node-sub">'
+      nodeHTML += ''
           + createTerminalHTML('in', 'terminal-' + g_TerminalCounter )
           + mergeStatusHTML()
-          + '<div class="merge-cap merge-out"></div>'
-        + '</div>'
+          + '<div class="merge-cap merge-out"></div>';
     }
+    nodeHTML += '</div>';
     
     if ( branchType !== '' ) {
       // 条件分岐は最大6分岐までにする
@@ -1795,19 +1854,20 @@ const addBranch = function( nodeID ) {
       if ( !( branchType === 'conditional' && branchLength > 6 ) ) {
         g_TerminalCounter++;
 
-        if ( branchType === 'conditional' ) {
+        if ( branchType === 'conditional' || branchType === 'status-file' ) {
           $branchNode.find('.node-sub.default').before( nodeHTML );
-          panelHTML = panelHTML.replace('{{n}}', branchLength );
-          $('#branch-case-list').find('tbody').append( panelHTML );
         } else if ( branchType === 'parallel' ) {
           $branchNode.find('.node-branch').append( nodeHTML );
         } else {
           $branchNode.find('.node-' + branchType ).append( nodeHTML );
         }
+        
         const beforeNodeData = $.extend( true, {}, conductorData[ nodeID ] );
         nodeSet( $branchNode );
         const afterNodeData = $.extend( true, {}, conductorData[ nodeID ] );
         conductorHistory.branch( beforeNodeData, afterNodeData );
+        
+        panelChange( nodeID );
         branchLine( nodeID );
         connectEdgeUpdate( nodeID );
       } else {
@@ -1823,6 +1883,8 @@ const removeBranch = function( nodeID, terminalID ) {
       branchType = 'conditional';
     } else if ( $branchNode.is('.function-parallel') ) {
       branchType = 'parallel';
+    } else if ( $branchNode.is('.function-status-file') ) {
+      branchType = 'status-file';
     } else if ( $branchNode.is('.function-merge') ) {
       branchType = 'merge';
     }
@@ -1879,6 +1941,11 @@ const removeBranch = function( nodeID, terminalID ) {
           panelChange( nodeID );
           connectEdgeUpdate( nodeID );
 
+          // Status file branchで削除したのが最初のTerminalの場合名称を修正する
+          if ( caseNum === 1 && branchType === 'status-file') {
+            $branchNode.find('.branch-if-type').eq(0).text('if');
+          }
+
         } else {
           message('0004');
         }
@@ -1920,6 +1987,7 @@ $('.node-table').on('mousedown', 'tbody tr', function( e ){
   const branchNode = [
     'conditional-branch',
     'parallel-branch',
+    'status-file-branch',
     'merge',
   ]; 
   
@@ -2281,7 +2349,7 @@ const nodeInterrupt = function( nodeID ) {
             inTerminalLength = inTerminals.length;
 
       // 分岐ノードはCase1に接続する
-      const branchNodeCheck = ['parallel-branch', 'conditional-branch'];
+      const branchNodeCheck = ['parallel-branch', 'conditional-branch', 'status-file-branch'];
       if ( branchNodeCheck.indexOf( conductorData[ nodeID ].type ) !== -1 ) {
         for ( let i = 0; i < outTerminalLength; i++ ) {
           if ( Number( conductorData[ nodeID ]['terminal'][ outTerminals[ i ] ].case ) === 1 ) {
@@ -3133,6 +3201,7 @@ const nodeLoopCheck = function( nodeID ) {
   const noCountNode = [
     'conditional-branch',
     'parallel-branch',
+    'status-file-branch',
     'merge'
   ];
   
@@ -3186,10 +3255,49 @@ const nodeLoopCheck = function( nodeID ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const $conductorParameter = $('#conductor-parameter'),
-      $branchCaseList = $('#branch-case-list').find('tbody');
+      $branchCaseList = $('#branch-case-list').find('tbody'),
+      $statusFileCaseList = $('#status-file-case-list').find('tbody');
 
 $conductorParameter.find('.editor-tab-menu-item').not('[data-tab="conductor"]').hide();
 
+// End node : 終了時のステータスを選択
+const endStatusSlect = function(){
+  const $end = $('#end').find('.end-status-select');
+  
+  // Radio選択HTML
+  let html = '<ul class="end-status-select-list">';
+  const order = [ 5, 11, 7 ],
+        orderLength = order.length;
+  for ( let i = 0; i < orderLength; i++ ) {
+    const id = 'end-status-' + endType[order[i]][0]
+    html += ''
+    + '<li class="end-status-select-item">'
+      + '<input class="end-status-select-radio" type="radio" name="end-status" id="' + id + '" value="' + order[i] + '">'
+      + '<label class="end-status-select-label" for="' + id + '">' + endType[order[i]][1] + '</label>'
+    + '</li>';
+  }
+  $end.html( html );
+  
+  // 選択イベント
+  $end.find('.end-status-select-radio').on('change', function(){
+    // 選択されているノードが一つかどうか
+    if ( g_selectedNodeID.length <= 1 ) {
+      const nodeID = g_selectedNodeID[0],
+            $node = $('#' + nodeID ),
+            val = $( this ).val(),
+            nodeName = ( val === '5')? 'End': 'End : ' + endType[val][1];
+      $node.attr('data-end-status', endType[val][0] )
+        .find('.node-name > span').text( nodeName );
+      conductorData[nodeID].END_TYPE = $( this ).val();
+      
+      // サイズを更新
+      nodeSet( $node );
+    }
+  });
+}
+endStatusSlect();
+
+// パネルをnodeIDのものに変更する
 const panelChange = function( nodeID ) {
 
   // 複数選択されている場合はパネルを表示しない
@@ -3215,13 +3323,14 @@ const panelChange = function( nodeID ) {
         case 'movement':
         case 'conditional-branch':
         case 'parallel-branch':
+        case 'status-file-branch':
         case 'merge':
         case 'call':
         case 'call_s':
+        case 'end':
           panelType = nodeType;
           break;
         case 'start':
-        case 'end':
         case 'blank':
         case 'pause':
           panelType = 'function';
@@ -3307,6 +3416,14 @@ const panelChange = function( nodeID ) {
           $('#symphony-call-default-skip').prop('checked', nodeChecked );
         }
         break;
+      case 'end':
+        // End status
+        if ( conductorEditorMode === 'execute' ) {
+          $('#end-status').text(endType[conductorData[ nodeID ].END_TYPE][1]);
+        } else {
+          $('#end').find('.end-status-select-radio').val([conductorData[ nodeID ].END_TYPE]);
+        }
+        break;
       case 'function':
         $('#function-type').text( conductorData[ nodeID ].type );
         break;
@@ -3346,6 +3463,44 @@ const panelChange = function( nodeID ) {
         $('#noset-conditions').html( nosetConditionHTML );
         break;
       }
+      case 'status-file-branch': {
+        const terminals = conductorData[ nodeID ].terminal,
+              outTerminals = Object.keys( terminals ).map(function(k){
+                return terminals[k];
+              }).filter(function(v){
+                if ( v.case !== undefined && v.case !== 'else') {
+                  return true;
+                }
+              }).sort(function(a,b){
+                if ( a.case > b.case ) {
+                  return 1;
+                } else if ( a.case < b.case ) {
+                  return -1;
+                } else {
+                  return 0;
+                }
+              });
+              
+        const terminalLength = outTerminals.length;
+        let listHTML = '';
+        for (let i = 0; i < terminalLength; i++ ) {
+          const ifName = ( i === 0 )? 'if':'else if',
+                value = ( outTerminals[i].condition !== undefined )? outTerminals[i].condition.join(' '): '';
+          listHTML += ''
+          + '<tr>'
+            + '<th class="panel-th">' + ifName + ' :</th>'
+            + '<td class="panel-td">';
+          if ( conductorEditorMode === 'execute' ) {
+            listHTML +=  '<span class="panel-span">' + value + '</span>';
+          } else {
+            listHTML +=  '<input value="' + value + '" maxlength="256" class="status-file-input panel-text" type="text" data-terminal="' + outTerminals[i].id + '" title="">';
+          }
+          listHTML +=  '</td>'
+          + '</tr>';
+        }
+        $statusFileCaseList.html( listHTML );
+        break;
+      }
       case 'node':
         // パネル情報更新
         const nodeInfo = conductorUseList.conductorStatus['NODE_INFO'][ nodeID ];
@@ -3354,6 +3509,7 @@ const panelChange = function( nodeID ) {
           ['#node-instance-id', nodeInfo.NODE_INSTANCE_NO ],
           ['#node-name', nodeInfo.NODE_NAME ],
           ['#node-status', nodeStatus[ nodeInfo.STATUS ][1] ],
+          ['#node-status-file', nodeInfo.STATUS_FILE ],
           ['#node-start', nodeInfo.TIME_START ],
           ['#node-end', nodeInfo.TIME_END ],
           ['#node-oepration-id', nodeInfo.OPERATION_ID ],
@@ -3363,7 +3519,7 @@ const panelChange = function( nodeID ) {
         const panelNodeInfoLength = panelNodeInfo.length;
 
         for ( let i = 0; i < panelNodeInfoLength; i++ ) {
-          if ( panelNodeInfo[ i ][ 1 ] === null ) panelNodeInfo[ i ][ 1 ] = '';
+          if ( panelNodeInfo[ i ][ 1 ] === null || panelNodeInfo[ i ][ 1 ] === undefined ) panelNodeInfo[ i ][ 1 ] = '';
           $( panelNodeInfo[ i ][ 0 ] ).text( panelNodeInfo[ i ][ 1 ] );
         }
         // Jump
@@ -3845,7 +4001,7 @@ const modalNoticeList = function() {
       + '<table class="modal-table modal-select-table modal-notice-select-table">'
         + '<thead>'
           + '<tr>'
-            + '<th class="notice-name" scope="col" style="width:' + noticeNmaeWidth + '%"></th>';
+            + '<th class="notice-name" scope="col" style="width:' + noticeNmaeWidth + '%">' + getSomeMessage("ITABASEC020300") + '</th>';
     
     for ( let i = 0; i < statusLength; i++ ) {
       const statusName = editor.textEntities( conductorUseList.noticeStatusList[i].STATUS_NAME ),
@@ -3902,8 +4058,8 @@ const modalNoticeList = function() {
     + '</div>';
   } else {
     //noticelistHTML += '<div class="">通知先の登録が。<a ref="' + noticeListURL + '">Conductor通知一覧</a>より登録してください。</div>';
-    noticelistHTML += '<div class="">' + getSomeMessage("ITAWDCC92175") + '</div>';
-    noticelistHTML += '<div class="">' + getSomeMessage("ITAWDCC92176") + '(<a href="' + noticeListURL + ' " target="_blank" rel="noopener noreferrer">'+  getSomeMessage("ITAWDCC92177") + '</a>)</div>';
+    noticelistHTML += '<div class="notice-blank-messege">' + getSomeMessage("ITAWDCC92175") + '<br>'
+    + getSomeMessage("ITAWDCC92176") + '(<a href="' + noticeListURL + ' " target="_blank" rel="noopener noreferrer">'+  getSomeMessage("ITAWDCC92177") + '</a>)</div>';
   }
   
   $modalBody.html( noticelistHTML );
@@ -4029,6 +4185,20 @@ $conductorParameter.find('#branch-condition-move').on('mousedown', 'li', functio
       }
     }
   });
+});
+
+// Status file 条件値入力
+$conductorParameter.find('#status-file-case-list').on('input', '.status-file-input', function() {
+  const $input = $( this ),
+        terminalID = $input.attr('data-terminal'),
+        val = $input.val(),      
+        $terminal = $('#' + terminalID );
+  
+  // 値をセット
+  if ( conductorData[ g_selectedNodeID[0] ].type === 'status-file-branch') {
+    conductorData[ g_selectedNodeID[0] ].terminal[terminalID].condition = [val];
+    $terminal.prev('.node-body').find('.branch-if-value-inner').text( val );
+  }
 });
 
 // Note更新
@@ -4328,7 +4498,7 @@ const conductorHistory = {
           $artBoard.append( $node );
           nodeSet( $node, conductorData[ nodeID ].x, conductorData[ nodeID ].y );
           
-          const nodeCheck = ['merge', 'conditional-branch', 'parallel-branch'];
+          const nodeCheck = ['merge', 'conditional-branch', 'parallel-branch', 'status-file-branch'];
           if ( nodeCheck.indexOf( conductorData[ nodeID ].type ) !== -1 ) {
             $node.ready( function(){
               branchLine( nodeID );
@@ -4612,7 +4782,7 @@ const nodeReSet = function( reSetConductorData ) {
         nodeSet( $node, reSetConductorData[ nodeID ].x, reSetConductorData[ nodeID ].y );
         
         // 分岐ノード
-        const nodeCheck = ['merge', 'conditional-branch', 'parallel-branch'];
+        const nodeCheck = ['merge', 'conditional-branch', 'parallel-branch', 'status-file-branch'];
         if ( nodeCheck.indexOf( reSetConductorData[ nodeID ].type ) !== -1 ) {
           readyCounter++;
           $node.ready( function() {
@@ -4732,10 +4902,11 @@ const loadConductor = function( loadConductorData, mode ) {
       clearConductor();
       message('1001');
        
-      alert( getSomeMessage("ITABASEC020008") );
-      var url = '/default/menu/01_browse.php?no=2100180002';
-      location.href = url;
-
+      setTimeout( function(){
+        alert( getSomeMessage("ITABASEC020008") );
+        var url = '/default/menu/01_browse.php?no=2100180002';
+        location.href = url;
+      }, 1 );
     }
     
 };
@@ -4909,10 +5080,11 @@ const conductorStatusUpdate = function( exeNumber ) {
       conductorData[ nodeID ].endStatus = true;
       const inTerminalID = terminalInOutID( conductorData[ nodeID ].terminal, 'in'),
             outTerminals = terminalInOutID( conductorData[ nodeID ].terminal, 'out'),
-            outTerminalLength = outTerminals.length;
+            outTerminalLength = outTerminals.length,
+            $branchNode = $('#' + nodeID );
       let otherFlag = true,
           otherTerminal;
-      $('#' + nodeID ).addClass('running');
+      $branchNode.addClass('running');
       $('#' + conductorData[ nodeID ].terminal[ inTerminal[0] ].edge ).attr('data-status', 'running');
       for ( let i = 0; i < outTerminalLength; i++ ) {
         const terminal = conductorData[ nodeID ]['terminal'][ outTerminals[ i ] ];
@@ -4921,6 +5093,7 @@ const conductorStatusUpdate = function( exeNumber ) {
             otherFlag = false;
           } else {
             $('#' + terminal.id ).closest('.node-sub').addClass('run-unused');
+            $branchNode.find( '.' + terminal.id + '-branch-line').attr('data-status', 'unused');
             nextNodeUnused( terminal.edge );
           }
         } else {
@@ -4929,11 +5102,75 @@ const conductorStatusUpdate = function( exeNumber ) {
       }
       if ( otherFlag !== true ) {
         $('#' + otherTerminal.id ).closest('.node-sub').addClass('run-unused');
+        $branchNode.find( '.' + otherTerminal.id + '-branch-line').attr('data-status', 'unused');
         nextNodeUnused( otherTerminal.edge );
       }
     }
   };
   
+  // Status file blanchの状態を更新する
+  const statusFileBranch = function( nodeID ) {
+    const $branchNode = $('#' + nodeID ),
+          inTerminalsID = terminalInOutID( conductorData[ nodeID ].terminal, 'in'),
+          inTerminal = conductorData[ nodeID ].terminal[ inTerminalsID[0] ],
+          prevNodeID = inTerminal.targetNode,
+          prevNodeStatus = nodeInfo[ prevNodeID ].STATUS,
+          prevNodeStatusFile = nodeInfo[ prevNodeID ].STATUS_FILE;
+    
+    // 前のNodeが終了しているかチェック
+    if ( ['5','9','12','13','14'].indexOf( prevNodeStatus ) !== -1 ) {
+      conductorData[ nodeID ].endStatus = true;
+      const $prevEdge = $('#' + inTerminal.edge ),
+            terminals = Object.keys( conductorData[ nodeID ].terminal ).map(function(k){
+                    return conductorData[ nodeID ].terminal[k];
+                }),
+            outTerminals = terminals.filter(function(v){
+                    if ( v.case !== undefined && v.case !== 'else') return true;
+                }).sort(function(a,b){
+                    if ( a.case > b.case ) {
+                        return 1;
+                    } else if ( a.case < b.case ) {
+                        return -1;
+                    } else {
+                        return 0;
+                    }
+                }),
+            outTerminalLength = outTerminals.length,
+            elseTerminal = terminals.filter(function(v){
+                    if ( v.case === 'else') return true;
+                });
+      
+      // Caseの順番にStatus fileの値とConditionの値をチェックする
+      let matchTerminalID = undefined;
+      for ( let i = 0; i < outTerminalLength; i++ ) {
+        if ( outTerminals[i].condition.join('') === prevNodeStatusFile && matchTerminalID === undefined ) {
+          $('#' + outTerminals[i].id ).closest('.node-sub').attr('data-match', 'true');
+          matchTerminalID = outTerminals[i].id;
+        } else {
+          $('#' + outTerminals[i].id ).closest('.node-sub').addClass('run-unused');
+          $branchNode.find( '.' + outTerminals[i].id + '-branch-line').attr('data-status', 'unused');
+          nextNodeUnused( outTerminals[i].edge );
+        }
+      }
+      // マッチしなかったらelse
+      if ( matchTerminalID === undefined ) {
+        matchTerminalID = elseTerminal[0].id;
+      } else {
+        $('#' + elseTerminal[0].id ).closest('.node-sub').addClass('run-unused');
+        $branchNode.find( '.' + elseTerminal[0].id + '-branch-line').attr('data-status', 'unused');
+        nextNodeUnused( elseTerminal[0].edge );
+      }
+
+      $branchNode.addClass('running');
+      if ( prevNodeStatusFile === undefined ) {
+        $branchNode.attr('data-status-file', 'unknown').find('.status-file-result-inner').text('Unknown');
+      } else {
+        $branchNode.attr('data-status-file', 'known').find('.status-file-result-inner').text( prevNodeStatusFile );
+      }
+      
+      $prevEdge.attr('data-status', 'running');
+    }
+  };
   
   // 並列マージの状態を更新する
   const parallelMergeCheck = function( nodeID ) {
@@ -4956,7 +5193,6 @@ const conductorStatusUpdate = function( exeNumber ) {
       $node.find('.merge-status').attr('data-status', 'complete');
     }
   };
-  
   
   // Movement、Call、Endの状態を更新する
   const movementCheck = function( nodeID ) {
@@ -5087,6 +5323,9 @@ const conductorStatusUpdate = function( exeNumber ) {
           case 'parallel-branch':
             parallelBranchCheck( nodeID );
             break;
+          case 'status-file-branch':
+            statusFileBranch( nodeID );
+            break;
           case 'merge':
             parallelMergeCheck( nodeID );
             break;
@@ -5144,6 +5383,7 @@ const conductorStatusUpdate = function( exeNumber ) {
     case '7':
     case '8':
     case '10':
+    case '11':
       // 終了
       $('#scram-instance').prop('disabled', true );
       nodeStatusUpdate();
