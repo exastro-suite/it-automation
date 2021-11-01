@@ -975,7 +975,11 @@ EOD;
 
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
-        return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile);
+        if(isset($num_rows)){
+          return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile,$num_rows);
+        }else{
+          return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile);
+        }
     }
     
     //webroot(03,04,07)----

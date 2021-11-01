@@ -128,7 +128,8 @@
         case "FILTER":
         case "FILTER_DATAONLY":
         case "EDIT":
-        case "GET_PULLDOWN":
+        case "LIST_OPTIONS":
+        case "DOWNLOAD_SPREADSHEET":
             break;
         default:
             //----不正な要求（内容が不正）
