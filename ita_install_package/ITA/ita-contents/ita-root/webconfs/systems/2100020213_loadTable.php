@@ -88,6 +88,18 @@ Ansible(Pioneer)作業管理
     /* 実行区分 */
     $c = new IDColumn('EXEC_MODE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203065"),'B_ANSIBLE_EXEC_MODE','ID','NAME','', array('OrderByThirdColumn'=>'ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1203066"));
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('EXEC_MODE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANSIBLE_EXEC_MODE_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //Ansible virtualenv
@@ -150,6 +162,18 @@ Ansible(Pioneer)作業管理
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('I_ANS_HOST_DESIGNATE_TYPE_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_HOST_DESIGNATE_TYPE_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'HOST_DESIGNATE_TYPE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HOST_DESIGNATE_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $cg2->addColumn($c);
 
     // 並列実行数
@@ -242,6 +266,18 @@ Ansible(Pioneer)作業管理
     //ステータス
     $c = new IDColumn('COLLECT_STATUS',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207101"),'B_COLLECT_STATUS','COLLECT_STATUS_ID','COLLECT_STATUS_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207102"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('COLLECT_STATUS');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_COLLECT_STATUS_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'COLLECT_STATUS_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'COLLECT_STATUS_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $cg->addColumn($c);
 
     //収集ログ

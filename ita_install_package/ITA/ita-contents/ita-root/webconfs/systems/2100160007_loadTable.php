@@ -47,6 +47,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
     $c->getOutputType('json')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENU_GROUP_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_MENU_GROUP_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_GROUP_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_GROUP_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
 
@@ -70,6 +82,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
     $c->getOutputType('json')->setVisible(false);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENU_ID_CLONE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_MENU_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
 

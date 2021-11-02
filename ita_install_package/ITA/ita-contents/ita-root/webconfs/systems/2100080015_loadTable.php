@@ -219,6 +219,19 @@ Terrraform 代入値自動登録設定
 
             $c->getOutputType('json')->setVisible(false); //RestAPIでは隠す
 
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('MENU_ID_CLONE_02');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_MENU_LIST_JNL',
+                'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+                'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+                'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                )
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
+
             //登録更新関係から隠す----
             $cg->addColumn($c);
 
@@ -1216,6 +1229,19 @@ Terrraform 代入値自動登録設定
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
 
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('HCL_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_TERRAFORM_HCL_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'HCL_FLAG',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HCL_FLAG_SELECT',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
+
     $table->addColumn($c);
 
     ////////////////////////////////////////////////////////////////////
@@ -1227,6 +1253,19 @@ Terrraform 代入値自動登録設定
     $c->setRequired(false);
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
+
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('NULL_DATA_HANDLING_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_VALID_INVALID_MASTER_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
 
     $table->addColumn($c);
 

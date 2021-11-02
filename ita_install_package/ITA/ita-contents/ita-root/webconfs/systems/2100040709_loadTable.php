@@ -94,6 +94,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('HOST_DESIGNATE_TYPE_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207212"),'    B_HOST_DESIGNATE_TYPE_LIST','HOST_DESIGNATE_TYPE_ID','HOST_DESIGNATE_TYPE_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207213"));//エクセル・ヘッダでの説明
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('HOST_DESIGNATE_TYPE_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_HOST_DESIGNATE_TYPE_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'HOST_DESIGNATE_TYPE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HOST_DESIGNATE_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //プロトコル
