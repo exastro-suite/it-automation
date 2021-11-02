@@ -2445,17 +2445,21 @@ function exportFileFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
                 //基準日整形チェック(Y/m/d H:i:s)
                 $validateDateFormat = '/\A[0-9]{4}\/[0-9]{1,2}\/[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}\z/';
                 if( $strBaseTime0 !== null ){
-                    if( preg_match($validateDateFormat, $strBaseTime0 ) ){
-                        $strBaseTime0 = date('Y/m/d H:i', strtotime($strBaseTime0));
-                    }else{
-                        $validateErrtype = 'BASE_TIMESTAMP_0';
+                    if( $strBaseTime0 != "" ){
+                        if( preg_match($validateDateFormat, $strBaseTime0 ) ){
+                            $strBaseTime0 = date('Y/m/d H:i', strtotime($strBaseTime0));
+                        }else{
+                            $validateErrtype = 'BASE_TIMESTAMP_0';
+                        }
                     }
                 }
                 if( $strBaseTime1 !== null ){
-                    if( preg_match($validateDateFormat, $strBaseTime1 ) ){
-                        $strBaseTime1 = date('Y/m/d H:i', strtotime($strBaseTime1));
-                    }else{
-                        $validateErrtype = 'BASE_TIMESTAMP_1';
+                    if( $strBaseTime1 != "" ){
+                        if( preg_match($validateDateFormat, $strBaseTime1 ) ){
+                            $strBaseTime1 = date('Y/m/d H:i', strtotime($strBaseTime1));
+                        }else{
+                            $validateErrtype = 'BASE_TIMESTAMP_1';
+                        }                        
                     }
                 }
 
