@@ -86,6 +86,18 @@ Ansible（Legacy Role）代入値自動登録設定
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207306"));//エクセル・ヘッダでの説明
         #$c->setSubtotalFlag(false);
         $c->setRequired(true);//登録/更新時には、入力必須
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('PARSE_TYPE_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_PARSE_TYPE_MASTER_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'PARSE_TYPE_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'PARSE_TYPE_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cgg->addColumn($c);
         //"PREFIX(ファイル名)"
         $c = new TextColumn('FILE_PREFIX', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207307"));
@@ -262,6 +274,19 @@ Ansible（Legacy Role）代入値自動登録設定
             $c->getOutputType("csv")->setVisible(false);
 
             $c->getOutputType('json')->setVisible(false); //RestAPIでは隠す
+
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('MENU_ID_CLONE_02');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_MENU_LIST_JNL',
+                'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+                'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+                'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                )
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
 
             //登録更新関係から隠す----
             $cg->addColumn($c);

@@ -113,6 +113,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010401"));
     $c->setRequired(true);
     $c->setHiddenMainTableColumn(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('GIT_PROTOCOL_TYPE_ROW_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_CICD_GIT_PROTOCOL_TYPE_NAME_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'GIT_PROTOCOL_TYPE_ROW_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'GIT_PROTOCOL_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     /////////////////////////////////////////////////////////
@@ -121,6 +133,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('GIT_REPO_TYPE_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010500"),'B_CICD_GIT_REPOSITORY_TYPE_NAME','GIT_REPO_TYPE_ROW_ID','GIT_REPO_TYPE_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010501"));
     $c->setHiddenMainTableColumn(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('GIT_REPO_TYPE_ROW_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_CICD_GIT_REPOSITORY_TYPE_NAME_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'GIT_REPO_TYPE_ROW_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'GIT_REPO_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     /////////////////////////////////////////////////////////
@@ -232,6 +256,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setHiddenMainTableColumn(true);
         $c->setDefaultValue("register_table", TD_B_CICD_MATERIAL_LINK_LIST::C_AUTO_SYNC_FLG_ON);
         $c->setRequired(true);
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('AUTO_SYNC_FLG');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_VALID_INVALID_MASTER_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         /////////////////////////////////////////////////////////

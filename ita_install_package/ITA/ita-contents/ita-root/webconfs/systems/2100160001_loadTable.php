@@ -77,6 +77,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);//登録/更新時には、入力必須
     $objVldt = new SubstitutionValidator($c);
     $c->setValidator($objVldt);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('TARGET');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'G_PARAM_TARGET_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'TARGET_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'TARGET_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 表示順序
@@ -95,6 +107,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(false);
     $objVldt = new PurposeValidator($c);
     $c->setValidator($objVldt);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('PURPOSE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_PARAM_PURPOSE_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'PURPOSE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'PURPOSE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 縦メニュー利用
@@ -102,6 +126,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102020"));//エクセル・ヘッダでの説明
     $objVldt = new VerticalValidator($c);
     $c->setValidator($objVldt);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('VERTICAL');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 入力用メニューグループ
@@ -109,6 +145,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new LinkIDColumn('MENUGROUP_FOR_INPUT',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102011"),'D_CMDB_MENU_GRP_LIST','MENU_GROUP_ID','MENU_GROUP_NAME',$url,false,false,'','','','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102012"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENUGROUP_FOR_INPUT');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CMDB_MENU_GRP_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_GROUP_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_GROUP_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 代入値自動登録用メニューグループ
@@ -117,6 +165,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(false);
     $objVldt = new MgForSubstValidator($c);
     $c->setValidator($objVldt);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENUGROUP_FOR_SUBST');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CMDB_MENU_GRP_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_GROUP_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_GROUP_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 参照用メニューグループ
@@ -125,6 +185,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(false);
     $objVldt = new MgForViewValidator($c);
     $c->setValidator($objVldt);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENUGROUP_FOR_VIEW');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CMDB_MENU_GRP_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_GROUP_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_GROUP_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // メニュー作成状態
@@ -148,6 +220,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt(''))); //入力不可にして裏で値を持って置く場合。
     $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt(''))); //入力不可にして裏で値を持って置く場合。
     $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction); //「登録」時に1(未作成)に
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENU_CREATE_STATUS');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_MENU_CREATE_STATUS_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_CREATE_STATUS',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_CREATE_STATUS_SELECT',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 説明
