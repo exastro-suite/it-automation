@@ -192,6 +192,7 @@ $ary["ITATERRAFORM-ERR-211430"]     = "Variable (Value) is not selected. ";
 $ary["ITATERRAFORM-ERR-211440"]     = "Variable (Value) is not registered.";
 $ary["ITATERRAFORM-ERR-211450"]     = "Following items are duplicated with the records of [Item No.]:({}). n [(Movement),(Variable)]";
 $ary["ITATERRAFORM-ERR-211460"]     = "You cannot enter same variables in the Key variable and Value variable.";
+$ary["ITATERRAFORM-ERR-211470"]     = "The combination of [Movement, variable name] is invalid.";
 $ary["ITATERRAFORM-ERR-221010"]     = "[Alert]HTTP_STATUS_CODE_IS_NOT_200[StatusCode]{}{}";
 $ary["ITATERRAFORM-ERR-221020"]     = "Cannot find Target Execution No. \nRecord may have been discarded.";
 $ary["ITATERRAFORM-ERR-221030"]     = "The status of target operation in process cannot be emergency stop. ({})";

@@ -425,6 +425,11 @@ Terraform代入値管理
     //エクセル/CSVからのアップロードを禁止する。
     $c->setAllowSendFromFile(false);
 
+    //Filter/Print/deleteのみ無効
+    $c->getOutputType('filter_table')->setVisible(false);
+    $c->getOutputType('print_table')->setVisible(false);
+    $c->getOutputType('delete_table')->setVisible(false);
+
     // REST/excel/csvで項目無効
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
@@ -435,6 +440,35 @@ Terraform代入値管理
 
     $table->addColumn($c);
     //変数名----
+
+    //----変数名(Webページ表示用)
+    $c = new IDColumn('VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103710"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103720"));//エクセル・ヘッダでの説明
+
+    $c->setHiddenMainTableColumn(false); //更新対象カラム
+
+    // 必須チェックは組合せバリデータで行う。
+    $c->setRequired(false);
+
+    //コンテンツのソースがヴューの場合、登録/更新の対象とする
+    $c->setHiddenMainTableColumn(false);
+
+    //エクセル/CSVからのアップロードを禁止する。
+    $c->setAllowSendFromFile(false);
+
+    // Filter/Print/delete以外無効
+    $c->getOutputType('filter_table')->setVisible(true);
+    $c->getOutputType('print_table')->setVisible(true);
+    $c->getOutputType('delete_table')->setVisible(true);
+    $c->getOutputType('update_table')->setVisible(false);
+    $c->getOutputType('register_table')->setVisible(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->getOutputType('excel')->setVisible(false);
+    $c->getOutputType('csv')->setVisible(false);
+    $c->getOutputType('json')->setVisible(false);
+
+    $table->addColumn($c);
+    //変数名(Webページ表示用)----
 
     //************************************************************************************
     //----HCL設定

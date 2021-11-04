@@ -192,6 +192,7 @@ $ary["ITATERRAFORM-ERR-211430"]     = "変数(Value)が未選択です。";
 $ary["ITATERRAFORM-ERR-211440"]     = "変数(Value)が未登録です。";
 $ary["ITATERRAFORM-ERR-211450"]     = "次の項目が、[項番]:({})のレコードと重複しています。\n[(Movement),(変数)]";
 $ary["ITATERRAFORM-ERR-211460"]     = "Key変数とValue変数に同じ変数の入力はできません。";
+$ary["ITATERRAFORM-ERR-211470"]     = "[Movement,変数名]の組み合わせが不正です。";
 $ary["ITATERRAFORM-ERR-221010"]     = "[Alert]HTTP_STATUS_CODE_IS_NOT_200[StatusCode]{}{}";
 $ary["ITATERRAFORM-ERR-221020"]     = "対象の作業No.が見つかりません。\nレコードが廃止されている可能性があります。";
 $ary["ITATERRAFORM-ERR-221030"]     = "処理中の対象作業のステータスは緊急停止の実施対象外です。({})";
