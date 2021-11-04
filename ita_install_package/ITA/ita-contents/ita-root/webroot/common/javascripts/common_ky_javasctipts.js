@@ -1496,8 +1496,8 @@ function displayRoleModalBody( roleList, initData, valueType ) {
             hideRoleName = getSomeMessage("ITAWDCC92008");
       // ********は表示しない
       if ( roleName !== hideRoleName ) {
-        roleHTML += '<tr><th>'
-        + roleName + '</tr></th>';
+        roleHTML += '<tr><td>'
+        + roleName + '</tr></td>';
       }
     }
 
