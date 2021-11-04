@@ -122,7 +122,7 @@ function conductorNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRec
                         //---個別指定のオペレーション取得
                         $aryOrderOpRetBody = getInfoOfOneOperation($intOrderOvRdOpeId,1);
 
-                        if( $aryOrderOpRetBody[0] == 1 ){
+                        if( $aryOrderOpRetBody[0] == 1 && array_key_exists($tmpNodeId, $tmpForOptionOrderOvRd) === true ){
                             $tmpForOptionOrderOvRd[$tmpNodeId]['OPERATION_NO_IDBH'] = $intOrderOvRdOpeId;
                         }else{
                             // オペレーションID不備
@@ -141,7 +141,7 @@ function conductorNoRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRec
                     }
                     //スキップ
                     if( $intOrderOvRdSkipflg !== null ){
-                        if( $intOrderOvRdSkipflg == 1 || $intOrderOvRdSkipflg == "" ){
+                        if( ( $intOrderOvRdSkipflg == 1 || $intOrderOvRdSkipflg == "" ) && array_key_exists($tmpNodeId, $tmpForOptionOrderOvRd) === true ){
                             $tmpForOptionOrderOvRd[$tmpNodeId]['SKIP_FLAG'] = $intOrderOvRdSkipflg;
                         }else{
                             $intOrderOvRdchkflg = "1";
