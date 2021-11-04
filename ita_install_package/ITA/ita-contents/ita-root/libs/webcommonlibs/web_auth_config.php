@@ -268,7 +268,7 @@
         // 設定値を取得する----
 
         if (isset($VOSCT_SesIdle) === false || $VOSCT_SesIdle < 0) {
-            $VOSCT_SesIdle = 28800; // デフォルト値＜アイドル時間を8時間(28800秒)に設定＞
+            $VOSCT_SesIdle = 3600; // デフォルト値＜アイドル時間を8時間(3600秒)に設定＞
             web_log($objMTS->getSomeMessage("ITAWDCH-ERR-44"));
         }
         if (isset($VOSCT_SesExpry) === false || $VOSCT_SesExpry < 0) {
@@ -276,7 +276,7 @@
             web_log($objMTS->getSomeMessage("ITAWDCH-ERR-45"));
         }
         if ($VOSCT_SesExpry < $VOSCT_SesIdle) {
-            $VOSCT_SesIdle = 28800; // デフォルト値＜アイドル時間を8時間(28800秒)に設定＞
+            $VOSCT_SesIdle = 3600; // デフォルト値＜アイドル時間を8時間(3600秒)に設定＞
             $VOSCT_SesExpry = 86400; // デフォルト値＜有効期限を24時間(86400秒)に設定＞
             web_log($objMTS->getSomeMessage("ITAWDCH-ERR-46"));
         }
