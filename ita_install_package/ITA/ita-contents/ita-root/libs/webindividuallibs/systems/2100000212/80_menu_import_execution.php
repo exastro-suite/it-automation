@@ -177,7 +177,7 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
     //メニューidをint型からstring型へ変換
     foreach ($tmpJSONOfReceptedData as $key => $value) {
         foreach ($value as $value2) {
-            if( $objIntNumVali->isValid($value2) != false ){
+            if( is_numeric($value2) != false ){
                 $tmparray[$key][]= (string)sprintf('%010d', $value2);
             }else{
                 //メニューID不正時
