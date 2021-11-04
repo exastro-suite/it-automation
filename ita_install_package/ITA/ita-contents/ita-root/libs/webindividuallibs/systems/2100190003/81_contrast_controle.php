@@ -2463,6 +2463,22 @@ function exportFileFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
                     }
                 }
 
+                //指定値チェック(空の場合は、デフォルト値を指定)
+                if( in_array( $strFormat , array('1','2') ) === false ){
+                    if( $strFormat == "" ){
+                        $strFormat = 1;
+                    }else{
+                        $validateErrtype = 'FORMATTER_ID';
+                    }                    
+                }
+                if( in_array( $outputType ,  array('1','2') ) === false ){
+                    if( $outputType == "" ){
+                        $outputType = 1;
+                    }else{
+                        $validateErrtype = 'OUTPUT_TYPE';
+                    }
+                }
+
                 //必須パラメータあり(比較定義ID,出力形式)
                 if ( is_numeric($intContrastid)  ){
 
@@ -2525,7 +2541,16 @@ function exportFileFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
                         }
                     }else{
                         //パラメータ不正時
-                        $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310221");#"指定した条件で比較対象となるデータがありません";
+                        if( $validateErrtype == 'FORMATTER_ID' ){
+                            $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-ERR-310102",array($validateErrtype) );#"出力内容({})の設定が不正です。";
+                        }elseif( $validateErrtype == 'OUTPUT_TYPE' ){
+                            $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-ERR-310103",array($validateErrtype) );#"出力形式({})の設定が不正です。";
+                        }elseif( in_array($validateErrtype, array('BASE_TIMESTAMP_0','BASE_TIMESTAMP_1') ) === true ){
+                            $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-ERR-310104",array($validateErrtype) );#"基準日({})の設定が不正です。";
+                        }else{
+                            $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310221");#"指定した条件で比較対象となるデータがありません";
+                        }
+                        
                         $intResultInfoCode = "001";
                         $outputfilename = "";      
                     }
