@@ -57,6 +57,7 @@ Ansible(Legacy)作業管理
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1108050"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
 
     $table->setDBSortKey(array("EXECUTION_NO"=>"DESC"));

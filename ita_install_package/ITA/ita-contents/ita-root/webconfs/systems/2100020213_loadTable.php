@@ -56,7 +56,7 @@ Ansible(Pioneer)作業管理
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309030"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
-
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
     $table->setDBSortKey(array("EXECUTION_NO"=>"DESC"));
 

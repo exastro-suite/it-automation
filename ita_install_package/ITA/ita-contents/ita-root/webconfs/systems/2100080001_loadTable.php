@@ -63,6 +63,7 @@ TERRAFORMインタフェース情報
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102040'));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
 
     //************************************************************************************
