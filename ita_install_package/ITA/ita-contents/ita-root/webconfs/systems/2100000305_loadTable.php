@@ -92,6 +92,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile', $g['objMTS']->getSomeMessage("ITABASEH-MNU-108010"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
 
     $table->addUniqueColumnSet(array('ITA_EXT_STM_ID','PATTERN_NAME'));

@@ -99,6 +99,8 @@ class TableControlAgent {
 
     protected $dispRestrictValue;
 
+	protected $noRegisterFlg;
+
 	public function __construct($strDBMainTableId, $strRIColumnId, $strRIColumnLabel="", $strDBJournalTableId=null, $arrayVariant=array()){
 		global $g;
 		if( $strRIColumnLabel == "" ){
@@ -123,6 +125,8 @@ class TableControlAgent {
 		$this->strDBJournalTableHiddenId = "";
 
 		$this->strRIColumnLabel = $strRIColumnLabel;
+
+		$this->noRegisterFlg = false;
 
 		$arrayVariant['TT_SYS_00_ROW_IDENTIFY_LABEL'] = $strRIColumnLabel;
 
@@ -269,6 +273,13 @@ class TableControlAgent {
 	}
 	public function setShareTableAlias($strAlias){
 		$this->shareTableAlias = $strAlias;
+	}
+
+	public function getNoRegisterFlg(){
+		return $this->noRegisterFlg;
+	}
+	public function setNoRegisterFlg($boolRegisterFlg){
+		$this->noRegisterFlg = $boolRegisterFlg;
 	}
 
 	//----main(UTN)テーブル関係

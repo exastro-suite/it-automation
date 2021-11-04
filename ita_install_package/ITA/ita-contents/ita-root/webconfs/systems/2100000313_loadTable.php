@@ -53,6 +53,7 @@ Symphonyインターフェース情報
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITABASEH-MNU-303030"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
 
     //Symphony作業用データリレイストレージパス(ITA)

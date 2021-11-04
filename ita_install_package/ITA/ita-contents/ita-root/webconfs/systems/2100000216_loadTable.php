@@ -35,6 +35,8 @@ $tmpFx = function (&$aryVariant=[], &$arySetting=[]) {
     // 主キー：シーケンス名
     $table = new simpleTableControlAgent('D_SEQUENCE', 'NAME', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230011"), null, $aryVariant);
 
+    $table->setNoRegisterFlg(true);    // 登録画面無し
+
     // Table settings
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230002"));
     $table->setGeneObject('AutoSearchStart',true); //('',true,false)

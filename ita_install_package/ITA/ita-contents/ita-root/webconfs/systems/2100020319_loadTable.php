@@ -80,6 +80,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1705040"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
 
     /////////////////////////////////////////////////////
