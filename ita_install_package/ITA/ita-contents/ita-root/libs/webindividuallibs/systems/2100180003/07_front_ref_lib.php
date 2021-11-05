@@ -83,6 +83,13 @@
     }else if ($strCommand == "INFO" ){
          $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable);
          $aryForResultData[0]['ResultData']['resultdata']['CONTENTS']['INFO'] = conductorJsonGetTitle();
+    }else if( isset($expandRestCommandPerMenu) === false ){
+           // WARNING:ILLEGAL_ACCESS, DETAIL:UNEXPECTED X-COMMAND SENT FOR REST CONTENT.
+           web_log($objMTS->getSomeMessage("ITAWDCH-ERR-115008"));
+
+           webRequestForceQuitFromEveryWhere(400,11510807);
+           exit();
+           //不正な要求（内容が不正）----
     }
 
 ?>
