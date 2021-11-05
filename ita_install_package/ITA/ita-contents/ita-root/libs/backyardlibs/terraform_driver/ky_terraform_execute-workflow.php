@@ -2055,6 +2055,91 @@
             }
 
             //----------------------------------------------
+            // Terraformに登録した変数の一覧を取得し、variables.jsonとして格納する
+            //----------------------------------------------
+            //variables_json格納用のディレクトリを作成
+            $variables_dir = $tgt_execution_dir . "/" . "variables";
+            if(!mkdir($variables_dir, 0777, true) ){
+                // 警告フラグON
+                $warning_flag = 1;
+                // 例外処理へ
+                throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
+            }else{
+                if(!chmod($variables_dir, 0777)){
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
+                }
+            }
+
+            $variables_json = $variables_dir . "/variables.json";
+            //variables_jsonファイルを作成
+            if(!file_exists($variables_json)){
+                if(!touch($variables_json)){
+                    // 警告フラグON
+                    $warning_flag = 1;
+                    // 例外処理へ
+                    throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($tgt_execution_no, __FILE__ , __LINE__)));
+                }else{
+                    if(!chmod($variables_json, 0777)){
+                        // 警告フラグON
+                        $warning_flag = 1;
+                        // 例外処理へ
+                        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($tgt_execution_no, __FILE__ , __LINE__)));
+                    }
+                }
+            }
+
+            //Terraform側に登録されているVariables一覧を取得
+            $statusCode = 0;
+            $count = 0;
+            while ($statusCode != 200 && $count < $apiRetryCount){
+                $apiResponse = get_workspace_var_list($lv_terraform_hostname, $lv_terraform_token ,$tfe_workspace_id, $proxy_setting);
+                $statusCode = $apiResponse['StatusCode'];
+                if($statusCode == 200){
+                    //返却StatusCodeが正常なので終了
+                    break;
+                }else{
+                    //返却StatusCodeが異常なので、3秒間sleepして再度実行
+                    sleep(3);
+                    $count++;
+                }
+            }
+            //API結果を判定
+            if($statusCode != 200){
+                //error_logにメッセージを追記
+                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141030"); //[API Error]Variables一覧取得に失敗しました。
+                LocalLogPrint($error_log, $message);
+
+                // 異常フラグON
+                $error_flag = 1;
+                // 例外処理へ
+                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-141031",array(__FILE__,__LINE__,$statusCode));
+                throw new Exception( $backyard_log );
+            }else{
+                //Terraform変数から格納したい情報のみを抽出
+                $workspaceVarListResponsContents = $apiResponse['ResponsContents'];
+                $arrayVarsList = array();
+                foreach($workspaceVarListResponsContents['data'] as $data){
+                    $attributes = $data['attributes'];
+                    $arrayVarData = array();
+                    if($attributes['category'] == 'terraform'){
+                        $arrayVarData['key'] = $attributes['key'];
+                        $arrayVarData['value'] = $attributes['value'];
+                        $arrayVarData['sensitive'] = $attributes['sensitive'];
+                        $arrayVarData['hcl'] = $attributes['hcl'];
+                        $arrayVarsList[] = $arrayVarData;
+                    }
+                }
+            }
+            //json_encodeし、ファイルに書き込み
+            if(!empty($arrayVarsList)){
+                $json = json_encode($arrayVarsList, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+                file_put_contents($variables_json, $json);
+            }
+
+            //----------------------------------------------
             // tar.gzファイルをTFEにアップロード（plan&applyを実行）
             //----------------------------------------------
             //アップロードURLおよびconfiguration-versionsIDを取得
