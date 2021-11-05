@@ -847,7 +847,9 @@ EOD;
                         $htmlPrintTableAreaTailPriSome=$arySetting['tail_scene_rec_n0_prv1'];
                     }
                     else{
-                        $htmlPrintTableAreaTailPriSome = "{$g['objMTS']->getSomeMessage("ITAWDCH-STD-350")}<br>";
+                        if($objTable->getNoRegisterFlg()===false){
+                            $htmlPrintTableAreaTailPriSome = "{$g['objMTS']->getSomeMessage("ITAWDCH-STD-350")}<br>";
+                        }   
                     }
                 }
                 else if($g['privilege'] === "2"){

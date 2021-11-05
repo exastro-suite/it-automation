@@ -51,12 +51,36 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('TASK_STATUS',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900014'),'B_DP_STATUS_MASTER','TASK_ID','TASK_STATUS','');
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900016'));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('TASK_STATUS');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_DP_STATUS_MASTER_JNL',
+    	    'TTT_SEARCH_KEY_COLUMN_ID'=>'TASK_ID',
+        	'TTT_GET_TARGET_COLUMN_ID'=>'TASK_STATUS',
+	        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+    	    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+	        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+	    )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 処理種別
     $c = new IDColumn('DP_TYPE',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900022'),'B_DP_TYPE','ROW_ID','DP_TYPE','');
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900023'));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('DP_TYPE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_DP_TYPE_JNL',
+	    'TTT_SEARCH_KEY_COLUMN_ID'=>'ROW_ID',
+    	'TTT_GET_TARGET_COLUMN_ID'=>'DP_TYPE',
+	    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+    	'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+    	'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+	    )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // モード
@@ -67,6 +91,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // 廃止情報
     $c = new IDColumn('ABOLISHED_TYPE',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900028'),'B_DP_ABOLISHED_TYPE','ROW_ID','ABOLISHED_TYPE','');
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ABOLISHED_TYPE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_DP_ABOLISHED_TYPE_JNL',
+	        'TTT_SEARCH_KEY_COLUMN_ID'=>'ROW_ID',
+    	    'TTT_GET_TARGET_COLUMN_ID'=>'ABOLISHED_TYPE',
+    	    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+    	    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+    	    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+    	)
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 指定時刻
@@ -94,6 +130,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // 実行ユーザ
     $c = new IDColumn('EXECUTE_USER',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900035'),'A_ACCOUNT_LIST','USER_ID','USERNAME','');
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900036'));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('EXECUTE_USER');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_ACCOUNT_LIST_JNL',
+	        'TTT_SEARCH_KEY_COLUMN_ID'=>'USER_ID',
+	        'TTT_GET_TARGET_COLUMN_ID'=>'USERNAME',
+	        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+    	    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+    	    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+    	)
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //実行ユーザの値が$g['login_id']か空欄と一致するレコードのみを表示させる

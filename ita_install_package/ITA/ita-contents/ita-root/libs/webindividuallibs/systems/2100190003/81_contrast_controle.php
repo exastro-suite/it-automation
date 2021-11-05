@@ -2445,17 +2445,37 @@ function exportFileFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
                 //基準日整形チェック(Y/m/d H:i:s)
                 $validateDateFormat = '/\A[0-9]{4}\/[0-9]{1,2}\/[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}\z/';
                 if( $strBaseTime0 !== null ){
-                    if( preg_match($validateDateFormat, $strBaseTime0 ) ){
-                        $strBaseTime0 = date('Y/m/d H:i', strtotime($strBaseTime0));
-                    }else{
-                        $validateErrtype = 'BASE_TIMESTAMP_0';
+                    if( $strBaseTime0 != "" ){
+                        if( preg_match($validateDateFormat, $strBaseTime0 ) ){
+                            $strBaseTime0 = date('Y/m/d H:i', strtotime($strBaseTime0));
+                        }else{
+                            $validateErrtype = 'BASE_TIMESTAMP_0';
+                        }
                     }
                 }
                 if( $strBaseTime1 !== null ){
-                    if( preg_match($validateDateFormat, $strBaseTime1 ) ){
-                        $strBaseTime1 = date('Y/m/d H:i', strtotime($strBaseTime1));
+                    if( $strBaseTime1 != "" ){
+                        if( preg_match($validateDateFormat, $strBaseTime1 ) ){
+                            $strBaseTime1 = date('Y/m/d H:i', strtotime($strBaseTime1));
+                        }else{
+                            $validateErrtype = 'BASE_TIMESTAMP_1';
+                        }                        
+                    }
+                }
+
+                //指定値チェック(空の場合は、デフォルト値を指定)
+                if( in_array( $strFormat , array('1','2') ) === false ){
+                    if( $strFormat == "" ){
+                        $strFormat = 1;
                     }else{
-                        $validateErrtype = 'BASE_TIMESTAMP_1';
+                        $validateErrtype = 'FORMATTER_ID';
+                    }                    
+                }
+                if( in_array( $outputType ,  array('1','2') ) === false ){
+                    if( $outputType == "" ){
+                        $outputType = 1;
+                    }else{
+                        $validateErrtype = 'OUTPUT_TYPE';
                     }
                 }
 
@@ -2521,7 +2541,16 @@ function exportFileFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
                         }
                     }else{
                         //パラメータ不正時
-                        $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310221");#"指定した条件で比較対象となるデータがありません";
+                        if( $validateErrtype == 'FORMATTER_ID' ){
+                            $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-ERR-310102",array($validateErrtype) );#"出力内容({})の設定が不正です。";
+                        }elseif( $validateErrtype == 'OUTPUT_TYPE' ){
+                            $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-ERR-310103",array($validateErrtype) );#"出力形式({})の設定が不正です。";
+                        }elseif( in_array($validateErrtype, array('BASE_TIMESTAMP_0','BASE_TIMESTAMP_1') ) === true ){
+                            $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-ERR-310104",array($validateErrtype) );#"基準日({})の設定が不正です。";
+                        }else{
+                            $strResultMsg = $g['objMTS']->getSomeMessage("ITABASEH-MNU-310221");#"指定した条件で比較対象となるデータがありません";
+                        }
+                        
                         $intResultInfoCode = "001";
                         $outputfilename = "";      
                     }

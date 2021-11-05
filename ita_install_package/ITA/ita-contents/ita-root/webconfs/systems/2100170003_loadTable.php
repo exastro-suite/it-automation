@@ -40,6 +40,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('HOSTGROUP_NAME',$g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100205"),'F_HOSTGROUP_LIST','ROW_ID','HOSTGROUP_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100206"));
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('HOSTGROUP_NAME');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_HOSTGROUP_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ROW_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HOSTGROUP_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // オペレーション
@@ -51,6 +63,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('HOSTNAME',$g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100209"),'C_STM_LIST','SYSTEM_ID','HOSTNAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITAHOSTGROUP-MNU-100210"));
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('HOSTNAME');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'C_STM_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'SYSTEM_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HOSTNAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     $table->fixColumn();

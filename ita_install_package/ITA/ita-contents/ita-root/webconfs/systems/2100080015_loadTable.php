@@ -219,6 +219,19 @@ Terrraform 代入値自動登録設定
 
             $c->getOutputType('json')->setVisible(false); //RestAPIでは隠す
 
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('MENU_ID_CLONE_02');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_MENU_LIST_JNL',
+                'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+                'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+                'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                )
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
+
             //登録更新関係から隠す----
             $cg->addColumn($c);
 
@@ -881,6 +894,11 @@ Terrraform 代入値自動登録設定
             //エクセル/CSVからのアップロードを禁止する。
             $c->setAllowSendFromFile(false);
 
+            //Filter/Print/deleteのみ無効
+            $c->getOutputType('filter_table')->setVisible(false);
+            $c->getOutputType('print_table')->setVisible(false);
+            $c->getOutputType('delete_table')->setVisible(false);
+
             // REST/excel/csvで項目無効
             $c->getOutputType('excel')->setVisible(false);
             $c->getOutputType('csv')->setVisible(false);
@@ -894,6 +912,34 @@ Terrraform 代入値自動登録設定
             unset($objFunction01);
             unset($objFunction02);
             unset($objFunction03);
+
+            // Key変数名Webページ表示用
+            $c = new IDColumn('KEY_VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105150"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105100"));
+
+            $c->setHiddenMainTableColumn(false); //更新対象カラム
+
+            // 必須チェックは組合せバリデータで行う。
+            $c->setRequired(false);
+
+            //コンテンツのソースがヴューの場合、登録/更新の対象とする
+            $c->setHiddenMainTableColumn(false);
+
+            //エクセル/CSVからのアップロードを禁止する。
+            $c->setAllowSendFromFile(false);
+
+            //Filter/Print/delete以外無効
+            $c->getOutputType('filter_table')->setVisible(true);
+            $c->getOutputType('print_table')->setVisible(true);
+            $c->getOutputType('delete_table')->setVisible(true);
+            $c->getOutputType('update_table')->setVisible(false);
+            $c->getOutputType('register_table')->setVisible(false);
+            $c->getOutputType('print_journal_table')->setVisible(false);
+            $c->getOutputType('excel')->setVisible(false);
+            $c->getOutputType('csv')->setVisible(false);
+            $c->getOutputType('json')->setVisible(false);
+
+            $cg->addColumn($c);
 
 
             ////////////////////////////////////////////////////////
@@ -1147,6 +1193,11 @@ Terrraform 代入値自動登録設定
             //エクセル/CSVからのアップロードを禁止する。
             $c->setAllowSendFromFile(false);
 
+            //Filter/Print/deleteのみ無効
+            $c->getOutputType('filter_table')->setVisible(false);
+            $c->getOutputType('print_table')->setVisible(false);
+            $c->getOutputType('delete_table')->setVisible(false);
+
             // REST/excel/csvで項目無効
             $c->getOutputType('excel')->setVisible(false);
             $c->getOutputType('csv')->setVisible(false);
@@ -1160,6 +1211,35 @@ Terrraform 代入値自動登録設定
             unset($objFunction01);
             unset($objFunction02);
             unset($objFunction03);
+
+            // Value変数名Webページ表示用
+            $c = new IDColumn('VAL_VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105150"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105160"));
+
+            $c->setHiddenMainTableColumn(false); //更新対象カラム
+
+            // 必須チェックは組合せバリデータで行う。
+            $c->setRequired(false);
+
+            //コンテンツのソースがヴューの場合、登録/更新の対象とする
+            $c->setHiddenMainTableColumn(false);
+
+            //エクセル/CSVからのアップロードを禁止する。
+            $c->setAllowSendFromFile(false);
+
+            //Filter/Print/delete以外無効
+            $c->getOutputType('filter_table')->setVisible(true);
+            $c->getOutputType('print_table')->setVisible(true);
+            $c->getOutputType('delete_table')->setVisible(true);
+            $c->getOutputType('update_table')->setVisible(false);
+            $c->getOutputType('register_table')->setVisible(false);
+            $c->getOutputType('print_journal_table')->setVisible(false);
+            $c->getOutputType('excel')->setVisible(false);
+            $c->getOutputType('csv')->setVisible(false);
+            $c->getOutputType('json')->setVisible(false);
+
+            $cg->addColumn($c);
+
 
             ////////////////////////////////////////////////////////
             //REST/excel/csv入力用 Val変数　Movement+変数名
@@ -1216,6 +1296,19 @@ Terrraform 代入値自動登録設定
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
 
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('HCL_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_TERRAFORM_HCL_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'HCL_FLAG',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HCL_FLAG_SELECT',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
+
     $table->addColumn($c);
 
     ////////////////////////////////////////////////////////////////////
@@ -1227,6 +1320,19 @@ Terrraform 代入値自動登録設定
     $c->setRequired(false);
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
+
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('NULL_DATA_HANDLING_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_VALID_INVALID_MASTER_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
 
     $table->addColumn($c);
 
@@ -1693,7 +1799,7 @@ Terrraform 代入値自動登録設定
             }
             unset($retArray);
         }
-        //作業パターンのチェックの組み合わせチェック----
+        //作業パターンのチェック----
 
         //----Key変数の種類ごとに、バリデーションチェック
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
@@ -1741,8 +1847,42 @@ Terrraform 代入値自動登録設定
                 unset($retArray);
 
                 if( $boolExecuteContinue === true && $boolSystemErrorFlag === false ){
+                    //作業パターンの組み合わせチェック
+                    $retBool = false;
+                    $query = "SELECT "
+                            ." COUNT(*) REC_COUNT "
+                            ."FROM "
+                            ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
+                            ."WHERE "
+                            ." TAB_1.DISUSE_FLAG = '0' "
+                            ."AND TAB_1.PATTERN_ID = :PATTERN_ID "
+                            ."AND TAB_1.MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+        
+                    $aryForBind = array();
+                    $aryForBind['PATTERN_ID'] = $rg_pattern_id;
+                    $aryForBind['MODULE_VARS_LINK_ID'] = $vars_link_id;
+        
+                    $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+                    if( $retArray[0] === true ){
+                        $objQuery =& $retArray[1];
+                        $intCount = 0;
+                        $aryDiscover = array();
+                        $row = $objQuery->resultFetch();
+                        unset($objQuery);
+                        if( $row['REC_COUNT'] == '1' ){
+                            $retBool = true;
+                        }else if( $row['REC_COUNT'] == '0' ){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211470");
+                        }else{
+                            $boolSystemErrorFlag = true;
+                        }
+                        unset($row);
+                        unset($objQuery);
+                    }else{
+                        $boolSystemErrorFlag = true;
+                    }
+                    unset($retArray);
                 }
-
                 break;
             }
         }
@@ -1793,6 +1933,41 @@ Terrraform 代入値自動登録設定
                 unset($retArray);
 
                 if( $boolExecuteContinue === true && $boolSystemErrorFlag === false ){
+                    //作業パターンの組み合わせチェック
+                    $retBool = false;
+                    $query = "SELECT "
+                            ." COUNT(*) REC_COUNT "
+                            ."FROM "
+                            ." D_TERRAFORM_PTN_VARS_LINK_VFP TAB_1 "
+                            ."WHERE "
+                            ." TAB_1.DISUSE_FLAG = '0' "
+                            ."AND TAB_1.PATTERN_ID = :PATTERN_ID "
+                            ."AND TAB_1.MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+        
+                    $aryForBind = array();
+                    $aryForBind['PATTERN_ID'] = $rg_pattern_id;
+                    $aryForBind['MODULE_VARS_LINK_ID'] = $vars_link_id;
+        
+                    $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+                    if( $retArray[0] === true ){
+                        $objQuery =& $retArray[1];
+                        $intCount = 0;
+                        $aryDiscover = array();
+                        $row = $objQuery->resultFetch();
+                        unset($objQuery);
+                        if( $row['REC_COUNT'] == '1' ){
+                            $retBool = true;
+                        }else if( $row['REC_COUNT'] == '0' ){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211470");
+                        }else{
+                            $boolSystemErrorFlag = true;
+                        }
+                        unset($row);
+                        unset($objQuery);
+                    }else{
+                        $boolSystemErrorFlag = true;
+                    }
+                    unset($retArray);
                 }
                 break;
             }

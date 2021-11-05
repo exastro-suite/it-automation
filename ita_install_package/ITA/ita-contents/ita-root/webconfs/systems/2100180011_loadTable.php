@@ -118,6 +118,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 更新時は「自動入力」を表示 */
     $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 登録時は「自動入力」を表示 */
     $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction); //初期値を1(準備中)に
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('STATUS_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_REGULARLY_STATUS_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'REGULARLY_STATUS_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'REGULARLY_STATUS_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //実行ユーザ
@@ -142,6 +154,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setOutputType('update_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 更新時は「自動入力」を表示 */
     $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new StaticTextTabBFmt($strWebUIText))); /* 登録時は「自動入力」を表示 */
     $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction); //実行ユーザを自動入力
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('EXECUTION_USER_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_ACCOUNT_LIST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'USER_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'USERNAME_JP',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //スケジュール設定ボタン
@@ -219,6 +243,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('update_table')->setAttr('data-sch', 'scheduleRegularlyPeriod'); //data属性を追加（モーダルから入力欄への値セット用）
         $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt(''))); //テキストと、隠しテキストインプットを出力する
         $c->getOutputType('register_table')->setAttr('data-sch', 'scheduleRegularlyPeriod'); //data属性を追加（モーダルから入力欄への値セット用）
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('REGULARLY_PERIOD_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_REGULARLY_PERIOD_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'REGULARLY_PERIOD_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'REGULARLY_PERIOD_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         //間隔
@@ -239,6 +275,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('update_table')->setAttr('data-sch', 'schedulePatternWeekNumber'); //data属性を追加（モーダルから入力欄への値セット用）
         $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt(''))); //テキストと、隠しテキストインプットを出力する
         $c->getOutputType('register_table')->setAttr('data-sch', 'schedulePatternWeekNumber'); //data属性を追加（モーダルから入力欄への値セット用）
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('PATTERN_WEEK_NUMBER');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_WEEK_NUMBER_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'WEEK_NUMBER_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'WEEK_NUMBER_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         //曜日
@@ -248,6 +296,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('update_table')->setAttr('data-sch', 'schedulePatternDayOfWeek'); //data属性を追加（モーダルから入力欄への値セット用）
         $c->setOutputType('register_table', new OutputType(new ReqTabHFmt(), new TextHiddenInputTabBFmt(''))); //テキストと、隠しテキストインプットを出力する
         $c->getOutputType('register_table')->setAttr('data-sch', 'schedulePatternDayOfWeek'); //data属性を追加（モーダルから入力欄への値セット用）
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('PATTERN_DAY_OF_WEEK');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_DAY_OF_WEEK_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'DAY_OF_WEEK_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'DAY_OF_WEEK_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         //日

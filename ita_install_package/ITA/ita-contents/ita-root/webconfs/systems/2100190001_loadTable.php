@@ -70,12 +70,36 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('CONTRAST_MENU_ID_1',$g['objMTS']->getSomeMessage("ITABASEH-MNU-310004"),'D_CMDB_MENU_LIST_CONTRAST','MENU_ID','MENU_PULLDOWN','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-310006"));//エクセル・ヘッダでの説明
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('CONTRAST_MENU_ID_1');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CMDB_MENU_LIST_CONTRAST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_PULLDOWN',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //'比較対象メニュー2'
     $c = new IDColumn('CONTRAST_MENU_ID_2',$g['objMTS']->getSomeMessage("ITABASEH-MNU-310005"),'D_CMDB_MENU_LIST_CONTRAST','MENU_ID','MENU_PULLDOWN','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-310006"));//エクセル・ヘッダでの説明
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('CONTRAST_MENU_ID_2');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CMDB_MENU_LIST_CONTRAST_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_PULLDOWN',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //'全件一致'
@@ -83,6 +107,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('ALL_MATCH_FLG',$g['objMTS']->getSomeMessage("ITABASEH-MNU-310007"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
     $c->setValidator($objVldt);
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-310008"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ALL_MATCH_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     $table->fixColumn();
