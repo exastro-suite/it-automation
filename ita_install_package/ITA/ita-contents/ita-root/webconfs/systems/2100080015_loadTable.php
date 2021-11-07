@@ -914,7 +914,7 @@ Terrraform 代入値自動登録設定
             unset($objFunction03);
 
             // Key変数名Webページ表示用
-            $c = new IDColumn('KEY_VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105150"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
+            $c = new IDColumn('KEY_VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105150"),'D_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105100"));
 
             $c->setHiddenMainTableColumn(false); //更新対象カラム
@@ -1213,7 +1213,7 @@ Terrraform 代入値自動登録設定
             unset($objFunction03);
 
             // Value変数名Webページ表示用
-            $c = new IDColumn('VAL_VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105150"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
+            $c = new IDColumn('VAL_VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105150"),'D_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
             $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105160"));
 
             $c->setHiddenMainTableColumn(false); //更新対象カラム
