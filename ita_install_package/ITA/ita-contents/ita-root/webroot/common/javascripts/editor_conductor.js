@@ -452,7 +452,9 @@ const connectablePattern = {
   'parallel-branch' : ['conditional-branch','parallel-branch','pause','status-file-branch'],
   'status-file-branch': ['conditional-branch','pause','status-file-branch','merge'],
   'merge' : ['conditional-branch','merge','status-file-branch'],
-  'pause' : ['pause','end']
+  'pause' : ['pause','end','status-file-branch'],
+  'call_s' : ['status-file-branch'],
+  'call' : ['status-file-branch']
 };
 
 // ID 連番用
