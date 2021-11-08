@@ -30,7 +30,7 @@
         function updateWorkspace($registerData){
             $ret = $this->setWorkspace($registerData, 'update');
             return($ret);
-        }        
+        }
 
         function setWorkspace($registerData, $type){
             //グローバル変数宣言
@@ -93,7 +93,7 @@
                 $ret = false;
                 return($ret);
             }
-            
+
             //データをセット
             $registerData['organizationName'] = $retOrganizationData[1]['ORGANIZATION_NAME'];
 
@@ -191,7 +191,7 @@
                 $retArray[2] = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211160", $retOrganizationData[2]); //Organization情報の取得に失敗しました。
                 return($retArray);
             }
-            
+
             //データをセット
             $checkData['organizationName'] = $retOrganizationData[1]['ORGANIZATION_NAME'];
             $checkData['emailAddress'] = $retOrganizationData[1]['EMAIL_ADDRESS'];
@@ -219,7 +219,7 @@
             // Workspaceの登録状態をチェック
             //----------------------------------------------
             $retCheckWorkspace = $terraformWorkspace->checkWorkspace($checkData);
-            
+
             //API結果判定
             if($retCheckWorkspace[0] == true){
                 $retArray[0] = true;
@@ -323,7 +323,7 @@
                 $ret = false;
                 return($ret);
             }
-            
+
             //データをセット
             $deleteData['organizationName'] = $retOrganizationData[1]['ORGANIZATION_NAME'];
 
@@ -360,6 +360,114 @@
             }
 
             return($ret);
+        }
+
+        function destroyWorkspaceInsRegister($destroyData)
+        {
+            //グローバル変数宣言
+            global $g;
+
+            //ローカル変数宣言
+            $ret = false;
+            $strFxName = __FUNCTION__;
+            $data = array();
+
+            //本体ロジックをコール
+            require_once($g['root_dir_path'] . "/libs/commonlibs/common_terraform_function.php");
+            require_once($g['root_dir_path'] . "/libs/webindividuallibs/systems/{$g['page_dir']}/81_terraformWorkspace.php");
+            $terraformWorkspace = new terraformWorkspace();
+
+            //$destroyData中身をデコード
+            $destroyData['workspaceID']   = urldecode($destroyData['workspaceID']);
+            $destroyData['workspaceName'] = urldecode($destroyData['workspaceName']);
+
+            //----------------------------------------------
+            // インタフェース情報を取得
+            //----------------------------------------------
+            $retInterfaceInfo = getInterfaceInfo();
+            if ($retInterfaceInfo[0] == false) {
+                //エラーログを出力
+                web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211170", $retInterfaceInfo[2]));
+                $ret = false;
+                return ($ret);
+            }
+
+            //データをセット
+            $destroyData['hostName'] = $retInterfaceInfo[1]['TERRAFORM_HOSTNAME'];
+            $destroyData['token'] = ky_decrypt($retInterfaceInfo[1]['TERRAFORM_TOKEN']);
+            $destroyData['proxySetting'] = array();
+            $destroyData['proxySetting']['address'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_ADDRESS'];
+            $destroyData['proxySetting']['port'] = $retInterfaceInfo[1]['TERRAFORM_PROXY_PORT'];
+
+
+            //----------------------------------------------
+            // Workspace情報を取得
+            //----------------------------------------------
+            $retWorkspaceData = getWorkspaceData($destroyData['workspaceID']);
+            if ($retWorkspaceData[0] == false) {
+                //エラーログを出力
+                web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211180", $retWorkspaceData[2]));
+                $ret = false;
+                return ($ret);
+            }
+
+            //データをセット
+            $aryUtnSqlBind = $retWorkspaceData[1];
+            $destroyData['organizationID'] = $retWorkspaceData[1]['ORGANIZATION_ID'];
+            $destroyData['workspaceName'] = $retWorkspaceData[1]['WORKSPACE_NAME'];
+
+            //----------------------------------------------
+            // Organization情報を取得
+            //----------------------------------------------
+            $retOrganizationData = getOrganizationData($destroyData['organizationID']);
+            if ($retOrganizationData[0] == false) {
+                //エラーログを出力
+                web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211160", $retOrganizationData[2]));
+                $ret = false;
+                return ($ret);
+            }
+
+            //データをセット
+            $destroyData['organizationName'] = $retOrganizationData[1]['ORGANIZATION_NAME'];
+
+            //----------------------------------------------
+            // Workspaceの登録状態をチェック
+            //----------------------------------------------
+            $retCheckWorkspace = $terraformWorkspace->checkWorkspace($destroyData);
+            //API結果判定
+            if ($retCheckWorkspace[0] == true) {
+                //Workspace存在判定
+                if ($retCheckWorkspace[2] == true) {
+                    //Workspace削除APIを実行
+                    $data["WORKSPACE_ID"] = $destroyData['workspaceID'];
+                    $data["EXE_USER_ID"] = $g["login_id"];
+                    $retdestroyWorkspace = destroyInsRegister($data);
+                    if ($retdestroyWorkspace[0] == true) {
+                        $ret = array(
+                            true,
+                            $retdestroyWorkspace[1] // execution_no
+                        );
+                    } else {
+                        //エラーログ出力
+                        web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-142018", '00000400-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')'));
+                        web_log($retdestroyWorkspace[1]);
+                        $ret = false;
+                        return ($ret);
+                    }
+                } else {
+                    //TFEにWorkspaceが登録されていない
+                    $ret = false;
+                    return ($ret);
+                }
+            } else {
+                //エラーログ出力
+                web_log($g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211130", '00000500-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')'));
+
+                $ret = false;
+                return ($ret);
+            }
+
+            return ($ret);
         }
 
         //-- サイト個別PHP要素、ここまで--
