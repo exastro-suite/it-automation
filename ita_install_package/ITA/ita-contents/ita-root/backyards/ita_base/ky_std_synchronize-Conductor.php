@@ -3408,8 +3408,19 @@
                             foreach ($tmpMovement as $key => $value) {
                                 //ENDノード(正常終了)の終了タイプでConductorのステータス上書き(優先度:正常終了<正常終了(警告)<異常終了)
                                 if( $value['I_NODE_TYPE_ID'] == 2 && $value['STATUS_ID'] == 9 ){
-                                    if( $arySymInsUpdateTgtSource['STATUS_ID'] < $value['END_TYPE'] && $arySymInsUpdateTgtSource['STATUS_ID'] != 7){
+                                    switch ( $value['END_TYPE'] ) {
+                                        //異常終了
+                                        case '7':
                                             $arySymInsUpdateTgtSource['STATUS_ID'] = $value['END_TYPE'];
+                                            break;
+                                        //警告終了
+                                        case '11':
+                                            if( $arySymInsUpdateTgtSource['STATUS_ID'] == 5 ){
+                                                $arySymInsUpdateTgtSource['STATUS_ID'] = $value['END_TYPE'];
+                                            }
+                                            break;
+                                        default:
+                                            break;
                                     }
                                 }
                             }
