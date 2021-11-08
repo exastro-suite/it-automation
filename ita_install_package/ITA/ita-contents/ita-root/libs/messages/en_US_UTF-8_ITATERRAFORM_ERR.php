@@ -107,6 +107,11 @@ $ary["ITATERRAFORM-ERR-142011"]     = "[API Error] Failed to connect to Terrafor
 $ary["ITATERRAFORM-ERR-142012"]     = "[Notice: API Error] Failed to get the detailed information of the outputs.";
 $ary["ITATERRAFORM-ERR-142013"]     = "[Notice: API Error] Failed to get the detailed information of the outputs.(FILE:{} LINE:{} StatusCode:{})";
 $ary["ITATERRAFORM-ERR-142014"]     = "[Notice] Failed to convert JSON of outputs.JSON errror code={}";
+$ary["ITATERRAFORM-ERR-142015"]     = "[API Error]Failed to delete resource.";
+$ary["ITATERRAFORM-ERR-142016"]     = "[API Error]Failed to delete resource.(FILE:{} LINE:{} StatusCode:{})";
+$ary["ITATERRAFORM-ERR-142017"]     = "[API Error]Failed to register the task for deleting the resource.";
+$ary["ITATERRAFORM-ERR-142018"]     = "[API Error]Failed to register the task for deleting the resource.(FILE:{} LINE:{} StatusCode:{})";
+$ary["ITATERRAFORM-ERR-142019"]     = "The value of the item is invalid.(FILE:{} LINE:{} Target item:{})";
 $ary["ITATERRAFORM-ERR-151010"]     = "Module file is not registered. Processing will be skipped. (Module:{})";
 $ary["ITATERRAFORM-ERR-151020"]     = "Exception occurred.";
 $ary["ITATERRAFORM-ERR-151030"]     = "The Module file managed by the system does not exist. (ModuleID:{} File name:{})";

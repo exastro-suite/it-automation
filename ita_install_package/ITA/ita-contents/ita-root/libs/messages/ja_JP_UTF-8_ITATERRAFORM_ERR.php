@@ -107,6 +107,13 @@ $ary["ITATERRAFORM-ERR-142011"]     = "[API Error]Terraformとの接続に失敗
 $ary["ITATERRAFORM-ERR-142012"]     = "[Notice: API Error]outputsデータの取得に失敗しました。";
 $ary["ITATERRAFORM-ERR-142013"]     = "[Notice: API Error]outputsデータの取得に失敗しました。(FILE:{} LINE:{} StatusCode:{})";
 $ary["ITATERRAFORM-ERR-142014"]     = "[Notice]outputsのJSON変換に失敗しました。JSON errror code={}";
+$ary["ITATERRAFORM-ERR-142015"]     = "[API Error]リソースの削除に失敗しました。";
+$ary["ITATERRAFORM-ERR-142016"]     = "[API Error]リソースの削除に失敗しました。(FILE:{} LINE:{} StatusCode:{})";
+$ary["ITATERRAFORM-ERR-142017"]     = "[API Error]リソースの削除のタスク登録に失敗しました。";
+$ary["ITATERRAFORM-ERR-142018"]     = "[API Error]リソースの削除のタスク登録に失敗しました。(FILE:{} LINE:{} StatusCode:{})";
+$ary["ITATERRAFORM-ERR-142019"]     = "項目が不正です。(FILE:{} LINE:{} 対象:{})";
+$ary["ITATERRAFORM-ERR-142020"]     = "Terraformに対象のWorkspaceが登録されていません。(WorkspaceID:{})";
+$ary["ITATERRAFORM-ERR-142021"]     = "Terraformに対象のOrganizationが登録されていません。(OrganizationID:{})";
 $ary["ITATERRAFORM-ERR-151010"]     = "Moduleファイルが未登録です。処理をスキップします。(Module:{})";
 $ary["ITATERRAFORM-ERR-151020"]     = "例外発生";
 $ary["ITATERRAFORM-ERR-151030"]     = "システムで管理しているModuleファイルが存在しません。(ModuleID:{}  ファイル名:{})";

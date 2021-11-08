@@ -14,7 +14,7 @@
 //
 //////// ----コールバックファンクション ////////
 function callback() {}
-callback.prototype = {  
+callback.prototype = {
     getOrganizationData : function(result){
         // セッションチェック
         if ( typeof result == "string" ) {
@@ -32,7 +32,7 @@ callback.prototype = {
         }
 
         //ボタンの非活性を解除
-        $('#Mix1_Nakami').find('input').prop('disabled', false);
+        $('#Mix1_Nakami').find('input:not(.deleteBtnInTbl)').prop('disabled', false);
     },
     getWorkspaceData : function(result){
         // セッションチェック
@@ -51,7 +51,7 @@ callback.prototype = {
         }
 
         //ボタンの非活性を解除
-        $('#Mix2_Nakami').find('input').prop('disabled', false);
+        $('#Mix2_Nakami').find('input:not(.destroyBtnInTbl):not(.deleteBtnInTbl)').prop('disabled', false);
     },
     getPolicyData : function(result){
         // セッションチェック
@@ -70,7 +70,7 @@ callback.prototype = {
         }
 
         //ボタンの非活性を解除
-        $('#Mix3_Nakami').find('input').prop('disabled', false);
+        $('#Mix3_Nakami').find('input:not(.deleteBtnInTbl)').prop('disabled', false);
     },
     getPolicySetData : function(result){
         // セッションチェック
@@ -91,7 +91,7 @@ callback.prototype = {
         }
 
         //ボタンの非活性を解除
-        $('#Mix4_Nakami').find('input').prop('disabled', false);
+        $('#Mix4_Nakami').find('input:not(.deleteBtnInTbl)').prop('disabled', false);
     },
     deleteOrganization : function(result){
         // セッションチェック
@@ -204,6 +204,30 @@ callback.prototype = {
                 getPolicySetData();
             }
         }
+    },
+    destroyWorkspaceInsRegister: function (result) {
+        // セッションチェック
+        if (typeof result == "string") {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
+
+        if (result[0] == true) {
+            //タスク登録成功メッセージ
+            //作業状態確認へ遷移
+            let execution_no = result[1];
+            if (typeof execution_no !== "undefined") {
+                let menu_id = "2100080010";
+                let url = '/default/menu/01_browse.php?no=' + menu_id + '&execution_no=' + execution_no;
+
+                // 作業状態確認メニューに遷移
+                location.href = url;
+            }
+        } else {
+            //削除失敗通知メッセージ
+            window.alert(getSomeMessage("ITATERRAFORM100031"));
+            getWorkspaceData();
+        }
     }
 }
 
@@ -292,7 +316,7 @@ function deleteWorkspace(obj, organizationName, workspaceName){
         'workspaceName' : workspaceName
     };
 
-    //{}をTerraformから削除します。削除されたWorkspaceは元に戻せません。
+    //{}をTerraformから削除します。リソースは削除されません。削除されたWorkspaceは元に戻せません。
     if( window.confirm(getSomeMessage("ITATERRAFORM100026",{0:workspaceName}))){
         proxy.deleteWorkspace(data);
     }
@@ -363,5 +387,23 @@ function deleteRelationshipPolicy(obj, policySetId, policySetName, policyId, pol
     //{}を{}から切り離します。
     if( window.confirm(getSomeMessage("ITATERRAFORM100029",{0:policySetName, 1:policyName}))){
         proxy.deleteRelationshipPolicy(data);
+    }
+}
+
+function destroyWorkspaceInsRegister(obj, workspaceID, workspaceName) {
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
+    //エンコード
+    workspaceID = encodeURIComponent(workspaceID, workspaceName);
+    var data = {
+        'workspaceID': workspaceID,
+        'workspaceName': workspaceName
+    };
+
+    //destroy実行確認メッセージ
+    if (window.confirm(getSomeMessage("ITATERRAFORM100030", workspaceName))) {
+        proxy.destroyWorkspaceInsRegister(data);
+    } else {
+        $(obj).attr('disabled', false);
     }
 }

@@ -83,10 +83,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new TextValidator(0, 32, false, '/^(|[0-9.]+)$/', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102525")));
     $table->addColumn($c);
 
-    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102530"));
+    $cgg = new ColumnGroup($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102530"));
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-106380"));
         //Terraform連携状態チェック
         $c = new LinkButtonColumn('CHECK', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102540"), $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102550"), '', array());
         $outputType = new OutputType(new TabHFmt(), new LinkButtonTabBFmt());
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106400')); //エクセル・ヘッダでの説明
         $c->setOutputType("print_table", $outputType);
         $c->setEvent("print_table", "onClick", "checkWorkspace", array('this', ':WORKSPACE_ID')); //ボタン押下時のイベント
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
@@ -100,6 +102,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c = new TextColumn('CHECK_RESULT',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102560"));
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
         $outputType->setVisible(false); //フィルタ・登録・更新・変更履歴時は非表示
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106410')); //エクセル・ヘッダでの説明
         $c->setOutputType("filter_table", $outputType);
         $c->setOutputType("update_table", $outputType);
         $c->setOutputType("register_table", $outputType);
@@ -115,6 +118,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //Terraform登録ボタン
         $c = new LinkButtonColumn('REGISTER', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102570"), $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102580"), '', array());
         $outputType = new OutputType(new TabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array("")));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106420')); //エクセル・ヘッダでの説明
         $c->setOutputType("print_table", $outputType);
         $c->setEvent("print_table", "onClick", "registerWorkspace", array('this', ':WORKSPACE_ID')); //ボタン押下時のイベント
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
@@ -127,6 +131,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //Terraform更新ボタン
         $c = new LinkButtonColumn('UPDATE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102590"), $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102600"), '', array());
         $outputType = new OutputType(new TabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array("")));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106430')); //エクセル・ヘッダでの説明
         $c->setOutputType("print_table", $outputType);
         $c->setEvent("print_table", "onClick", "updateWorkspace", array('this', ':WORKSPACE_ID')); //ボタン押下時のイベント
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
@@ -139,6 +144,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //Terraform削除ボタン
         $c = new LinkButtonColumn('DELETE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102610"), $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-102620"), '', array());
         $outputType = new OutputType(new TabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array("")));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106440')); //エクセル・ヘッダでの説明
         $c->setOutputType("print_table", $outputType);
         $c->setEvent("print_table", "onClick", "deleteWorkspace", array('this', ':WORKSPACE_ID')); //ボタン押下時のイベント
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
@@ -148,7 +154,23 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setDBColumn(false);
         $cg->addColumn($c);
 
-    $table->addColumn($cg);
+        $cgg->addColumn($cg);
+    // $table->addColumn($cgg);
+
+    //workspaceのdestroyボタン
+    $c = new LinkButtonColumn('DESTROY', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-106370"), $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-106390"), '', array());
+    $outputType = new OutputType(new TabHFmt(), new LinkButtonTabBFmt(0, array($objFunction), array("")));
+    $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106450')); //エクセル・ヘッダでの説明
+    $c->setOutputType("print_table", $outputType);
+    $c->setEvent("print_table", "onClick", "destroyWorkspaceInsRegister", array('this', ':WORKSPACE_ID', ':WORKSPACE_NAME')); //ボタン押下時のイベント
+    $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
+    $outputType->setVisible(false); //登録・更新時は非表示
+    $c->setOutputType("update_table", $outputType);
+    $c->setOutputType("register_table", $outputType);
+    $c->setDBColumn(false);
+
+    $cgg->addColumn($c);
+    $table->addColumn($cgg);
 
     // PolicySet-Workspace紐付管理へのリンクボタン
     $strLabelText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-107010");
