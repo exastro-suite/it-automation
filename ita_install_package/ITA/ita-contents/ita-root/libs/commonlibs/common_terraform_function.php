@@ -200,11 +200,7 @@
     function destroyInsRegister($destroyData) {
         global $g, $objDBCA, $objMTS;
 
-        if (empty($root_dir_path)) {
-            $root_dir_temp = array();
-            $root_dir_temp = explode("ita-root", dirname(__FILE__));
-            $root_dir_path = $root_dir_temp[0] . "ita-root";
-        }
+        $root_dir_path = $g["root_dir_path"];
 
         require_once $root_dir_path . "/libs/backyardlibs/common/common_functions.php";
 
