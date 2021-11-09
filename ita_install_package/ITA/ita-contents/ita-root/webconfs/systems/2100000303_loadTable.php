@@ -62,7 +62,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITABASEH-MNU-101050"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
-    $table->setNoRegisterFlg(true);    // 登録画面無し
 
     $c = new IDColumn('HARDAWRE_TYPE_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-101060"),'B_HARDAWRE_TYPE','HARDAWRE_TYPE_ID','HARDAWRE_TYPE_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-101070"));//エクセル・ヘッダでの説明
