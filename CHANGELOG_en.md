@@ -1,10 +1,11 @@
-Exastro IT Automation 1.8.2 (2021-10-28)
+Exastro IT Automation 1.8.2 (2021-11-12)
 ==================================================
 
 
 インストーラ
 ---------------
  * Updated to Version v1.8.2 #1617
+ * Fixed an issue with the Excel output by phpspreadhseet v1.19.0 #1687
 
 エクスポート/インポート
 ---------------
