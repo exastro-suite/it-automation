@@ -67,8 +67,7 @@
     }
 
     $loginUrl = "";
-    
-    isset(explode("?", $_SERVER['HTTP_REFERER'])[1]){
+    if(isset(explode("?", $_SERVER['HTTP_REFERER'])[1])){
         $loginUrl = isset(explode("&", explode("?", $_SERVER['HTTP_REFERER'])[1])[0]) ? explode("&", explode("?", $_SERVER['HTTP_REFERER'])[1])[0] : "";
     }
 
