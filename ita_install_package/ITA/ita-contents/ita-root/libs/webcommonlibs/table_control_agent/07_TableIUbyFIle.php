@@ -62,7 +62,7 @@
         //受付拡張子(エクセル)の設定----
 
         //----受付拡張子(CSV系)の設定
-        $pblStrCsvFileTailMarks = ".csv,.scsv";
+        $pblStrCsvFileTailMarks = ".scsv";
         //受付拡張子(CSV系)の設定----
 
         $ret_str = '';
@@ -523,15 +523,28 @@
                 $strFileReceptUniqueNumber = $strModeMark."_".$strLogTimeStamp."_".basename($strUpTmpFileFullname);
                 $strMovedFileFullname = $editSourceDir."/".$strFileReceptUniqueNumber.".log";
 
-                if( move_uploaded_file($strUpTmpFileFullname, $strMovedFileFullname) === false ){
-                    //----ファイルの移動に失敗した
-                    $intErrorType = 802;
-                    $intErrorPlaceMark = 1000;
-                    throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                    //ファイルの移動に失敗した----
-                }
-                else{
-                    $strIUDSourceFullname = $strMovedFileFullname;
+                if($strApiFlg == true){
+                  if( rename($strUpTmpFileFullname, $strMovedFileFullname) === false ){
+                      //----ファイルの移動に失敗した
+                      $intErrorType = 802;
+                      $intErrorPlaceMark = 1000;
+                      throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                      //ファイルの移動に失敗した----
+                  }
+                  else{
+                      $strIUDSourceFullname = $strMovedFileFullname;
+                  }
+                }else{
+                  if( move_uploaded_file($strUpTmpFileFullname, $strMovedFileFullname) === false ){
+                      //----ファイルの移動に失敗した
+                      $intErrorType = 802;
+                      $intErrorPlaceMark = 1000;
+                      throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                      //ファイルの移動に失敗した----
+                  }
+                  else{
+                      $strIUDSourceFullname = $strMovedFileFullname;
+                  }
                 }
             }
             else{
@@ -1095,6 +1108,12 @@
                     //----第1引数の配列値をキーに、第2引数の配列値を値とする連想配列を形成
                     $inputArray = array_combine($tableHeaderId, $excelBodyData);
                     //第1引数の配列値をキーに、第2引数の配列値を値とする連想配列を形成----
+                    
+                    if($strApiFlg == true){
+                      if($inputArray['ROW_EDIT_BY_FILE'] != "登録" && $inputArray['ROW_EDIT_BY_FILE'] != "更新" && $inputArray['ROW_EDIT_BY_FILE'] != "廃止" && $inputArray['ROW_EDIT_BY_FILE'] != "復活"){
+                        continue;
+                      }
+                    }
 
                     //EXCELモード----
                 }
@@ -1500,7 +1519,12 @@
 
         //結果出力----
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
-        return array($strRetStrBody,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryNormalResultOfEditExecute,$aryRawResultOfEditExecute);
+
+        if($strApiFlg == true){
+          return array($strRetStrBody,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryNormalResultOfEditExecute,$aryRawResultOfEditExecute,$strErrorStreamFromEditExecute);
+        }else{
+          return array($strRetStrBody,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryNormalResultOfEditExecute,$aryRawResultOfEditExecute);
+        }
     }
 
     function printUploadLog($file_neme, &$aryVariant=array(), &$arySetting=array()){
