@@ -136,7 +136,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new NumColumn('INPUT_ORDER',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102613"));
     $c->setHiddenMainTableColumn(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102614"));
-    $c->setValidator(new IntNumValidator(0, null));
+    $c->setValidator(new IntNumValidator(1, ★★★REPEAT_CNT★★★));
     $c->setSubtotalFlag(false);
     $c->setRequired(true);
     $table->addColumn($c);

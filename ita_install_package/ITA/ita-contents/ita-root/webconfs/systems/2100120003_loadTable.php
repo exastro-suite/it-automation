@@ -415,7 +415,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
         $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
         $objOT->setFirstSearchValueOwnerColumnID('MATL_TYPE_ROW_ID');
-        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'MATL_TYPE_ROW_ID_JNL',
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>$view_name.'_JNL',
             'TTT_SEARCH_KEY_COLUMN_ID'=>'MATL_TYPE_ROW_ID',
             'TTT_GET_TARGET_COLUMN_ID'=>'MATL_TYPE_NAME',
             'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',

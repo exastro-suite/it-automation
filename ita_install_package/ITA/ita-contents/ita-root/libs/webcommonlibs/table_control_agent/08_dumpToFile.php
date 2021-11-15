@@ -459,20 +459,24 @@
 
                 $aryColumns = $objTable->getColumns();
                 $FileUploadColumnCount = 0;
-                $aryUploadFileKeys = array_keys($aryUploadFile[1]);
-                foreach($aryColumns as $strColumnId=>$objColumn){
-                  
-                    if(get_class($objColumn)==="FileUploadColumn"){
-                        $FileEncryptFunctionName = $objColumn->getFileEncryptFunctionName();
-                       
-                        if($FileEncryptFunctionName==="ky_file_encrypt"){
-                          
-                            for($i=1;$i<=count($aryUploadFile);$i++){
-                                $aryUploadFile[$i][$aryUploadFileKeys[$FileUploadColumnCount]] = "";
-                            }
+
+                if(is_array($aryUploadFile) && array_key_exists(1,$aryUploadFile)){
+
+                    $aryUploadFileKeys = array_keys($aryUploadFile[1]);
+                    foreach($aryColumns as $strColumnId=>$objColumn){
+                    
+                        if(get_class($objColumn)==="FileUploadColumn"){
+                            $FileEncryptFunctionName = $objColumn->getFileEncryptFunctionName();
+                        
+                            if($FileEncryptFunctionName==="ky_file_encrypt"){
                             
+                                for($i=1;$i<=count($aryUploadFile);$i++){
+                                    $aryUploadFile[$i][$aryUploadFileKeys[$FileUploadColumnCount]] = "";
+                                }
+                                
+                            }
+                            $FileUploadColumnCount++;
                         }
-                        $FileUploadColumnCount++;
                     }
                 }
 

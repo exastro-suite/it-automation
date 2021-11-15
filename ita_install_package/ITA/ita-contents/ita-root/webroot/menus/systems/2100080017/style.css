@@ -1,0 +1,21 @@
+input.destroyBtnInTbl[type="button"] {
+    background: #ffbc00;
+    border: 1px solid #dda200;
+    box-shadow: 0 2px 0 #bb8900;
+    color: white;
+    margin: 0;
+    min-width: auto;
+    min-width: 100%;
+    width: 100%;
+    margin-top: 2px;
+    padding: 0 2px;
+    border-radius: 3px;
+    font-size: 90%;
+    height: 18px;
+}
+input[type="button"][disabled], input[type="button"][disabled]:hover, input[type="button"][disabled]:active, input[type="submit"][disabled], input[type="submit"][disabled]:hover, input[type="submit"][disabled]:active, button.linkBtnInTbl[disabled], button.linkBtnInTbl[disabled]:hover, button.linkBtnInTbl[disabled]:active {
+    background-color: #F2F2F2;
+    border-color: #CCCCCC;
+    color: #868686;
+    box-shadow: none;
+}
