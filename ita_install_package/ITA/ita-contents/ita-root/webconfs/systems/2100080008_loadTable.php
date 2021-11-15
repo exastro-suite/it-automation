@@ -442,7 +442,7 @@ Terraform代入値管理
     //変数名----
 
     //----変数名(Webページ表示用)
-    $c = new IDColumn('VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103710"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
+    $c = new IDColumn('VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103710"),'D_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103720"));//エクセル・ヘッダでの説明
 
     $c->setHiddenMainTableColumn(false); //更新対象カラム

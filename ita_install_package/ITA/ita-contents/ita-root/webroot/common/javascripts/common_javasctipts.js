@@ -45,7 +45,11 @@ $( window ).on({
                           midashiID = $heading.find('.showbutton').closest('div').attr('id');
                     let nakamiID;
                     if ( $heading.next().is('.open') ) {
-                        nakamiID = $heading.next('.open').find('.text').attr('id')
+                        nakamiID = $heading.next('.open').find('.text').attr('id');
+                    } else if ( $heading.next().is('form') && ( pageNo === '2100000329' || pageNo === '2100000211')) {
+                        nakamiID = $heading.next('form').find('#Mix1_Nakami').attr('id');
+                    } else if ( $heading.next().is('#import_all') ) {
+                        nakamiID = $heading.next('#import_all').find('.text').attr('id');
                     } else if ( $heading.next().is('h3') ) {
                         if ( $heading.next('h3').next().is('.text') ) {
                             nakamiID = $heading.next('h3').next('.text').attr('id');
@@ -153,10 +157,11 @@ function set_layout_setting() {
             exclusionPageNo = [
               '2100180003','2100180005',
               '2100160011',
-              '2100000211','2100000212'
-            ];
+              '2100000326'
+            ],
+            href = location.href;
       
-      if ( pageNo !== null && grpNo === null && exclusionPageNo.indexOf( pageNo ) === -1 ) {
+      if ( href.match(/\/default\/menu\//) && pageNo !== null && grpNo === null && exclusionPageNo.indexOf( pageNo ) === -1 ) {
           const $html = $('html'),
                 $footerUL = $('#FOOTER').find('ul'),
                 layoutKeyName = 'ita_layout',
@@ -195,11 +200,14 @@ function set_layout_setting() {
                   // 00_javascriptのwindow.load後のshow()を無視するため属性を付ける
                   let prevNakamiID = '';
                   $('#KIZI').find('h2').each( function(){
-                      const $heading = $( this ),
-                            midashiID = $heading.find('.showbutton').closest('div').attr('id');
+                      const $heading = $( this );
                       let nakamiID;
                       if ( $heading.next().is('.open') ) {
-                          nakamiID = $heading.next('.open').find('.text').attr('id')
+                          nakamiID = $heading.next('.open').find('.text').attr('id');
+                      } else if ( $heading.next().is('form') && ( pageNo === '2100000329' || pageNo === '2100000211')) {
+                          nakamiID = $heading.next('form').find('#Mix1_Nakami').attr('id');
+                      } else if ( $heading.next().is('#import_all') ) {
+                          nakamiID = $heading.next('#import_all').find('.text').attr('id');
                       } else {
                           nakamiID = $heading.next('.text').attr('id');
                       }
@@ -224,7 +232,11 @@ function set_layout_setting() {
                             midashiTEXT = $heading.find('.midashi_class').text();
                       let nakamiID;
                       if ( $heading.next().is('.open') ) {
-                          nakamiID = $heading.next('.open').find('.text').attr('id')
+                          nakamiID = $heading.next('.open').find('.text').attr('id');
+                      } else if ( $heading.next().is('form') && ( pageNo === '2100000329' || pageNo === '2100000211')) {
+                          nakamiID = $heading.next('form').find('#Mix1_Nakami').attr('id');
+                      } else if ( $heading.next().is('#import_all') ) {
+                          nakamiID = $heading.next('#import_all').find('.text').attr('id');
                       } else if ( $heading.next().is('h3') ) {
                           if ( $heading.next('h3').next().is('.text') ) {
                               nakamiID = $heading.next('h3').next('.text').attr('id');

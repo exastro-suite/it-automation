@@ -151,7 +151,7 @@ elif [ "${TYPE}" = "sshKeyAuthPass" ]; then
     expect {
         \"Cloning into\" {
             exp_continue
-        } \"passphrase for key \" {
+        } \"passphrase for key \*:\" {
             send \"${SSH_PASS_PASSPHRASE}\n\"
             exp_continue
         } \"Username for \" {

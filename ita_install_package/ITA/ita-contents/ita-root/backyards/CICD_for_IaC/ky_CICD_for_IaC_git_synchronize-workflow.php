@@ -608,6 +608,7 @@
             return $logstr;
         }
 
+        $sleep_time = 50000;
         usleep($sleep_time);
 
         $ps_array2 = array();
@@ -619,6 +620,7 @@
             return $logstr;
         }
 
+        $sleep_time = 100000;
         usleep($sleep_time);
 
         $ps_array3 = array();

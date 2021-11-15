@@ -49,6 +49,11 @@
                 $aryForResultData = ReSTCommandExcelDowload($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
                 //DOWNLOAD_SPREADSHEET----
             }
+            else if( $strCommand == "UPLOAD_SPREADSHEET" ){
+                //----DOWNLOAD_SPREADSHEET
+                $aryForResultData = ReSTCommandExcelUpload($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
+                //DOWNLOAD_SPREADSHEET----
+            }
             else{
                 $aryForResultData = array(array('ResultStatusCode'=>500,
                                                 'ResultData'=>$g['requestByREST']['preResponsContents']['errorInfo']
@@ -578,7 +583,7 @@
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);        
         return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
     }
-    //----webroot(03,04,07)
+    
     function ReSTCommandExcelDowload($strCommand, $objJSONOfReceptedData, $objTable, $strApiFlg=false){
         global $g;
         // ----ローカル変数宣言
@@ -812,6 +817,188 @@
                                                                           'DOWNLOAD_FILE'=>""));
               }
           }
+          
+          if( headers_sent() === true ){
+              $intErrorType = 900;
+              $intErrorPlaceMark = 1000;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+          }
+        }
+        catch (Exception $e){
+          // 失敗時のデータテンプレを取得
+          $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+
+          $tmpErrMsgBody = $e->getMessage();
+          dev_log($tmpErrMsgBody, $intControlDebugLevel01);
+          if( $intResultStatusCode === null ) $intResultStatusCode = 500;
+          if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
+          if( 500 <= $intErrorType ) web_log($tmpErrMsgBody);
+      }
+      $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                            'ResultData'=>$aryForResultData);;
+      return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+    }
+    
+    function ReSTCommandExcelUpload($strCommand, $objJSONOfReceptedData, $objTable, $strApiFlg=false){
+        global $g;
+        // ----ローカル変数宣言
+        $intControlDebugLevel01=250;
+
+        $intResultStatusCode = null;
+        $aryForResultData = array();
+        $aryPreErrorData = null;
+
+        $intErrorPlaceMark = null;
+        $strErrorPlaceFmt = "%08d";
+
+        $arrayRetBody = array();
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+
+        $intErrorPlaceMark = null;
+        $strErrorPlaceFmt = "%08d";
+        
+        $boolKeyExists = null;
+
+        $strFxName = __FUNCTION__;
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+        try{
+          $tmpArrayReqHeaderRaw = getallheaders();
+          list($strFormatterId,$boolKeyExists) = isSetInArrayNestThenAssign($tmpArrayReqHeaderRaw,array('Formatter'),"json");
+          unset($tmpArrayReqHeaderRaw);
+
+          $tmpArrayVariant = array();
+          $tmpArraySetting = array();
+
+          $tmpArraySetting = array('system_function_control'=>array('DTiSFilterCheckValid'=>array('HiddenVars'=>array('DecodeOfSelectTagStringEscape'=>false))));
+
+          if( is_array($objJSONOfReceptedData) !== true ){
+              $tmpAryFilterData = array();
+          }
+          else{
+              $tmpAryFilterData = $objJSONOfReceptedData;
+          }
+
+          $objListFormatter = $objTable->getFormatter($strFormatterId);
+          if( is_a($objListFormatter, "ListFormatter") !== true ){
+              // ----リストフォーマッタクラスではない
+              $intErrorPlaceMark = 100;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+              // リストフォーマッタクラスではない----
+          }
+
+          if( is_a($objListFormatter, "JSONFormatter") !== true ){
+              $intErrorPlaceMark = 200;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+          }
+
+          if( is_array($objJSONOfReceptedData) !== true ){
+              $intResultStatusCode = 400;
+              $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+              $aryForResultData['Error'] = array();
+              $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+              $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+              $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                    'ResultData'=>$aryForResultData);
+              return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+          }
+          
+          
+          if(!array_key_exists('FILE_NAME',$objJSONOfReceptedData)){
+            //ファイル名の指定がない
+            $intResultStatusCode = 400;
+            $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+            $aryForResultData['Error'] = array();
+            $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+            $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-1121"));
+            $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                  'ResultData'=>$aryForResultData);
+            return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+          }
+          
+          $upTmpFileFullname = "/tmp/tmpfile";
+          $upload_files = base64_decode($objJSONOfReceptedData['UPLOAD_FILE']);
+          $upOrgFilename = $objJSONOfReceptedData['FILE_NAME'];
+          file_put_contents($upTmpFileFullname,$upload_files);
+          
+          if( preg_match('/\.xlsx$/',$upOrgFilename) === 1 ){
+            $intModeFileCh = 0;
+          }else if( preg_match('/\.xlsm$/',$upOrgFilename) === 1 ){
+            $intModeFileCh = 1;
+          }else if( preg_match('/\.scsv$/',$upOrgFilename) === 1 ){
+            $intModeFileCh = 1;
+          }else{
+            //ファイル種別が不正
+            $intResultStatusCode = 400;
+            $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+            $aryForResultData['Error'] = array();
+            $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+            $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-508",array('.xlsx,.xlsm,.scsv')));
+            $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                  'ResultData'=>$aryForResultData);
+            return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+          }
+
+          $tmpArrayVariant = array();
+          $tmpArraySetting = array();
+          $tmpArrayVariant['objTable'] = $objTable;
+          $tmpArrayVariant['tableIUDByQMFile']  = array('vars'=>array('strUpTmpFileFullname'=>$upTmpFileFullname,'strOrgFileNameOfUpTmpFile'=>$upOrgFilename));
+          
+          $aryResultOfTableIUD = tableIUDByQMFile(null, null, $intModeFileCh, 'all_dump_table', $tmpArrayVariant, $tmpArraySetting, true);
+          $aryNormalResultOfEditExecute = $aryResultOfTableIUD[4];
+          $deleteString = array("\t","\r");
+          $aryRawResultOfEditExecute = explode("\n", str_replace($deleteString, "", $aryResultOfTableIUD[6]));
+          $tmpAryRawResultOfEditExecute = $aryRawResultOfEditExecute;
+          foreach ($tmpAryRawResultOfEditExecute as $key => $value) {
+            if($value == ""){
+              unset($tmpAryRawResultOfEditExecute[$key]);
+            }
+          }
+          
+          $aryRawResultOfEditExecute = $tmpAryRawResultOfEditExecute;
+          
+          if( $aryResultOfTableIUD[1] !== null ){
+              //----エラー発生
+              switch($aryResultOfTableIUD[1]){
+                  case 1: // 権限がない
+                      $intResultStatusCode = 403;
+                      break;
+                  case 371: // JSON固有サイズover。
+                  case 372: // フォーマットが一致しない。
+                  case 373: // 不正なフォーマット。
+                      $intResultStatusCode = 400;
+                      break;
+                  case 374: // アップロードファイルが不正なフォーマット。
+                      $intResultStatusCode = 400;
+                      $semiNormalFlg = 1;
+                      break;
+                  default:
+                      $intResultStatusCode = 500;
+                      break;
+              }
+              if("" != $aryResultOfTableIUD[3]){
+                  $aryPreErrorData = $aryResultOfTableIUD[3];
+              }
+              else{
+                  $aryPreErrorData = getMessageFromResultOfTableIUDByQMFile($aryResultOfTableIUD[1],0);
+              }
+              $intErrorPlaceMark = 300;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+              //エラー発生----
+          }
+          else{
+              //----正常終了
+              $intResultStatusCode = 200;
+              $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
+              $aryForResultData['resultdata'] = array('LIST'=>array('NORMAL'=>$aryNormalResultOfEditExecute,
+                                                                    'ERROR_DETAIL'=>$aryRawResultOfEditExecute
+                                                                    )
+                                                      );
+              //正常終了----
+          }
+          unset($tmpStrTempFilename);
           
           if( headers_sent() === true ){
               $intErrorType = 900;

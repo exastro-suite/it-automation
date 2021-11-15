@@ -66,7 +66,10 @@
 
     }
 
-    $loginUrl = isset(explode("&", explode("?", $_SERVER['HTTP_REFERER'])[1])[0]) ? explode("&", explode("?", $_SERVER['HTTP_REFERER'])[1])[0] : "";
+    $loginUrl = "";
+    if(isset(explode("?", $_SERVER['HTTP_REFERER'])[1])){
+        $loginUrl = isset(explode("&", explode("?", $_SERVER['HTTP_REFERER'])[1])[0]) ? explode("&", explode("?", $_SERVER['HTTP_REFERER'])[1])[0] : "";
+    }
 
     if($pwExpiration == '1' && (strpos($loginUrl,'login') !== false) && ($pwLastUpdTime == null || $pwLastUpdTime == "")){
 

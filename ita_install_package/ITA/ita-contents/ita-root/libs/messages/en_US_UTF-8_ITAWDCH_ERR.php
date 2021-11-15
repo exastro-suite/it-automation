@@ -202,6 +202,7 @@ $ary["ITAWDCH-ERR-1117"]            = "You do not have permission for maintenanc
 $ary["ITAWDCH-ERR-1118"]            = "The selected operation and the movement permission role do not match.";
 $ary["ITAWDCH-ERR-1119"]            = "The selected operation and the login user permission role do not match.";
 $ary["ITAWDCH-ERR-1120"]            = "The selected movement and the login user permission role do not match.";
+$ary["ITAWDCH-ERR-1121"]            = "No file name is specified.";
 $ary["ITAWDCH-ERR-2001"]            = "RESULT:UNEXPECTED_ERROR({})";
 $ary["ITAWDCH-ERR-2002"]            = "FUNCTION:{},RESULT:UNEXPECTED_ERROR({})";
 $ary["ITAWDCH-ERR-3001"]            = "System error has occurred.";

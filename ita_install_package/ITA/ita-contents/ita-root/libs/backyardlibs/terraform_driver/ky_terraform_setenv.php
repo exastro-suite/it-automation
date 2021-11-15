@@ -56,6 +56,9 @@
     // 代入値自動登録設定テーブル名
     $vg_terraform_val_assign_table_name          = "B_TERRAFORM_VAL_ASSIGN";
 
+    // 代入値自動登録設定VIEW名
+    $vg_terraform_val_assign_view_name          = "D_TERRAFORM_VAL_ASSIGN";
+
     // 代入値管理情報紐付け（代入値/変数名/Movement紐付け)管理VIEW
     $vg_terraform_vars_data_view_name            = "D_TERRAFORM_VARS_DATA";
 

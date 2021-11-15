@@ -704,10 +704,17 @@ class ControlGit {
     function setSshExtraArgsVar2_3Low() {
         // ssh 設定
         $output = NULL;
-        $cmd = "sudo git config --global core.sshCommand 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' 2>&1";
+        $reg_flg = false;
+        $cmd = "sudo git config --global -l 2>&1";
         exec($cmd, $output, $return_var);
-
-        if(0 != $return_var){
+        if(0 == $return_var){
+            foreach($output as $stdline) {
+               $ret = preg_match("/core.sshcommand/", $stdline);
+               if($ret == 1){
+                   $reg_flg = true;
+               }
+            }
+        } else {
             $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1036",array($cmd)); 
             $logaddstr = $cmd . "\n" . implode("\n",$output);
             $logaddstr .= "\nexit code:($return_var)";
@@ -715,6 +722,20 @@ class ControlGit {
             $this->SetGitCommandLastErrorMsg($logstr . "\n" . $logaddstr);
             $this->SetLastErrorMsg($FREE_LOG);
             return false;
+        }
+        if($reg_flg === false) {
+            $output = NULL;
+            $cmd = "sudo git config --global core.sshCommand 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' 2>&1";
+            exec($cmd, $output, $return_var);
+            if(0 != $return_var){
+                $logstr    = $this->objMTS->getSomeMessage("ITACICDFORIAC-ERR-1036",array($cmd)); 
+                $logaddstr = $cmd . "\n" . implode("\n",$output);
+                $logaddstr .= "\nexit code:($return_var)";
+                $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+                $this->SetGitCommandLastErrorMsg($logstr . "\n" . $logaddstr);
+                $this->SetLastErrorMsg($FREE_LOG);
+                return false;
+            }
         }
         return true;
     }
