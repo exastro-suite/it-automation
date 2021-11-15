@@ -63,7 +63,6 @@ Ansible 共通 Ansible Tower インスタンス一覧
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010001003"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
-    $table->setNoRegisterFlg(true);      // 登録画面無し
 
 
     //----ホスト名

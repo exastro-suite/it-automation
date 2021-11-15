@@ -57,6 +57,7 @@ Ansible(Legacy)作業管理
 );
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);      // 登録画面無し
 
 
     $table->setDBSortKey(array("EXECUTION_NO"=>"DESC"));
