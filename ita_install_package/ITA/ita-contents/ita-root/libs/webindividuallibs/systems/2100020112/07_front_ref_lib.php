@@ -36,6 +36,8 @@
         $aryForResultData = movementExecutionControlFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
       }
     }else{
-      $aryForResultData = movementExecutionControlFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
+           webRequestForceQuitFromEveryWhere(400,11510807);
+           exit();
+           //不正な要求（内容が不正）----
     }
 ?>
