@@ -202,6 +202,7 @@ $ary["ITAWDCH-ERR-1117"]            = "メンテナンス権限がありませ�
 $ary["ITAWDCH-ERR-1118"]            = "オペレーションとMovementのアクセス許可ロールが適合していません。";
 $ary["ITAWDCH-ERR-1119"]            = "オペレーションとログインユーザーのアクセス許可ロールが適合していません。";
 $ary["ITAWDCH-ERR-1120"]            = "Movementとログインユーザーのアクセス許可ロールが適合していません。";
+$ary["ITAWDCH-ERR-1121"]            = "ファイル名の指定がありません。";
 $ary["ITAWDCH-ERR-2001"]            = "RESULT:UNEXPECTED_ERROR({})";
 $ary["ITAWDCH-ERR-2002"]            = "FUNCTION:{},RESULT:UNEXPECTED_ERROR({})";
 $ary["ITAWDCH-ERR-3001"]            = "システムエラーが発生しました。";
