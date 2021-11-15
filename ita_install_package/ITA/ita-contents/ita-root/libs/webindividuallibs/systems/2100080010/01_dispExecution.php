@@ -157,8 +157,12 @@
 
         // 代入値管理へ遷移するボタン生成
         $caption = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-101280");
-        $url = sprintf("/default/menu/01_browse.php?no=2100080008&ope_id=%s&movement_id=%s", $ope_param,$movement_param);
-        $COLUMN_39 =  sprintf("<input class=\"linkBtnInTbl\" type=\"button\" value=\"%s\" onClick=\"window.open('%s')\">",$caption,$url);
+        if (empty($ope_param) && empty($movement_param)) {
+            $COLUMN_39 = "";
+        } else {
+            $url = sprintf("/default/menu/01_browse.php?no=2100080008&ope_id=%s&movement_id=%s", $ope_param,$movement_param);
+            $COLUMN_39 =  sprintf("<input class=\"linkBtnInTbl\" type=\"button\" value=\"%s\" onClick=\"window.open('%s')\">",$caption,$url);
+        }
 
         // Movement一覧へ遷移するボタン生成
         $caption = $COLUMN_32;
