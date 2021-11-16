@@ -200,6 +200,13 @@ class ControlGit {
             $this->ClearGitCommandLastErrorMsg();
             exec($cmd, $output, $return_var);
             if(0 != $return_var){
+                global $log_level;
+                if($log_level == 'DEBUG') {
+                    $logaddstr = "";
+                    $logaddstr = implode("\n",$output);
+                    $logaddstr .= "\nexit code:($return_var)\nError retry with git command";
+                    error_log(__FILE__.__LINE__.$logaddstr);
+                }
                 // リトライ中のログは表示しない。
                 if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
             } else {
@@ -257,6 +264,13 @@ class ControlGit {
             exec($cmd, $output, $return_var);
             if($return_var == 0) {
                 break;
+            }
+            global $log_level;
+            if($log_level == 'DEBUG') {
+                $logaddstr = "";
+                $logaddstr = implode("\n",$output);
+                $logaddstr .= "\nexit code:($return_var)\nError retry with git command";
+                error_log(__FILE__.__LINE__.$logaddstr);
             }
             if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
         }
@@ -324,6 +338,13 @@ class ControlGit {
                 if($return_var == 0) {
                     break;
                 }
+                global $log_level;
+                if($log_level == 'DEBUG') {
+                    $logaddstr = "";
+                    $logaddstr = implode("\n",$output1);
+                    $logaddstr .= "\nexit code:($return_var)\nError retry with git command";
+                    error_log(__FILE__.__LINE__.$logaddstr);
+                }
                 if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
             }
             if($return_var != 0) {
@@ -379,6 +400,13 @@ class ControlGit {
             if($return_var == 0){
                 break;
             }
+            global $log_level;
+            if($log_level == 'DEBUG') {
+                $logaddstr = "";
+                $logaddstr = implode("\n",$output2);
+                $logaddstr .= "\nexit code:($return_var)\nError retry with git command";
+                error_log(__FILE__.__LINE__.$logaddstr);
+            }
             if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
         }
         if($return_var != 0) {
@@ -428,6 +456,13 @@ class ControlGit {
             if($return_var == 0) {
                 break;
             }
+            global $log_level;
+            if($log_level == 'DEBUG') {
+                $logaddstr = "";
+                $logaddstr = implode("\n",$output);
+                $logaddstr .= "\nexit code:($return_var)\nError retry with git command";
+                error_log(__FILE__.__LINE__.$logaddstr);
+            }
             if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
         }
         if($return_var == 0) {
@@ -475,6 +510,13 @@ class ControlGit {
 
             exec($cmd, $output, $return_var);
             if(0 != $return_var){
+                global $log_level;
+                if($log_level == 'DEBUG') {
+                    $logaddstr = "";
+                    $logaddstr = implode("\n",$output);
+                    $logaddstr .= "\nexit code:($return_var)\nError retry with git command";
+                    error_log(__FILE__.__LINE__.$logaddstr);
+                }
                 // リトライ中のログは表示しない。
                 if(($this->retryCount -1) > $idx) { usleep($this->retryWaitTime); }
             } else {

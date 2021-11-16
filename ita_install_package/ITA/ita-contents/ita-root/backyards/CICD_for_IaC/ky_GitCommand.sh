@@ -31,17 +31,20 @@ if [ $PROXYURL != "__undefine__" ]; then
 fi
 
 CMD="git --git-dir "$CLONE_REPO"/.git --work-tree="$CLONE_REPO" "$GIT_CMD
-# ssh の接続がhttpより時間がかかる模様 set timeoutを10に統一
+# ssh の接続がhttpより時間がかかる模様 set timeoutを60に統一
 if [ "${TYPE}" = "httpUserAuth" ]; then
     expect -c "
-    set timeout  10
+    set timeout  60
     spawn $CMD
     expect {
         \"Username for \" {
-            send \"${REMOTE_USER}\n\"
+            send \"${REMOTE_USER}\r\"
             exp_continue
         } \"Password for \" {
-            send \"${REMOTE_PASSWORD}\n\"
+            send \"${REMOTE_PASSWORD}\r\"
+            exp_continue
+        } \"remote: \" {
+            set timeout -1
             exp_continue
         } timeout {
             exit 200
@@ -69,13 +72,16 @@ if [ "${TYPE}" = "httpUserAuth" ]; then
     }"
 elif [ "${TYPE}" = "httpNoUserAuth" ]; then
     expect -c "
-    set timeout  10
+    set timeout  60
     spawn $CMD
     expect {
         \"Username for \" {
             exit 201
         } \"Password for \" {
             exit 202
+        } \"remote: \" {
+            set timeout -1
+            exp_continue
         } timeout {
             exit 205
         } eof {
@@ -102,20 +108,20 @@ elif [ "${TYPE}" = "httpNoUserAuth" ]; then
     }"
 elif [ "${TYPE}" = "sshPassAuth" ]; then
     expect -c "
-    set timeout 10
+    set timeout 60
     spawn $CMD
     expect {
         \"Cloning into\" {
             exp_continue
         } \"continue connecting\" {
-            send \"yes\n\"
+            send \"yes\r\"
             exp_continue
         } \"passphrase for key \" {
             exit 203
         } \"Username for \" {
             exit 201
         } \"password:\" {
-            send \"${SSH_PASSWORD}\n\"
+            send \"${SSH_PASSWORD}\r\"
             exp_continue
         } \"remote: \" {
             set timeout -1
@@ -146,13 +152,13 @@ elif [ "${TYPE}" = "sshPassAuth" ]; then
     }"
 elif [ "${TYPE}" = "sshKeyAuthPass" ]; then
     expect -c "
-    set timeout 10
+    set timeout 60
     spawn $CMD
     expect {
         \"Cloning into\" {
             exp_continue
-        } \"passphrase for key \*:\" {
-            send \"${SSH_PASS_PASSPHRASE}\n\"
+        } \"passphrase for key \*: \" {
+            send \"${SSH_PASS_PASSPHRASE}\r\"
             exp_continue
         } \"Username for \" {
             exit 201
@@ -187,12 +193,12 @@ elif [ "${TYPE}" = "sshKeyAuthPass" ]; then
     }"
 elif [ "${TYPE}" = "sshKeyAuthNoPass" ]; then
     expect -c "
-    set timeout 10
+    set timeout 60
     spawn $CMD
     expect {
         \"Cloning into\" {
             exp_continue
-        } \"passphrase for key \" {
+        } \"passphrase for key \*: \" {
             exit 203
         } \"Username for \" {
             exit 201
