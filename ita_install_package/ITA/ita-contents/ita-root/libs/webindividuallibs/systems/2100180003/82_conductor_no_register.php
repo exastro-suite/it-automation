@@ -564,6 +564,15 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
         //#587
         if( $value['NODE_TYPE_ID'] == 11) $arr_json[$value['NODE_NAME']]['type']="status-file-branch";
 
+        //END個別 #467
+        if( $value['NODE_TYPE_ID'] == 2) {
+            if( isset($value['END_TYPE']) === true ){
+                $arr_json[$value['NODE_NAME']]['END_TYPE']=$value['END_TYPE'];
+            }else{
+                $arr_json[$value['NODE_NAME']]['END_TYPE']="5";
+            }
+        }
+        
         //Movement個別
         if( $value['NODE_TYPE_ID'] == 3) {
             if( isset( $aryPatternList[$value['PATTERN_ID']] ) ){
