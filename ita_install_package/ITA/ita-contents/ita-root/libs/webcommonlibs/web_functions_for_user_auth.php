@@ -986,6 +986,7 @@
 
         $boolExpiryOut = false;
         $strReasonType = null;
+        $firstLoginFlg = 0;
 
         $strFxName = __FUNCTION__; // checkPasswordExpiryOut
 
@@ -1070,8 +1071,9 @@
                     else if($tmpIntCount1 == 1){
                         // ---- (2未満だった)初めて、登録されたまま、と評価できる場合（履歴に、パスワードが１種しかない）
 
-                        $tempBoolPassWordChange = true;
+                        $tempBoolPassWordChange = 1;
                         $strReasonType = "0";
+                        $firstLoginFlg = 1;
 
                         // (2未満だった)初めて、登録されたまま、と評価できる場合（履歴に、パスワードが１種しかない）----
                     }
@@ -1210,7 +1212,8 @@
             $strErrMsg = $tmpErrMsgBody;
         }
         $aryValues = array('ExpiryOut'=>$boolExpiryOut,
-                           'ReasonType'=>$strReasonType);
+                           'ReasonType'=>$strReasonType,
+                           'firstLogin'=>$firstLoginFlg);
         return array($aryValues,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
     }
 

@@ -39,8 +39,8 @@
     $last_log_flg = 0;
 
     if( $tmpAryRetBody[0]['ExpiryOut'] === true ){
-        if($lastLoginTime != "" || $deactivatePwChange != '1'){
-            if($pwExpiration != '1'){
+        if($pwExpiration != '1'){
+            if($deactivatePwChange != '1' || $tmpAryRetBody[0]['firstLogin'] != '1'){
                 // アクセスログ出力(有効期限が切れ)
                 web_log($objMTS->getSomeMessage("ITAWDCH-ERR-34"));
         
@@ -56,7 +56,7 @@
                     )
                 );
                 exit();
-            }
+            }  
         }
     } // ユーザーID
 
