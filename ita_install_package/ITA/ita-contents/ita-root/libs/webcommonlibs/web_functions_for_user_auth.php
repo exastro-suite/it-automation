@@ -1071,7 +1071,7 @@
                     else if($tmpIntCount1 == 1){
                         // ---- (2未満だった)初めて、登録されたまま、と評価できる場合（履歴に、パスワードが１種しかない）
 
-                        $tempBoolPassWordChange = 1;
+                        $tempBoolPassWordChange = true;
                         $strReasonType = "0";
                         $firstLoginFlg = 1;
 
