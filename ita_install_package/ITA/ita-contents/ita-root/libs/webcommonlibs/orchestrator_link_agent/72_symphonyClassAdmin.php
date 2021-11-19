@@ -1211,7 +1211,7 @@ function symphonyClassRegisterExecute($fxVarsIntSymphonyClassId ,$fxVarsAryRecep
         if( isset($aryExecuteData['ACCESS_AUTH'] ) ){
             $register_tgt_row['ACCESS_AUTH']       = $aryExecuteData['ACCESS_AUTH'];
         }else{
-            $register_tgt_row['ACCESS_AUTH']="1,2,3,4";
+            $register_tgt_row['ACCESS_AUTH']="";
         }
 
         $arrayConfigForIUD = $aryConfigForSymClassIUD;
