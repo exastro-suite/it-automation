@@ -13,18 +13,6 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-
-    $tmpAryRetBody = checkLoginPasswordExpiryOut($user_id,$p_login_pw_l_update,$pass_word_expiry,$objDBCA);
-    if( $tmpAryRetBody[1] !== null ){
-        $tmpErrMsgBody = $tmpAryRetBody[3];
-
-        // アクセスログ出力(想定外エラー)
-        web_log($objMTS->getSomeMessage("ITAWDCH-ERR-35",$tmpErrMsgBody));
-
-        // 想定外エラー通知画面にリダイレクト
-        webRequestForceQuitFromEveryWhere(500,10710101);
-        exit();
-    }
  
     $passwordSettings = getPasswordOtherSettings($user_id,$objDBCA);
     
@@ -34,18 +22,33 @@
     $pwLastUpdTime = $passwordSettings["PW_LAST_UPDATE_TIME"]; // パスワード最終更新日時
     $userId = $passwordSettings["USER_ID"]; // ユーザーID
     $oldPassword = $passwordSettings["PASSWORD"];
+    $tempBoolPassWordChange = false;
 
     $pw_l_up_flg = 0;
     $last_log_flg = 0;
+    $strReasonType = "";
 
-    if( $tmpAryRetBody[0]['ExpiryOut'] === true ){
+    $tmpIntPWLDUnixTime = strtotime($pwLastUpdTime);
+    $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
+    if($tmpIntPWLDUnixTime + ($pass_word_expiry * 86400) < $tempRequestTime ){
+        $tempBoolPassWordChange = true;
+        $strReasonType = "1";
+    }
+
+
+    if( $pwLastUpdTime == '' || $tempBoolPassWordChange === true ){
         if($pwExpiration != '1'){
-            if($deactivatePwChange != '1' || $tmpAryRetBody[0]['firstLogin'] != '1'){
+
+            if( $pwLastUpdTime == '' ){
+                $strReasonType = "0";
+            }
+
+            if($lastLoginTime != "" || $deactivatePwChange != '1'){
                 // アクセスログ出力(有効期限が切れ)
                 web_log($objMTS->getSomeMessage("ITAWDCH-ERR-34"));
         
                 // パスワード変更画面にリダイレクト
-                $arrayRedirect = array('expiry'=>$tmpAryRetBody[0]['ReasonType'],'username'=>$username);
+                $arrayRedirect = array('expiry'=>$strReasonType,'username'=>$username);
                 webRequestForceQuitFromEveryWhere(
                     401,
                     10710501,
@@ -109,5 +112,4 @@
         
     }
 
-    unset($tmpAryRetBody);
 ?>
