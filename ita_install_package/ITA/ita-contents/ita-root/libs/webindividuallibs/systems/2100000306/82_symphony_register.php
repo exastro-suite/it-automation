@@ -110,13 +110,13 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                 throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
             while($row = $objQuery->resultFetch()) {
-                if ( !(array_key_exists(9, $value)) ){
+                if ( !(array_key_exists(10, $value)) ){
                     if($row['NEXT_PENDING_FLAG'] == "1"){
                         $row['NEXT_PENDING_FLAG'] = "checkedValue";
                     }else{
                         $row['NEXT_PENDING_FLAG'] = "";
                     }
-                    $value[9][] = array("0" => $row['ORCHESTRATOR_ID'],
+                    $value[10][] = array("0" => $row['ORCHESTRATOR_ID'],
                                          "1" => $row['PATTERN_ID'],
                                          "2" => $row['NEXT_PENDING_FLAG'],
                                          "3" => $row['DESCRIPTION'],
@@ -138,7 +138,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                         }
 
                         if( count($value) == 7 ){
-                            if( is_array($value[9])){
+                            if( is_array($value[10])){
                                 $objJSONarrChk=0;
                             }
                     }
@@ -223,20 +223,20 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                     }
 
                     //movemnt要素の配列チェック
-                    if( array_key_exists(9, $value) ){
+                    if( array_key_exists(10, $value) ){
                         //movemnt要素の配列順＝実行順序へ
-                        foreach ($value[9] as $key1 => $value1) {
+                        foreach ($value[10] as $key1 => $value1) {
                             $tmp_ary = array( 0 => $key1+1);
-                            $value[9][$key1] = array_merge($tmp_ary, $value[9][$key1]);
+                            $value[10][$key1] = array_merge($tmp_ary, $value[10][$key1]);
                         }
                         //Movemnt要素ss;<XX>型へ変換
-                        foreach ($value[9] as $key1 => $value1) {
+                        foreach ($value[10] as $key1 => $value1) {
                             $ret_mov[] = "ss;" . implode( "ss;", $value1 );
                         }
-                        $objJSONOfReceptedData[$key][9] =  implode( "", $ret_mov ) ;
+                        $objJSONOfReceptedData[$key][10] =  implode( "", $ret_mov ) ;
 
                     }else{
-                        $objJSONOfReceptedData[$key][9] =  array() ;
+                        $objJSONOfReceptedData[$key][10] =  array() ;
                     }
 
                     break;
@@ -281,7 +281,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                     if( array_key_exists(0, $value) ) $Process_type = $value[0];
                     if( array_key_exists(2, $value) ) $intShmphonyClassId = $value[2];
                     if( array_key_exists(3, $value) ) $arrayReceptData = $value[3];
-                    if( array_key_exists(9, $value) ) $strSortedData = $value[9];
+                    if( array_key_exists(10, $value) ) $strSortedData = $value[10];
                     if( array_key_exists(7, $value) ) $strLT4UBody = $value[7];
 
                     switch ($Process_type) {
