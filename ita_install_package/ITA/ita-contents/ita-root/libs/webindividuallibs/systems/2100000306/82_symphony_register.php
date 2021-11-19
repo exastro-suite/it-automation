@@ -131,7 +131,13 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                 //登録、更新
                 case $strResultType01:
                 case $strResultType02:
-                        if( count($value) == 6 ){
+                
+                        // #1695
+                        if ( !(array_key_exists(5, $value)) ){
+                            $value[5] = "";
+                        }
+
+                        if( count($value) == 7 ){
                             if( is_array($value[9])){
                                 $objJSONarrChk=0;
                             }
@@ -165,6 +171,33 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                         if ( !array_key_exists(4, $value) )$value[4]="";
                     }
 
+                    //アクセス権のチェック  #1695
+                    if( array_key_exists(5, $value) && !is_array($value[5]) ){
+                        $tmpAAuthList = explode( "," ,$value[5] ) ;
+                        $arrAccessAuth = array();
+                        foreach ( $tmpAAuthList as $tmpAAuth ) {
+                            $tmpArrayBind = array( 'ROLE_NAME' => $tmpAAuth );
+                            $sql = "SELECT * FROM A_ROLE_LIST WHERE ROLE_NAME = :ROLE_NAME";
+
+                            $objQuery = $objDBCA->sqlPrepare($sql);
+                            $objQuery->sqlBind($tmpArrayBind);
+                            $r = $objQuery->sqlExecute();
+                            if($r!=true){
+                                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            }
+                            while($row = $objQuery->resultFetch()) {
+                                $arrAccessAuth[] = $row['ROLE_ID'];
+                            }
+                        }               
+                        if( $arrAccessAuth != array() ){
+                            $value[5] = implode( "," , $arrAccessAuth );
+                        }else{
+                             $value[5] = "";
+                        }
+                    }else{
+                        $value[5]="";
+                    }
+
                     //symphony要素の成形、型変換
                     $objJSONOfReceptedData[$key][3]= array();
                     unset($objJSONOfReceptedData[$key][4]);
@@ -176,6 +209,12 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                                         "name"  => "symphony_tips",
                                         "value" => $value[4]
                     );
+                    // #1695 
+                    $objJSONOfReceptedData[$key][3][]= array(
+                                        "name"  => "ACCESS_AUTH",
+                                        "value" => $value[5]
+                    );
+
                     //最終更新時刻を変換、チェック
                     if ( array_key_exists(7, $value) ){
                         if( $value[7] != "" ) $objJSONOfReceptedData[$key][7] = substr_replace($value[7], "." , 16, 0);
