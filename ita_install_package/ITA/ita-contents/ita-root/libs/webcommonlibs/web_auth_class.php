@@ -305,7 +305,6 @@ class Auth
             // ----id/pass認証
             if ($this->login()) {
                 // ログイン成功
-                $this->setLastLoginTime();
                 return;
             }
             // id/pass認証----

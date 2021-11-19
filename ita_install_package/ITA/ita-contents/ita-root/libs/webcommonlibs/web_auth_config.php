@@ -352,6 +352,17 @@
 
         switch ($checkStatus) {
             case "login_success":
+
+                if (enableActiveDirectorySync($strExternalAuthSettingsFilename) && $boolLocalAuthUser === false) {
+                        $objDBCA = new DBConnectAgent();
+                        $tmpResult = $objDBCA->connectOpen();
+                        $tmpArrayBind = array('USERNAME'=>$strUsername );
+                        $sql = "UPDATE A_ACCOUNT_LIST SET LAST_LOGIN_TIME = SYSDATE() WHERE USERNAME = :USERNAME";
+                        $objQuery = $objDBCA->sqlPrepare($sql);
+                        $objQuery->sqlBind($tmpArrayBind);
+                        $r = $objQuery->sqlExecute();
+                }
+                
                 break;
             case "id_error":
             case "id_error_on_syntax":

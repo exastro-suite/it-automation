@@ -240,10 +240,18 @@
             $oldPassword = $passwordSettings["PASSWORD"];
             // ----ログイン状態である、と判定された場合
 
+            $strReasonType = "";
+
+            $tmpIntPWLDUnixTime = strtotime($pwLastUpdTime);
+            $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
+            if($tmpIntPWLDUnixTime + ($pass_word_expiry * 86400) < $tempRequestTime ){
+                $tempBoolPassWordChange = true;
+            }
+
+
             // ----パスワードの有効期限を判定
-            $tmpAryRetBody = checkLoginPasswordExpiryOut($user_id,$p_login_pw_l_update,$pass_word_expiry,$objDBCA);
            
-            if( $tmpAryRetBody[0]['ExpiryOut'] === true ){
+           if( $pwLastUpdTime == '' || $tempBoolPassWordChange === true ){
                 if($lastLoginTime != "" || $deactivatePwChange != '1'){
                     //----パスワード有効期限切れ
                     // 汎用系メッセージ
@@ -297,8 +305,6 @@
                 }
                 
             }
-
-            unset($tmpAryRetBody);
             // パスワードの有効期限を判定-----
 
             // ----メニューに対する権限を取得
