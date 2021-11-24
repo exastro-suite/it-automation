@@ -28,45 +28,65 @@
     $last_log_flg = 0;
     $strReasonType = "";
 
-    $tmpIntPWLDUnixTime = strtotime($pwLastUpdTime);
-    $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
-    if($tmpIntPWLDUnixTime + ($pass_word_expiry * 86400) < $tempRequestTime ){
-        $tempBoolPassWordChange = true;
-        $strReasonType = "1";
-    }
-
-
-    if( $pwLastUpdTime == '' || $tempBoolPassWordChange === true ){
-        if($pwExpiration != '1'){
-
-            if( $pwLastUpdTime == '' ){
-                $strReasonType = "0";
-            }
-
-            if($lastLoginTime != "" || $deactivatePwChange != '1'){
-                // アクセスログ出力(有効期限が切れ)
-                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-34"));
-        
-                // パスワード変更画面にリダイレクト
-                $arrayRedirect = array('expiry'=>$strReasonType,'username'=>$username);
-                webRequestForceQuitFromEveryWhere(
-                    401,
-                    10710501,
-                    array('InsideRedirectMode'=>1,
-                        'MenuID'=>$ACRCM_id,
-                        'MenuGroupID'=>$ACRCM_group_id,
-                        'ValueForPost'=>$arrayRedirect
-                    )
-                );
-                exit();
-            }  
+    // ----■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。
+    if(isset($pass_word_expiry)){
+        // ----設定テーブルに、パスワードの有効期限に関する設定があった場合
+        if($pass_word_expiry == "0"){
+            $tempIntLength = 0;
         }
-    } // ユーザーID
+        else{
+            $tempIntLength = intval($pass_word_expiry);
+        }
+        // 設定テーブルに、パスワードの有効期限に関する設定があった場合----
+    }
+    else{
+        // ----設定テーブルに、パスワードの有効期限に関する設定がなかった場合
+        $tempIntLength = 0;
+        // 設定テーブルに、パスワードの有効期限に関する設定がなかった場合----
+    }
+    // ■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。----    
+
+    if(0 < $tempIntLength){
+        $tmpIntPWLDUnixTime = strtotime($pwLastUpdTime);
+        $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
+        if($tmpIntPWLDUnixTime + ($pass_word_expiry * 86400) < $tempRequestTime ){
+            $tempBoolPassWordChange = true;
+            $strReasonType = "1";
+        }
+
+
+        if( $pwLastUpdTime == '' || $tempBoolPassWordChange === true ){
+            if($pwExpiration != '1'){
+
+                if( $pwLastUpdTime == '' ){
+                    $strReasonType = "0";
+                }
+
+                if($lastLoginTime != "" || $deactivatePwChange != '1'){
+                    // アクセスログ出力(有効期限が切れ)
+                    web_log($objMTS->getSomeMessage("ITAWDCH-ERR-34"));
+            
+                    // パスワード変更画面にリダイレクト
+                    $arrayRedirect = array('expiry'=>$strReasonType,'username'=>$username);
+                    webRequestForceQuitFromEveryWhere(
+                        401,
+                        10710501,
+                        array('InsideRedirectMode'=>1,
+                            'MenuID'=>$ACRCM_id,
+                            'MenuGroupID'=>$ACRCM_group_id,
+                            'ValueForPost'=>$arrayRedirect
+                        )
+                    );
+                    exit();
+                }  
+            }
+        } // ユーザーID
+
+    }
 
     if($lastLoginTime == null && $deactivatePwChange == '1'){
         $pw_l_up_flg = 1;
         $last_log_flg = 1;
-
     }
 
     $loginUrl = "";
