@@ -242,29 +242,50 @@
 
             $strReasonType = "";
 
-            $tmpIntPWLDUnixTime = strtotime($pwLastUpdTime);
-            $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
-            if($tmpIntPWLDUnixTime + ($pass_word_expiry * 86400) < $tempRequestTime ){
-                $tempBoolPassWordChange = true;
-            }
-
-
-            // ----パスワードの有効期限を判定
-           
-           if( $pwLastUpdTime == '' || $tempBoolPassWordChange === true ){
-                if($lastLoginTime != "" || $deactivatePwChange != '1'){
-                    //----パスワード有効期限切れ
-                    // 汎用系メッセージ
-                    if($pwExpiration != '1'){
-                        // アクセスログ出力(有効期限が切れ)
-                        web_log($objMTS->getSomeMessage("ITAWDCH-ERR-2001",array($tmpStrErrMsgBody)));
-
-                        webRequestForceQuitFromEveryWhere(401,11410501);
-                        exit();
-                    }
-                    //パスワード有効期限切れ----
+            // ----■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。
+            if(isset($pass_word_expiry)){
+                // ----設定テーブルに、パスワードの有効期限に関する設定があった場合
+                if($pass_word_expiry == "0"){
+                    $tempIntLength = 0;
                 }
-                
+                else{
+                    $tempIntLength = intval($pass_word_expiry);
+                }
+                // 設定テーブルに、パスワードの有効期限に関する設定があった場合----
+            }
+            else{
+                // ----設定テーブルに、パスワードの有効期限に関する設定がなかった場合
+                $tempIntLength = 0;
+                // 設定テーブルに、パスワードの有効期限に関する設定がなかった場合----
+            }
+            // ■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。----    
+
+            if(0 < $tempIntLength){
+
+                $tmpIntPWLDUnixTime = strtotime($pwLastUpdTime);
+                $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
+                if($tmpIntPWLDUnixTime + ($pass_word_expiry * 86400) < $tempRequestTime ){
+                    $tempBoolPassWordChange = true;
+                }
+
+
+                // ----パスワードの有効期限を判定
+            
+            if( $pwLastUpdTime == '' || $tempBoolPassWordChange === true ){
+                    if($lastLoginTime != "" || $deactivatePwChange != '1'){
+                        //----パスワード有効期限切れ
+                        // 汎用系メッセージ
+                        if($pwExpiration != '1'){
+                            // アクセスログ出力(有効期限が切れ)
+                            web_log($objMTS->getSomeMessage("ITAWDCH-ERR-2001",array($tmpStrErrMsgBody)));
+
+                            webRequestForceQuitFromEveryWhere(401,11410501);
+                            exit();
+                        }
+                        //パスワード有効期限切れ----
+                    }
+                    
+                }
             }
 
             $pw_l_up_flg = 0;
