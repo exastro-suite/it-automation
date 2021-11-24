@@ -87,7 +87,8 @@ class  AnsibleVault {
         $encode_value = ""; 
 
         $strExecshellTemplateName = $root_dir_path . '/backyards/ansible_driver/ky_ansible_vault_command_shell_template.sh';
-        $strExecshellName         = $execDirPath . '/.tmp/.playbook_vault_execute_shell.sh';
+        // execDirPathはTower利用時はNFSの設定に依存してしまうので、~/ita-root/tempにshellを作成
+        $strExecshellName         = sprintf("%s/temp/playbook_vault_execute_shell_%s.sh",$root_dir_path,getmypid());
 
         $path = sprintf('%s/confs/commonconfs/path_ANSIBLE_MODULE.txt',$this->root_dir_path);
         // 改行コードが付いている場合に取り除く
@@ -167,6 +168,7 @@ class  AnsibleVault {
 
         exec("/bin/rm -rf " . $vault_value_file);
         exec("/bin/rm -rf " . $vault_stderr_file);
+        exec("/bin/rm -rf " . $strExecshellName);
 
         foreach($output as $line) {
             if(strlen(trim($line)) == 0) {
