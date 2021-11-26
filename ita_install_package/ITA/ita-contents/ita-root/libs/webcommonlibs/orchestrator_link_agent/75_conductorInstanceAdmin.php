@@ -1893,12 +1893,8 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
                     $arrDataRelaystoragePath[$varOrcId] = "";
                 }                
             }else{
-                // エラーフラグをON
-                // 例外処理へ
-                $strErrStepIdInFx="00000600";
-                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                $arrDataRelaystoragePath[$varOrcId] = "";
             }
-
         }
         //存在するオーケストレータ分回る----
 
