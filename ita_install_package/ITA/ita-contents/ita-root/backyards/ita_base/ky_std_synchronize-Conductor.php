@@ -464,9 +464,7 @@
                     $arrDataRelaystoragePath[$strOrcIdNumeric] = "";
                 }                
             }else{
-                // 例外処理へ
-                $strErrStepIdInFx="00000200";
-                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                $arrDataRelaystoragePath[$strOrcIdNumeric] = "";
             }
 
             unset($aryRetBodyOfAddFunction);
