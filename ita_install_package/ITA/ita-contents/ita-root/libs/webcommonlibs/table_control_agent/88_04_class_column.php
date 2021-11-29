@@ -8375,8 +8375,18 @@ class SensitiveSingleTextColumn extends passwordColumn {
 				//更新の場合
 				if( $modeValue=="DTUP_singleRecUpdate" ){
 					if(!empty($aryVariant['edit_target_row'])){
-						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
-						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                        if(array_key_exists($sensitiveFlagColumn, $aryVariant['edit_target_row'])){
+	    					$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+                        }
+                        else{
+    						$beforeSensitiveFlagValue = 1;
+                        }
+                        if(array_key_exists($sensitiveFlagColumn, $reqOrgData)){
+    						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                        }
+                        else{
+    						$afterSensitiveFlagValue = 1;
+                        }
 						//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
 						if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
 							$this->setUpdateRequireExcept(false);
@@ -8425,7 +8435,7 @@ class SensitiveSingleTextColumn extends passwordColumn {
 							}
 
 							//SENSITIVE_FLAGがON(2)の場合のみエンコードした値を入れる
-							if($exeQueryData[$sensitiveFlagColumn] == 2){
+							if(array_key_exists($sensitiveFlagColumn, $exeQueryData) && $exeQueryData[$sensitiveFlagColumn] == 2){
 								$exeQueryData[$objColumn->getID()] = $strEncodedValue;
 							}
 
@@ -8479,8 +8489,18 @@ class SensitiveMultiTextColumn extends SensitiveSingleTextColumn {
 				//更新の場合
 				if( $modeValue=="DTUP_singleRecUpdate" ){
 					if(!empty($aryVariant['edit_target_row'])){
-						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
-						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                        if(array_key_exists($sensitiveFlagColumn, $aryVariant['edit_target_row'])){
+    						$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+                        }
+                        else{
+    						$beforeSensitiveFlagValue = 1;
+                        }
+                        if(array_key_exists($sensitiveFlagColumn, $reqOrgData)){
+    						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                        }
+                        else{
+    						$afterSensitiveFlagValue = 1;
+                        }
 						//sensitiveFlagが2(ON)から2(ON)の以外の場合に、具体値を必須項目にする
 						if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
 							$this->setUpdateRequireExcept(false);
@@ -8531,8 +8551,18 @@ class SensitiveMultiTextColumn extends SensitiveSingleTextColumn {
 					//更新の場合
 					if( $modeValue=="DTUP_singleRecUpdate" ){
 						if(!empty($aryVariant['edit_target_row'])){
-							$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
-							$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                            if(array_key_exists($sensitiveFlagColumn, $aryVariant['edit_target_row'])){
+    							$beforeSensitiveFlagValue = $aryVariant['edit_target_row'][$sensitiveFlagColumn];
+                            }
+                            else{
+        						$beforeSensitiveFlagValue = 1;
+                            }
+                            if(array_key_exists($sensitiveFlagColumn, $reqOrgData)){
+	    						$afterSensitiveFlagValue = $reqOrgData[$sensitiveFlagColumn];
+                            }
+                            else{
+        						$afterSensitiveFlagValue = 1;
+                            }
 							//sensitiveFlagが2(ON)から2(ON)の以外の場合のみ実行
 							if(!($beforeSensitiveFlagValue == 2 && $afterSensitiveFlagValue == 2)){
 								list($varValue,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($reqOrgData,array($this->getID()),null);
@@ -8560,7 +8590,7 @@ class SensitiveMultiTextColumn extends SensitiveSingleTextColumn {
 							}
 
 							//SENSITIVE_FLAGがON(2)の場合のみエンコードした値を入れる
-							if($exeQueryData[$sensitiveFlagColumn] == 2){
+							if(array_key_exists($sensitiveFlagColumn, $exeQueryData) && $exeQueryData[$sensitiveFlagColumn] == 2){
 								$exeQueryData[$objColumn->getID()] = $strEncodedValue;
 							}
 
