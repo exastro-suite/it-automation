@@ -62,7 +62,7 @@ $objQuery = $objDBCA->sqlPrepare($sql);
 $result = $objQuery->sqlExecute();
 
 // ホストグループ検索対象を検索
-$sql = "SELECT * FROM F_SPLIT_TARGET";
+$sql = "SELECT * FROM F_SPLIT_TARGET WHERE DISUSE_FLAG = '0'";
 
 $objQuery = $objDBCA->sqlPrepare($sql);
 $result = $objQuery->sqlExecute();
