@@ -166,7 +166,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
            $objQuery = $aryRetBody[1];
            // RBAC対応
            $intRowLength = 0;
-           $ret = getTargetRecodeCount($objTable,$objQuery,$ntRowLength);
+           $ret = getTargetRecodeCount($objTable,$objQuery,$intRowLength);
            if($ret === false) {
                $intErrorType = 500;
                $intRowLength = -1;
