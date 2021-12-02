@@ -437,7 +437,7 @@ resize: vertical;
 }
 .panel-span {
 display: inline-block;
-height: auto; min-height: 24px;
+height: auto; min-height: 26px;
 background-color: rgba( 0,0,0,.2 );
 line-height: 16px;
 word-break: break-all;

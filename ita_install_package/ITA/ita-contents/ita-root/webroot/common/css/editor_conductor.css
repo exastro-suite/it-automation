@@ -252,6 +252,7 @@ left: 50%;
 transform: translateX(-50%);
 }
 .node-end-status {
+display: none;
 position: absolute;
 right: -5%; bottom: -10%;
 z-index: 100;
@@ -261,6 +262,7 @@ border-radius: 50%;
 background-color: #FFF;
 background-image: linear-gradient( -45deg, #CCC, #EEE );
 box-shadow: 2px 2px 4px rgb( 0,0,0,.4 );
+pointer-events: none;
 }
 .node-end-status-inner {
 display: block;
@@ -271,7 +273,12 @@ border: 2px solid #333;
 border-radius: 50%;
 box-shadow: 0 0 4px rgba( 0,0,0,.3 ) inset;
 }
-.node[data-end-status="done"] .node-end-status {
+.conductor-end .node-end-status,
+.node-result[data-result-text="ERROR"] + .node-end-status,
+.node-result[data-result-text="WARN"] + .node-end-status {
+display: block;
+}
+.conductor-end[data-end-status="done"] .node-end-status {
 display: none;
 }
 .node-type,
@@ -717,6 +724,7 @@ color: #EEE;
 .branch-type li.error { background-color: #D60000; }
 .branch-type li.stop { background-color: #EBEB00; color: #111; }
 .branch-type li.skip { background-color: #00878A; }
+.branch-type li.warning { background-color: #FFB400; color: #111; }
 .branch-type li.other { background-color: #999999; }
 
 .function-status-file .node-body {
@@ -1010,6 +1018,7 @@ cursor: grab;
 .branch-case li.error { background-color: #D60000; }
 .branch-case li.stop { background-color: #EBEB00; color: #111; }
 .branch-case li.skip { background-color: #00878A; }
+.branch-case li.warning { background-color: #FFB400; color: #111; }
 
 .branch-case li:hover {
 opacity: 0.75;
@@ -1073,13 +1082,14 @@ font-size: 40px!important;
 .symphony-call .node-type,
 .symphony-call .node-circle .node-gem { background-color: #002B62; }
 
-.conductor-end[data-end-status="warning"] .node-type {
+.node-result[data-end-status="warning"] .node-type {
 background-image:
 linear-gradient( rgba( 255,255,255,.2 ), transparent ),
 linear-gradient( -45deg, #FFB400 25%, #333 25%, #333 50%, #FFB400 50%, #FFB400 75%, #333 75% );
 background-size: 100% 100%, 16px 16px;
 text-shadow: 1px 1px 1px #333, -1px -1px 1px #333, 1px -1px 1px #333, -1px 1px 1px #333;
 }
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner,
 .conductor-end[data-end-status="warning"] .node-end-status-inner {
 background-color: #FFB400;
 }
@@ -1090,6 +1100,7 @@ linear-gradient( -45deg, #4C0000 25%, #ED1C24 25%, #ED1C24 50%, #4C0000 50%, #4C
 background-size: 100% 100%, 16px 16px;
 text-shadow: 1px 1px 1px #333, -1px -1px 1px #333, 1px -1px 1px #333, -1px 1px 1px #333;
 }
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner,
 .conductor-end[data-end-status="error"] .node-end-status-inner {
 background-color: #ED1C24;
 }
@@ -1099,29 +1110,37 @@ content: '';
 display: block;
 position: absolute;
 }
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner::before,
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner::after,
 .conductor-end[data-end-status="warning"] .node-end-status-inner::before,
 .conductor-end[data-end-status="warning"] .node-end-status-inner::after {
 transform: translateX(-50%);
 width: 4px;
 background-color: #FFF;
 }
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner::before,
 .conductor-end[data-end-status="warning"] .node-end-status-inner::before {
 left: 50%; top: 9px;
 height: 10px;
 }
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner::after,
 .conductor-end[data-end-status="warning"] .node-end-status-inner::after {
 left: 50%; top: 23px;
 height: 4px;
 }
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner::before,
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner::after,
 .conductor-end[data-end-status="error"] .node-end-status-inner::before,
 .conductor-end[data-end-status="error"] .node-end-status-inner::after {
 left: 50%; top: 50%;
 width: 3px; height: 18px;
 background-color: #FFF;
 }
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner::before,
 .conductor-end[data-end-status="error"] .node-end-status-inner::before {
 transform: translate(-50%,-50%) rotate(45deg);
 }
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner::after,
 .conductor-end[data-end-status="error"] .node-end-status-inner::after {
 transform: translate(-50%,-50%) rotate(-45deg);
 }
@@ -1339,6 +1358,9 @@ background-color: #00878A;
 background-color: #FD0;
 text-shadow: none;
 color: #000;
+}
+.complete[data-result="15"] .node-result::before {
+background-color: #FFB400;
 }
 
 

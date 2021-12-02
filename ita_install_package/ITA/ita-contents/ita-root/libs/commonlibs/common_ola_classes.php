@@ -4760,6 +4760,11 @@ class OrchestratorLinkAgent {
 
                         if( $value['NODE_TYPE_ID'] == 4 && isset( $rows[$value['NODE_CLASS_NO']] ) ==  true ){
                             $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$rows[$value['NODE_CLASS_NO']]['CONDUCTOR_INSTANCE_CALL_NO'];
+                            //Conductorインスタンス無し場合
+                            if( $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID'] == "" ){
+                                $arr_json[$value['NODE_NAME']]['CALL_CONDUCTOR_ID']=$value['CONDUCTOR_CALL_CLASS_NO'];
+                            }
+
                             $arr_json[$value['NODE_NAME']]['CONDUCTOR_NAME']=$rows[$value['NODE_CLASS_NO']]['I_PATTERN_NAME'];
                         }
 
@@ -4923,6 +4928,7 @@ class OrchestratorLinkAgent {
                         break;
                     case "9":  // 正常終了
                     case "14": // SKIP終了
+                    case "15": // 警告終了
                         $rowEndedMovement[] = $rowOfMovement;
                         break;
                     case "6": // 異常終了
