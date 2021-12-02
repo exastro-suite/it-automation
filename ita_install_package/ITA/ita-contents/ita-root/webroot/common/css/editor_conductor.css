@@ -1082,7 +1082,7 @@ font-size: 40px!important;
 .symphony-call .node-type,
 .symphony-call .node-circle .node-gem { background-color: #002B62; }
 
-.node-result[data-end-status="warning"] .node-type {
+.conductor-end[data-end-status="warning"] .node-type {
 background-image:
 linear-gradient( rgba( 255,255,255,.2 ), transparent ),
 linear-gradient( -45deg, #FFB400 25%, #333 25%, #333 50%, #FFB400 50%, #FFB400 75%, #333 75% );
