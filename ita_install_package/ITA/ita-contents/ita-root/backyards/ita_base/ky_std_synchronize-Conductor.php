@@ -536,10 +536,7 @@
                         throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     }
 
-                    //　親Conductorのみ実行対象へ
-                    if( $row["CONDUCTOR_CALL_FLAG"] != 2 ){
-                        $aryConductorOnRun[] = $row;
-                    }
+                    $aryConductorOnRun[] = $row;
 
                     break;
                 case "3": //実行中
@@ -1514,26 +1511,6 @@
                                             );                                    
                                     }
 
-                                    $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
-                                    $arySymInsCallUpdateTgtSource = $aryRetBody[0];
-                                    $arySymInsCallUpdateTgtSource['STATUS_ID'] = 3;     //実行中
-                                    $arySymInsCallUpdateTgtSource['TIME_START'] = "DATETIMEAUTO(6)";
-
-
-                                    // 更新用のテーブル定義
-                                    $aryConfigForIUD = $aryConfigForSymInsIUD;
-
-                                    // BIND用のベースソース
-                                    $aryBaseSourceForBind = $arySymInsCallUpdateTgtSource;
-                                    
-                                    $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
-
-                                    if( $aryRetBody !== true  ){
-                                        // 例外処理へ
-                                        $strErrStepIdInFx="00001402";
-                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                                    }
-
                                     // 呼び出しConductorインスタンスのステータスを実行中へ---
 
                                 
@@ -1569,8 +1546,14 @@
                                     $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
                                     $arySymInsCallUpdateTgtSource = $aryRetBody[0];
 
-                                    if( $arySymInsCallUpdateTgtSource['STATUS_ID'] == 5 ){
+                                    if( $arySymInsCallUpdateTgtSource['STATUS_ID'] == 5 || $arySymInsCallUpdateTgtSource['STATUS_ID'] == 11 ){
                                         $aryMovInsUpdateTgtSource['STATUS_ID']    = '9'; //正常終了
+
+                                        //Call先、警告終了時
+                                        if( $arySymInsCallUpdateTgtSource['STATUS_ID'] == 11 ){
+                                            $aryMovInsUpdateTgtSource['STATUS_ID']    = '15'; //警告終了
+                                        }
+
                                         $aryMovInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
                                         $boolNextNodeReadyflg = true;
                                         $aryMovInsUpdateTgtSource['TIME_START'] = str_replace("-","/",$aryMovInsUpdateTgtSource['TIME_START']) ;
@@ -1750,6 +1733,7 @@
                                         case "12":  //Skip完了
                                         case "9":  //正常終了
                                         case "14":  //Skip終了
+                                        case "15":  //警告終了
                                             $boolNextNodeReadyflg = true;
                                             break;
                                         default:
@@ -2133,6 +2117,7 @@
                                         break;
                                     case "9":  //正常終了
                                     case "14":  //Skip終了
+                                    case "15":  //警告終了
                                         break;
 
                                     default: // 返し値として存在してはいけない値だった場合
@@ -2160,6 +2145,7 @@
                                     case "13":  //Skip後保留中
                                     case "9":  //正常終了
                                     case "14":  //Skip終了
+                                    case "15":  //警告終了
                                         break;
 
                                     default: // 返し値として存在してはいけない値だった場合
@@ -3106,8 +3092,8 @@
                                 //全ノード中に異常系のノードが存在する場合
                                 if( count($arrOfErrMovement) != 0 ){
                                     $intErrMovcnt = 1;
-                                    //対象ノードが、正常終了、SKIP終了の場合
-                                    if( array_search($aryMovInsUpdateTgtSource['I_NODE_TYPE_ID'],array(3,4,10) )  !== false && array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14) ) !== false){
+                                    //対象ノードが、正常終了、SKIP終了、警告終了の場合
+                                    if( array_search($aryMovInsUpdateTgtSource['I_NODE_TYPE_ID'],array(3,4,10) )  !== false && array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14,15) ) !== false){
                                         $intErrMovcnt = 0;                                                
                                     }   
                                 }
@@ -3119,8 +3105,8 @@
                             }else{
                                  //conditional、異常系ノードなし、
                                 $intNextJobStopflg=1;
-                                //対象ノードが、正常終了、SKIP終了の場合、後続処理実施
-                                if( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14) ) !== false ){
+                                //対象ノードが、正常終了、SKIP終了、警告終了の場合、後続処理実施
+                                if( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14,15) ) !== false ){
                                     $boolNextNodeReadyflg = true;   
                                 }
                             }
@@ -3176,7 +3162,7 @@
                             }else{
                                 if( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(6,7,10,11) ) !== false ){
                                     $tmpNextNodeReadyflg = false;
-                                }elseif( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14) ) !== false ){
+                                }elseif( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14,15) ) !== false ){
                                     $tmpNextNodeReadyflg = true;
                                     foreach ($arrNextTargetNodeClass as $nclass) {
                                         //後続処理conditionalの場合
@@ -3204,6 +3190,7 @@
                             case "3": // mov.実行中
                             case "5": // mov.実行完了（下位オーケストレータは、正常に終了していた場合）
                             case "9": // mov.正常終了
+                            case "15": // mov.警告終了
                                 break;
                             case "4": // mov.実行中(遅延)
                                 $arySymInsUpdateTgtSource['STATUS_ID'] = 4;     //.実行中(遅延)へ

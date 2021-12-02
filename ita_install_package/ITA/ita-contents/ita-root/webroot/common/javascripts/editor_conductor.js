@@ -382,6 +382,7 @@ const nodeStatus = {
   '12': ['skip', getSomeMessage("ITABASEC010702") ], // Skip完了
   '13': ['skip', getSomeMessage("ITABASEC010703") ], // Skip後保留中
   '14': ['skip', getSomeMessage("ITABASEC010704") ], // Skip完了
+  '15': ['warning', getSomeMessage("ITABASEC020311") ], // 警告終了
 };
 
 // Movementステータス
@@ -392,6 +393,7 @@ const movementEndStatus = {
   '10': ['error', getSomeMessage("ITABASEC010502") ], // 準備エラー
   '11': ['error', getSomeMessage("ITABASEC010307") ], // 想定外エラー
   '14': ['skip', getSomeMessage("ITABASEC010702") ], // Skip完了
+  '15': ['warning', getSomeMessage("ITABASEC020311") ], // 警告終了
   '9999': ['other', 'Other'],
 };
 
@@ -1467,9 +1469,9 @@ const createNodeHTML = function( nodeID ) {
       + '<div class="node-circle">'
         + '<span class="node-gem"><span class="node-gem-inner node-gem-length-' + nodeCircle.length + '">' + nodeCircle + '</span></span>'
         + '<span class="node-running"></span>'
-        + '<span class="node-result" data-result-text="" data-href="#"></span>';
-      if ( nodeData.type === 'end') nodeHTML += '<span class="node-end-status"><span class="node-end-status-inner"></span></span>';
-      nodeHTML += '</div>'
+        + '<span class="node-result" data-result-text="" data-href="#"></span>'
+        + '<span class="node-end-status"><span class="node-end-status-inner"></span></span>'
+      + '</div>'
       + '<div class="node-type"><span>' + nodeType + '</span></div>';
     }
     // Node name
@@ -3863,7 +3865,7 @@ const callConductorUpdate = function( nodeID, id, name ) {
   panelChange( nodeID );
 };
 
-// Callコンダクターセレクト
+// Callシンフォニーセレクト
 const callSymphonyUpdate = function( nodeID, id, name ) {
   const $node = $('#' + nodeID );
   if ( id !== 0 ) { 
@@ -5078,7 +5080,7 @@ const conductorStatusUpdate = function( exeNumber ) {
     if ( nodeStatus === '12' || nodeStatus === '13') nodeStatus = '14';
     
     // 終了しているかチェックする
-    if ( ['6','7','9','10','11','14','9999'].indexOf( nodeStatus ) !== -1 ) {
+    if ( ['6','7','9','10','11','14','15','9999'].indexOf( nodeStatus ) !== -1 ) {
       conductorData[ nodeID ].endStatus = true;
       const inTerminalID = terminalInOutID( conductorData[ nodeID ].terminal, 'in'),
             outTerminals = terminalInOutID( conductorData[ nodeID ].terminal, 'out'),
@@ -5120,7 +5122,7 @@ const conductorStatusUpdate = function( exeNumber ) {
           prevNodeStatusFile = nodeInfo[ prevNodeID ].STATUS_FILE;
     
     // 前のNodeが終了しているかチェック
-    if ( ['5','9','12','13','14'].indexOf( prevNodeStatus ) !== -1 ) {
+    if ( ['5','9','12','13','14','15'].indexOf( prevNodeStatus ) !== -1 ) {
       conductorData[ nodeID ].endStatus = true;
       const $prevEdge = $('#' + inTerminal.edge ),
             terminals = Object.keys( conductorData[ nodeID ].terminal ).map(function(k){
@@ -5183,7 +5185,7 @@ const conductorStatusUpdate = function( exeNumber ) {
     for ( let i = 0; i < inTerminalLength; i++ ) {
       const tergetNodeID = conductorData[ nodeID ].terminal[ inTerminals[i] ].targetNode;
       // 終了しているかチェックする
-      if ( ['5','9','12','13','14'].indexOf( nodeInfo[ tergetNodeID ].STATUS ) !== -1 ) {
+      if ( ['5','9','12','13','14','15'].indexOf( nodeInfo[ tergetNodeID ].STATUS ) !== -1 ) {
         waitingCount++;
         $node.addClass('running');
         $('#' + inTerminals[i] ).next().find('.merge-status').attr('data-status', 'waiting');
@@ -5253,6 +5255,9 @@ const conductorStatusUpdate = function( exeNumber ) {
       case '13':
       case '14':
         endMessage = 'SKIP';
+        break;
+      case '15':
+        endMessage = 'WARN';
         break;
     }
     nodeJump();
