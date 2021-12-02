@@ -99,7 +99,7 @@ $ary["ITACICDFORIAC-MNU-1200020000"] = "The file(s) registered to the Remote rep
 The files displayed can be downloaded as a single file.";
 $ary["ITACICDFORIAC-MNU-1200020001"] = "Item number";
 $ary["ITACICDFORIAC-MNU-1200020002"] = "Remote repository file";
-$ary["ITACICDFORIAC-MNU-1200020003"] = "It is possible to maintain (view) the files registered to the Remote Repository.";
+$ary["ITACICDFORIAC-MNU-1200020003"] = "Remote repository file";
 $ary["ITACICDFORIAC-MNU-1200020100"] = "Remote Repository name";
 $ary["ITACICDFORIAC-MNU-1200020101"] = "[Source data]Remote Repositoryt.";
 $ary["ITACICDFORIAC-MNU-1200020200"] = "File path";
