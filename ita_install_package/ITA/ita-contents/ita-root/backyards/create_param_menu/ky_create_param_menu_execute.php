@@ -6101,6 +6101,12 @@ function createAlterColumnSql($tableType, $menuTableName, $columnNameListArray){
             //現在のColumnNameを次の$afterColumnに設定
             $afterColumn = $columnName;
         }
+        
+        //ACCESS_AUTHカラムが存在しない場合は追加処理を追記
+        if(!(in_array("ACCESS_AUTH", $fieldListArray))){
+            $alterColumnSql = $alterColumnSql . "ALTER TABLE " . $targetTable      . " ADD ACCESS_AUTH TEXT AFTER " . $afterColumn . ";\n";
+            $alterColumnSql = $alterColumnSql . "ALTER TABLE " . $targetTableJnl   . " ADD ACCESS_AUTH TEXT AFTER " . $afterColumn . ";\n";
+        }
 
         return $alterColumnSql;
 
