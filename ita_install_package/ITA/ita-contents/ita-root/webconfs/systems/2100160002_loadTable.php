@@ -99,36 +99,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // 必須
     $c = new IDColumn('REQUIRED',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102113"),'G_REQUIRED_MASTER','REQUIRED_ID','REQUIRED_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102114"));//エクセル・ヘッダでの説明
-    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
-    $objOT->setFirstSearchValueOwnerColumnID('REQUIRED');
-    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'G_REQUIRED_MASTER_JNL',
-        'TTT_SEARCH_KEY_COLUMN_ID'=>'REQUIRED_ID',
-        'TTT_GET_TARGET_COLUMN_ID'=>'REQUIRED_NAME',
-        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
-        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
-        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
-        )
-    );
-    $objOT->setTraceQuery($aryTraceQuery);
-    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
 
     // 一意制約
     $c = new IDColumn('UNIQUED',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102119"),'G_REQUIRED_MASTER','REQUIRED_ID','REQUIRED_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102120"));//エクセル・ヘッダでの説明
-    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
-    $objOT->setFirstSearchValueOwnerColumnID('UNIQUED');
-    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'G_REQUIRED_MASTER_JNL',
-        'TTT_SEARCH_KEY_COLUMN_ID'=>'REQUIRED_ID',
-        'TTT_GET_TARGET_COLUMN_ID'=>'REQUIRED_NAME',
-        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
-        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
-        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
-        )
-    );
-    $objOT->setTraceQuery($aryTraceQuery);
-    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
 
