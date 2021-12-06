@@ -50,12 +50,11 @@ Installer
  * Fixed an issue where the installer would fail because there were no MariaDB in the UBI8 Standard repository. #1146
  * Fixed an issue where repositories keeps getting added to /etc/yum.repos.d/ita.repo every time the install script is run. #1172
 
-
 General
 ---------------
  * Added a clone button to the "List/Update" sub menu in all of the parameters. #174
  * Fixed an issue with the Excel output by phpspreadhseet v1.15.0 #329
- * Fixed an issue in the Filter selection (ID Column) where error 400 would occur when trying to search for an ID that doesn't exist in LIST with RestAPI.
+ * Fixed an issue in the Filter selection (ID Column) where error 400 would occur when trying to search for an ID that doesn't exist in LIST with RestAPI. #437
  * Made it possible to download the Change history in an Excel file #482
  * Made it possible to check reserved Symphony/Conductors from the Main menu #488
  * Made adjustments to Exastro OASE user's initial Role/Menu link value #752
@@ -63,7 +62,7 @@ General
  * Fixed an issue where the "Execution process type" headline cell is not combined when downloading the Excel file #831
  * Fixed an issue where menus users don't have permission to see would be displayed #987
  * Fixed an issue where the display filter's date items would not search properly when the "from" and "to" date are the same as the item the user is searching for #1027
- * Fixed an issue where the screen would not be displayed correctly when the display filter's "Pulldown search" button is pressed repeatedly #1147
+ * Fixed an issue where the screen would not be displayed correctly when the display filter's "Pulldown search" button is pressed repeatedly #1125
  * Fixed an issue where the screen would not be displayed correctly when Darkmode is selected #1147
  * Fixed an issue where an system error would occur when filter searching #1165
  * Fixed an issue where some values would not display properly if some specific characters were included #1174
@@ -115,12 +114,11 @@ Conductor
  * Fixed an issue in Conductor Class edit hwere some abolished contents would remain #1186
  * Fixed an issue with SonarQube identification in the Conductor Regularly execution menu #1191
 
-
 Create Menu
 ---------------
  * Made it possible to choose "Yes/no" , "True/False" and "*/(blank)" from Pulldown sselections #178
  * Fixed an issue where it was possible to have the "/" character in item names when creating menus #540
- * Made it possible to configure multiunique settings from the Web screen #709
+ * Made it possible to configure multiunique settings from the Web screen #653
  * Fixed an issue where after changing the menu group of an earlier created menu, the pre-updated menu would remain in the old menu group #709
  * Removed the option to change the Menu name when editing #727
  * Fixed an issue where updating an regular expression would reset the data and it's history #887
@@ -129,8 +127,9 @@ Create Menu
  * Improved the VIEW for reference item information #1101
  * Fixed an issue where if the character "`" was written in an item name and it was referenced to a different menu, the page would not open #1222
  * Fixed an issue where a validation error would occur if there specified ID of Reference items had too many numbers #1236
- * Fixed an issue where the "Password" item in the "Menu item creation information" menu shows "Message ID is not found" #1348
+ * Fixed an issue where the "Password" item in the "Menu item creation information" menu shows "Message ID is not found" #1347
  * Made the button names and Modal names in the  Menu define/create menu unique #1348
+ * Fixed an issue where menus created in an ITA version before the RBAC function was added would not be editable. #1730
 
 Compare
 ---------------
