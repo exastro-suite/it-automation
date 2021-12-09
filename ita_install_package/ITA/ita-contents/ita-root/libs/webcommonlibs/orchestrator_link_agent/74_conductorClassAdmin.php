@@ -597,6 +597,32 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
             } 
         }
 
+        //conditional-branchのステータス状態
+        foreach ($aryNodeData as $key => $value) {
+            if( $value['type'] == "conditional-branch" ){
+                foreach ( $value['terminal'] as $terminalname => $terminalnameinfo) {
+                    if( $terminalnameinfo['type'] == "out" ){
+                        if( isset($terminalnameinfo['condition']) ){                    
+                            if( $terminalnameinfo['condition'] == array() ){
+                                //"Conditional branch - Caseの設定が不正です。"
+                                $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170044");
+                            }
+                        }else{
+                                //"Conditional branch - Caseの設定が不正です。"
+                                $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170044");      
+                        }
+                    }
+                }
+            }
+            if( $strErrMsg != "" ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000300";
+                $intErrorType = 2;
+                    $strExpectedErrMsgBodyForUI = $strErrMsg;
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            } 
+        }
 
         //各ノードの備考
         foreach ($aryNodeData as $key => $value) {
