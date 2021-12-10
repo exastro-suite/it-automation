@@ -204,6 +204,7 @@ function menuExportExecutionFromRest($objJSONOfReceptedData){
             $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900024', array($taskNo));
             $_SESSION['data_export_task_no'] = $taskNo;
 
+            $arrayResult["TASK_ID"] = $taskNo;
             renameExportDir($dirName, $taskNo);
             $resultFlg = true;
             $intResultCode= "000";
@@ -216,7 +217,6 @@ function menuExportExecutionFromRest($objJSONOfReceptedData){
 
         }
 
-        $arrayResult["TASK_ID"] = $taskNo;
         $arrayResult["RESULTCODE"] = $intResultCode;
         $arrayResult['RESULTINFO'] = strip_tags(trim($resultMsg));
     

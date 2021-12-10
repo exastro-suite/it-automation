@@ -95,6 +95,8 @@
 
     // 代入値自動登録設定テーブル名(B_TERRAFORM_VAL_ASSIGN)
     $lv_val_assign_tbl      = $vg_terraform_val_assign_table_name;
+    // 代入値自動登録設定VIEW名(D_TERRAFORM_VAL_ASSIGN)
+    $lv_val_assign_view     = $vg_terraform_val_assign_view_name;
     // 作業パターン詳細テーブル名(B_TERRAFORM_PATTERN_LINK)
     $lv_pattern_link_tbl    = $vg_terraform_pattern_link_table_name;
     // 変数一覧テーブル名(B_TERRAFORM_MODULE_VARS_LINK)
@@ -374,7 +376,7 @@
         $lva_vars_ass_chk_list       = array();
         $lva_table_nameTOPkeyname_list = array();
 
-        $ret = readValAssDB($lv_val_assign_tbl,
+        $ret = readValAssDB($lv_val_assign_view,
                             $lv_pattern_link_tbl,  
                             $lv_vars_master_tbl,   
                             $lv_ptn_vars_link_view,
@@ -410,13 +412,13 @@
         // P0004
         //   紐付メニューから具体値を取得する。
         ////////////////////////////////////////////////////////////////////////////////
-        $ret = GetMenuData($lva_table_nameTOsql_list,
-                           $lva_table_nameTOid_list,
-                           $lva_table_col_list,
-                           $lva_vars_ass_list,
-                           $lva_vars_ass_chk_list,
-                           $lva_error_column_id_list,
-                           $warning_flag);
+        GetMenuData($lva_table_nameTOsql_list,
+                    $lva_table_nameTOid_list,
+                    $lva_table_col_list,
+                    $lva_vars_ass_list,
+                    $lva_vars_ass_chk_list,
+                    $lva_error_column_id_list,
+                    $warning_flag);
 
         // 不要となった配列変数を開放
         unset($lva_table_nameTOsql_list);
@@ -762,7 +764,7 @@
     //   代入値紐付からカラム情報を取得する。
     //   
     // パラメータ
-    //   $in_val_assign_tbl:             代入値紐付テーブル名
+    //   $in_val_assign_view:            代入値自動登録VIEW名
     //   $in_pattern_link_tbl:           作業パターン詳細テーブル名
     //   $in_vars_master_tbl:            変数一覧テーブル名
     //   $in_ptn_vars_link_view          作業パターン変数紐付VIEW名
@@ -779,7 +781,7 @@
     // 戻り値
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
-    function readValAssDB($in_val_assign_tbl,    
+    function readValAssDB($in_val_assign_view,    
                           $in_pattern_link_tbl,  
                           $in_vars_master_tbl,    
                           $in_ptn_vars_link_view,
@@ -795,6 +797,7 @@
         global    $log_level;
 
         $cmdb_menu_column_tbl = 'B_CMDB_MENU_COLUMN';
+        $in_ptn_vars_link_view_vfp = $in_ptn_vars_link_view . "_VFP";
 
         $sql =            " SELECT                                                           \n";
         $sql = $sql .     "   TBL_A.COLUMN_ID                                             ,  \n";
@@ -845,6 +848,14 @@
         $sql = $sql .     "       MODULE_VARS_LINK_ID  = TBL_A.VAL_VARS_LINK_ID  AND         \n";
         $sql = $sql .     "       DISUSE_FLAG   = '0'                                        \n";
         $sql = $sql .     "   ) AS VAL_PTN_VARS_LINK_CNT                                  ,  \n";
+        $sql = $sql .     "   (                                                              \n";
+        $sql = $sql .     "     SELECT                                                       \n";
+        $sql = $sql .     "       COUNT(*)                                                   \n";
+        $sql = $sql .     "     FROM                                                         \n";
+        $sql = $sql .     "       $in_ptn_vars_link_view_vfp                                 \n";
+        $sql = $sql .     "     WHERE                                                        \n";
+        $sql = $sql .     "       MODULE_PTN_LINK_ID = TBL_A.VAL_VARS_PTN_LINK_ID            \n";
+        $sql = $sql .     "   ) AS UNIQUE_VAL_PTN_VARS_LINK_CNT                           ,  \n";
         $sql = $sql .     "   TBL_A.KEY_VARS_LINK_ID                                      ,  \n";
         $sql = $sql .     "   (                                                              \n";
         $sql = $sql .     "     SELECT                                                       \n";
@@ -865,9 +876,17 @@
         $sql = $sql .     "       MODULE_VARS_LINK_ID  = TBL_A.KEY_VARS_LINK_ID  AND         \n";
         $sql = $sql .     "       DISUSE_FLAG   = '0'                                        \n";
         $sql = $sql .     "   ) AS KEY_PTN_VARS_LINK_CNT                                  ,  \n";
+        $sql = $sql .     "   (                                                              \n";
+        $sql = $sql .     "     SELECT                                                       \n";
+        $sql = $sql .     "       COUNT(*)                                                   \n";
+        $sql = $sql .     "     FROM                                                         \n";
+        $sql = $sql .     "       $in_ptn_vars_link_view_vfp                                 \n";
+        $sql = $sql .     "     WHERE                                                        \n";
+        $sql = $sql .     "       MODULE_PTN_LINK_ID = TBL_A.KEY_VARS_PTN_LINK_ID            \n";
+        $sql = $sql .     "   ) AS UNIQUE_KEY_PTN_VARS_LINK_CNT                           ,  \n";
         $sql = $sql .     "   TBL_A.HCL_FLAG                                                 \n";
         $sql = $sql .     " FROM                                                             \n";
-        $sql = $sql .     "   $in_val_assign_tbl TBL_A                                       \n";
+        $sql = $sql .     "   $in_val_assign_view TBL_A                                      \n";
         $sql = $sql .     "   LEFT JOIN $cmdb_menu_column_tbl TBL_B ON                       \n";
         $sql = $sql .     "          (TBL_A.COLUMN_LIST_ID = TBL_B.COLUMN_LIST_ID)           \n";
         $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_TABLE  TBL_C ON                          \n";
@@ -1015,7 +1034,8 @@
                                           $row,
                                           "VAL_VARS_LINK_ID",
                                           "VAL_VARS_NAME",
-                                          "VAL_PTN_VARS_LINK_CNT"
+                                          "VAL_PTN_VARS_LINK_CNT",
+                                          "UNIQUE_VAL_PTN_VARS_LINK_CNT"
                                           );
                 if($ret === false){
                     // 次のカラムへ
@@ -1032,7 +1052,8 @@
                                           $row,
                                           "KEY_VARS_LINK_ID",
                                           "KEY_VARS_NAME",
-                                          "KEY_PTN_VARS_LINK_CNT"
+                                          "KEY_PTN_VARS_LINK_CNT",
+                                          "UNIQUE_KEY_PTN_VARS_LINK_CNT"
                                           );
                 if($ret === false){
                     // 次のカラムへ
@@ -1088,6 +1109,9 @@
     //                            作業パターン変数紐付の登録件数
     //                            VAL_PTN_VARS_LINK_CNT/KEY_PTN_VARS_LINK_CNT
     //
+    //   $unique_in_ptn_vars_link_cnt:   クエリ配列内のKey/Value型の作業パターン*変数の
+    //                                   作業パターン変数紐付の登録件数
+    //                                   UNIQUE_VAL_PTN_VARS_LINK_CNT/UNIQUE_KEY_PTN_VARS_LINK_CNT
     // 戻り値
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
@@ -1096,7 +1120,8 @@
                                 $row,
                                 $in_vars_link_id,
                                 $in_vars_name,
-                                $in_ptn_vars_link_cnt
+                                $in_ptn_vars_link_cnt,
+                                $in_unique_ptn_vars_link_cnt
                                ){
         global    $objMTS;
         global    $objDBCA;
@@ -1114,7 +1139,18 @@
         }
 
         // 変数がModule変数紐付け管理にあるか判定
-        if(@strlen($row[$in_ptn_vars_link_cnt]) == 0){
+        if($row[$in_ptn_vars_link_cnt] == 0){
+            if ( $log_level === 'DEBUG' ){
+                //代入値自動登録設定に登録されている変数とMovementの組合せはMovement詳細でMovementを紐付けていないか、Movement詳細で紐付けているModuleでは使用されていません。このレコードを処理対象外にします。(代入値自動登録設定 項番:{} 変数区分:{})
+                $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171140",array($row['COLUMN_ID'],$in_col_type));
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            }
+            // エラーリターン
+            return false;
+        }
+
+        // Movementと変数の組み合わせが利用可能かどうか判定
+        if($row[$in_unique_ptn_vars_link_cnt] == 0){
             if ( $log_level === 'DEBUG' ){
                 //代入値自動登録設定に登録されている変数とMovementの組合せはMovement詳細でMovementを紐付けていないか、Movement詳細で紐付けているModuleでは使用されていません。このレコードを処理対象外にします。(代入値自動登録設定 項番:{} 変数区分:{})
                 $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171140",array($row['COLUMN_ID'],$in_col_type));

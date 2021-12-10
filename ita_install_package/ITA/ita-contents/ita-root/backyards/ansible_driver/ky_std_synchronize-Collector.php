@@ -859,6 +859,7 @@
                         $resultprm = array();
                         $arrTargetLists = array();
                         $arrTargetUploadLists = array();
+                        $arrTargetUploadListFullpath = array();
                         $intParseTypeID = 1;    //1:yaml
 
                         //対象のファイル有の場合
@@ -886,7 +887,12 @@
                                         #$FREE_LOG = "[処理]収集対象のファイル形式ではありません。( ホスト名: $strTargetHost ファイル名:$targetFileName )";
                                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80010",array( $strTargetHost,$targetFileName ));
                                         outputLog($strCollectlogPath,$FREE_LOG);
-                                        require ($root_dir_path . $log_output_php ); 
+                                        
+                                        // トレースメッセージ
+                                        if ( $log_level === 'DEBUG' ){
+                                            require ($root_dir_path . $log_output_php );
+                                        }
+                                        
                                         $NOTICE_FLG = 3; //対象外
                                     }
                                 }
@@ -896,8 +902,12 @@
                             foreach ($arrTargetUploadfiles as $strTargetUploadfile) {
                                 $targetHosts =  explode( "/", str_replace( $strCollectTargetPath , "" , $strTargetUploadfile ) );
                                 //ホスト名、ファイル名、パス
-                                $arrTargetUploadLists[$targetHosts[1]][basename($strTargetUploadfile)]=$strTargetUploadfile;
-
+                                if ( isset($arrTargetUploadLists[$targetHosts[1]][basename($strTargetUploadfile)]) !== true ){
+                                    $arrTargetUploadLists[$targetHosts[1]][basename($strTargetUploadfile)]=$strTargetUploadfile;
+                                }
+                                if ( isset($arrTargetUploadListFullpath[$targetHosts[1]][$strTargetUploadfile]) !== true ){
+                                    $arrTargetUploadListFullpath[$targetHosts[1]][$strTargetUploadfile]=$strTargetUploadfile;
+                                }
                             }
 
                             //ホスト毎に実施
@@ -1109,8 +1119,36 @@
                                                                                 $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
                                                                             }
                                                                         }else{
-                                                                            $insertData[$parmNO]="";
-                                                                            $UpdateFileData[$parmNO] ="";
+                                                                            $matchflg = "";
+                                                                            foreach ($arrTargetUploadListFullpath[$hostname] as $tmpfilekey => $tmparrfilepath ) {
+                                                                                //フルパス完全一致
+                                                                                if( $tmpfilekey == $tgtSource_row[$pramName] ){
+                                                                                    $matchflg = "FULL";
+                                                                                    #$insertData[$parmNO] = basename($tgtSource_row[$pramName]);
+                                                                                    $upload_filepath = $tmparrfilepath;
+                                                                                    if( is_file( $upload_filepath ) == true && $insertData[$parmNO] != "" ){
+                                                                                        $insertData[$parmNO] = basename($upload_filepath);
+                                                                                        $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                                    }
+                                                                                }else{
+                                                                                    //部分後方一致
+                                                                                    if ( preg_match("<{$tgtSource_row[$pramName]}$>", $tmpfilekey) ) {
+                                                                                        $matchflg = "AFTER";
+                                                                                        #$insertData[$parmNO] = basename($tgtSource_row[$pramName]);
+
+                                                                                        $upload_filepath = $tmparrfilepath;
+                                                                                        if( is_file( $upload_filepath ) == true  && $insertData[$parmNO] != "" ){
+                                                                                            $insertData[$parmNO] = basename($upload_filepath);
+                                                                                            $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                                        }
+                                                                                    } 
+                                                                                }
+                                                                                if( $matchflg != "" )break;
+                                                                            }
+                                                                            if( $matchflg == ""){
+                                                                                $insertData[$parmNO]="";
+                                                                                $UpdateFileData[$parmNO] ="";
+                                                                            }
                                                                         }
                                                                     }                                                                
                                                                 }
@@ -1185,7 +1223,7 @@
                                                                         }
                                                                     }
                                                                     $insertData[$parmNO]=$value;
-                                                                    if(gettype( $value ) == "NULL" ) $insertNullflg[$parmNO] = 1;
+                                                                    if( gettype( $value ) == "NULL" || $value == "" ) $insertNullflg[$parmNO] = 1;
                                                                 //項目名：リピート部分[X]
                                                                 }elseif(mb_strpos($tgtSource_key,$pramName) !== false){
 
@@ -1193,24 +1231,67 @@
                                                                     if( $tmpColname == $pramName ){
                                                                         $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
                                                                         $insertData[$parmNO]=$value;
-                                                                        if(gettype( $value ) == "NULL" ) $insertNullflg[$parmNO] = 1;
+                                                                        if(gettype( $value ) == "NULL" || $value == ""  ) $insertNullflg[$parmNO] = 1;
+                                                                    }
+                                                                //項目名：リピート部分[X]
+                                                                }elseif(mb_strpos($pramName,$tgtSource_key) !== false){
+
+                                                                    $tmpColname =preg_replace('/\[[0-9]+?\]/u',"",$tgtSource_key);
+                                                                    if( $tmpColname == $pramName ){
+                                                                        $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
+                                                                        $insertData[$parmNO]=$value;
+                                                                        if(gettype( $value ) == "NULL" || $value == ""  ) $insertNullflg[$parmNO] = 1;
                                                                     }
                                                                 //その他
                                                                 }else{
                                                                     if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]=null;
                                                                 }
 
-                                                                // #449 ファイルアップロードカラム対応
-                                                                if(isset($arrFileUploadList[$filename][$menuid]) == true ){
+                                                                // #449 ファイルアップロードカラム対応 + #1532
+                                                                if(isset($arrFileUploadList[$filename][$menuid]) == true && ($pramName == $tgtSource_key || mb_strpos($tgtSource_key,$pramName) !== false) ){
+                                                                    //ファイルアップロードカラムの場合
                                                                     if( array_key_exists($pramName, $arrFileUploadList[$filename][$menuid] ) ){
-                                                                        if( isset($arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]] ) == true ){
-                                                                            $upload_filepath = $arrTargetUploadLists[$hostname][$tgtSource_row[$pramName]];
-                                                                            if( is_file( $upload_filepath ) == true ){
+                                                                        
+                                                                        //ファイルアップロード対象リスト（key：ファイル名-valuse:パス）にある場合
+                                                                        if( array_key_exists( $value ,$arrTargetUploadLists[$hostname] )  == true ){
+                                                                            $upload_filepath = $arrTargetUploadLists[$hostname][$value];
+                                                                            if( is_file( $upload_filepath ) == true && $insertData[$parmNO] != ""  ){
+                                                                                $insertData[$parmNO] = basename($upload_filepath);
                                                                                 $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
                                                                             }
                                                                         }else{
+                                                                        //ファイルアップロード対象リスト（key：パス-valuse:パス）にある場合
+                                                                            $matchflg = "";
+                                                                            foreach ($arrTargetUploadListFullpath[$hostname] as $tmpfilekey => $tmparrfilepath ) {
+                                                                                $matchflg = "";
+                                                                                $upload_filepath = $tmparrfilepath;
+                                                                                $upload_filename = basename($upload_filepath);
+                                                                                //ファイルフルパス完全/部分一致
+                                                                                if( $tmpfilekey == $tgtSource_row[$tgtSource_key] ){
+                                                                                    //フルパス完全一致
+                                                                                    $matchflg = "FULL";
+                                                                                }elseif ( preg_match("<{$tgtSource_row[$tgtSource_key]}$>", $tmpfilekey) ) {
+                                                                                    //部分後方一致
+                                                                                    $matchflg = "AFTER";
+                                                                                }
+                                                                                if( $matchflg != "" ){
+                                                                                    if( is_file( $upload_filepath ) == true && $insertData[$parmNO] != ""  ){
+                                                                                        $insertData[$parmNO] = $upload_filename;
+                                                                                        $UpdateFileData[$parmNO] = base64_encode(file_get_contents( $upload_filepath ));
+                                                                                    }
+                                                                                    break;   
+                                                                                }
+                                                                            }
+                                                                            //不要項目除外
+                                                                            if( $matchflg == ""){
+                                                                                $insertData[$parmNO]="";
+                                                                                unset($UpdateFileData[$parmNO]);
+                                                                            }
+                                                                        }
+
+                                                                        if( $pramName != $tgtSource_key && $tmpColname != $pramName && ( $insertData[10] != 1 && $insertData[10] != null )  ){
+                                                                            unset($insertData[$parmNO]);
                                                                             $insertData[$parmNO]="";
-                                                                            unset($UpdateFileData[$parmNO]);
                                                                         }
                                                                     }else{
                                                                          //値がNULLの項目を除外　#1050,1051
@@ -1259,7 +1340,9 @@
                                                                                 if( $tmpinsertData[10] == $insertData[10] ){
                                                                                     foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
                                                                                         if( $tmpinsertDatavalue == "") {
-                                                                                            $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                            if($tmpFilter[$insertDataNO][$tmpinsertDatakey] === NULL ){
+                                                                                                $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                            }
                                                                                             if( isset($UpdateFileData[$tmpinsertDatakey]) ){
                                                                                                 $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
                                                                                             }
@@ -1285,6 +1368,13 @@
                                                                                 // #449 ファイルアップロードカラム対応
                                                                                 if( $UpdateFileData != array() ){
                                                                                     #$tmpFilter['UPLOAD_FILE'] = $UpdateFileData;
+
+                                                                                    foreach ($UpdateFileData as $upfileskey => $upfilesval) {
+                                                                                        if( $insertData[$upfileskey] == "" ){
+                                                                                            unset( $UpdateFileData[$upfileskey] );
+                                                                                        }
+                                                                                    }
+
                                                                                     $tmpFilter['UPLOAD_FILE'][$intColmun] = $UpdateFileData;
                                                                                 }
                                                                                 $intColmun++;                                                                                
@@ -1302,7 +1392,7 @@
                                                                                 if( $tmpinsertData[10] == $insertData[10] ){
                                                                                     foreach ( $tmpinsertData as $tmpinsertDatakey => $tmpinsertDatavalue) {
                                                                                         if( isset($insertData[$tmpinsertDatakey]) ) {
-                                                                                            if( $insertData[$tmpinsertDatakey] != "" ) {
+                                                                                            if( $insertData[$tmpinsertDatakey] != "" && $tmpFilter[$insertDataNO][$tmpinsertDatakey] == "" ) {
                                                                                                 $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
                                                                                                 if( isset($UpdateFileData[$tmpinsertDatakey]) ){
                                                                                                     $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
@@ -1352,7 +1442,11 @@
                                                             #$FREE_LOG = "[処理]CMDBへのデータ登録、更新に失敗しました。({}件)";
                                                             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80003",array( $arrRestInfo[1]['LIST']['NORMAL']['error']['ct'] ."/". count($tmpFilter) ) );
                                                             outputLog($strCollectlogPath,$FREE_LOG);
-                                                            require ($root_dir_path . $log_output_php );
+                                                            
+                                                            // トレースメッセージ
+                                                            if ( $log_level === 'DEBUG' ){
+                                                                require ($root_dir_path . $log_output_php );
+                                                            }
 
                                                             $NOTICE_FLG = 2; //収集済み（通知あり）
                                                         }else{
@@ -1366,7 +1460,10 @@
                                                         #$FREE_LOG = "[処理]RESTアクセスに失敗しました。";
                                                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80002");
                                                         outputLog($strCollectlogPath,$FREE_LOG, array($arrRestInfo[2],$arrRestInfo[3],json_encode(json_decode($arrRestInfo[4],true),JSON_UNESCAPED_UNICODE)  ) );
-                                                        require ($root_dir_path . $log_output_php );
+                                                        // トレースメッセージ
+                                                        if ( $log_level === 'DEBUG' ){
+                                                            require ($root_dir_path . $log_output_php );
+                                                        }
                                                         #break;
                                                         $NOTICE_FLG = 2; //収集済み（通知あり）
 
@@ -1375,12 +1472,19 @@
                                                     #$FREE_LOG = "[処理]RESTアクセスに失敗しました。"
                                                     $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80002");
                                                     outputLog($strCollectlogPath,$FREE_LOG);
+                                                    // トレースメッセージ
+                                                    if ( $log_level === 'DEBUG' ){
+                                                        require ($root_dir_path . $log_output_php );
+                                                    }
 
                                                     #FREE_LOG=" REST DATA ( Hostname: $hostname MenuID: $strmenuid OperationNO: $intOpeNoUAPK )";
                                                     $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80007", array($hostname,$strmenuid,$intOpeNoUAPK) );
                                                     outputLog($strCollectlogPath,$FREE_LOG, array($tmpRestInfo[2],$tmpRestInfo[3],json_encode(json_decode($tmpRestInfo[4],true),JSON_UNESCAPED_UNICODE ) ) );
 
-                                                    require ($root_dir_path . $log_output_php );
+                                                    // トレースメッセージ
+                                                    if ( $log_level === 'DEBUG' ){
+                                                        require ($root_dir_path . $log_output_php );
+                                                    }
                                                     #break;
                                                     $NOTICE_FLG = 2; //収集済み（通知あり）                                          
                                                 }
@@ -1394,7 +1498,11 @@
                                         #$FREE_LOG = "[処理]収集項目値管理で指定されたファイルがありません。 ";
                                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80008" );
                                         outputLog($strCollectlogPath,$FREE_LOG); 
-                                        require ($root_dir_path . $log_output_php );
+                                        
+                                        // トレースメッセージ
+                                        if ( $log_level === 'DEBUG' ){
+                                            require ($root_dir_path . $log_output_php );
+                                        }
                                         
                                         if( $RESTEXEC_FLG == 1 ){
                                             $NOTICE_FLG = 2; //収集済み（通知あり）   
@@ -1407,7 +1515,11 @@
                                     #$FREE_LOG = "[処理]対象機器が登録されていないか、廃止されています。 hostname:${hostname} "
                                     $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80004",array( $hostname ));
                                     outputLog($strCollectlogPath,$FREE_LOG);
-                                    require ($root_dir_path . $log_output_php );
+                                    
+                                    // トレースメッセージ
+                                    if ( $log_level === 'DEBUG' ){
+                                        require ($root_dir_path . $log_output_php );
+                                    }
 
                                     if( $RESTEXEC_FLG == 1 ){
                                         $NOTICE_FLG = 2; //収集済み（通知あり）   
@@ -1423,7 +1535,10 @@
                             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80009");
                             outputLog($strCollectlogPath,$FREE_LOG);
 
-                            require ($root_dir_path . $log_output_php );
+                            // トレースメッセージ
+                             if ( $log_level === 'DEBUG' ){
+                                require ($root_dir_path . $log_output_php );
+                            }
                             $NOTICE_FLG = 3; //対象外       
                         }
                     }elseif( $aryOperation === false ){
@@ -1432,7 +1547,10 @@
                         $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-80006",array( $intOpeNoUAPK ));
                         outputLog($strCollectlogPath,$FREE_LOG);
 
-                        require ($root_dir_path . $log_output_php );
+                        // トレースメッセージ
+                        if ( $log_level === 'DEBUG' ){
+                            require ($root_dir_path . $log_output_php );
+                        }
                         $NOTICE_FLG = 4; //収集エラー用
                     }
 
@@ -1749,9 +1867,9 @@ function updateMovmentInstance($objDBCA,$db_model_ch,$tmpConfigForMovementIUD,$d
     $aryConfigForIUD = $tmpConfigForMovementIUD;
 
     // BIND用のベースソース
-    $aryBaseSourceForBind = $aryCollectTgtSource;
+    $aryBaseSourceForBindTmp = $aryCollectTgtSource;
 
-    $aryRetBody = insertFromTablename($objDBCA,$db_model_ch,"UPDATE",$strCollectTablename,$strCollectKeyname,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+    $aryRetBody = insertFromTablename($objDBCA,$db_model_ch,"UPDATE",$strCollectTablename,$strCollectKeyname,$aryConfigForIUD,$aryBaseSourceForBindTmp,$strFxName);
 
     return $aryRetBody;
 }
@@ -1835,6 +1953,15 @@ function yamlParseAnalysis($strTargetfile){
                             }else{
                                 $arrVarsList[$key1][ $value3['VAR_NAME_PATH'] ][] = $value3['VAR_VALUE'] ;
                             }
+                        }else{
+                            foreach ( $value3['VAR_VALUE'] as $key4 => $value4 ) {
+                                if( is_numeric( $key4 ) ){
+                                    if( !is_array( $value4 ) ){
+                                        //----　　$arrVarsList　に値設定   --------//
+                                        $arrVarsList[$key1][ $value3['VAR_NAME_PATH'].'['.$key4.']' ] = $value4 ;
+                                    }                              
+                                }
+                            }
                         }
                     }
                 }
@@ -1898,10 +2025,7 @@ function yamlParseAnalysis($strTargetfile){
             }
             else{
                 $wk_var_name_path = $var;
-                if(is_numeric($var) === false)
-                    $wk_var_name = $var;
-                else
-                    $wk_var_name = $var;
+                $wk_var_name = $var;
             }
             // 配列の開始かを判定する。
             if($col_array_f == "I"){

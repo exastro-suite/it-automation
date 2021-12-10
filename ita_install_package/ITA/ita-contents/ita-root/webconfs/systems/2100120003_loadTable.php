@@ -163,6 +163,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('json')->setVisible(false);
 
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('REPO_ROW_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_CICD_REPOSITORY_LIST_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'REPO_ROW_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'REPO_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
 
         $cg1->addColumn($c);
 
@@ -360,6 +372,20 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         //$c->setRequired(true);
         $c->setRequiredMark(true);//必須マークのみ付与
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('MATL_ROW_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CICD_MATL_PATH_LIST_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'MATL_ROW_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'MATL_FILE_PATH',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
+
         $cg1->addColumn($c);
 
     $table->addColumn($cg1);
@@ -387,6 +413,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         $c->setRequired(true);
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('MATL_TYPE_ROW_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>$view_name.'_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'MATL_TYPE_ROW_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'MATL_TYPE_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg2->addColumn($c);
 
         if($ansible_driver === true) {
@@ -419,6 +457,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $c = new IDColumn('DIALOG_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030800"),'B_ANSIBLE_PNS_DIALOG_TYPE','DIALOG_TYPE_ID','DIALOG_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('DIALOG_TYPE_NAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
                 $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030801"));
                 $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+                $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+                $objOT->setFirstSearchValueOwnerColumnID('DIALOG_TYPE_ID');
+                $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANSIBLE_PNS_DIALOG_TYPE_JNL',
+                    'TTT_SEARCH_KEY_COLUMN_ID'=>'DIALOG_TYPE_ID',
+                    'TTT_GET_TARGET_COLUMN_ID'=>'DIALOG_TYPE_NAME',
+                    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                    )
+                );
+                $objOT->setTraceQuery($aryTraceQuery);
+                $c->setOutputType('print_journal_table',$objOT);
                 $cg3->addColumn($c);
     
                 /////////////////////////////////////////////////////////
@@ -427,6 +477,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030900"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('OS_TYPE_NAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
                 $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030901"));
                 $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+                $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+                $objOT->setFirstSearchValueOwnerColumnID('OS_TYPE_ID');
+                $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_OS_TYPE_JNL',
+                    'TTT_SEARCH_KEY_COLUMN_ID'=>'OS_TYPE_ID',
+                    'TTT_GET_TARGET_COLUMN_ID'=>'OS_TYPE_NAME',
+                    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                    )
+                );
+                $objOT->setTraceQuery($aryTraceQuery);
+                $c->setOutputType('print_journal_table',$objOT);
                 $cg3->addColumn($c);
     
             $cg2->addColumn($cg3);
@@ -439,6 +501,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032001"));
         $c->setRequired(true);
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ACCT_ROW_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CICD_UACC_RUCC_LINKLINK_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'USERNAME_PULLKEY',
+            'TTT_GET_TARGET_COLUMN_ID'=>'USERNAME_PULLDOWN',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg2->addColumn($c);
 
         /////////////////////////////////////////////////////////
@@ -447,6 +521,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c = new IDColumn('RBAC_FLG_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032200"),'B_CICD_RBAC_FLG_NAME','RBAC_FLG_ROW_ID','RBAC_FLG_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('RBAC_FLG_ROW_ID'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200032201"));
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('RBAC_FLG_ROW_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_CICD_RBAC_FLG_NAME_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'RBAC_FLG_ROW_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'RBAC_FLG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg2->addColumn($c);
 
     $table->addColumn($cg2);
@@ -464,6 +550,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
         $c->setDefaultValue("register_table", TD_B_CICD_MATERIAL_LINK_LIST::C_AUTO_SYNC_FLG_ON);
         $c->setRequired(true);
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('AUTO_SYNC_FLG');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_VALID_INVALID_MASTER_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         /////////////////////////////////////////////////////////
@@ -651,6 +749,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setAllowSendFromFile(false);
         $c->setFunctionForEvent('beforeTableIUDAction',$beforeObjFunction);
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('SYNC_LAST_UPDATE_USER');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_CICD_UACC_RUCC_LINKLINK_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'USERNAME_PULLKEY',
+            'TTT_GET_TARGET_COLUMN_ID'=>'USERNAME_PULLDOWN',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         /////////////////////////////////////////////////////////
@@ -701,6 +811,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c = new IDColumn('DEL_OPE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031600"),'C_OPERATION_LIST','OPERATION_NO_UAPK','OPERATION_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('OPERATION_NAME'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031601"));//エクセル・ヘッダでの説明
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('DEL_OPE_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'C_OPERATION_LIST_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'OPERATION_NO_UAPK',
+            'TTT_GET_TARGET_COLUMN_ID'=>'OPERATION_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
 
         $cg->addColumn($c);
 
@@ -971,6 +1093,19 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('DEL_MOVE_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'C_PATTERN_PER_ORCH_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'PATTERN_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'PATTERN_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
+
         $cg->addColumn($c);
 
         /////////////////////////////////////////////////////////
@@ -979,6 +1114,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c = new IDColumn('DEL_EXEC_TYPE',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031800"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031801"));//エクセル・ヘッダでの説明
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('DEL_EXEC_TYPE');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
 

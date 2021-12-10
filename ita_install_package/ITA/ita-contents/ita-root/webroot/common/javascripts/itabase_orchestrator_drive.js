@@ -109,7 +109,7 @@ function printPetternInfo(boolCallProxy, pettern_id, pettern_name, timer_length)
 
 var gchkAccessAuth;
 function chkAccessAuth(operation_no,pattern_id) {
-    const chkAccessAuthURL = '/common/common_chkAccessAuth.php?OperationNoUAPK=' + operation_no + '&PatternId=' + pattern_id;
+    const chkAccessAuthURL = '/common/common_chkAccessAuth.php?OperationNoUAPK=' + operation_no + '&PatternId=' + pattern_id + '&UserId=' + gLoginUserID;
     $.ajax({
       type: 'get',
       url: chkAccessAuthURL,

@@ -457,7 +457,6 @@ function insertTask(){
         web_log($sql);
         web_log($objQuery->getLastError());
         throw new Exception($objMTS->getSomeMessage('ITABASEH-ERR-900066'));
-        return false;
     }
 
     $objDBCA->setQueryTime();
@@ -469,7 +468,6 @@ function insertTask(){
         web_log($sql);
         web_log($objQuery->getLastError());
         throw new Exception($objMTS->getSomeMessage('ITABASEH-ERR-900066'));
-        return false;
     }
     return true;
 }

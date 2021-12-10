@@ -58,6 +58,7 @@ $exportLabel1 = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900001');
 
 // Javascript用のメッセージ
 $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITABASEC', 'STD', '_js');
+$aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITAWDCC', 'STD', '_js');
 $strTemplateBody = getJscriptMessageTemplate($aryImportFilePath, $g['objMTS']);
 
 // 選択中のメニューを青くするための処理

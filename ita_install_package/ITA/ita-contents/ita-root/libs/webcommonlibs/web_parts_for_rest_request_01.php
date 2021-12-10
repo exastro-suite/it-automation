@@ -21,6 +21,7 @@
     //////////////////////////////////////////////////////////////////////
 
     // admin_auth_config.phpの読み込み
+
     require_once ($root_dir_path . "/libs/webcommonlibs/web_auth_config.php");
 
     global $aryExternalAuthSettings, $boolLocalAuthUser; // 外部認証設定変数
@@ -125,7 +126,7 @@
         // ----ログイン状態である、と判定された場合
         $username = $strReqUsername;
 
-        $tmpAryRetBody = getUserInfosByUsername($username,$objDBCA,$db_model_ch);
+        $tmpAryRetBody = getUserInfosByUsername($username,$objDBCA);
         if( $tmpAryRetBody[1] !== null ){
             $tmpStrErrMsgBody = $tmpAryRetBody[3];
 
@@ -229,29 +230,102 @@
             // 要ログインメニューに未ログインでアクセスしている場合----
         }
         else{
+
+            $passwordSettings = getPasswordOtherSettings($user_id,$objDBCA);
+           
+            $pwExpiration = $passwordSettings["PW_EXPIRATION"]; // パスワード無期限設定
+            $deactivatePwChange = $passwordSettings["DEACTIVATE_PW_CHANGE"]; // 初回パスワード再設定無効
+            $lastLoginTime = $passwordSettings["LAST_LOGIN_TIME"]; // 最終ログイン日時
+            $pwLastUpdTime = $passwordSettings["PW_LAST_UPDATE_TIME"]; // パスワード最終更新日時
+            $oldPassword = $passwordSettings["PASSWORD"];
             // ----ログイン状態である、と判定された場合
 
-            // ----パスワードの有効期限を判定
-            $tmpAryRetBody = checkLoginPasswordExpiryOut($username,$p_login_pw_l_update,$pass_word_expiry,$objDBCA);
-            if( $tmpAryRetBody[1] !== null ){
-                $tmpStrErrMsgBody = $tmpAryRetBody[3];
+            $strReasonType = "";
 
-                // 汎用系メッセージ
-                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-2001",array($tmpStrErrMsgBody)));
-
-                webRequestForceQuitFromEveryWhere(500,11410501);
-                exit();
+            // ----■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。
+            if(isset($pass_word_expiry)){
+                // ----設定テーブルに、パスワードの有効期限に関する設定があった場合
+                if($pass_word_expiry == "0"){
+                    $tempIntLength = 0;
+                }
+                else{
+                    $tempIntLength = intval($pass_word_expiry);
+                }
+                // 設定テーブルに、パスワードの有効期限に関する設定があった場合----
             }
-            if( $tmpAryRetBody[0]['ExpiryOut'] === true ){
-                //----パスワード有効期限切れ
-                // 汎用系メッセージ
-                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-2001",array($tmpStrErrMsgBody)));
-
-                webRequestForceQuitFromEveryWhere(401,11410501);
-                exit();
-                //パスワード有効期限切れ----
+            else{
+                // ----設定テーブルに、パスワードの有効期限に関する設定がなかった場合
+                $tempIntLength = 0;
+                // 設定テーブルに、パスワードの有効期限に関する設定がなかった場合----
             }
-            unset($tmpAryRetBody);
+            // ■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。----    
+
+            if(0 < $tempIntLength){
+
+                $tmpIntPWLDUnixTime = strtotime($pwLastUpdTime);
+                $tempRequestTime = htmlspecialchars($_SERVER["REQUEST_TIME"], ENT_QUOTES, "UTF-8");
+                if($tmpIntPWLDUnixTime + ($pass_word_expiry * 86400) < $tempRequestTime ){
+                    $tempBoolPassWordChange = true;
+                }
+
+
+                // ----パスワードの有効期限を判定
+            
+            if( $pwLastUpdTime == '' || $tempBoolPassWordChange === true ){
+                    if($lastLoginTime != "" || $deactivatePwChange != '1'){
+                        //----パスワード有効期限切れ
+                        // 汎用系メッセージ
+                        if($pwExpiration != '1'){
+                            // アクセスログ出力(有効期限が切れ)
+                            web_log($objMTS->getSomeMessage("ITAWDCH-ERR-2001",array($tmpStrErrMsgBody)));
+
+                            webRequestForceQuitFromEveryWhere(401,11410501);
+                            exit();
+                        }
+                        //パスワード有効期限切れ----
+                    }
+                    
+                }
+            }
+
+            $pw_l_up_flg = 0;
+            $last_log_flg = 0;
+           
+            if(empty($lastLoginTime) && $deactivatePwChange == '1'){
+                $pw_l_up_flg = 1;
+                $last_log_flg = 1;
+            }
+
+            if(empty($lastLoginTime) && !empty($pwLastUpdTime) || (!empty($lastLoginTime) && !empty($pwLastUpdTime))){
+                $last_log_flg = 1;
+            }
+
+            if((empty($lastLoginTime) && empty($pwLastUpdTime)) || (!empty($lastLoginTime) && empty($pwLastUpdTime))){
+                $pw_l_up_flg = 1;
+                $last_log_flg = 1;
+            }
+
+            if($last_log_flg == '1'){
+
+                if($pw_l_up_flg == '1'){
+                    $tmpStrSql = "UPDATE A_ACCOUNT_LIST SET LAST_LOGIN_TIME = SYSDATE(), PW_LAST_UPDATE_TIME = SYSDATE() WHERE USER_ID = :USERID_BV";
+                    $tmpArrayBind = array('USERID_BV'=>$user_id);
+                    $objQuery = $objDBCA->sqlPrepare($tmpStrSql);
+                    $objQuery->sqlBind($tmpArrayBind);
+                    $r = $objQuery->sqlExecute();
+                
+                    $g['objDBCA'] = $objDBCA;
+                    $tempArrayRet = updateUserLastLogin($user_id,$oldPassword,$oldPassword,$objDBCA);
+                    unset($tempArrayRet);
+                }else{
+                    $tmpStrSql = "UPDATE A_ACCOUNT_LIST SET LAST_LOGIN_TIME = SYSDATE() WHERE  USER_ID = :USERID_BV";
+                    $tmpArrayBind = array('USERID_BV'=>$user_id);
+                    $objQuery = $objDBCA->sqlPrepare($tmpStrSql);
+                    $objQuery->sqlBind($tmpArrayBind);
+                    $r = $objQuery->sqlExecute();
+                }
+                
+            }
             // パスワードの有効期限を判定-----
 
             // ----メニューに対する権限を取得

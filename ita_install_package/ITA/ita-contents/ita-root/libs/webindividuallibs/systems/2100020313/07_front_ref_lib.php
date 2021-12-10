@@ -22,12 +22,22 @@
 
     require_once( dirname(__FILE__) ."/81_movement_execution_control.php" );
 
-    $aryForResultData = movementExecutionControlFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
-
-
-    
-
-
-
-
+    if($strCommand == "CANCEL" || $strCommand == "SCRAM"){
+      if( is_array($objJSONOfReceptedData) !== true ){
+        $intResultStatusCode = 400;
+        $arrayRetBody = $g['requestByREST']['preResponsContents']['errorInfo'];
+        $arrayRetBody['Error'] = array();
+        $arrayRetBody['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+        $arrayRetBody['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+        $aryForResultData[0] = array('ResultStatusCode'=>$intResultStatusCode,
+                                     'ResultData'=>$arrayRetBody);
+        $aryForResultData[1] = null;
+      }else{
+        $aryForResultData = movementExecutionControlFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData);
+      }
+    }else{
+           webRequestForceQuitFromEveryWhere(400,11510807);
+           exit();
+           //不正な要求（内容が不正）----
+    }
 ?>

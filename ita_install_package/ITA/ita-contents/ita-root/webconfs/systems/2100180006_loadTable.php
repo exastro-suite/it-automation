@@ -23,6 +23,8 @@
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
+    $strLrWebRootToThisPageDir = substr(basename(__FILE__), 0, 10);
+
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITABASEH-MNU-306010");
 /*
@@ -93,6 +95,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = new IDColumn('STATUS_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-202090"),'B_SYM_EXE_STATUS','SYM_EXE_STATUS_ID','SYM_EXE_STATUS_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-203010"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('STATUS_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_SYM_EXE_STATUS_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'SYM_EXE_STATUS_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'SYM_EXE_STATUS_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //実行ユーザ
@@ -102,6 +116,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = new IDColumn('ABORT_EXECUTE_FLAG',$g['objMTS']->getSomeMessage("ITABASEH-MNU-306070"),'B_SYM_ABORT_FLAG','SYM_ABORT_FLAG_ID','SYM_ABORT_FLAG_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-306080"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('ABORT_EXECUTE_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_SYM_ABORT_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'SYM_ABORT_FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'SYM_ABORT_FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //リンクボタン
@@ -127,6 +153,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new DateTimeColumn('TIME_END',$g['objMTS']->getSomeMessage("ITABASEH-MNU-203080"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-203090"));//エクセル・ヘッダでの説明
 	$c->setValidator(new DateTimeValidator(null,null));
+    $table->addColumn($c);
+
+
+    //通知ログ
+    $c = new FileUploadColumn( 'NOTICE_LOG', $g['objMTS']->getSomeMessage("ITABASEH-MNU-203091") , "{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$strLrWebRootToThisPageDir}");//'通知ログ'
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-203092"));
+    $c->setMaxFileSize(4*1024*1024*1024);
+    $c->setFileHideMode(true);
+    $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
 
 

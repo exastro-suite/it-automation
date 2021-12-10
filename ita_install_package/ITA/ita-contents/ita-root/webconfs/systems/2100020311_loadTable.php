@@ -17,11 +17,26 @@
 //
 //  【処理概要】
 //    ・Ansible（Legacy Role）代入値管理
+//  【特記事項】
+//   ●●●●●●●●
+//    ・カラムの増減する場合「tmp_file_COL_IDSOP_19・del_flag_COL_IDSOP_19」
+//      のKey名の変更が必要となる場合がある。
+//   ●●●●●●●●
 //
 //////////////////////////////////////////////////////////////////////
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
+
+    global $root_dir_path;
+    if ( empty($root_dir_path) ){
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+    }
+
+    // 共通モジュールをロード
+    require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
 
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1302040");
@@ -1070,12 +1085,12 @@ Ansible（Legacy Role）代入値管理
 
         $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
         //条件付き必須なので、出現するときは、空白選択させない
-        $boolWhiteKeyAdd = false;
+        $tmpBoolWhiteKeyAdd = false;
 
         if( is_array($varAddResultData) === true ){
             if( array_key_exists(0,$varAddResultData) === true ){
                 if(in_array($varAddResultData[0], array("PARENT_VAR"))){
-                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
                 }else if(in_array($varAddResultData[0], array("NORMAL_VAR_0", "NORMAL_VAR_1"))){
                     $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                 }
@@ -1105,7 +1120,7 @@ Ansible（Legacy Role）代入値管理
         $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
 
         //条件付き必須なので、出現するときは、空白選択させない
-        $boolWhiteKeyAdd = false;
+        $tmpBoolWhiteKeyAdd = false;
 
         $strFxName = "";
 
@@ -1177,7 +1192,7 @@ Ansible（Legacy Role）代入値管理
         //親変数かどうか、を調べる----                
 
         if( $intVarType == 1 ){
-            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
         }else if( $intVarType === 0 ){
             $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
         }
@@ -1277,6 +1292,10 @@ Ansible（Legacy Role）代入値管理
     //メンバー変数名----
 
 
+    $cg1 = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-310000"));
+    $cg2 = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-310001"));
+
+
 ////////////////////////////////////////////////////////
 //----Sensitive設定
 ////////////////////////////////////////////////////////
@@ -1287,8 +1306,20 @@ Ansible（Legacy Role）代入値管理
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
     $c->setDefaultValue("register_table", 1);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('SENSITIVE_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_SENSITIVE_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'VARS_SENSITIVE',
+        'TTT_GET_TARGET_COLUMN_ID'=>'VARS_SENSITIVE_SELECT',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
 
-    $table->addColumn($c);
+    $cg2->addColumn($c);
 
 
 ////////////////////////////////////////////////////////
@@ -1304,7 +1335,22 @@ Ansible（Legacy Role）代入値管理
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
 
-    $table->addColumn($c);
+    $cg2->addColumn($c);
+    $cg1->addColumn($cg2);
+
+////////////////////////////////////////////////////////
+//----具体値ファイル
+////////////////////////////////////////////////////////
+    $c = new FileUploadColumn('VARS_ENTRY_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-310002"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-310003"));//エクセル・ヘッダでの説明
+    $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
+    $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+    $c->setFileHideMode(true);
+    $c->setHiddenMainTableColumn(true);
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+    $cg1->addColumn($c);
+
+    $table->addColumn($cg1);
 
 
 ////////////////////////////////////////////////////////
@@ -1687,6 +1733,23 @@ Ansible（Legacy Role）代入値管理
                 // 登録処理の場合
                 $intAssignId = array_key_exists('ASSIGN_ID',$arrayRegData)?$arrayRegData['ASSIGN_ID']:null;
             }
+        }
+
+        // カラムの増減する場合「tmp_file_COL_IDSOP_19・del_flag_COL_IDSOP_19」
+        // のKey名の変更が必要となる場合がある。
+        $UpLoadFile = "tmp_file_COL_IDSOP_19";
+        $DelFlag    = "del_flag_COL_IDSOP_19";
+        $tgtTableName = "B_ANSIBLE_LRL_VARS_ASSIGN";
+        // $g['ModeType']  03_registerTable.php/04_updateTable.php/05_deleteTable.phpで設定
+        // 0:[ブラウザからの新規登録
+        // 1:[EXCEL]からの新規登録
+        // 2:[CSV]からの新規登録
+        // 3:[JSON]からの新規登録
+        // 4:[ブラウザからの新規登録(SQLトランザクション無し)
+        list($ret,$boolSystemErrorFlag,$retStrBody) = chkSpecificsValueInput($arrayRegData, $arrayVariant, $g['objMTS'], $UpLoadFile, $DelFlag, $g['ModeType'], $tgtTableName);
+        if($ret === false) {
+            $boolExecuteContinue = false;
+            $retBool = false;
         }
 
         $g['PATTERN_ID_UPDATE_VALUE']        = "";
@@ -2192,6 +2255,7 @@ function CheckDefaultValueSameDefine($objDBCA, $objMTS, $objPtnID, $objVarID, $o
         unset($objQuery);
     }
     else{
+        $objQuery = $retArray[1];
         $errmsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-56200",array(basename(__FILE__),__LINE__,"ExecuteAgent"));
         web_log($errmsg);
         web_log($objQuery->getLastError());

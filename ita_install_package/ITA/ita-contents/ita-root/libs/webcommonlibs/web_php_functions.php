@@ -28,6 +28,7 @@
         $objTable = loadTable();
 
         // ルートディレクトリを取得
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -714,6 +715,15 @@
 
             list($intInsideRedirectMode, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('InsideRedirectMode'),1); // 0
 
+            $getCopy = $_GET;
+            unset($getCopy['m']);
+            unset($getCopy['c']);
+            $get_parameter_anp = "";
+            if("" != http_build_query($getCopy)){
+                $get_parameter_anp = "&" . http_build_query($getCopy);
+            }
+            $get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
+
             //MDC(NNN)+
             switch ($intForceQuitDatailCode) {
                 // 403
@@ -743,16 +753,14 @@
                     insideRedirectCodePrint("/common/common_access_filter.php",$intInsideRedirectMode);
                     break;
                 case 10610401: // 認証画面にリダイレクト
-                    list($strMenuIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuID'),null);
                     list($aryValueForPost,  $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('ValueForPost'),array());
-                    list($strMenuGroupIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuGroupID'),null);
-                    insideRedirectCodePrint("/common/common_auth.php?login&grp={$strMenuGroupIdNumeric}&no={$strMenuIdNumeric}",$intInsideRedirectMode,$aryValueForPost, true);
+                    insideRedirectCodePrint("/common/common_auth.php?login{$get_parameter_anp}",$intInsideRedirectMode,$aryValueForPost, true);
                     break;
                 case 10710501: // パスワード変更画面にリダイレクト
                     list($strMenuIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuID'),null);
                     list($aryValueForPost,  $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('ValueForPost'),array());
                     list($strMenuGroupIdNumeric, $tmpBoolKeyExists) = isSetInArrayNestThenAssign($aryAppendix,array('MenuGroupID'),null);
-                    insideRedirectCodePrint("/common/common_change_password_form.php?login&grp={$strMenuGroupIdNumeric}&no={$strMenuIdNumeric}",$intInsideRedirectMode,$aryValueForPost);
+                    insideRedirectCodePrint("/common/common_change_password_form.php?login{$get_parameter_anp}",$intInsideRedirectMode,$aryValueForPost);
                     break;
                 case 10310601: // アカウントロック画面にリダイレクト
                 case 10310602: // アカウントロック画面にリダイレクト
@@ -2893,9 +2901,12 @@ class RoleBasedAccessControl {
         return true;
     }
     function chkMovementAccessAuth($OperationNoUAPK,$PatternId,$objDBCA,$objMTS,$restAPI=false,$login_id=0) {
+        global $g;
+
         ////////////////////////////////
         // ルートディレクトリを取得   //
         ////////////////////////////////
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -3015,7 +3026,6 @@ class RoleBasedAccessControl {
     }
     // RBAC対応 ----
     function ky_debug($file,$func,$line,$title,$data) {
-       return;
        try {
          $dump = var_export($data,true);
          $tmpVarTimeStamp = time();
@@ -3033,7 +3043,6 @@ class RoleBasedAccessControl {
        }
     }
     function ky_backtrace($file,$func,$line,$title) {
-       return;
        try {
          $print_backtrace = "------backtrace--\n";
          $tmpVarTimeStamp = time();

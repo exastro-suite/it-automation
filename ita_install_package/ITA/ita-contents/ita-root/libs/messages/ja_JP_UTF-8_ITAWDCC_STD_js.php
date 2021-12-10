@@ -147,6 +147,14 @@ $ary["ITAWDCC92167"]        = "実行まで残り";
 $ary["ITAWDCC92168"]        = "日";
 $ary["ITAWDCC92169"]        = "時間";
 $ary["ITAWDCC92170"]        = "分";
+$ary["ITAWDCC92171"]        = "リンクリスト保存";
+$ary["ITAWDCC92172"]        = "リンクリスト読込";
+$ary["ITAWDCC92173"]        = "ファイルの読み込みに失敗しました。";
+$ary["ITAWDCC92174"]        = "通知設定有り";
+$ary["ITAWDCC92175"]        = "通知先の設定がありません。";
+$ary["ITAWDCC92176"]        = "通知先定義の登録はこちら";
+$ary["ITAWDCC92177"]        = "Conductor通知先定義";
+$ary["ITAWDCC92178"]        = "ロール";
 $ary["ITAWDCC100000"]       = "同期を再開しますか？";
 $ary["ITAWDCC100001"]       = "同期の再開を受け付けました。";
 ?>

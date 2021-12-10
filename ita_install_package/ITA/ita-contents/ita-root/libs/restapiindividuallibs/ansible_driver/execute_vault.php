@@ -63,6 +63,17 @@
     $in_ExecUser                    = $aryReceptData['EXEC_USER'];
     $in_TargetValue                 = $aryReceptData['TARGET_VALUE'];
     $in_TargetValue                 = $this->ky_decrypt($in_TargetValue);
+    $in_engine_virtualenv_name      = $aryReceptData['ANS_ENGINE_VIRTUALENV_NAME'];
+
+    $aryOrchestratorList = array('LEGACY_NS'=>'legacy_ns','PIONEER_NS'=>'pioneer_ns','LEGACY_RL'=>'legacy_rl');
+    $strOutFolderName    = "/out";
+
+    $aryOcheSubDir       = explode("_",$aryOrchestratorList[$in_OrchestratorSub_Id]);
+
+    $strPadExeNo         = sprintf("%010d",$in_ExeNo);
+    $strDRSDirPerExeNoNS = "{$in_DataRelayStorageTrunkPathNS}/{$aryOcheSubDir[0]}/{$aryOcheSubDir[1]}/{$strPadExeNo}";
+    $root_dir_path       = $this->getApplicationRootDirPath();
+    $strOutPutDirPath    = "{$strDRSDirPerExeNoNS}{$strOutFolderName}";
 
     $obj = new AnsibleVault();
 
@@ -74,7 +85,7 @@
 
     // ansible-vault 暗号化
     $EncodeValue = "";
-    $ret = $obj->Vault($in_ExecUser,$PasswordFile,$in_TargetValue,$EncodeValue,'');
+    $ret = $obj->Vault($in_ExecUser,$PasswordFile,$in_TargetValue,$EncodeValue,'',$in_engine_virtualenv_name,$strDRSDirPerExeNoNS);
     if($ret === true) {
         $this->arySuccessInfo['status'] = "SUCCEED";
     } else {

@@ -305,7 +305,6 @@ class Auth
             // ----id/pass認証
             if ($this->login()) {
                 // ログイン成功
-                $retResult = $this->setLastLoginTime();
                 return;
             }
             // id/pass認証----
@@ -1019,7 +1018,7 @@ class OAuth2 extends Auth
         } else {
             $uri .= '?'.http_build_query($query);
         }
-        return header('Location: '.$uri);
+        header('Location: '.$uri);
     }
 
     protected function callback()
@@ -1203,7 +1202,7 @@ class OAuth2 extends Auth
         // まとめてsessionに登録----
 
         //最終ログイン日時設定
-        $retResult = $this->setLastLoginTime();
+        $this->setLastLoginTime();
         return true;
     }
 

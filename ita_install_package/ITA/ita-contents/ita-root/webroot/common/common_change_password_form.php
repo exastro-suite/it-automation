@@ -56,12 +56,7 @@
     // ■ログイン成功後に表示させたいメニューのＩＤが、リクエストのGETクエリーに含まれているかをチェックする。----
 
     if( !isset($req_menu_id) ){
-        // アクセスログ出力(想定外エラー)
-        web_log($objMTS->getSomeMessage("ITAWDCH-MNU-1190091"));
-        
-        // 想定外エラー通知画面にリダイレクト
-        webRequestForceQuitFromEveryWhere(400,20410101);
-        exit();
+        $ASJTM_id = "";
     }
     else if( !is_numeric($req_menu_id) ){
 
@@ -70,12 +65,7 @@
             $ASJTM_grp_id = sprintf("%010d", htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8"));
         }
         else{
-            // アクセスログ出力(想定外エラー)
-            web_log($objMTS->getSomeMessage("ITAWDCH-MNU-1190092"));
-            
-            // 想定外エラー通知画面にリダイレクト
-            webRequestForceQuitFromEveryWhere(400,20410102);
-            exit();
+            $ASJTM_id = "";
         }
     }
     else{
@@ -121,6 +111,24 @@
     
     $strDifferBody1 = "";
     $strDifferBody2 = "";
+
+    $getCopy = $_GET;
+    $get_parameter = "";
+    $get_parameter_anp = "";
+    if("" != http_build_query($getCopy)){
+        $get_parameter = "?" . http_build_query($getCopy);
+        $get_parameter_anp = "&" . http_build_query($getCopy);
+    }
+    $get_parameter = str_replace('+', '%20', $get_parameter);
+    $get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
+
+    unset($getCopy['login']);
+    $get_parameter_no_login = "";
+    if("" != http_build_query($getCopy)){
+        $get_parameter_no_login = "?" . http_build_query($getCopy);
+    }
+    $get_parameter_no_login = str_replace('+', '%20', $get_parameter_no_login);
+
     // ---- ■リクエストに紐付くセッションが、ログイン状態かをチェックする。
     if($auth->checkAuth()){
         //----ログインしている状態
@@ -133,7 +141,7 @@
             $strDifferBody2 =
 <<< EOD
 
-                        <form method="POST" class="inputUserInfoForm" action="{$scheme_n_authority}/common/common_auth.php?grp={$ASJTM_grp_id}&no={$ASJTM_id}" >
+                        <form method="POST" class="inputUserInfoForm" action="{$scheme_n_authority}/common/common_auth.php{$get_parameter_no_login}" >
                         <input id="logoutTryExecute" class="changePwGateSubmitElement abortTryExecute" type="submit" name="logout" value="{$objMTS->getSomeMessage("ITAWDCH-MNU-1190018")}">
                         </form>
 EOD;
@@ -143,7 +151,7 @@ EOD;
             $strDifferBody2 =
 <<< EOD
 
-                        <form method="POST" class="inputUserInfoForm" action="{$scheme_n_authority}/common/common_auth.php?grp={$ASJTM_grp_id}&no={$ASJTM_id}" >
+                        <form method="POST" class="inputUserInfoForm" action="{$scheme_n_authority}/common/common_auth.php{$get_parameter}" >
                         <input id="returnTryExecute" class="changePwGateSubmitElement abortTryExecute" type="submit" value="{$objMTS->getSomeMessage("ITAWDCH-MNU-1190019")}">
                         </form>
 EOD;
@@ -176,7 +184,7 @@ EOD;
         $strDifferBody2 = 
 <<< EOD
 
-                        <form method="POST" class="inputUserInfoForm" method="POST" name="change_pw_form" action="{$scheme_n_authority}/common/common_auth.php?login&grp={$ASJTM_grp_id}&no={$ASJTM_id}">
+                        <form method="POST" class="inputUserInfoForm" method="POST" name="change_pw_form" action="{$scheme_n_authority}/common/common_auth.php?login{$get_parameter_anp}">
                         <input type="hidden" name="expiry" value="{$strExpiry}">
                         <input id="jumpToLoginGateTryExecute" class="changePwGateSubmitElement abortTryExecute" type="submit" value="{$objMTS->getSomeMessage("ITAWDCH-MNU-1190009")}">
                         </form>
@@ -225,7 +233,7 @@ EOD;
                             {$strReasonMessageBody}
                         </div>
                         <div id="gateChangePwContainerBody" class="gateContainer">
-                            <form id="gateChangePwForm" class="inputUserInfoForm" method="POST" name="change_pw_form" action="{$scheme_n_authority}/common/common_change_password_do.php?grp={$ASJTM_grp_id}&no={$ASJTM_id}">
+                            <form id="gateChangePwForm" class="inputUserInfoForm" method="POST" name="change_pw_form" action="{$scheme_n_authority}/common/common_change_password_do.php{$get_parameter}">
                                 <table id="gateChangePwTable" class="headerLeftTable inputItemTable" border="0">
                                     <tr>
                                         <th class="inputItemExplain">{$objMTS->getSomeMessage("ITAWDCH-MNU-1190004")}</th>

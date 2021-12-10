@@ -105,6 +105,8 @@ class JournalSeqNoColumnDummy extends TextColumn {
     //----ここから継承メソッドの上書き処理
 
     function __construct ($strColId="JOURNAL_SEQ_NO", $strColExplain="", $strSequenceId=null) {
+        global $g;
+        
         if ($strColExplain === "") {
             $strColExplain = $g['objMTS']->getSomeMessage("ITAWDCH-STD-11301");
         }

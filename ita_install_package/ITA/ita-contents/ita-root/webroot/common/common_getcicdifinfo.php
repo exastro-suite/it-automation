@@ -35,15 +35,30 @@ try {
     $aryOrderToReqGate = array('DBConnect'=>'LATE');
     require_once ($root_dir_path . $php_req_gate_php );
 
+    ///////////////////////////////////////////////////
+    // アクセス制限
+    ///////////////////////////////////////////////////
+    //ブラウザから直接アクセスさせない
+    if(!isset($_SERVER['HTTP_X_REQUESTED_WITH']) || strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) != 'xmlhttprequest'){
+        // アクセスログ出力(リダイレクト判定NG)
+        web_log($objMTS->getSomeMessage("ITAWDCH-MNU-1190093"));
+        
+        // 不正操作によるアクセス警告画面にリダイレクト
+        webRequestForceQuitFromEveryWhere(403,10000403);
+        exit();
+    }
+
     ////////////////////////////////
     // DBコネクト                 //
     ////////////////////////////////
     require ($root_dir_path . $db_connect_php );
-        
+
     ///////////////////////////////////////////////////
     // ファイル組み込み
     ///////////////////////////////////////////////////
     require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
+    require_once ($root_dir_path . "/libs/webcommonlibs/web_auth_config.php");
+    require_once ($root_dir_path . "/libs/webcommonlibs/web_functions_for_get_sysconfig.php");
 
     require_once ($root_dir_path . '/libs/backyardlibs/common/common_db_access.php');
     require_once ($root_dir_path . '/libs/backyardlibs/CICD_for_IaC/local_db_access.php');
@@ -61,6 +76,76 @@ try {
     $log_level = "";
     $DBobj = new LocalDBAccessClass($db_model_ch,$cmDBobj,$objDBCA,$objMTS,$g['login_id'],$logfile,$log_level);
 
+    //クエリデータを保管
+    if(array_key_exists('user_id',$_GET) === false) {
+        $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
+        $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6000");
+        throw new Exception($ErrorMsg);
+    }
+    $user_id = htmlspecialchars($_GET['user_id'], ENT_QUOTES, "UTF-8");
+
+    //システムコンフィグを取得
+    $tmpAryRetBody = getSystemConfigFromConfigList($objDBCA);
+    if( $tmpAryRetBody[1] !== null ){
+        $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
+        $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6000");
+        throw new Exception($ErrorMsg);
+    }
+    $arySYSCON = $tmpAryRetBody[0]['Items'];
+    unset($tmpAryRetBody);
+
+    //Sessionのログインチェックをして、ユーザが一致していたら処理を継続
+    $auth = null;
+    saLoginExecute($auth, $objDBCA, null, false);
+    $loginCheck = $auth->checkAuth();
+    if($loginCheck == false){
+        $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
+        $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6000");
+        throw new Exception($ErrorMsg);
+    }
+    $loginUserName = $auth->getUsername();
+
+    //D_ACCOUNT_LISTから対象のユーザIDのデータを取得し、ユーザ名が一致するかを確認
+    $sqlBody =            " SELECT USER_ID, USERNAME \n";
+    $sqlBody = $sqlBody . " FROM D_ACCOUNT_LIST \n";
+    $sqlBody = $sqlBody . " WHERE  DISUSE_FLAG = '0' \n";
+    $arrayBind = array();
+
+    $objQuery = $DBobj->SelectForSimple($sqlBody,$arrayBind);
+    if($objQuery === false){
+        $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
+        $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6000") . "\n" . $DBobj->GetLastErrorMsg();
+        throw new Exception($ErrorMsg);
+    }
+
+    $num_of_rows = $objQuery->effectedRowCount();
+    if($num_of_rows === 0) {
+        $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
+        $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6000") . "\n" . $DBobj->GetLastErrorMsg();
+        throw new Exception($ErrorMsg);
+    }
+
+    $accountData = array();
+    while ($row = $objQuery->resultFetch()){
+        if($row['USER_ID'] == $user_id){
+            $accountData = $row; //レコードは1つしかない想定
+        }
+    }
+
+    if(empty($accountData)){
+        $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
+        $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6000");
+        throw new Exception($ErrorMsg);
+    }
+
+    //クエリパラメータのuser_idとセッションが持つユーザ名情報が不一致
+    if($accountData['USERNAME'] != $loginUserName){       
+        $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
+        $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6000");
+        throw new Exception($ErrorMsg);
+    }
+
+    unset($objQuery);
 
     $sqlBody = "SELECT   HOSTNAME, PROTOCOL, PORT   FROM B_CICD_IF_INFO WHERE DISUSE_FLAG = '0'";
     $arrayBind = array();
@@ -68,13 +153,13 @@ try {
     $objQuery = $DBobj->SelectForSimple($sqlBody,$arrayBind);
     if($objQuery === false) {
         $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
-        $ErrorMsg = $strFxName ." Failed to get CICD interface information.\n". $DBobj->GetLastErrorMsg();
+        $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6000") . "\n" . $DBobj->GetLastErrorMsg();
         throw new Exception($ErrorMsg);
     }
     $num_of_rows = $objQuery->effectedRowCount();
     if($num_of_rows === 0) {
         $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
-        $ErrorMsg = $strFxName ." CICD interface information is not registered.\n". $DBobj->GetLastErrorMsg();
+        $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6001") . "\n" . $DBobj->GetLastErrorMsg();
         throw new Exception($ErrorMsg);
     }
     $tgtRepoListRow = array();

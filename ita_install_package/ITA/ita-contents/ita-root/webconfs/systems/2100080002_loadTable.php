@@ -81,6 +81,7 @@ Organizations管理
         //TFE連携状態チェック
         $c = new LinkButtonColumn('CHECK', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102300'), $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102310'), '', array());
         $outputType = new OutputType(new TabHFmt(), new LinkButtonTabBFmt());
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106400'));
         $c->setOutputType("print_table", $outputType);
         $c->setEvent("print_table", "onClick", "checkOrganization", array('this', ':ORGANIZATION_ID')); //ボタン押下時のイベント
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
@@ -94,6 +95,7 @@ Organizations管理
         $c = new TextColumn('CHECK_RESULT', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102320'));
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
         $outputType->setVisible(false); //フィルタ・登録・更新・変更履歴時は非表示
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106410'));
         $c->setOutputType("filter_table", $outputType);
         $c->setOutputType("update_table", $outputType);
         $c->setOutputType("register_table", $outputType);
@@ -109,6 +111,7 @@ Organizations管理
         //Terraform登録ボタン
         $c = new LinkButtonColumn('REGISTER', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102330'), $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102340'), '', array());
         $outputType = new OutputType(new TabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array("")));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106470'));
         $c->setOutputType("print_table", $outputType);
         $c->setEvent("print_table", "onClick", "registerOrganization", array('this', ':ORGANIZATION_ID')); //ボタン押下時のイベント
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
@@ -121,6 +124,7 @@ Organizations管理
         //Terraform更新ボタン
         $c = new LinkButtonColumn('UPDATE', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102350'), $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102360'), '', array());
         $outputType = new OutputType(new TabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array("")));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106480'));
         $c->setOutputType("print_table", $outputType);
         $c->setEvent("print_table", "onClick", "updateOrganization", array('this', ':ORGANIZATION_ID')); //ボタン押下時のイベント
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));
@@ -133,6 +137,7 @@ Organizations管理
         //Terraform削除ボタン
         $c = new LinkButtonColumn('DELETE', $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102370'), $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102380'), '', array());
         $outputType = new OutputType(new TabHFmt(),new LinkButtonTabBFmt(0,array($objFunction),array("")));
+        $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106490'));
         $c->setOutputType("print_table", $outputType);
         $c->setEvent("print_table", "onClick", "deleteOrganization", array('this', ':ORGANIZATION_ID')); //ボタン押下時のイベント
         $outputType = new OutputType(new TabHFmt(), new StaticTextTabBFmt(""));

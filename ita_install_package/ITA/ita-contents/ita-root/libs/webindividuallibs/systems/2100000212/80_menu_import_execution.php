@@ -73,6 +73,13 @@ function menuImportFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData
 
                 // DP_INFO 取得 #270 対応
                 $dpinfoPath = $g['root_dir_path'] . '/temp/data_import/import/' . $dirName;
+                if( !file_exists($dpinfoPath .'/DP_INFO') ){
+                    $aryRetBody["TASK_ID"] = "";
+                    $aryRetBody["RESULTCODE"] = "002";
+                    $aryRetBody['RESULTINFO'] = $g['objMTS']->getSomeMessage("ITABASEH-ERR-900073"); 
+                    break;
+                }
+
                 $json = file_get_contents($dpinfoPath .'/DP_INFO');
                 $dp_info = json_decode(json_decode(json_encode($json), true), true);
                 $_SESSION["dp_info"] = check_dp_info($dp_info);
@@ -177,7 +184,7 @@ function menuImportExecutionFromRest($objJSONOfReceptedData){
     //メニューidをint型からstring型へ変換
     foreach ($tmpJSONOfReceptedData as $key => $value) {
         foreach ($value as $value2) {
-            if( $objIntNumVali->isValid($value2) != false ){
+            if(is_numeric($value2)){
                 $tmparray[$key][]= (string)sprintf('%010d', $value2);
             }else{
                 //メニューID不正時

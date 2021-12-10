@@ -405,10 +405,14 @@ margin-right: 0;
 }
 #KIZI h2 table,
 #KIZI h2 tbody,
+#KIZI h2 th,
 #KIZI h2 tr,
 #KIZI h2 td {
 	display: block;
 	width: 100%;
+}
+#KIZI h2 th {
+	text-align: left;
 }
 #KIZI h2 td:nth-child(2) {
 	position: absolute;
@@ -471,7 +475,7 @@ margin-right: 0;
 
 
 #KIZI textarea, #KIZI input[type="text"], #KIZI input[type="password"] {
-	font-family: MS Gothic;
+	font-family: MS Gothic, sans-serif;
 	font-size: 13px;
 	padding: 2px;
 	margin-bottom: 2px;
@@ -720,7 +724,7 @@ input.showbutton:hover {
   min-height: 28px;
   line-height: 20px;
   margin: 3px 0; padding: 4px 8px;
-  font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+  font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
   word-break: break-all;
 }
 #gateChangePwTry,
@@ -843,7 +847,7 @@ input.showbutton:hover {
 	width: 100%;
 	height: 36px;
 	line-height: 28px;
-  font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+  font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
   font-size: 13px;
 	margin: 4px 0; padding: 4px 8px;
 }
@@ -896,7 +900,7 @@ width: auto;
 #KIZI .input_password input[type="password"],
 #KIZI .input_password input[type="text"] {
 padding: 2px 18px 2px 2px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 font-size: 13px;
 }
 #gateLoginContainer .input_password input[type="password"],
@@ -975,7 +979,6 @@ background-position: -16px 0;
 #ssoLoginContainer .ssoLoginLinkInner {
   display: table;
   width: 100%;
-  background-color: #EEE;
   background: #FF9B4B;
   box-shadow: 0 2px 0 #CC6818;
   border-radius: 4px;
@@ -1725,4 +1728,7 @@ color: #AAA;
 #select_area .select2-container--default.select2-container--focus .select2-selection--multiple {
 border-color: #0070FF;
 background-color: #E5F1FF;
+}
+.export_whole {
+    font-size: 18px;
 }

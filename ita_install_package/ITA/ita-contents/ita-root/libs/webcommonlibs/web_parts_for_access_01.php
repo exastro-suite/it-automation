@@ -21,7 +21,7 @@
     else{
         $host = "";
     }
-    
+
     // 一般動作
     if( isset($array_except_referer) === false ){
         $array_except_referer = array($ACRCM_representative_file_name);
@@ -45,7 +45,12 @@
         unset($tmpValue2);
         unset($tmpBool);
     }
-    
+
+    if (!empty($_GET['no'])) {
+        $array_except_referer[] = "/menus/systems/".sprintf("%010d", $_GET['no'])."/03_data_export.php?no=" . sprintf("%010d", $_GET['no']);
+        $array_except_referer[] = "/menus/systems/".sprintf("%010d", $_GET['no'])."/03_data_import.php?no=" . sprintf("%010d", $_GET['no']);
+    }
+
     $boolRefererCheck = false;
     foreach($array_except_referer as $value){
         if( strstr($host, $value) !== false ){
@@ -53,17 +58,17 @@
             break;
         }
     }
-    
+
     // 代表PHPファイルからのリダイレクトでない場合はNG
     if( $boolRefererCheck === false ){
         // アクセスログ出力(リダイレクト判定NG)
         web_log($objMTS->getSomeMessage("ITAWDCH-ERR-17",$host));
-        
+
         // 不正操作によるアクセス警告画面にリダイレクト
         webRequestForceQuitFromEveryWhere(400,10810201);
         exit();
     }
-    
+
     // browse系、access系、reg_n_up系の共有パーツを読み込み
     require_once ($root_dir_path . "/libs/webcommonlibs/web_parts_for_common.php");
 ?>

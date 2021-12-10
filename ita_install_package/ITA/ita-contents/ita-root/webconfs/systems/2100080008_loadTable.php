@@ -90,7 +90,7 @@ Terraform代入値管理
     //************************************************************************************
     //----作業パターン
     // REST/excel/csv入力用 Movement+変数名
-    $c = new IDColumn('REST_MODULE_VARS_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103670"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_VARS_LINK_ID','PTN_VAR_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_VARS_LINK_ID'));
+    $c = new IDColumn('REST_MODULE_VARS_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103670"),'E_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','PTN_VAR_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103680"));
 
     //コンテンツのソースがヴューの場合、登録/更新の対象外
@@ -425,6 +425,11 @@ Terraform代入値管理
     //エクセル/CSVからのアップロードを禁止する。
     $c->setAllowSendFromFile(false);
 
+    //Filter/Print/deleteのみ無効
+    $c->getOutputType('filter_table')->setVisible(false);
+    $c->getOutputType('print_table')->setVisible(false);
+    $c->getOutputType('delete_table')->setVisible(false);
+
     // REST/excel/csvで項目無効
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
@@ -435,6 +440,35 @@ Terraform代入値管理
 
     $table->addColumn($c);
     //変数名----
+
+    //----変数名(Webページ表示用)
+    $c = new IDColumn('VARS_PTN_LINK_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103710"),'D_TERRAFORM_PTN_VAR_LIST','MODULE_PTN_LINK_ID','VARS_LINK_PULLDOWN','',array('OrderByThirdColumn'=>'MODULE_PTN_LINK_ID'));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103720"));//エクセル・ヘッダでの説明
+
+    $c->setHiddenMainTableColumn(false); //更新対象カラム
+
+    // 必須チェックは組合せバリデータで行う。
+    $c->setRequired(false);
+
+    //コンテンツのソースがヴューの場合、登録/更新の対象とする
+    $c->setHiddenMainTableColumn(false);
+
+    //エクセル/CSVからのアップロードを禁止する。
+    $c->setAllowSendFromFile(false);
+
+    // Filter/Print/delete以外無効
+    $c->getOutputType('filter_table')->setVisible(true);
+    $c->getOutputType('print_table')->setVisible(true);
+    $c->getOutputType('delete_table')->setVisible(true);
+    $c->getOutputType('update_table')->setVisible(false);
+    $c->getOutputType('register_table')->setVisible(false);
+    $c->getOutputType('print_journal_table')->setVisible(false);
+    $c->getOutputType('excel')->setVisible(false);
+    $c->getOutputType('csv')->setVisible(false);
+    $c->getOutputType('json')->setVisible(false);
+
+    $table->addColumn($c);
+    //変数名(Webページ表示用)----
 
     //************************************************************************************
     //----HCL設定
@@ -447,6 +481,18 @@ Terraform代入値管理
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
 
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('HCL_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_TERRAFORM_HCL_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'HCL_FLAG',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HCL_FLAG_SELECT',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     //************************************************************************************
@@ -459,6 +505,19 @@ Terraform代入値管理
     $c->setRequired(true); //登録/更新時には、入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
+
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('SENSITIVE_FLAG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_SENSITIVE_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'VARS_SENSITIVE',
+        'TTT_GET_TARGET_COLUMN_ID'=>'VARS_SENSITIVE_SELECT',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
 
     $table->addColumn($c);
 
@@ -595,16 +654,17 @@ Terraform代入値管理
                (strlen($intVarsLinkId)         === 0) &&
                (strlen($intRestVarsLinkId)     !== 0)){
                 $query =  "SELECT                                             "
+                         ."  TBL_A.MODULE_PTN_LINK_ID,                        "
                          ."  TBL_A.MODULE_VARS_LINK_ID,                              "
                          ."  TBL_A.PATTERN_ID,                                "
                          ."  COUNT(*) AS MODULE_VARS_LINK_ID_CNT                     "
                          ."FROM                                               "
                          ."  E_TERRAFORM_PTN_VAR_LIST TBL_A                     "      //モード毎
                          ."WHERE                                              "
-                         ."  TBL_A.MODULE_VARS_LINK_ID    = :MODULE_VARS_LINK_ID   AND      "
+                         ."  TBL_A.MODULE_PTN_LINK_ID    = :MODULE_PTN_LINK_ID   AND      "
                          ."  TBL_A.DISUSE_FLAG     = '0'                      ";
                 $aryForBind = array();
-                $aryForBind['MODULE_VARS_LINK_ID'] = $intRestVarsLinkId;
+                $aryForBind['MODULE_PTN_LINK_ID'] = $intRestVarsLinkId;
                 $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
                 if( $retArray[0] === true ){
                     $objQuery =& $retArray[1];

@@ -43,7 +43,7 @@ Ansible(Legacy Role)作業パターン
     } else {
         if($objQuery->effectedRowCount() == 0) {
             $message = sprintf("Recode not found. (Table:B_ANSIBLE_IF_INFO");
-            web_log(basename(__FILE__),__LINE__,$message);
+            web_log('[FILE]' .basename(__FILE__) .'[LINE]' .__LINE__ .$message);
         } else {
             $row = $objQuery->resultFetch();
             // ANSIBLE_EXEC_MODE=2 ansible tower
@@ -153,6 +153,27 @@ Ansible(Legacy Role)作業パターン
         $c = new IDColumn('ANS_WINRM_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207071"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207072"));//エクセル・ヘッダでの説明
         $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANS_WINRM_ID');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
+        $cg->addColumn($c);
+
+        /* Ansible virtualenv path*/
+        $objVldt = new SingleTextValidator(0,512,false);
+        $c = new TextColumn('ANS_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
+        $c->setHiddenMainTableColumn(true);
+        $c->setValidator($objVldt);
+        $c->setRequired(false);
         $cg->addColumn($c);
 
         /* 親Playbookのヘッダーセクション */
@@ -183,9 +204,22 @@ Ansible(Legacy Role)作業パターン
         $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000013") );
 
         // virtualenv
-        $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000014"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
-        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000015"));
+        $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030"));
         $c->setHiddenMainTableColumn(true);
+
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('ANS_VIRTUALENV_NAME');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_VIRTUALENV_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'VIRTUALENV_NAME',
+            'TTT_GET_TARGET_COLUMN_ID'=>'VIRTUALENV_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         $table->addColumn($cg);

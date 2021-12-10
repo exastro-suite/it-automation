@@ -19,6 +19,8 @@
 $tmpAry = explode('ita-root', dirname(__FILE__));$root_dir_path=$tmpAry[0].'ita-root';unset($tmpAry);
 require_once ( $root_dir_path . '/libs/webcommonlibs/table_control_agent/web_parts_for_template_01_browse.php');
 require_once ( $root_dir_path . '/libs/webindividuallibs/systems/2100160003/web_parts_for_create_menu.php');
+$aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITAWDCC', 'STD', '_js');
+$strTemplateBody = getJscriptMessageTemplate($aryImportFilePath, $g['objMTS']);
 ?>
 <script type="text/javascript">
 $(function() {
@@ -58,9 +60,9 @@ $(function() {
 <!-------------------------------- ユーザ・コンテンツ情報 -------------------------------->
 <!-------------------------------- 説明 -------------------------------->
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="" >
         <tr>
-            <td><div onClick=location.href="javascript:show('SetsumeiMidashi','SetsumeiNakami');" class="midashi_class" ><?php echo $headerLabel1; ?></div></td>
+            <th scope="col"><div onClick=location.href="javascript:show('SetsumeiMidashi','SetsumeiNakami');" class="midashi_class" ><?php echo $headerLabel1; ?></div></th>
             <td>
                 <div id="SetsumeiMidashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('SetsumeiMidashi','SetsumeiNakami');" >
@@ -78,9 +80,9 @@ $(function() {
 <!-------------------------------- メニュー作成-------------------------------->
 <?php if (isset($_REQUEST['create']) === false) { ?>
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="">
         <tr>
-            <td><div onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" class="midashi_class" ><?php echo $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102502"); ?></div></td>
+            <th scope="col"><div onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" class="midashi_class" ><?php echo $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102502"); ?></div></th>
             <td>
                 <div id="Mix1_Midashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" >
@@ -113,9 +115,9 @@ $(function() {
 </div>
 <?php }else{?>
 <h2>
-    <table width="100%">
+    <table width="100%" aria-describedby="" >
         <tr>
-            <td><div onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" class="midashi_class" ><?php echo $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102502"); ?></div></td>
+            <th scope="col"><div onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" class="midashi_class" ><?php echo $g['objMTS']->getSomeMessage("ITACREPAR-MNU-102502"); ?></div></th>
             <td>
                 <div id="Mix1_Midashi" align="right">
                     <input type="button" value="<?php echo $strCmdWordAreaClose; ?>" class="showbutton" onClick=location.href="javascript:show('Mix1_Midashi','Mix1_Nakami');" >

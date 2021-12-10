@@ -621,7 +621,7 @@ EOD;
 
                 if($strOutputFileType == "SafeCSV"){
                     $strOutputStr .= 
-<<<EOD
+<<< EOD
             <form style="display:inline" name="reqToolDL" action="{$g['scheme_n_authority']}/webdbcore/editorBaker.zip">
                 <input type="submit" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-346")}" >
             </form>
@@ -811,9 +811,6 @@ EOD;
         $strOutputStr = "";
         // ローカル変数宣言----
         
-        $strOutputStr .= 
-<<<EOD
-EOD;
         //
         return $strOutputStr;
         //
@@ -835,6 +832,8 @@ EOD;
         $checkFormatterId = $retArray[1];
         $objListFormatter = $retArray[2];
 
+        $htmlPrintTableAreaTailPriSome = "";
+        $htmlPrintTableAreaTailCommon = "";
         if($row_counter == 0){
             // ----0件の場合はTABLEではなくメッセージを返却するようハンドリング
             $htmlPrintTableAreaTailCommon = "<br>{$g['objMTS']->getSomeMessage("ITAWDCH-STD-349")}<br>";
@@ -843,13 +842,14 @@ EOD;
             }
             
             if(array_key_exists("privilege", $g)===true){
-                $htmlPrintTableAreaTailPriSome="";
                 if($g['privilege'] === "1"){
                     if(array_key_exists("tail_scene_rec_n0_prv1", $arySetting)===true){
                         $htmlPrintTableAreaTailPriSome=$arySetting['tail_scene_rec_n0_prv1'];
                     }
                     else{
-                        $htmlPrintTableAreaTailPriSome = "{$g['objMTS']->getSomeMessage("ITAWDCH-STD-350")}<br>";
+                        if($objTable->getNoRegisterFlg()===false){
+                            $htmlPrintTableAreaTailPriSome = "{$g['objMTS']->getSomeMessage("ITAWDCH-STD-350")}<br>";
+                        }   
                     }
                 }
                 else if($g['privilege'] === "2"){
@@ -864,13 +864,11 @@ EOD;
             // 0件の場合はTABLEではなくメッセージを返却するようハンドリング----
         }
         else{
-            $htmlPrintTableAreaTailCommon="";
             if(array_key_exists("tail_scene_rec_nx_common", $arySetting)===true){
                 $htmlPrintTableAreaTailCommon = $arySetting['tail_scene_rec_nx_common'];
             }
             //
             if(array_key_exists("privilege", $g)===true){
-                $htmlPrintTableAreaTailPriSome="";
                 if($g['privilege'] === "1"){
                     if(array_key_exists('tail_scene_rec_nx_prv1', $arySetting)===true){
                         $htmlPrintTableAreaTailPriSome=$arySetting['tail_scene_rec_nx_prv1'];
@@ -891,7 +889,7 @@ EOD;
         }
         //
         $strOutputStr = 
-<<<EOD
+<<< EOD
                 {$htmlPrintTableAreaTailCommon}
                 {$htmlPrintTableAreaTailPriSome}
 EOD;

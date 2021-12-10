@@ -32,6 +32,7 @@
         //----$ordMode=2[CSV]からの廃止/復活
         //----$ordMode=3[JSON]からの廃止/復活
         //----$ordMode=4[ブラウザからの新規登録(SQLトランザクション無し)
+        $g['ModeType'] = $ordMode;
 
         //----返し値:$varRet
         //----処理結果次第で書き換えるグローバル変数：$g['error_flag']
@@ -375,10 +376,12 @@
                                 $type = "update_table";
                                 break;
                             }
-                            // リクエスト元とカラムの出力先が適合しない場合は、ID変換失敗のチェックはしない。
-                            // 二重チェックを防止
-                            if( ! $objFocusCol->getOutputType($type)->isVisible()) {
-                                continue;
+                            if( $colKey != "UPD_UPDATE_TIMESTAMP" ) {
+                                // リクエスト元とカラムの出力先が適合しない場合は、ID変換失敗のチェックはしない。
+                                // 二重チェックを防止
+                                if( ! $objFocusCol->getOutputType($type)->isVisible()) {
+                                    continue;
+                                }
                             }
                             if( $objFocusCol->isDBColumn()===true && $objFocusCol->getDeleteOffBeforeCheck()!==false ){
                                 //----廃止前・個別チェック
@@ -618,7 +621,6 @@
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
                             throw new Exception( '00002500-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                            break;
                         }
                     }
                     
@@ -677,7 +679,6 @@
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
                             throw new Exception( '00002900-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                            break;
                         }
                     }
                     

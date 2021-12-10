@@ -1435,7 +1435,7 @@ function getRequestTargetFromQuery(checkRequestKey,boolGenericMode){
         var checkTargetValue = getQuerystring(checkKey);
         // シンフォニークラス№が取得された場合
         if ( checkTargetValue.length > 0 ){
-            if( typeof boolGenericMode!==true ){
+            if( typeof boolGenericMode!=true ){
                 // 整数チェック
                 if( checkTargetValue.match( /^[-]?[0-9]+(\.[0-9]+)?$/ ) ){
                     retValue = checkTargetValue;

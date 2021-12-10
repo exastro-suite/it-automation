@@ -457,6 +457,29 @@
                 $varRetBody = $aryTempResult[0];
                 $aryUploadFile = $aryTempResult[1];
 
+                $aryColumns = $objTable->getColumns();
+                $FileUploadColumnCount = 0;
+
+                if(is_array($aryUploadFile) && array_key_exists(1,$aryUploadFile)){
+
+                    $aryUploadFileKeys = array_keys($aryUploadFile[1]);
+                    foreach($aryColumns as $strColumnId=>$objColumn){
+                    
+                        if(get_class($objColumn)==="FileUploadColumn"){
+                            $FileEncryptFunctionName = $objColumn->getFileEncryptFunctionName();
+                        
+                            if($FileEncryptFunctionName==="ky_file_encrypt"){
+                            
+                                for($i=1;$i<=count($aryUploadFile);$i++){
+                                    $aryUploadFile[$i][$aryUploadFileKeys[$FileUploadColumnCount]] = "";
+                                }
+                                
+                            }
+                            $FileUploadColumnCount++;
+                        }
+                    }
+                }
+
                 //JSON(ストリーム)向けの出力----
             }
             else if( $strOutputFileType == "csv" ){
@@ -484,7 +507,12 @@
                 if( $objCsvFormatter->getGeneValue("csvFieldRowHide",$refRetKeyExists) !== false ){
                     $objCsvFormatter->setGeneValue("csvFieldRowAdd",true);
                     $objCsvFormatter->setGeneValue("csvRecordShowAdd",false);
-                    $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId);
+                    
+                    if($strOutputDataType === "history"){
+                        $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId, null, null, 1);
+                    }else{
+                        $strCsvHeaderStream .= $objTable->getPrintFormat($strFormatterId);
+                    } 
                 }
                 $strCSVOutputFileType = $objCsvFormatter->getGeneValue("outputFileType",$refRetKeyExists);
                 if( $strCSVOutputFileType == "SafeCSV" ){
@@ -677,21 +705,11 @@
                     $objExcelFormatter->cashModeAdjust();
 
                     // ----XLSXファイル名の設定
-                    if( $strPrintTypeMode != "forDeveloper" ){
-                        if($strOutputDataType === "latest"){
-                            $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
-                        }
-                        else if($strOutputDataType === "history"){
-                            $strDLFilename = $objExcelFormatter->makeLocalFileNameHistory(".xlsx",$intUnixTime);
-                        }
+                    if($strOutputDataType === "latest"){
+                        $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
                     }
-                    else{
-                        if($strOutputDataType === "latest"){
-                            $strDLFilename = $objExcelFormatter->makeLocalFileName(".xlsx",$intUnixTime);
-                        }
-                        else if($strOutputDataType === "history"){
-                            $strDLFilename = $objExcelFormatter->makeLocalFileNameHistory(".xlsx",$intUnixTime);
-                        }
+                    else if($strOutputDataType === "history"){
+                        $strDLFilename = $objExcelFormatter->makeLocalFileNameHistory(".xlsx",$intUnixTime);
                     }
                     if( $strDLFilename === null ){
                         $intErrorType = 501;
@@ -882,7 +900,7 @@
 
                     if( $strToAreaType == "toStd" ){
                         // ----MIMEタイプの設定
-                        printHeaderForProvideFileStream($strDLFilename,"",null,array("ContentExcelType"=>"EXCEL2007"));
+                        printHeaderForProvideFileStream($strDLFilename,"",null);
                         // MIMEタイプの設定----
                     }
 
@@ -980,7 +998,11 @@ EOD;
 
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
-        return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile);
+        if(isset($num_rows)){
+          return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile,$num_rows);
+        }else{
+          return array($varRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg, $aryUploadFile);
+        }
     }
     
     //webroot(03,04,07)----

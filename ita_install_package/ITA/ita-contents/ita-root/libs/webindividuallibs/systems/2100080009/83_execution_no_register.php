@@ -86,6 +86,7 @@
             }
 
             // RBAC対応 ----
+            $root_dir_path = $g["root_dir_path"];
             if ( empty($root_dir_path) ){
                 $root_dir_temp = array();
                 $root_dir_temp = explode( "ita-root", dirname(__FILE__) );

@@ -222,6 +222,19 @@ Ansible（Legacy Role）代入値自動登録設定
 
             $c->getOutputType('json')->setVisible(false); //RestAPIでは隠す
 
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('MENU_ID_CLONE_02');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_MENU_LIST_JNL',
+                'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+                'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+                'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                )
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
+
             //登録更新関係から隠す----
             $cg->addColumn($c);
 
@@ -1126,12 +1139,12 @@ Ansible（Legacy Role）代入値自動登録設定
 
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                $tmpBoolWhiteKeyAdd = false;
 
                 if( is_array($varAddResultData) === true ){
                     if( array_key_exists(0,$varAddResultData) === true ){
                         if(in_array($varAddResultData[0], array("PARENT_VAR"))){
-                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
                         }else if(in_array($varAddResultData[0], array("NORMAL_VAR_0", "NORMAL_VAR_1"))){
                             $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                         }
@@ -1161,7 +1174,7 @@ Ansible（Legacy Role）代入値自動登録設定
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
 
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                $tmpBoolWhiteKeyAdd = false;
 
                 $strFxName = "";
 
@@ -1235,7 +1248,7 @@ Ansible（Legacy Role）代入値自動登録設定
                 //親変数かどうか、を調べる----
 
                 if( $intVarType == 1 ){
-                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
                 }else if( $intVarType === 0 ){
                     $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                 }
@@ -2013,12 +2026,12 @@ Ansible（Legacy Role）代入値自動登録設定
 
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                $tmpBoolWhiteKeyAdd = false;
 
                 if( is_array($varAddResultData) === true ){
                     if( array_key_exists(0,$varAddResultData) === true ){
                         if(in_array($varAddResultData[0], array("PARENT_VAR"))){
-                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
                         }else if(in_array($varAddResultData[0], array("NORMAL_VAR_0", "NORMAL_VAR_1"))){
                             $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                         }
@@ -2048,7 +2061,7 @@ Ansible（Legacy Role）代入値自動登録設定
                 $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
 
                 //条件付き必須なので、出現するときは、空白選択させない
-                $boolWhiteKeyAdd = false;
+                $tmpBoolWhiteKeyAdd = false;
 
                 $strFxName = "";
 
@@ -2121,7 +2134,7 @@ Ansible（Legacy Role）代入値自動登録設定
                 //親変数かどうか、を調べる----
 
                 if( $intVarType == 1 ){
-                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $boolWhiteKeyAdd, "", true);
+                    $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
                 }else if( $intVarType === 0 ){
                     $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                 }
@@ -2407,6 +2420,19 @@ Ansible（Legacy Role）代入値自動登録設定
     $c = new IDColumn('NULL_DATA_HANDLING_FLG',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-6000000"),'B_VALID_INVALID_MASTER','FLAG_ID','FLAG_NAME','', array('OrderByThirdColumn'=>'FLAG_ID'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-6000001"));
     $c->setHiddenMainTableColumn(true); //更新対象カラム
+
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('NULL_DATA_HANDLING_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_VALID_INVALID_MASTER_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
 
     $c->setRequired(false);
 

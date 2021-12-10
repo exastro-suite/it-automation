@@ -99,6 +99,8 @@ class TableControlAgent {
 
     protected $dispRestrictValue;
 
+	protected $noRegisterFlg;
+
 	public function __construct($strDBMainTableId, $strRIColumnId, $strRIColumnLabel="", $strDBJournalTableId=null, $arrayVariant=array()){
 		global $g;
 		if( $strRIColumnLabel == "" ){
@@ -123,6 +125,8 @@ class TableControlAgent {
 		$this->strDBJournalTableHiddenId = "";
 
 		$this->strRIColumnLabel = $strRIColumnLabel;
+
+		$this->noRegisterFlg = false;
 
 		$arrayVariant['TT_SYS_00_ROW_IDENTIFY_LABEL'] = $strRIColumnLabel;
 
@@ -269,6 +273,13 @@ class TableControlAgent {
 	}
 	public function setShareTableAlias($strAlias){
 		$this->shareTableAlias = $strAlias;
+	}
+
+	public function getNoRegisterFlg(){
+		return $this->noRegisterFlg;
+	}
+	public function setNoRegisterFlg($boolRegisterFlg){
+		$this->noRegisterFlg = $boolRegisterFlg;
 	}
 
 	//----main(UTN)テーブル関係
@@ -684,7 +695,7 @@ class TableControlAgent {
 		return $this->strPrintingTableId;
 	}
 
-	public function getPrintFormat($strFormatterId, $strIdOfTableTag=null, $strNumberForRI=null){
+	public function getPrintFormat($strFormatterId, $strIdOfTableTag=null, $strNumberForRI=null, $historyCsvFlg=null){
 		global $g;
 		$retStrVal = "";
 		$intControlDebugLevel01 = 250;
@@ -707,7 +718,11 @@ class TableControlAgent {
 			$this->setPrintingTableID($strNowPrintingId);
 			//瞬間存在値なのでセット----
 
-			$retStrVal = $this->aryObjFormatter[$strFormatterId]->format($strIdOfTableTag);
+			if($strFormatterId == "csv" && $historyCsvFlg == 1){
+				$retStrVal = $this->aryObjFormatter[$strFormatterId]->format($strIdOfTableTag, $historyCsvFlg);
+			}else{
+				$retStrVal = $this->aryObjFormatter[$strFormatterId]->format($strIdOfTableTag);
+			}
 
 			//----瞬間存在値なのでクリア
 			$this->setPrintingTableID(null);
@@ -811,7 +826,7 @@ class TableControlAgent {
 	}
 	//----シノニム
 	public function setRIColumnID($strColIdText){
-		return $this->setRowIdentifyColumnID($strColIdText);
+		$this->strRowIdentifyColumnId = $strColIdText;
 	}
 	//シノニム----
 
@@ -1041,6 +1056,7 @@ class TableControlAgent {
                                                                               $pkeyColumnName,
                                                                               $pkeyID);
                             $objQuery = $g['objDBCA']->sqlPrepare($sql);
+                            $error_msg1 = "[%s:%s]:DB Access Error. (SQL: %s)";
                             if($objQuery->getStatus()===false){
                                 $message = sprintf($error_msg1,basename(__FILE__),__LINE__,$sql);
                                 $message .= "\n" . $objQuery->getLastError();
@@ -1361,7 +1377,7 @@ class TableControlAgent {
         catch (Exception $e){
             $tmpErrMsgBody = $e->getMessage();
             dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5001",array($tmpErrMsgBody,$intErrorStatus)));
+            web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-5001",array($tmpErrMsgBody,$this->getSelfInfoForLog())));
             webRequestForceQuitFromEveryWhere(500,90410103);
             exit();
         }

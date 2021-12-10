@@ -753,7 +753,7 @@ function Filter1Tbl_search_control( exec_flag_var, value1 ){
                 // 自動開始制御タグがない場合は、システムエラー扱い、とする。
                 // システムエラーが発生しました。
                 alert( getSomeMessage("ITAWDCC20205") );
-                exit;
+                exec_flag_ret = false;
             }else{
                 if( objFCSL.value == 'on' ){
                     // 自動開始制御タグが存在し、オートフィルタ開始の抑制が働いている可能性がある
@@ -1156,7 +1156,7 @@ function buttonDisableControl(mode,strTid,objButton){
 }
 var cicdifinfoURL;
 function getcicdifinfoURL() {
-    const URL = '/common/common_getcicdifinfo.php';
+    const URL = '/common/common_getcicdifinfo.php?user_id=' + gLoginUserID;
     $.ajax({
       type: 'get',
       url: URL,

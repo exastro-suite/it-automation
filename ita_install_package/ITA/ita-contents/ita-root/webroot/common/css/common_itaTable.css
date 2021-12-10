@@ -90,7 +90,7 @@ box-sizing: border-box;
 padding: 3px;
 white-space: pre;
 line-height: 1.5;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #2B2B2B;
 }
 .itaTableBody th.diff,
@@ -151,7 +151,7 @@ background-image: none;
 max-width: 640px;
 overflow: hidden;
 text-overflow: ellipsis;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 }
 .likeHeader .tdInner {
 max-width: 320px;
@@ -408,7 +408,7 @@ overflow: hidden;
 min-width: 160px; height: 32px;
 padding: 0 8px;
 font-size: 12px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 text-overflow: ellipsis;
 white-space: nowrap;
 color: #DDD;
@@ -489,7 +489,7 @@ text-align: center;
 color: #AAA;
 cursor: pointer;
 font-size: 12px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 }
 .pagingList span:hover {
 color: #FFF;
@@ -724,7 +724,7 @@ background-color: #FFF;
 border-radius: 1em;
 font-weight: bold;
 font-size: 11px;
-font-family: Consolas;
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #F00;
 }
 
@@ -827,7 +827,7 @@ border-collapse: collapse;
 padding: 3px 6px;
 border: 1px solid #D4D4D4;
 line-height: 1.5;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #2B2B2B;
 }
 #ExecutionNakami th {

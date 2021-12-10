@@ -56,6 +56,7 @@ Terraform作業管理
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103840"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);    // 登録画面無し
 
 
     $table->setDBSortKey(array("EXECUTION_NO"=>"DESC"));

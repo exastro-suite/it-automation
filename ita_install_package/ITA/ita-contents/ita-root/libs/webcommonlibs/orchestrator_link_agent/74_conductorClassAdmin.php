@@ -513,6 +513,35 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
         }
         unset($objMLTxtVali);
 
+        #312
+        if( array_key_exists("NOTICE_INFO",$aryExecuteData) === true ){
+            if(is_array($aryExecuteData['NOTICE_INFO']) === true ){
+                //通知設定ありの場合
+                if( count( $aryExecuteData['NOTICE_INFO'] ) != 0 ){
+                    $steNoticeList = implode( ",", array_keys($aryExecuteData['NOTICE_INFO']) );
+
+                    //通知の存在チェック
+                    $retArray = $objOLA->getNoticeInfo( $steNoticeList );                
+                    if( count($retArray[4]) == 0 ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $intErrorType = 2;
+                        $tmpnoticeIDs = implode(",",  array_keys($retArray[2]) );
+                        $strErrMsg = $objMTS->getSomeMessage("ITABASEH-ERR-5733205",array($tmpnoticeIDs));//"選択された通知が不正です。(". $tmpnoticeIDs .")";
+
+                    }elseif( count($retArray[2]) != 0  ){
+                        // エラーフラグをON
+                        // 例外処理へ
+                        $intErrorType = 2;
+                        $tmpnoticeIDs = implode(",",  array_keys($retArray[2]) );
+                        $strErrMsg = $objMTS->getSomeMessage("ITABASEH-ERR-5733205",array($tmpnoticeIDs));//"選択された通知が不正です。(". $tmpnoticeIDs .")";
+
+                    }
+                }                
+            }
+        }
+
+
         if( $strErrMsg != "" ){
             // エラーフラグをON
             // 例外処理へ
@@ -568,6 +597,32 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
             } 
         }
 
+        //conditional-branchのステータス状態
+        foreach ($aryNodeData as $key => $value) {
+            if( $value['type'] == "conditional-branch" ){
+                foreach ( $value['terminal'] as $terminalname => $terminalnameinfo) {
+                    if( $terminalnameinfo['type'] == "out" ){
+                        if( isset($terminalnameinfo['condition']) ){                    
+                            if( $terminalnameinfo['condition'] == array() ){
+                                //"Conditional branch - Caseの設定が不正です。"
+                                $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170044");
+                            }
+                        }else{
+                                //"Conditional branch - Caseの設定が不正です。"
+                                $strErrMsg=$objMTS->getSomeMessage("ITABASEH-ERR-170044");      
+                        }
+                    }
+                }
+            }
+            if( $strErrMsg != "" ){
+                // エラーフラグをON
+                // 例外処理へ
+                $strErrStepIdInFx="00000300";
+                $intErrorType = 2;
+                    $strExpectedErrMsgBodyForUI = $strErrMsg;
+                throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+            } 
+        }
 
         //各ノードの備考
         foreach ($aryNodeData as $key => $value) {
@@ -911,6 +966,68 @@ function conductorClassRegisterExecute($fxVarsIntConductorClassId ,$fxVarsAryRec
 
             }
 
+            //ENDノード終了タイプ #467 
+            if( $aryDataForMovement['type'] == "end"  ){
+                if( $aryDataForMovement['END_TYPE'] != "" ){
+                    if( array_search($aryDataForMovement['END_TYPE'], array(5,7,11) ) === false ){
+                        $intErrorType = 2;
+                        $strErrStepIdInFx="00002800";
+                        $strExpectedErrMsgBodyForUI = $objMTS->getSomeMessage("ITABASEH-ERR-170039");#"ENDノード終了タイプが不正です。";
+                        throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                    }                    
+                }
+            }
+
+            //Status-File-Branchノード の条件(if/elseif)重複チェック/caseチェック #587
+            if( $aryDataForMovement['type'] == "status-file-branch"  ){
+                $arrConditionalVal = array();
+                $arrConditionalcaseNo = array();
+                $strChkMsg = "";
+
+                foreach ( $aryDataForMovement['terminal'] as $tmpterminalkey => $tmpArrterminal) {
+                    if( $tmpArrterminal['type'] == "out" && $tmpArrterminal['case'] != "else"){
+                        if( array_key_exists("condition", $tmpArrterminal ) ){
+                            
+                            $strconditionalval = $tmpArrterminal['condition'][0];
+                            $intconditionalCaseNo = $tmpArrterminal['case'];
+
+                            if( $strconditionalval != "" ){
+                                //if / elseif の値のcaseNoチェック
+                                if( array_search($intconditionalCaseNo, $arrConditionalcaseNo ) === false){
+                                    $arrConditionalcaseNo[] = $intconditionalCaseNo;
+                                }else{
+                                    $strChkMsg = $objMTS->getSomeMessage("ITABASEH-ERR-170040");
+                                    #"Status file branch - 条件分岐が不正です。";
+                                }   
+                                //if / elseif の値の重複チェック
+                                if( array_search($strconditionalval, $arrConditionalVal ) === false){
+                                    $arrConditionalVal[] = $strconditionalval;
+                                }else{
+                                     $strChkMsg = $objMTS->getSomeMessage("ITABASEH-ERR-170041");
+                                     #"Status file branch - 条件分岐(if/elseif)に重複した値が設定されています。";
+                                }
+                            }else{
+                                //if / elseif 条件無し
+                                $strChkMsg = $objMTS->getSomeMessage("ITABASEH-ERR-170042");
+                                #"Status file branch - 条件分岐(if/elseif)に値が設定されていません。";
+                            }
+
+                        }else{
+                            //if / elseif 条件無し
+                            $strChkMsg = $objMTS->getSomeMessage("ITABASEH-ERR-170042");
+                            #"Status file branch - 条件分岐(if/elseif)に値が設定されていません。";                         
+                        } 
+                    }
+                }
+
+                if( $strChkMsg != "" ){
+                    $intErrorType = 2;
+                    $strErrStepIdInFx="00002800";
+                    $strExpectedErrMsgBodyForUI = $strChkMsg ;
+                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                }                
+            }
+
         }
          //-バリデーションチェック(NODE毎詳細)---
 
@@ -1088,23 +1205,23 @@ function checkNodeUseCaseValidate($aryNodeData){
         "out"=>array('movement','call','call_s','parallel-branch','blank')
     );
     $arrNodeVariList['end']=array(
-        "in"=>array('movement','call','call_s','conditional-branch','merge','pause','blank'),
+        "in"=>array('movement','call','call_s','conditional-branch','merge','pause','blank','status-file-branch'),
         "out"=>array()
     );
     $arrNodeVariList['movement']=array(
-        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank'),
-        "out"=>array('end','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank')
+        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank','status-file-branch'),
+        "out"=>array('end','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank','status-file-branch')
     );
     $arrNodeVariList['call']=array(
-        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank'),
+        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank','status-file-branch'),
         "out"=>array('end','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank')
     );
     $arrNodeVariList['call_s']=array(
-        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank'),
+        "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank','status-file-branch'),
         "out"=>array('end','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank')
     );
     $arrNodeVariList['parallel-branch']=array(
-        "in"=>array('start','movement','call','call_s','conditional-branch','merge','pause','blank'),
+        "in"=>array('start','movement','call','call_s','conditional-branch','merge','pause','blank','status-file-branch'),
         "out"=>array('movement','call','call_s','blank')
     );
     $arrNodeVariList['conditional-branch']=array(
@@ -1116,12 +1233,18 @@ function checkNodeUseCaseValidate($aryNodeData){
         "out"=>array('end','movement','call','call_s','parallel-branch','pause','blank')
     );
     $arrNodeVariList['pause']=array(
-        "in"=>array('movement','call','call_s','parallel-branch','merge','blank'),
+        "in"=>array('movement','call','call_s','parallel-branch','merge','blank','status-file-branch'),
         "out"=>array('end','movement','call','call_s','parallel-branch','merge','blank')
     );
     $arrNodeVariList['blank']=array(
         "in"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank'),
         "out"=>array('start','movement','call','call_s','parallel-branch','conditional-branch','merge','pause','blank')
+    );
+
+    // #587
+    $arrNodeVariList['status-file-branch']=array(
+        "in"=>array('movement'),
+        "out"=>array('end','movement','call','call_s','parallel-branch','pause','blank')
     );
 
     try{

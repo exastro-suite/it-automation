@@ -70,43 +70,6 @@
             exit();
         }
         
-        // ----■ログイン成功後に表示させたいメニューのＩＤが、リクエストのGETクエリーに含まれているかをチェックする。
-        if( isset($_GET['no']) ){
-            $req_menu_id = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
-        }
-        // ■ログイン成功後に表示させたいメニューのＩＤが、リクエストのGETクエリーに含まれているかをチェックする。----
-        
-        $ASJTM_grp_id = "";
-
-        // メニューIDがクエリーで与えられているか判定
-        if( !isset($req_menu_id) ){
-            // アクセスログ出力(想定外エラー)
-            web_log($objMTS->getSomeMessage("ITAWDCH-MNU-1190094"));
-            
-            // 想定外エラー通知画面にリダイレクト
-            webRequestForceQuitFromEveryWhere(400,20310101);
-            exit();
-        }
-        else if( !is_numeric($req_menu_id) ){
-
-            if( isset($_GET['grp']) ){
-                $ASJTM_id = "";
-                $ASJTM_grp_id = sprintf("%010d", htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8"));
-            }
-            else{
-                // アクセスログ出力(想定外エラー)
-                web_log($objMTS->getSomeMessage("ITAWDCH-MNU-1190095"));
-
-                // 想定外エラー通知画面にリダイレクト
-                webRequestForceQuitFromEveryWhere(400,20310102);
-                exit();
-            }
-
-        }
-        else{
-            $ASJTM_id = addslashes($req_menu_id);
-        }
-        
         require_once ($root_dir_path . "/libs/webcommonlibs/web_auth_config.php");
         
         $auth = null;
@@ -179,8 +142,18 @@
     // 共通HTMLステートメントパーツ
     require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_html_statement.php");
 
+    $getCopy = $_GET;
+    $get_parameter = "";
+    $get_parameter_anp = "";
+    if("" != http_build_query($getCopy)){
+        $get_parameter = "?" . http_build_query($getCopy);
+        $get_parameter_anp = "&" . http_build_query($getCopy);
+    }
+    $get_parameter = str_replace('+', '%20', $get_parameter);
+    $get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
+
     $strErrShowBody = "";
-    $strActionUrl = "{$scheme_n_authority}/common/common_auth.php?login&grp={$ASJTM_grp_id}&no={$ASJTM_id}";
+    $strActionUrl = "{$scheme_n_authority}/common/common_auth.php?login{$get_parameter_anp}";
     if( empty($err_msg) ){
         //----パスワード変更に成功した
         $strErrShowBody .= "<p>{$objMTS->getSomeMessage("ITAWDCH-MNU-1190016")}</p><br>";
@@ -189,16 +162,7 @@
     else{
         //----パスワード変更に失敗した
         $strErrShowBody .= $err_msg;
-        if($auth->checkAuth()){
-            //----ログインしている場合
-            $strActionUrl = "{$scheme_n_authority}/common/common_change_password_form.php?grp={$ASJTM_grp_id}&no={$ASJTM_id}";
-            //ログインしている場合----
-        }
-        else{
-            //----ログインしていない場合
-            $strActionUrl = "{$scheme_n_authority}/common/common_change_password_form.php?grp={$ASJTM_grp_id}&no={$ASJTM_id}";
-            //ログインしていない場合----
-        }
+        $strActionUrl = "{$scheme_n_authority}/common/common_change_password_form.php{$get_parameter}";
         $strExpiry = "";
         if( isset($_POST['expiry'] )){
             $strExpiry = htmlspecialchars($_POST['expiry'], ENT_QUOTES, "UTF-8");

@@ -52,7 +52,7 @@
     require_once($g['root_dir_path'] . "/webconfs/systems/2100180002_loadTable.php");
     $objTable1 = loadTable($symphony_class_dir,$aryTmpVariant1,$aryTmpSetting1);
 
-    $tmpRetArray = getFilterCommandArea($objTable1,$aryTmpVariant1,$aryTmpSetting1,"filter_table","Filter1Tbl","FilterConditionTableFormatter");
+    $tmpRetArray = getFilterCommandArea($objTable1,$aryTmpVariant1,$aryTmpSetting1,"filter_table","Filter1Tbl");
     $strHtmlFilter1Commnad = $tmpRetArray[1];
     //シンフォニー用----
 
@@ -64,7 +64,7 @@
     require_once($g['root_dir_path'] . "/webconfs/systems/2100000304_loadTable.php");
     $objTable2 = loadTable($op_list_dir,$aryTmpVariant2,$aryTmpSetting2);
     
-    $tmpRetArray = getFilterCommandArea($objTable2,$aryTmpVariant2,$aryTmpSetting2,"filter_table","Filter2Tbl","FilterConditionTableFormatter");
+    $tmpRetArray = getFilterCommandArea($objTable2,$aryTmpVariant2,$aryTmpSetting2,"filter_table","Filter2Tbl");
     $strHtmlFilter2Commnad = $tmpRetArray[1];
     //オペレーション用----
     
@@ -78,6 +78,7 @@
     $timeStamp_itabase_symphony_class_info_access_js=filemtime("$root_dir_path/webroot/common/javascripts/itabase_symphony_class_info_access.js");
 
 print <<< EOD
+    <script>const gLoginUserID = {$g['login_id']};</script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/common/javascripts/editor_conductor.js?{$timeStamp_editor_conductor_js}"></script>
@@ -417,8 +418,10 @@ EOD;
                   <li class="editor-tab-menu-item" data-tab="conditional-branch">Conditional branch</li>
                   <li class="editor-tab-menu-item" data-tab="parallel-branch">Parallel branch</li>
                   <li class="editor-tab-menu-item" data-tab="merge">Parallel merge</li>
+                  <li class="editor-tab-menu-item" data-tab="status-file-branch">Status file branch</li>
                   <li class="editor-tab-menu-item" data-tab="call">Conductor call</li>
                   <li class="editor-tab-menu-item" data-tab="call_s">Symphony call</li>
+                  <li class="editor-tab-menu-item" data-tab="end">End</li>
                 </ul>
               </div><!-- /.editor-tab-menu -->
 
@@ -431,11 +434,16 @@ EOD;
                       <tbody>
                         <tr>
                           <th class="panel-th">ID :</th>
-                          <td class="panel-td"><span id="conductor-class-id" class="panel-span"></span></td>
+                          <td class="panel-td" colspan="2"><span id="conductor-class-id" class="panel-span"></span></td>
                         </tr>
                         <tr>
                           <th class="panel-th">Name :</th>
-                          <td class="panel-td"><span id="conductor-class-name-view" class="panel-span"></span></td>
+                          <td class="panel-td" colspan="2"><span id="conductor-class-name-view" class="panel-span"></span></td>
+                        </tr>
+                        <tr>
+                          <th class="panel-th">Notice :</th>
+                          <td class="panel-td"><span id="conductor-notice-status" class="panel-span"></span></td>
+                          <td class="panel-td panel-td-button"><button id="conductor-notice-select" class="panel-button">Select</button></td>
                         </tr>
                       </tbody>
                     </table>
@@ -491,6 +499,26 @@ EOD;
                   </div>
                 </div>
                 
+                <!-- End -->
+                <div id="end" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <table class="panel-table">
+                      <tbody>
+                        <tr>
+                          <th class="panel-th">End status :</th>
+                          <td class="panel-td">
+                            <span id="end-status" class="panel-span"></span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Note</div>
+                      <span id="end-note" class="panel-note panel-span"></span>
+                    </div>
+                  </div>
+                </div>
+                
                 <!-- Function -->
                 <div id="function" class="editor-tab-body">
                   <div class="editor-tab-body-inner">
@@ -535,6 +563,22 @@ EOD;
                     <div class="panel-group">
                       <div class="panel-group-title">Note</div>
                       <span id="merge-note" class="panel-note panel-span"></span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- status-file-branch -->
+                <div id="status-file-branch" class="editor-tab-body">
+                  <div class="editor-tab-body-inner">
+                    <div id="status-file-case-move">
+                    <table id="status-file-case-list" class="panel-table ">
+                      <tbody>
+                      </tbody>
+                    </table>
+                    </div>
+                    <div class="panel-group">
+                      <div class="panel-group-title">Note</div>
+                      <span id="status-file-note" class="panel-note panel-span"></span>
                     </div>
                   </div>
                 </div>

@@ -40,9 +40,30 @@ $ary["ITACICDFORIAC-MNU-1200010701"] = "Input the Git user.
 The Uses is an required item when \"Private\" is selected for Visibility. 
 [Maximum length] 128 Bytes";
 $ary["ITACICDFORIAC-MNU-1200010800"] = "Password";
-$ary["ITACICDFORIAC-MNU-1200010801"] = "Input the Git password. 
-The Git password is an required item when \"Private\" is selected for Visibility. 
-[Maximum length] 128 Bytes";
+$ary["ITACICDFORIAC-MNU-1200010801"] = "Please input the password needed when running the Git clone command.
+The password is required if the visibility type is set to \"Private\". 
+[Max size] 128 bytes
+Please note that password authentication was disabled by GitHub the 13th of August 2021.
+https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/
+If you are using GitHub with password authentication, you will need to create and enter your own personal access token for the Git account information password.
+Please see the following URL for how to create a personal access token.
+https://docs.github.com/ja/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token";
+$ary["ITACICDFORIAC-MNU-1200010810"]   = "ssh connection information";
+$ary["ITACICDFORIAC-MNU-1200010820"]   = "Password";
+$ary["ITACICDFORIAC-MNU-1200010821"]   = "Please input the Linux user and password needed in order to run Git clone command.
+The password is not required if you have ssh password authentication selected.
+[Max length] 128 bytes";
+$ary["ITACICDFORIAC-MNU-1200010830"]   = "Passphrase";
+$ary["ITACICDFORIAC-MNU-1200010831"]   = "Please input the passphrase set to the secret keyfile used when running the Git clone command.
+The passphrase is not required if you have ssh key certificate (with passphrase) selected.
+[Max length] 128 bytes";
+$ary["ITACICDFORIAC-MNU-1200010840"]   = "Connection parameters";
+$ary["ITACICDFORIAC-MNU-1200010841"]   = "Configures the parameters that will be set to the \"GIT_SSH_COMMAND\" environment variables when running the Git clone command.
+The \"GIT_SSH_COMMAND\" is an environment variable that can be configured in Git version 2.3 or later.If the ITA server has a Git version earlier than 2.3 installed, the configured parameter will be deactivated.
+\"GIT_SSH_COMMAND\" is set to the following parameter by default.
+UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+The configured parameter is added on the end.
+[Max length] 512 bytes";
 $ary["ITACICDFORIAC-MNU-1200010900"] = "Proxy";
 $ary["ITACICDFORIAC-MNU-1200011000"] = "Address";
 $ary["ITACICDFORIAC-MNU-1200011001"] = "If you are using a Proxy server, please enter the Proxy server address.
@@ -78,7 +99,7 @@ $ary["ITACICDFORIAC-MNU-1200020000"] = "The file(s) registered to the Remote rep
 The files displayed can be downloaded as a single file.";
 $ary["ITACICDFORIAC-MNU-1200020001"] = "Item number";
 $ary["ITACICDFORIAC-MNU-1200020002"] = "Remote repository file";
-$ary["ITACICDFORIAC-MNU-1200020003"] = "It is possible to maintain (view) the files registered to the Remote Repository.";
+$ary["ITACICDFORIAC-MNU-1200020003"] = "Remote repository file";
 $ary["ITACICDFORIAC-MNU-1200020100"] = "Remote Repository name";
 $ary["ITACICDFORIAC-MNU-1200020101"] = "[Source data]Remote Repositoryt.";
 $ary["ITACICDFORIAC-MNU-1200020200"] = "File path";

@@ -14,54 +14,19 @@
 //   limitations under the License.
 //
 
-    // ----■ログイン成功後に表示させたいメニューのＩＤが、リクエストのGETクエリーに含まれているかをチェックする。
-    if( isset($_GET['no']) ){
-        $req_menu_id = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
-    }
+$getCopy = $_GET;
+unset($getCopy['login']);
+$get_parameter = "";
+if("" != http_build_query($getCopy)){
+    $get_parameter = "?" . http_build_query($getCopy);
+}
+$get_parameter = str_replace('+', '%20', $get_parameter);
 
-    $ASJTM_grp_id = "";
-    if( isset($_GET['grp']) ){
-        $ASJTM_grp_id = htmlspecialchars(sprintf("%010d", $_GET['grp']), ENT_QUOTES, "UTF-8");
-    }
+if(array_key_exists("no", $getCopy)){
+    $ASJTM_representative_file_name = "/default/menu/01_browse.php{$get_parameter}";
+}
+else{
+    $ASJTM_representative_file_name = "/default/mainmenu/01_browse.php{$get_parameter}";
+}
 
-    if( !isset($req_menu_id) ){
-        // ----含まれていない。
-
-        // アクセスログ出力(想定外エラー)
-        web_log($objMTS->getSomeMessage("ITAWDCH-ERR-18"));
-        
-        // 想定外エラー通知画面にリダイレクト
-        webRequestForceQuitFromEveryWhere(400,10910101);
-        exit();
-
-        //含まれていない。----
-    }
-    else if("" == $req_menu_id){
-
-        if( isset($_GET['grp']) ){
-            $ASJTM_id = "";
-        }
-        else{
-            // ----■リクエストのGETクエリーに含まれていた、ログイン成功後に表示させたいメニューのＩＤが、数字又は数値形式の文字列ではなかった。
-
-            // アクセスログ出力(想定外エラー)
-            web_log($objMTS->getSomeMessage("ITAWDCH-ERR-19"));
-            
-            // 想定外エラー通知画面にリダイレクト
-            webRequestForceQuitFromEveryWhere(400,10910102);
-            exit();
-
-            // リクエストのGETクエリーに含まれていた、ログイン成功後に表示させたいメニューのＩＤが、数字又は数値形式の文字列ではなかった。■----
-        }
-    }
-    else{
-        $ASJTM_id = sprintf("%010d", addslashes($req_menu_id));
-    }
-
-    if("" !== $ASJTM_id){
-        $ASJTM_representative_file_name = "/default/menu/01_browse.php?no=" . $ASJTM_id;
-    }
-    else{
-        $ASJTM_representative_file_name = "/default/mainmenu/01_browse.php?grp=" . $ASJTM_grp_id;
-    }
 ?>

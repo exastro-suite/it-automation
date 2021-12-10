@@ -98,7 +98,7 @@ Terraform作業パターン詳細
 
             $strQuery = "UPDATE A_PROC_LOADED_LIST "
                        ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                       ."WHERE ROW_ID in (2100080001) ";
+                       ."WHERE ROW_ID in (2100080001,2100080002) ";
 
             $aryForBind = array();
 

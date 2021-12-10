@@ -40,7 +40,7 @@
 //      UpdateSyncStatusRecode
 //      UpdateRepoListSyncStatus
 //      UpdateRepoListRecode
-//      getPasswordAuthType
+//      getAuthType
 //
 ///////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////
@@ -314,9 +314,13 @@
 
         $cloneRepoDir = $LFCobj->getLocalCloneDir($RepoId);
         $libPath      = $LFCobj->getLocalShellDir();
-        $Gitobj = new ControlGit($RepoId, $RepoListRow['REMORT_REPO_URL'], $RepoListRow['BRANCH_NAME'], $cloneRepoDir, $RepoListRow['GIT_USER'],  $RepoListRow['GIT_PASSWORD'], $libPath, $objMTS, $RepoListRow['RETRAY_COUNT'], $RepoListRow['RETRAY_INTERVAL'], $RepoListRow['PROXY_ADDRESS'], $RepoListRow['PROXY_PORT'], $GitCmdRsltParsAry);
+        $Gitobj = new ControlGit($RepoId, $RepoListRow['REMORT_REPO_URL'], $RepoListRow['BRANCH_NAME'], $cloneRepoDir, $RepoListRow['GIT_USER'],  $RepoListRow['GIT_PASSWORD'], $RepoListRow['SSH_PASSWORD'], $RepoListRow['SSH_PASSPHRASE'], $RepoListRow['SSH_EXTRA_ARGS'], $libPath, $objMTS, $RepoListRow['RETRAY_COUNT'], $RepoListRow['RETRAY_INTERVAL'], $RepoListRow['PROXY_ADDRESS'], $RepoListRow['PROXY_PORT'], $GitCmdRsltParsAry);
 
         try {
+            // Gitのバージョンをチェックしssh接続パラメータを設定する。
+            $ret = LocalsetSshExtraArgs();
+
+            // 戻り値チェック不要
             // ローカルクローンディレクトリ有無判定
             $ret = $Gitobj->LocalCloneDirCheck();
             if($ret === false) {
@@ -888,8 +892,8 @@
 
         global $objMTS;
 
-        // Password認証か判定
-        $AuthTypeName = getPasswordAuthType($RepoListRow);
+        // 認証方式か判定
+        $AuthTypeName = getAuthType($RepoListRow);
 
         $ret = $Gitobj->GitPull($pullResultAry,$AuthTypeName,$UpdateFlg);
         if($ret !== true) {
@@ -994,8 +998,8 @@
             require ($root_dir_path . $log_output_php );
         }
 
-        // Password認証か判定
-        $AuthTypeName = getPasswordAuthType($RepoListRow);
+        // 認証方式か判定
+        $AuthTypeName = getAuthType($RepoListRow);
 
         $ret = $Gitobj->GitClone($AuthTypeName);
         if($ret !== true) {
@@ -1092,8 +1096,8 @@
 
         global $objMTS;
 
-        // Password認証か判定
-        $AuthTypeName = getPasswordAuthType($RepoListRow);
+        // 認証方式か判定
+        $AuthTypeName = getAuthType($RepoListRow);
 
         // ローカルクローンのブランチ確認
         $ret = $Gitobj->GitBranchChk($AuthTypeName);
@@ -1837,21 +1841,33 @@
         }
         return true;
     }
-    function getPasswordAuthType($RepoListRow) {
+    function getAuthType($RepoListRow) {
         // httpsの場合に認証が必要か判定
         switch($RepoListRow["GIT_PROTOCOL_TYPE_ROW_ID"]) {
         case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_HTTPS:
             switch($RepoListRow["GIT_REPO_TYPE_ROW_ID"]) {
             case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PUBLIC:
-                $PassAuth = "nopass";
+                $PassAuth = "httpNoUserAuth";
                 break;
             case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PRIVATE:
-                $PassAuth = "pass";
+                $PassAuth = "httpUserAuth";
+                break;
+            default:
+                $PassAuth = "httpNoUserAuth";
                 break;
             }
             break;
-        default:
-            $PassAuth = "nopass";
+        case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_LOCAL:
+            $PassAuth = "httpNoUserAuth";
+            break;
+        case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_PASS:
+            $PassAuth = "sshPassAuth";
+            break;
+        case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_KEY:
+            $PassAuth = "sshKeyAuthPass";
+            break;
+        case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_KEY_NOPASS:
+            $PassAuth = "sshKeyAuthNoPass";
             break;
         }
         return $PassAuth;
@@ -2144,5 +2160,45 @@
             }
         }
         return true;
+    }
+    function LocalsetSshExtraArgs() {
+        global $cmDBobj;
+        global $DBobj;
+        global $LFCobj;
+        global $Gitobj;
+        global $error_flag;
+        global $warning_flag;
+
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+
+        global $objMTS;
+
+        // Gitのバージョンをチェックしssh接続パラメータを設定する。
+        $ret = $Gitobj->setSshExtraArgs();
+        if($ret === false) {
+            // 異常フラグON
+            $error_flag = 1;
+
+            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1033");
+
+            $logaddstr = $Gitobj->GetLastErrorMsg();
+            $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
+
+            // UIに表示するメッセージ
+            $UIDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1033");
+            $UIDisplayMsg .= "\n" . $Gitobj->GetGitCommandLastErrorMsg();
+
+            // 戻り値編集
+            $retary  = array();
+            $RetCode = false;
+            $retary = makeReturnArray($RetCode,$FREE_LOG,$UIDisplayMsg);
+            throw new Exception($retary);
+        } else {
+            return $ret;
+        }
     }
 ?>

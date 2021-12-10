@@ -279,7 +279,7 @@ function conductorRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecep
         }
         $tmpErrMsgBody = $e->getMessage();
         dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-        web_log($tmpErrMsgBody, $intControlDebugLevel01);
+        web_log($tmpErrMsgBody." ".$intControlDebugLevel01);
         if( $intResultStatusCode === null ) $intResultStatusCode = 500;
         if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
         if( 500 <= $intErrorType ) $strSysErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
@@ -405,7 +405,9 @@ function conductorJsonGetTitle(){
                                  'id' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305040"),
                                  'note' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305090"),
                                  'LUT4U' => $g['objMTS']->getSomeMessage("ITAWDCH-STD-18011"),
-                                 'ACCESS_AUTH' => $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300001")."/".$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300002"));
+                                 'ACCESS_AUTH' => $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300001")."/".$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1300002"),
+                                 'NOTICE_INFO' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305280"),
+                               );
 
   $arr_json['config'] = array('editorVersion' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305100"),
                               'nodeNumber' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305110"),
@@ -415,6 +417,7 @@ function conductorJsonGetTitle(){
   $arr_json['node'] = array('h' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305140"),
                             'id' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-308001"),
                             'type' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305150"),
+                            'END_TYPE' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-305270"), //終了種別 #467
                             'PATTERN_ID' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-209105"),
                             'ORCHESTRATOR_ID' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-308005"),
                             'Name' => $g['objMTS']->getSomeMessage("ITABASEH-MNU-108020"),
@@ -506,7 +509,9 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
                                  'id' => $intConductorClassId,
                                  'note' => $arrConductorData['DESCRIPTION'],
                                  'LUT4U' => $strLT4UBody,
-                                 'ACCESS_AUTH' => $accessAuth);
+                                 'ACCESS_AUTH' => $accessAuth,
+                                 'NOTICE_INFO' => $arrConductorData['NOTICE_INFO'],
+                               );
 
     $intNodeNumber=0;
     $intTerminalNumber=0;
@@ -525,6 +530,7 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
                                   'id' => '',
                                   'terminal' => array(),
                                   'type' => '',
+                                  'END_TYPE' => '', // 終了タイプ #467
                                   'PATTERN_ID' => '',
                                   'ORCHESTRATOR_ID' => '',
                                   'Name' => '',
@@ -555,6 +561,18 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
         if( $value['NODE_TYPE_ID'] == 9) $arr_json[$value['NODE_NAME']]['type']="blank";
         if( $value['NODE_TYPE_ID'] == 10) $arr_json[$value['NODE_NAME']]['type']="call_s";
 
+        //#587
+        if( $value['NODE_TYPE_ID'] == 11) $arr_json[$value['NODE_NAME']]['type']="status-file-branch";
+
+        //END個別 #467
+        if( $value['NODE_TYPE_ID'] == 2) {
+            if( isset($value['END_TYPE']) === true ){
+                $arr_json[$value['NODE_NAME']]['END_TYPE']=$value['END_TYPE'];
+            }else{
+                $arr_json[$value['NODE_NAME']]['END_TYPE']="5";
+            }
+        }
+        
         //Movement個別
         if( $value['NODE_TYPE_ID'] == 3) {
             if( isset( $aryPatternList[$value['PATTERN_ID']] ) ){
@@ -736,7 +754,15 @@ function convertConductorClassJson($intConductorClassId,$strDdisuse,$getmode="")
                                                 'x' => '',
                                                 'y' => '');
 
-            if($tval['CASE_NO'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case']=$tval['CASE_NO'];
+            if( $tval['CASE_NO'] != "" ){
+                $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case']=$tval['CASE_NO'];
+
+                //#587
+                if( $tval['CASE_NO'] == "0" && $value['NODE_TYPE_ID'] == 11 ){
+                    $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['case'] = "else";
+                }
+
+            }
             if($tval['LINE_NAME'] != "" )$arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['edge']=$tval['LINE_NAME'];
             $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['id']=$tval['TERMINAL_CLASS_NAME'];
             $arr_json[$value['NODE_NAME']]['terminal'][$tval['TERMINAL_CLASS_NAME']]['targetNode']=$tval['CONNECTED_NODE_NAME'];

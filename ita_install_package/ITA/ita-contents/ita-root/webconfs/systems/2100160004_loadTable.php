@@ -51,16 +51,52 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c01 = new IDColumn('CREATE_MENU_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102405"),'F_CREATE_MENU_INFO','CREATE_MENU_ID','MENU_NAME','');
     $c01->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102406"));//エクセル・ヘッダでの説明
     $c01->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('CREATE_MENU_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_CREATE_MENU_INFO_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'CREATE_MENU_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c01->setOutputType('print_journal_table',$objOT);
 
     // ステータス
     $c02 = new IDColumn('STATUS_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102407"),'F_CM_STATUS_MASTER','STATUS_ID','STATUS_NAME','',array('OrderByThirdColumn'=>'STATUS_ID'));
     $c02->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102408"));//エクセル・ヘッダでの説明
     $c02->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('STATUS_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_CM_STATUS_MASTER_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'STATUS_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'STATUS_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c02->setOutputType('print_journal_table',$objOT);
 
     // メニュー作成タイプ
     $c05 = new IDColumn('MENU_CREATE_TYPE_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102413"),'F_MENU_CREATE_TYPE','MENU_CREATE_TYPE_ID','MENU_CREATE_TYPE_NAME','',array('OrderByThirdColumn'=>'MENU_CREATE_TYPE_ID'));
     $c05->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102414"));//エクセル・ヘッダでの説明
     $c05->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENU_CREATE_TYPE_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_MENU_CREATE_TYPE_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_CREATE_TYPE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_CREATE_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c05->setOutputType('print_journal_table',$objOT);
 
     // メニュー資材
     $c03 = new FileUploadColumn('FILE_NAME',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102409"));

@@ -156,6 +156,22 @@ callback.prototype = {
        // 正常の場合
        if( ary_result[0] == "000" ){
            menuEditorArray.selectPulldownList = JSON.parse(ary_result[2]);
+           selectReferenceSheetType3List();
+       }
+        // システムエラーの場合
+        else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+    },
+    /////////////////////
+    // callback: パラメータシート参照リスト取得(メニューのみ)
+    /////////////////////
+    selectReferenceSheetType3List : function(result){
+       var ary_result = getArrayBySafeSeparator(result);
+
+       // 正常の場合
+       if( ary_result[0] == "000" ){
+           menuEditorArray.selectReferenceSheetType3List = JSON.parse(ary_result[2]);
             if ( menuEditorTargetID === '') {
               menuEditor( menuEditorMode, menuEditorArray );
             } else {
@@ -190,8 +206,23 @@ callback.prototype = {
        // 正常の場合
        if( ary_result[0] == "000" ){
             menuEditorArray.referenceItemList = JSON.parse(ary_result[2]);
-            menuEditor( menuEditorMode, menuEditorArray );
+            selectReferenceSheetType3ItemData(menuEditorArray.selectMenuInfo.item);
        }
+        // システムエラーの場合
+        else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+    },
+    /////////////////////
+    // callback: パラメータシート参照の項目からメニューIDを取得
+    /////////////////////
+    selectReferenceSheetType3ItemData : function(result){
+        var ary_result = getArrayBySafeSeparator(result);
+        // 正常の場合
+        if( ary_result[0] == "000" ){
+            menuEditorArray.referenceSheetType3ItemData = JSON.parse(ary_result[2]);
+            menuEditor( menuEditorMode, menuEditorArray );
+        }
         // システムエラーの場合
         else{
             window.alert(getSomeMessage("ITAWDCC90101"));
@@ -260,6 +291,20 @@ function selectPulldownList(){
 /////////////////////
 function selectReferenceItemList(itemArray){
     proxy.selectReferenceItemList(itemArray);
+}
+
+/////////////////////
+// パラメータシート参照リスト取得(メニューのみ)
+/////////////////////
+function selectReferenceSheetType3List(){
+    proxy.selectReferenceSheetType3List();
+}
+
+/////////////////////
+// パラメータシート参照の項目からメニューIDを取得
+/////////////////////
+function selectReferenceSheetType3ItemData(itemArray){
+    proxy.selectReferenceSheetType3ItemData(itemArray);
 }
 
 /////////////////////

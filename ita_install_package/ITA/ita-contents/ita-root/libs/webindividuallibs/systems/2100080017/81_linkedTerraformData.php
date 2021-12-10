@@ -94,14 +94,14 @@ class  terraformEnerpriseData {
             $HtmlBody .=
 <<<EOD
 <div class="fakeContainer_Filter1Print" style="margin-top:20px; margin-bottom:20px">
-    <div id="Mix1_1_itaTable" class="itaTable def tableSticky">
-        <div id="Mix1_1_itaTableBody" class="itaTableBody scrollRight">
-            <div class="tableScroll">
-                <table id="Mix1_1">
-                    <tbody>
-                        <tr class="defaultExplainRow">
-                            <th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix1_1', 0 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th1}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix1_1', 1 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th2}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix1_1', 2 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th3}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1"><span class="generalBold">{$th4}</span></th>
-                        </tr>
+    <table id="Mix1_1">
+        <tbody>
+            <tr class="defaultExplainRow">
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106500')}" onclick="tableSort(1, this, 'Mix1_1', 0 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th1}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106460')}" onclick="tableSort(1, this, 'Mix1_1', 1 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th2}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106410')}" onclick="tableSort(1, this, 'Mix1_1', 2 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th3}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106490')}"><span class="generalBold">{$th4}</span></th>
+            </tr>
 EOD;
             $count = 1;
             foreach($organizationListData as $data){
@@ -111,6 +111,8 @@ EOD;
                 $registerStatus = "";
                 $registeredFlag = false;
                 $disuseFlag = false;
+                $disabledFlag = true;
+                $disabled = "";
 
                 //ITAに登録されているかどうかをチェック
                 foreach($itaOrganizationList as $itaOrganization){
@@ -127,10 +129,14 @@ EOD;
                     if($disuseFlag == true){
                         $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106350'); //廃止済み
                     }else{
+                        $disabledFlag = false;
                         $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106340'); //登録済み
                     }
                 }else{
                     $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106360'); //未登録
+                }
+                if ($disabledFlag) {
+                    $disabled = "disabled=true";
                 }
 
                 $HtmlBody .=
@@ -139,7 +145,7 @@ EOD;
                             <td id="{$cell_print}_1">{$organizationName}</td>
                             <td id="{$cell_print}_2">{$organizationEmail}</td>
                             <td id="{$cell_print}_3">{$registerStatus}</td>
-                            <td id="{$cell_print}_4"><input class="deleteBtnInTbl" type="button" value='{$td1}' onclick="deleteOrganization(this, '{$organizationName}')"></td>
+                            <td id="{$cell_print}_4"><input class="deleteBtnInTbl" type="button" {$disabled} value='{$td1}' onclick="deleteOrganization(this, '{$organizationName}')"></td>
                         </tr>
 EOD;
                 $count++;
@@ -147,11 +153,8 @@ EOD;
 
             $HtmlBody .=
 <<<EOD
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+        </tbody>
+    </table>
 </div>
 EOD;
         }
@@ -254,20 +257,24 @@ EOD;
             $th2 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106160'); //Workspace Name
             $th3 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106170'); //Terraform Version
             $th4 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106180'); //ITAの登録状態
-            $th5 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106190'); //削除
-            $td1 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106310'); //削除
+            $th5 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106370'); //destroy
+            $th6 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106190'); //削除
+            $td1 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106370'); //destroy
+            $td2 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106310'); //削除
 
             $HtmlBody .=
 <<<EOD
 <div class="fakeContainer_Filter1Print" style="margin-top:20px; margin-bottom:20px">
-    <div id="Mix2_1_itaTable" class="itaTable def tableSticky">
-        <div id="Mix2_1_itaTableBody" class="itaTableBody scrollRight">
-            <div class="tableScroll">
-                <table id="Mix2_1">
-                    <tbody>
-                        <tr class="defaultExplainRow">
-                            <th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix2_1', 0 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th1}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix2_1', 1 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th2}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix2_1', 2 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th3}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix2_1', 3 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th4}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1"><span class="generalBold">{$th5}</span></th>
-                        </tr>
+    <table id="Mix2_1">
+        <tbody>
+            <tr class="defaultExplainRow">
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106500')}" onclick="tableSort(1, this, 'Mix2_1', 0 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th1}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106510')}" onclick="tableSort(1, this, 'Mix2_1', 1 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th2}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106520')}" onclick="tableSort(1, this, 'Mix2_1', 2 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th3}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106410')}" onclick="tableSort(1, this, 'Mix2_1', 3 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th4}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106450')}"><span class="generalBold">{$th5}</span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106440')}"><span class="generalBold">{$th6}</span></th>
+            </tr>
 
 EOD;
             $count = 1;
@@ -275,16 +282,19 @@ EOD;
                 if(!empty($workspaceData)){
                     foreach($workspaceData as $data){
                         $cell_print = "cell_print_table_" . $count;
+                        $workspaceID = "";
                         $workspaceName = $data['attributes']['name'];
                         $terraformVersion = $data['attributes']['terraform-version'];
                         $registerStatus = "";
                         $registeredFlag = false;
                         $disuseFlag = false;
+                        $disabledFlag = true;
 
                         //ITAに登録されているかどうかをチェック
                         foreach($itaWorkspaceList as $itaWorkspace){
                             if($itaWorkspace['ORGANIZATION_NAME'] == $organizationName && $itaWorkspace['WORKSPACE_NAME'] == $workspaceName){
                                 $registeredFlag = true;
+                                $workspaceID = $itaWorkspace["WORKSPACE_ID"];
                                 if($itaWorkspace['DISUSE_FLAG'] == 1){
                                     $disuseFlag = true;
                                 }
@@ -296,10 +306,16 @@ EOD;
                             if($disuseFlag == true){
                                 $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106350'); //廃止済み
                             }else{
+                                $disabledFlag = false;
                                 $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106340'); //登録済み
                             }
                         }else{
                             $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106360'); //未登録
+                        }
+
+                        $disabled = "";
+                        if ($disabledFlag) {
+                            $disabled = "disabled=true";
                         }
 
                         $HtmlBody .=
@@ -309,7 +325,8 @@ EOD;
                                     <td id="{$cell_print}_2">{$workspaceName}</td>
                                     <td id="{$cell_print}_2">{$terraformVersion}</td>
                                     <td id="{$cell_print}_3">{$registerStatus}</td>
-                                    <td id="{$cell_print}_4"><input class="deleteBtnInTbl" type="button" value='{$td1}' onclick="deleteWorkspace(this, '{$organizationName}', '{$workspaceName}')"></td>
+                                    <td id="{$cell_print}_4"><input class="destroyBtnInTbl" type="button" value='{$td1}' onclick="destroyWorkspaceInsRegister(this, '{$workspaceID}', '{$workspaceName}')" {$disabled}></td>
+                                    <td id="{$cell_print}_5"><input class="deleteBtnInTbl" type="button" value='{$td2}' onclick="deleteWorkspace(this, '{$organizationName}', '{$workspaceName}')" {$disabled}></td>
                                 </tr>
 EOD;
                         $count++;
@@ -319,11 +336,8 @@ EOD;
 
             $HtmlBody .=
 <<<EOD
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+        </tbody>
+    </table>
 </div>
 EOD;
         }
@@ -429,19 +443,20 @@ EOD;
             $th4 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106230'); //Policy Codeをダウンロード
             $th5 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106240'); //削除
             $td1 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106330'); //ダウンロード
-            $td2 =  $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106310'); //削除
+            $td2 = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106310'); //削除
 
             $HtmlBody .=
 <<<EOD
 <div class="fakeContainer_Filter1Print" style="margin-top:20px; margin-bottom:20px">
-    <div id="Mix3_1_itaTable" class="itaTable def tableSticky">
-        <div id="Mix3_1_itaTableBody" class="itaTableBody scrollRight">
-            <div class="tableScroll">
-                <table id="Mix3_1">
-                    <tbody>
-                        <tr class="defaultExplainRow">
-                            <th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix3_1', 0 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th1}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix3_1', 1 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th2}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1" onclick="tableSort(1, this, 'Mix3_1', 2 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th3}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th><th scope="col" rowspan="1"><span class="generalBold">{$th4}</span></th><th scope="col" rowspan="1"><span class="generalBold">{$th5}</span></th>
-                        </tr>
+    <table id="Mix3_1">
+        <tbody>
+            <tr class="defaultExplainRow">
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106500')}" onclick="tableSort(1, this, 'Mix3_1', 0 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th1}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106530')}" onclick="tableSort(1, this, 'Mix3_1', 1 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th2}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106410')}" onclick="tableSort(1, this, 'Mix3_1', 2 ,null,'sortMarkWrap','sortNotSelected','sortSelectedAsc','sortSelectedDesc');" class="sortTriggerInTbl"><span class="generalBold">{$th3}</span><span class="sortMarkWrap"><span class="sortNotSelected"></span></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106540')}"><span class="generalBold">{$th4}</span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106550')}"><span class="generalBold">{$th5}</span></th>
+            </tr>
 
 EOD;
             $count = 1;
@@ -456,6 +471,9 @@ EOD;
                         $disuseFlag = false;
                         $downloadUrl = urlencode($data['links']['download']);
                         $url = $g['scheme_n_authority'] . "/default/menu/05_preupload.php?no=2100080017&purl=" . $downloadUrl . "&policyName=" . $policyName;
+                        $disabledFlag = true;
+                        $disabled = "";
+                        $disabled_a = "";
 
                         //ITAに登録されているかどうかをチェック
                         foreach($itaPolicyList as $itaPolicy){
@@ -472,10 +490,17 @@ EOD;
                             if($disuseFlag == true){
                                 $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106350'); //廃止済み
                             }else{
+                                $disabledFlag = false;
                                 $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106340'); //登録済み
                             }
                         }else{
                             $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106360'); //未登録
+                        }
+
+                        if ($disabledFlag) {
+                            $disabled  = "disabled=true";
+                            $url       = "";
+                            $disabled_a = "style='pointer-events: none; color: #868686; text-decoration:none;  '";
                         }
 
                         $HtmlBody .=
@@ -484,8 +509,8 @@ EOD;
                                     <td id="{$cell_print}_1">{$organizationName}</td>
                                     <td id="{$cell_print}_2">{$policyName}</td>
                                     <td id="{$cell_print}_3">{$registerStatus}</td>
-                                    <td id="{$cell_print}_4"><a href='{$url}' target="_blank">{$td1}<a/></td>
-                                    <td id="{$cell_print}_5"><input class="deleteBtnInTbl" type="button" value='{$td2}' onclick="deletePolicy(this, '{$policyId}', '{$policyName}')"></td>
+                                    <td id="{$cell_print}_4"><a href='{$url}' target="_blank" {$disabled_a}>{$td1}<a/></td>
+                                    <td id="{$cell_print}_5"><input class="deleteBtnInTbl" type="button" value='{$td2}' onclick="deletePolicy(this, '{$policyId}', '{$policyName}')" {$disabled}></td>
                                 </tr>
 EOD;
                         $count++;
@@ -495,11 +520,8 @@ EOD;
 
             $HtmlBody .=
 <<<EOD
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+        </tbody>
+    </table>
 </div>
 EOD;
         }
@@ -680,17 +702,19 @@ EOD;
             $HtmlBody .=
 <<<EOD
 <div class="fakeContainer_Filter1Print" style="margin-top:20px; margin-bottom:20px">
-    <div id="Mix4_1_itaTable" class="itaTable def tableSticky">
-        <div id="Mix4_1_itaTableBody" class="itaTableBody scrollRight">
-            <div class="tableScroll">
-                <table id="Mix4_1">
-                    <tbody>
-                        <tr class="defaultExplainRow">
-                            <th scope="col" rowspan="2"><span class="generalBold">{$th1}</span></th><th scope="col" rowspan="1" colspan="3" style="text-align:left;"><span class="generalBold">{$th2}</span></th><th scope="col" rowspan="2"><span class="generalBold">{$th3}</span></th><th scope="col" rowspan="2"><span class="generalBold">{$th4}</span></th>
-                        </tr>
-                        <tr class="defaultExplainRow">
-                            <th scope="col" rowspan="1"><span class="generalBold"></span></th><th scope="col" rowspan="1"><span class="generalBold">{$th5}</span></th><th scope="col" rowspan="1"><span class="generalBold">{$th6}</span></th>
-                        </tr>
+    <table id="Mix4_1">
+        <tbody>
+            <tr class="defaultExplainRow">
+                <th scope="col" rowspan="2" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106500')}"><span class="generalBold">{$th1}</span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106560')}"colspan="3" style="text-align:left;"><span class="generalBold">{$th2}</span></th>
+                <th scope="col" rowspan="2" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106410')}"><span class="generalBold">{$th3}</span></th>
+                <th scope="col" rowspan="2" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106590')}"><span class="generalBold">{$th4}</span></th>
+            </tr>
+            <tr class="defaultExplainRow">
+                <th scope="col" rowspan="1"><span class="generalBold"></span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106570')}"><span class="generalBold">{$th5}</span></th>
+                <th scope="col" rowspan="1" title="{$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106580')}"><span class="generalBold">{$th6}</span></th>
+            </tr>
 
 EOD;
             $count = 1;
@@ -715,6 +739,8 @@ EOD;
                         $linkPolicyCount = count($linkPolicyData);
                         $organizationRowCount = 1 + $linkWorkspaceCount + $linkPolicyCount;
                         $dummyRowCount = $linkWorkspaceCount + $linkPolicyCount;
+                        $disabledFlag = true;
+                        $disabled = "";
 
                         //ITAに登録されているかどうかをチェック
                         foreach($itaPolicySetList as $itaPolicySet){
@@ -731,10 +757,16 @@ EOD;
                             if($disuseFlag == true){
                                 $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106350'); //廃止済み
                             }else{
+                                $disabledFlag = false;
                                 $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106340'); //登録済み
                             }
                         }else{
                             $registerStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106360'); //未登録
+                        }
+
+                        $disabled = "";
+                        if ($disabledFlag) {
+                            $disabled = "disabled=true";
                         }
 
                         $HtmlBody .=
@@ -743,7 +775,7 @@ EOD;
                                     <td rowspan="{$organizationRowCount}" id="{$cell_print}_1">{$organizationName}</td>
                                     <td colspan="3" id="{$cell_print}_2">{$policySetName}</td>
                                     <td id="{$cell_print}_3">{$registerStatus}</td>
-                                    <td id="{$cell_print}_4"><input class="deleteBtnInTbl" type="button" value={$td1} onclick="deletePolicySet(this, '{$policySetId}', '{$policySetName}')"></td>
+                                    <td id="{$cell_print}_4"><input class="deleteBtnInTbl" type="button" value={$td1} onclick="deletePolicySet(this, '{$policySetId}', '{$policySetName}')" {$disabled}></td>
                                 </tr>
 
 EOD;
@@ -765,6 +797,8 @@ EOD;
                                     }
                                 }
                             }
+                            $disabledFlag = true;
+                            $disabled = "";
 
                             //ITAに登録されているかどうかをチェック
                             foreach($itaWorkspaceList as $itaWorkspace){
@@ -781,10 +815,16 @@ EOD;
                                 if($workspaceDisuseFlag == true){
                                     $workspaceRegisterStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106350'); //廃止済み
                                 }else{
+                                    $disabledFlag = false;
                                     $workspaceRegisterStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106340'); //登録済み
                                 }
                             }else{
                                 $workspaceRegisterStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106360'); //未登録
+                            }
+
+                            $disabled = "";
+                            if ($disabledFlag) {
+                                $disabled = "disabled=true";
                             }
 
                             //余白スペースを作成
@@ -803,7 +843,7 @@ EOD;
                                         <td id="{$cell_print}_6">{$workspaceName}</td>
                                         <td id="{$cell_print}_7">-</td>
                                         <td id="{$cell_print}_8">{$workspaceRegisterStatus}</td>
-                                        <td id="{$cell_print}_9"><input class="deleteBtnInTbl" type="button" value='{$td2}' onclick="deleteRelationshipWorkspace(this, '{$policySetId}', '{$policySetName}', '{$workspaceId}', '{$workspaceName}')"></td>
+                                        <td id="{$cell_print}_9"><input class="deleteBtnInTbl" type="button" value='{$td2}' onclick="deleteRelationshipWorkspace(this, '{$policySetId}', '{$policySetName}', '{$workspaceId}', '{$workspaceName}')" {$disabled}></td>
                                     </tr>
 EOD;
                             $workspaceLoopCount++;
@@ -817,6 +857,8 @@ EOD;
                             $policyRegisteredFlag = false;
                             $policyDisuseFlag = false;
                             $policyRegisterStatus = "";
+                            $disabledFlag = true;
+                            $disabled = "";
 
                             //$policyListDataからpolicyIdが一致するものを探してpolicyNameを取得
                             foreach($policyListData[$organizationName] as $pData){
@@ -843,10 +885,16 @@ EOD;
                                 if($policyDisuseFlag == true){
                                     $policyRegisterStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106350'); //廃止済み
                                 }else{
+                                    $disabledFlag = false;
                                     $policyRegisterStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106340'); //登録済み
                                 }
                             }else{
                                 $policyRegisterStatus = $g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-106360'); //未登録
+                            }
+
+                            $disabled = "";
+                            if ($disabledFlag) {
+                                $disabled = "disabled=true";
                             }
 
                             //余白スペースを作成
@@ -864,7 +912,7 @@ EOD;
                                         <td id="{$cell_print}_6">-</td>
                                         <td id="{$cell_print}_7">{$policyName}</td>
                                         <td id="{$cell_print}_8">{$policyRegisterStatus}</td>
-                                        <td id="{$cell_print}_9"><input class="deleteBtnInTbl" type="button" value={$td2} onclick="deleteRelationshipPolicy(this, '{$policySetId}', '{$policySetName}', '{$policyId}', '{$policyName}')"></td>
+                                        <td id="{$cell_print}_9"><input class="deleteBtnInTbl" type="button" value={$td2} onclick="deleteRelationshipPolicy(this, '{$policySetId}', '{$policySetName}', '{$policyId}', '{$policyName}')" {$disabled}></td>
                                     </tr>
 EOD;
                             $policyLoopCount++;
@@ -878,10 +926,7 @@ EOD;
 
             $HtmlBody .=
 <<<EOD
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        </tbody>
     </div>
 </div>
 EOD;

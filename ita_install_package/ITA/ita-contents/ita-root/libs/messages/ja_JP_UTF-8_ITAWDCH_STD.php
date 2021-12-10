@@ -287,5 +287,6 @@ $ary["ITAWDCH-STD-50013"]           = "[処理]UPDATE実行　項番:{}";
 $ary["ITAWDCH-STD-50014"]           = "[処理]履歴作成実行　項番:{}";
 $ary["ITAWDCH-STD-50015"]           = "[処理]コミット";
 $ary["ITAWDCH-STD-50016"]           = "[処理]ロールバック";
+$ary["ITAWDCH-STD-50017"]           = "ロール";
 $ary["ITAWDCH-STD-906003"]          = "FUNCTION:{},RESULT:SUCCESS [RESPONSE:{}]";
 ?>

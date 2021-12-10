@@ -13,19 +13,19 @@
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
 //
-    
+
     // 各種ローカル定数を定義
     $intControlDebugLevel01 = 250;
 
     $execution_management_dir = "2100080011";
-    
+
     //----オーケストレータ別の設定記述
     $strExeTableIdForSelect = 'E_TERRAFORM_EXE_INS_MNG';
     //オーケストレータ別の設定記述----
-    
+
     $strFxName = __FUNCTION__;
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-1",__FILE__),$intControlDebugLevel01);
-    
+
     try{
         // パラメータチェック(ガードロジック)
         $objIntNumVali = new IntNumValidator(null,null,"","",array("NOT_NULL"=>true));
@@ -33,13 +33,13 @@
             // エラー箇所をメモ
             throw new Exception( '00000100-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
-        
+
         // レコードをSELECT
         $strSelectLastUpdateTimestamp1 = makeSelectSQLPartForDateWildColumn($g['db_model_ch'],"TAB_A.TIME_BOOK"            ,"DATEDATE",false);
         $strSelectLastUpdateTimestamp2 = makeSelectSQLPartForDateWildColumn($g['db_model_ch'],"TAB_A.TIME_START"           ,"DATEDATE",false);
         $strSelectLastUpdateTimestamp3 = makeSelectSQLPartForDateWildColumn($g['db_model_ch'],"TAB_A.TIME_END"             ,"DATEDATE",false);
         $strSelectLastUpdateTimestamp4 = makeSelectSQLPartForDateWildColumn($g['db_model_ch'],"TAB_A.LAST_UPDATE_TIMESTAMP","DATEDATE",false);
-        
+
         $strConnectString1 = makeStringConnectForSQLPart($g['db_model_ch'],array("'('","TAB_A.LAST_UPDATE_USER","')'"));
 
         //----オーケストレータ別の設定記述
@@ -76,7 +76,7 @@
                     WHERE   TAB_A.DISUSE_FLAG = '0'
                     AND     TAB_A.EXECUTION_NO = :EXECUTION_NO_BV ";
         //オーケストレータ別の設定記述----
-        
+
         $tmpAryBind = array( 'EXECUTION_NO_BV'=>$target_execution_no );
         $retArray = singleSQLExecuteAgent($sql, $tmpAryBind, $strFxName);
         if( $retArray[0] === true ){
@@ -100,17 +100,17 @@
         else{
             throw new Exception( '00000300-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
-        
+
         require_once($g['root_dir_path'] . "/webconfs/systems/{$execution_management_dir}_loadTable.php");
-        
+
         $table = loadTable($execution_management_dir);
         $arrayColumn = $table->getColumns();
-        
+
         $COLUMN_01 = nl2br(htmlspecialchars($showTgtRow['EXECUTION_NO']));
         $COLUMN_43 = nl2br(htmlspecialchars($showTgtRow['SYMPHONY_NAME']));
         $COLUMN_42 = nl2br(htmlspecialchars($showTgtRow['EXECUTION_USER']));
         $COLUMN_03 = nl2br(htmlspecialchars($showTgtRow['I_TIME_LIMIT']));
-        
+
         $COLUMN_04 = nl2br(htmlspecialchars($showTgtRow['OPERATION_NO_UAPK']));
         $COLUMN_05 = nl2br(htmlspecialchars($showTgtRow['I_OPERATION_NAME']));
 
@@ -126,7 +126,7 @@
         else{
             $COLUMN_06 = '';
         }
-        
+
         $strFocusColumnId = 'FILE_RESULT';
         $objColumn = $arrayColumn[$strFocusColumnId];
         $strLaBranchPerFUC_PADRIN = $objColumn->getLAPathToFUCItemPerRow($showTgtRow);
@@ -136,7 +136,7 @@
         else{
             $COLUMN_07 = '';
         }
-        
+
         $COLUMN_11 = nl2br(htmlspecialchars($showTgtRow['TIME_BOOK']));
         $COLUMN_12 = nl2br(htmlspecialchars($showTgtRow['TIME_START']));
         $COLUMN_13 = nl2br(htmlspecialchars($showTgtRow['TIME_END']));
@@ -157,13 +157,21 @@
 
         // 代入値管理へ遷移するボタン生成
         $caption = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-101280");
-        $url = sprintf("/default/menu/01_browse.php?no=2100080008&ope_id=%s&movement_id=%s", $ope_param,$movement_param);
-        $COLUMN_39 =  sprintf("<input class=\"linkBtnInTbl\" type=\"button\" value=\"%s\" onClick=\"window.open('%s')\">",$caption,$url);
+        if (empty($ope_param) && empty($movement_param)) {
+            $COLUMN_39 = "";
+        } else {
+            $url = sprintf("/default/menu/01_browse.php?no=2100080008&ope_id=%s&movement_id=%s", $ope_param,$movement_param);
+            $COLUMN_39 =  sprintf("<input class=\"linkBtnInTbl\" type=\"button\" value=\"%s\" onClick=\"window.open('%s')\">",$caption,$url);
+        }
 
         // Movement一覧へ遷移するボタン生成
         $caption = $COLUMN_32;
         $url = sprintf("/default/menu/01_browse.php?no=2100080004&movement_id=%s",$movement_param);
-        $COLUMN_40 =  sprintf("<button class=\"linkBtnInTbl\" type=\"button\" onClick=\"window.open('%s')\">%s</button>",$url,$caption);
+        if (!empty($caption)) {
+            $COLUMN_40 =  sprintf("<button class=\"linkBtnInTbl\" type=\"button\" onClick=\"window.open('%s')\">%s</button>",$url,$caption);
+        } else {
+            $COLUMN_40 = "";
+        }
 
 
         //オーケストレータ別の設定記述----
@@ -275,7 +283,7 @@ EOD;
         //----正常時でも飛ばす版
         $tmpErrMsgBody = $e->getMessage();
         dev_log($tmpErrMsgBody, $intControlDebugLevel01);
-        
+
         // DBアクセス事後処理
         if ( isset($objQuery) )    unset($objQuery);
 

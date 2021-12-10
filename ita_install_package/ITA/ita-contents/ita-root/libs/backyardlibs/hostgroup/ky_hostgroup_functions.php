@@ -118,6 +118,7 @@ function makeTree(&$hierarchy) {
                 $parentMatchFlg = true;
             }
         }
+        unset($treeData);
 
         if($childMatchFlg === false) {
             // 子追加

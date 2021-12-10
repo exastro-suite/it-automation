@@ -65,6 +65,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     $c = new IDColumn('HARDAWRE_TYPE_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-101060"),'B_HARDAWRE_TYPE','HARDAWRE_TYPE_ID','HARDAWRE_TYPE_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-101070"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('HARDAWRE_TYPE_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_HARDAWRE_TYPE_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'HARDAWRE_TYPE_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'HARDAWRE_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     $objVldt = new TextValidator(1, 128, false, '/^[\._a-zA-Z0-9-]+$/', "");
@@ -195,6 +207,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c = new IDColumn('LOGIN_PW_HOLD_FLAG',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102062"),'D_FLAG_LIST_01','FLAG_ID','FLAG_NAME','');
         $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102063"));//エクセル・ヘッダでの説明
         $c->addValidator($objVarVali);
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('LOGIN_PW_HOLD_FLAG');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_FLAG_LIST_01_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         $objFunction02 = function($objColumn, $strCallerName, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
@@ -245,6 +269,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
             // 変更前と変更後のパスワードを判定し、違う場合にansible-vaultで暗号化した文字列を初期化
             global $g;
+            $root_dir_path = $g['root_dir_path'];
             if ( empty($root_dir_path) ){
                 $root_dir_temp = array();
                 $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -457,6 +482,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $c = new IDColumn('LOGIN_AUTH_TYPE',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102088"),'B_LOGIN_AUTH_TYPE','LOGIN_AUTH_TYPE_ID','LOGIN_AUTH_TYPE_NAME','',array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102089"));//エクセル・ヘッダでの説明
                 $c->addValidator($objVarVali);
+                $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+                $objOT->setFirstSearchValueOwnerColumnID('LOGIN_AUTH_TYPE');
+                $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_LOGIN_AUTH_TYPE_JNL',
+                    'TTT_SEARCH_KEY_COLUMN_ID'=>'LOGIN_AUTH_TYPE_ID',
+                    'TTT_GET_TARGET_COLUMN_ID'=>'LOGIN_AUTH_TYPE_NAME',
+                    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                    )
+                );
+                $objOT->setTraceQuery($aryTraceQuery);
+                $c->setOutputType('print_journal_table',$objOT);
                 $cg->addColumn($c);
 
                 // WinRM接続情報
@@ -490,14 +527,50 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
                 $c = new IDColumn('PROTOCOL_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102030"),'B_PROTOCOL','PROTOCOL_ID','PROTOCOL_NAME','');
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102040"));//エクセル・ヘッダでの説明
+                $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+                $objOT->setFirstSearchValueOwnerColumnID('PROTOCOL_ID');
+                $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_PROTOCOL_JNL',
+                    'TTT_SEARCH_KEY_COLUMN_ID'=>'PROTOCOL_ID',
+                    'TTT_GET_TARGET_COLUMN_ID'=>'PROTOCOL_NAME',
+                    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                    )
+                );
+                $objOT->setTraceQuery($aryTraceQuery);
+                $c->setOutputType('print_journal_table',$objOT);
                 $cg->addColumn($c);
 
                 $c = new IDColumn('OS_TYPE_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102090"),'B_OS_TYPE','OS_TYPE_ID','OS_TYPE_NAME','');
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-103010"));//エクセル・ヘッダでの説明
+                $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+                $objOT->setFirstSearchValueOwnerColumnID('OS_TYPE_ID');
+                $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_OS_TYPE_JNL',
+                    'TTT_SEARCH_KEY_COLUMN_ID'=>'OS_TYPE_ID',
+                    'TTT_GET_TARGET_COLUMN_ID'=>'OS_TYPE_NAME',
+                    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                    )
+                );
+                $objOT->setTraceQuery($aryTraceQuery);
+                $c->setOutputType('print_journal_table',$objOT);
                 $cg->addColumn($c);
 
                 $c = new IDColumn('PIONEER_LANG_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-102100"),'B_ANS_PNS_LANG_MASTER','ID','NAME','',array('SELECT_ADD_FOR_ORDER'=>array('ID'),'ORDER'=>'ORDER BY ADD_SELECT_1') );
                 $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-102101"));//エクセル・ヘッダでの説明
+                $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+                $objOT->setFirstSearchValueOwnerColumnID('PIONEER_LANG_ID');
+                $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_PNS_LANG_MASTER_JNL',
+                    'TTT_SEARCH_KEY_COLUMN_ID'=>'ID',
+                    'TTT_GET_TARGET_COLUMN_ID'=>'NAME',
+                    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                    )
+                );
+                $objOT->setTraceQuery($aryTraceQuery);
+                $c->setOutputType('print_journal_table',$objOT);
                 $cg->addColumn($c);
 
         $cg2->addColumn($cg);
@@ -521,6 +594,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
            $c = new IDColumn('ANSTWR_INSTANCE_GROUP_NAME',$g['objMTS']->getSomeMessage("ITABASEH-MNU-104630"),
                               'B_ANS_TWR_INSTANCE_GROUP', 'INSTANCE_GROUP_NAME', 'INSTANCE_GROUP_NAME','');
            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-104631"));
+           $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+           $objOT->setFirstSearchValueOwnerColumnID('ANSTWR_INSTANCE_GROUP_NAME');
+           $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_INSTANCE_GROUP_JNL',
+               'TTT_SEARCH_KEY_COLUMN_ID'=>'INSTANCE_GROUP_NAME',
+               'TTT_GET_TARGET_COLUMN_ID'=>'INSTANCE_GROUP_NAME',
+               'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+               'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+               'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+               )
+           );
+           $objOT->setTraceQuery($aryTraceQuery);
+           $c->setOutputType('print_journal_table',$objOT);
            $cg->addColumn($c);
 
            // 認証情報　接続タイプ
@@ -530,7 +615,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
            //$c->getOutputType('update_table')->setOverrideInputValue(1);
            $c->setDefaultValue("register_table", 1);
            $c->setRequired(true);//登録/更新時には、入力必須
-
+           $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+           $objOT->setFirstSearchValueOwnerColumnID('CREDENTIAL_TYPE_ID');
+           $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_CREDENTIAL_TYPE_JNL',
+               'TTT_SEARCH_KEY_COLUMN_ID'=>'CREDENTIAL_TYPE_ID',
+               'TTT_GET_TARGET_COLUMN_ID'=>'CREDENTIAL_TYPE_NAME',
+               'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+               'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+               'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+               )
+           );
+           $objOT->setTraceQuery($aryTraceQuery);
+           $c->setOutputType('print_journal_table',$objOT);
            $cg->addColumn($c);
 
         $cg2->addColumn($cg);
@@ -544,6 +640,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
             $c = new IDColumn('COBBLER_PROFILE_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-103020"),'C_COBBLER_PROFILE','COBBLER_PROFILE_ID','COBBLER_PROFILE_NAME','');
             $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-103030"));//エクセル・ヘッダでの説明
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('COBBLER_PROFILE_ID');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'C_COBBLER_PROFILE_JNL',
+                'TTT_SEARCH_KEY_COLUMN_ID'=>'COBBLER_PROFILE_ID',
+                'TTT_GET_TARGET_COLUMN_ID'=>'COBBLER_PROFILE_NAME',
+                'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                )
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
             $cg->addColumn($c);
 
             $objVldt = new SingleTextValidator(0,256,false);
@@ -604,7 +712,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
             $strQuery = "UPDATE A_PROC_LOADED_LIST "
                        ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                       ."WHERE ROW_ID IN (2100020002,2100020004,2100020006,2100080002) ";
+                       ."WHERE ROW_ID IN (2100020001,2100020005,2100020002,2100020004,2100020006,2100080002) ";
 
             $aryForBind = array();
 

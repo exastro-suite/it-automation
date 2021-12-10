@@ -67,12 +67,7 @@
 
     // ----メニューIDがGETクエリーで与えられているか判定
     if( !isset($req_menu_id) ){
-        // アクセスログ出力(想定外エラー)
-        web_log($objMTS->getSomeMessage("ITAWDCH-MNU-1170091"));
-        
-        // 想定外エラー通知画面にリダイレクト
-        webRequestForceQuitFromEveryWhere(400,20210102);
-        exit();
+        $ASJTM_id = "";
     }
     else if( !is_numeric($req_menu_id) ){
 
@@ -81,14 +76,8 @@
             $ASJTM_grp_id = sprintf("%010d", htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8"));
         }
         else{
-            // アクセスログ出力(想定外エラー)
-            web_log($objMTS->getSomeMessage("ITAWDCH-MNU-1170092"));
-            
-            // 想定外エラー通知画面にリダイレクト
-            webRequestForceQuitFromEveryWhere(400,20210103);
-            exit();
+            $ASJTM_id = "";
         }
-
     }
     else{
         $ASJTM_id = addslashes($req_menu_id);
@@ -116,6 +105,13 @@
     $timeStamp_common_account_list_00_javascript_js=filemtime("$root_dir_path/webroot/common/javascripts/common_account_list_00_javascript.js");
     $timeStamp_ita_icon_png=filemtime("$root_dir_path/webroot/common/imgs/ita_icon.png");
     
+    $getCopy = $_GET;
+    $get_parameter_anp = "";
+    if("" != http_build_query($getCopy)){
+        $get_parameter_anp = "&" . http_build_query($getCopy);
+    }
+    $get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
+
     print 
 <<< EOD
         <script type="text/javascript" src="{$scheme_n_authority}/common/common_account_list_access.php?client=all"></script>
@@ -152,7 +148,7 @@
                         {$strMailTag}<br>
                     </p>
                     <div id="table_area"></div>
-                    <form method="POST" name="change_pw_form" action="{$scheme_n_authority}/common/common_auth.php?login&grp={$ASJTM_grp_id}&no={$ASJTM_id}">
+                    <form method="POST" name="change_pw_form" action="{$scheme_n_authority}/common/common_auth.php?login{$get_parameter_anp}">
                         <input type="submit" name="submit" value="{$objMTS->getSomeMessage("ITAWDCH-MNU-1170004")}">
                     </form>
                 </div>

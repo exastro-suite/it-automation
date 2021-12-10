@@ -26,6 +26,8 @@
     //
     //      $lva_table_nameTOid_list:      テーブル名配列
     //                                      [テーブル名]=MENU_ID
+    //      $lva_FileUploaduse_table_nameTOid_list:      FileUploadClomunが定義されているテーブル名配列
+    //                                      [テーブル名]=MENU_ID
     //      $lva_table_nameTOaccess_auth_flg: テーブル名配列
     //                                      [テーブル名]=ACCESS_AUTH_FLG
     //      $lva_table_nameTOPkeyname_list:テーブル 主キー名配列
@@ -87,6 +89,8 @@
     //                                        ['VARS_ENTRY']=>$col_val,
     //                                        ['VAR_TYPE']=>$in_var_type);
     //
+    //      $lva_FileUpLoadColumnFilePath_list 代入値紐付メニューに定義されているFileUpLoadColumnのファイルパス配列
+    //                                         [テーブル名][カラム名]=>FileUpLoadColumnのファイルパス
     //  F0001  readValAssDB
     //  F0002  ColVarInfoAnalysis
     //  F0004  makeMenuSelectSQL
@@ -222,6 +226,7 @@
             "SYSTEM_ID"=>""               ,
             "VARS_LINK_ID"=>""            ,
             "VARS_ENTRY"=>""              ,
+            "VARS_ENTRY_FILE"=>""         ,
             "SENSITIVE_FLAG"=>""          ,
             "ASSIGN_SEQ"=>""              ,
             "VARS_ENTRY_USE_TPFVARS"=>""  ,
@@ -245,6 +250,7 @@
             "SYSTEM_ID"=>""               ,
             "VARS_LINK_ID"=>""            ,
             "VARS_ENTRY"=>""              ,
+            "VARS_ENTRY_FILE"=>""         ,
             "SENSITIVE_FLAG"=>""          ,
             "ASSIGN_SEQ"=>""              ,
             "VARS_ENTRY_USE_TPFVARS"=>""  ,
@@ -438,6 +444,8 @@
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
         require_once ($root_dir_path . "/libs/webcommonlibs/web_php_functions.php");
+        require_once ( $root_dir_path . "/libs/commonlibs/common_getInfo_LoadTable.php");
+        require_once ( $root_dir_path . "/libs/backyardlibs/ansible_driver/FileUploadColumnDirectoryControl.php");
 
         ///////////////////////////////////////////////////////////////////////////
         // 関連データベースが更新されバックヤード処理が必要か判定
@@ -506,7 +514,8 @@
         $lva_table_nameTOid_list    = array();
         $lva_table_nameTOaccess_auth_flg = array();
         // テーブル名+カラム名配列
-        $lva_table_colnameTOid_list = array(); 
+        $lva_table_colnameTOid_list            = array(); 
+        $lva_FileUploaduse_table_nameTOid_list = array();
         // カラム情報配列
         $lva_table_col_list         = array();         
         // 代入値紐付の登録に不備がある主キーの配列
@@ -528,6 +537,7 @@
                             $lv_child_vars_tbl,    
                             $lv_ptn_vars_link_tbl, 
                             $lva_table_nameTOid_list,    
+                            $lva_FileUploaduse_table_nameTOid_list,
                             $lva_table_nameTOaccess_auth_flg,
                             $lva_table_colnameTOid_list, 
                             $lva_table_col_list,         
@@ -539,6 +549,24 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90032");
             throw new Exception( $FREE_LOG );
         }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        // P0002
+        //   紐付メニューで定義されているFileUploadColumnのファイルパスを取得
+        ///////////////////////////////////////////////////////////////////////////////
+        $lva_FileUpLoadColumnFilePath_list = array();
+        foreach($lva_FileUploaduse_table_nameTOid_list as $table_name=>$menuID) {
+            $ret = getFileUpLoadColumnFilePath($menuID,$table_name,$lva_FileUpLoadColumnFilePath_list,$objDBCA);
+            if($ret !== true) {
+                $error_flag = 1;
+
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55271",array($menuID));
+                $FREE_LOG .= "\n". $ret;
+                throw new Exception( $FREE_LOG );
+            }
+        }
+        // メモリ最適化
+        $ret = gc_mem_caches();
 
         ///////////////////////////////////////////////////////////////////////////////
         // P0003
@@ -561,20 +589,20 @@
         // P0004
         //   紐付メニューから具体値を取得する。
         ////////////////////////////////////////////////////////////////////////////////
-        $ret = GetMenuData($vg_driver_name,
-                           $lva_table_nameTOsql_list,
-                           $lva_table_nameTOid_list,
-                           $lva_table_col_list,
-                           $lva_child_vars_ass_list,
-                           $lva_child_vars_ass_chk_list,
-                           $lva_vars_ass_list,
-                           $lva_vars_ass_chk_list,
-                           $lva_error_column_id_list,
-                           $warning_flag);
+        GetMenuData($vg_driver_name,
+                    $lva_table_nameTOsql_list,
+                    $lva_table_nameTOid_list,
+                    $lva_table_col_list,
+                    $lva_child_vars_ass_list,
+                    $lva_child_vars_ass_chk_list,
+                    $lva_vars_ass_list,
+                    $lva_vars_ass_chk_list,
+                    $lva_error_column_id_list,
+                    $lva_FileUpLoadColumnFilePath_list,
+                    $warning_flag);
 
         // 不要となった配列変数を開放
         unset($lva_table_nameTOsql_list);
-        unset($lva_table_nameTOid_list);
         unset($lva_table_col_list);
         unset($lva_error_column_id_list);
         unset($lva_table_nameTOPkeyname_list);
@@ -685,8 +713,11 @@
             $vars_ass_list['ACCESS_AUTH'] = $ResultAccessAuthStr;
 
             // 代入値管理に具体値を登録
-            $ret = addStg1VarsAssDB($vars_ass_list,$lv_VarsAssignRecodes);
+            $ret = addStg1VarsAssDB($vars_ass_list,$lva_table_nameTOid_list,$lv_VarsAssignRecodes);
             if($ret === false){
+                // FileUploadColumnのディレクトリを元に戻す
+                $ret = FileUPloadColumnRestore();
+
                 // 異常フラグON
                 $error_flag = 1;
                 $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90051");
@@ -714,12 +745,16 @@
         ////////////////////////////////////////////////////////////////////////////////
         $ret = delVarsAssDB($lv_VarsAssignRecodes);
         if($ret === false){
+            // FileUploadColumnのディレクトリを元に戻す
+            $ret = FileUPloadColumnRestore();
             // 異常フラグON
             $error_flag = 1;
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90053");
             throw new Exception( $FREE_LOG );
         }
 
+        unset($lva_table_nameTOid_list);
+        unset($lva_FileUploaduse_table_nameTOid_list);
         unset($lva_vars_ass_list);
         unset($lva_vars_ass_chk_list);
         unset($lv_VarsAssignRecodes);
@@ -732,6 +767,8 @@
         ////////////////////////////////////////////////////////////////
         $r = $objDBCA->transactionCommit();
         if(!$r) {
+            // FileUploadColumnのディレクトリを元に戻す
+            $ret = FileUPloadColumnRestore();
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -977,6 +1014,8 @@
     //   $in_ptn_vars_link_tbl:          作業パターン変数紐付テーブル名
     //   &$ina_table_nameTOid_list:      テーブル名配列
     //                                   [テーブル名]=MENU_ID
+    //   &$ina_FileUploaduse_table_nameTOid_list:      FileUploadClomunが定義されているテーブル名配列
+    //                                   [テーブル名]=MENU_ID
     //   &$ina_table_nameTOaccess_auth_flg: テーブル名配列
     //                                   [テーブル名]=ACCESS_AUTH_FLG
     //   &$ina_table_colnameTOid_list:   テーブル名+カラム名配列
@@ -997,6 +1036,7 @@
                           $in_child_vars_tbl,    
                           $in_ptn_vars_link_tbl, 
                           &$ina_table_nameTOid_list,    
+                          &$ina_FileUploaduse_table_nameTOid_list,
                           &$ina_table_nameTOaccess_auth_flg,
                           &$ina_table_colnameTOid_list, 
                           &$ina_table_col_list,         
@@ -1321,6 +1361,9 @@
                 }
                 break;
             }
+            if($row['COL_CLASS'] == 'FileUploadColumn') {
+                $ina_FileUploaduse_table_nameTOid_list[$row['TABLE_NAME']]=$row['MENU_ID'];
+            }
             $ina_table_nameTOid_list[$row['TABLE_NAME']]=$row['MENU_ID'];
             $ina_table_colnameTOid_list[$row['TABLE_NAME']][$row['COL_NAME']][]=$row['COLUMN_ID'];
 
@@ -1340,6 +1383,7 @@
                                array('COLUMN_ID'=>$row['COLUMN_ID'],
                                      'COL_TYPE'=>$row['COL_TYPE'],
                                      'COL_TITLE'=>$row['COL_TITLE'],
+                                     'COL_CLASS'=>$row['COL_CLASS'],
                                      'REF_TABLE_NAME'=>$row['REF_TABLE_NAME'],
                                      'REF_PKEY_NAME'=>$row['REF_PKEY_NAME'],
                                      'REF_COL_NAME'=>$row['REF_COL_NAME'],
@@ -1662,6 +1706,8 @@
     //   $ina_child_vars_ass_chk_list:  配列変数用 列順序重複チェック配列
     //   $ina_vars_ass_list:            一般変数用 代入値登録情報配列
     //   $ina_vars_ass_chk_list:        一般変数用 代入順序重複チェック配列
+    //   $ina_FileUpLoadColumnFilePath_list: 代入値紐付メニューに定義されているFileUpLoadColumnのファイルパス配列
+    //                                  [テーブル名][カラム名]=>FileUpLoadColumnのファイルパス
     //
     // 戻り値
     //   true:   正常
@@ -1676,10 +1722,17 @@
                          &$ina_vars_ass_list,
                          &$ina_vars_ass_chk_list,
                          $ina_error_column_id_list,
+                         $ina_FileUpLoadColumnFilePath_list,
                          &$warning_flags){
         global    $objMTS;
         global    $objDBCA;
         global    $log_level;
+        global    $root_dir_path;
+        if ( empty($root_dir_path) ){
+            $root_dir_temp = array();
+            $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+            $root_dir_path = $root_dir_temp[0] . "ita-root";
+        }
 
         $VariableColumnAry = array();           // 変数カラムリスト
         $VariableColumnAry['B_ANS_TEMPLATE_FILE']['ANS_TEMPLATE_VARS_NAME']  = 0;
@@ -1707,8 +1760,6 @@
                 continue;
             }
             else{
-
-
                 // 代入値紐付メニューに具体値の登録なし
                 if( ! isset($total_row)){
                     //DBアクセスエラー
@@ -1768,6 +1819,11 @@
 
                         $col_val_key = $col_val;
 
+                        // パラメータシート側の項番取得
+                        if(DF_ITA_LOCAL_PKEY == $col_name) {
+                            $col_row_id = $col_val;
+                        }
+
                         switch($col_name){
                         // 具体値カラム以外を除外
                         case DF_ITA_LOCAL_OPERATION_CNT:
@@ -1799,7 +1855,6 @@
                                 $sql = $sql . "FROM   " . $ina_col_list['REF_TABLE_NAME'] . " ";
                                 $sql = $sql . "WHERE " . $ina_col_list['REF_PKEY_NAME'] . "=:" . $ina_col_list['REF_PKEY_NAME'] . " ";
                                 $sql = $sql . " AND DISUSE_FLAG='0'";
-
                                 $objQuery = $objDBCA->sqlPrepare($sql);
                                 if($objQuery->getStatus()===false){
                                     $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
@@ -1841,9 +1896,9 @@
                                     // プルダウン選択先のレコードが廃止されている
                                     if ( $log_level === 'DEBUG' ){
                                         $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90135",
-                                                                          array($in_tableNameToMenuIdList[$table_name],
+                                                                          array($ina_table_nameTOid_list[$table_name],
                                                                                 $row[DF_ITA_LOCAL_PKEY],
-                                                                                $col_data['COL_TITLE']));
+                                                                                $ina_col_list['COL_TITLE']));
                                         LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                                         $warning_flag = true;
                                         continue;
@@ -1852,12 +1907,48 @@
                                 }
                                 unset($objQuery);
                             }
-
+                            $col_class = $ina_col_list['COL_CLASS'];
+                            $col_filepath = "";
+                            $col_file_md5 = "";
+                            if($col_class == "FileUploadColumn") {
+                                $col_filepath = "";
+                                if(@count($ina_FileUpLoadColumnFilePath_list[$table_name][$col_name])==0) {
+                                    if ( $log_level === 'DEBUG' ){
+                                        $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55269",
+                                                                          array($table_name,
+                                                                                $col_name));
+                                        LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                        $warning_flag = true;
+                                        continue;
+                                    }
+                                } else {
+                                    if($col_val != "") {
+                                        $col_filepath = sprintf("%s%s/%010s/%s",$root_dir_path,$ina_FileUpLoadColumnFilePath_list[$table_name][$col_name],$col_row_id,$col_val);
+                                        if( ! file_exists($col_filepath)) {
+                                            if ( $log_level === 'DEBUG' ){
+                                                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55287",
+                                                                                         array($table_name,
+                                                                                               $col_name,
+                                                                                               $col_row_id,
+                                                                                               $col_filepath));
+                                                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                                $warning_flag = true;
+                                                continue;
+                                            }
+                                        }
+                                        $col_file_md5 = md5_file($col_filepath);
+                                    }
+                                }
+                            }
                             // 代入値管理の登録に必要な情報を生成                    
                             makeVarsAssData($in_driver_name,
                                             $table_name,
                                             $col_name,
                                             $col_val,
+                                            $col_row_id,
+                                            $col_class,
+                                            $col_filepath,
+                                            $col_file_md5,
                                             $access_auth,
                                             $ina_col_list['NULL_DATA_HANDLING_FLG'],
                                             $operation_id,
@@ -1936,6 +2027,9 @@
     //   $in_table_name:                テーブル名
     //   $in_col_name:                  カラム名
     //   $in_col_val:                   カラムの具体値
+    //   $in_col_row_id:                パラメータシートの項番
+    //   $in_col_class:                 カラムのクラス名
+    //   $in_col_filepath:              FileUpLoadColumnのファイルパス
     //   $in_access_auth:               該当レコードのアクセス権
     //   $in_null_data_handling_flg     代入値管理へのNULLデータ連携フラグ
     //   $in_operation_id:              オペレーションID
@@ -1956,6 +2050,10 @@
                              $in_table_name,
                              $in_col_name,
                              $in_col_val,
+                             $in_col_row_id,
+                             $in_col_class,
+                             $in_col_filepath,
+                             $in_col_file_md5,
                              $in_access_auth,
                              $in_null_data_handling_flg,
                              $in_operation_id,
@@ -2009,6 +2107,10 @@
                            $ina_col_list['VAL_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['VAL_ASSIGN_SEQ'],
                            $in_col_val,
+                           $in_col_row_id,
+                           $in_col_class,
+                           $in_col_filepath,
+                           $in_col_file_md5,
                            $in_access_auth,
                            $ina_col_list['VALUE_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
@@ -2041,6 +2143,10 @@
                            $ina_col_list['KEY_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['KEY_ASSIGN_SEQ'],
                            $col_name,
+                           $in_col_row_id,
+                           $in_col_class,
+                           $in_col_filepath,
+                           $in_col_file_md5,
                            $in_access_auth,
                            $ina_col_list['KEY_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
@@ -2074,6 +2180,10 @@
                            $ina_col_list['VAL_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['VAL_ASSIGN_SEQ'],
                            $in_col_val,
+                           $in_col_row_id,
+                           $in_col_class,
+                           $in_col_filepath,
+                           $in_col_file_md5,
                            $in_access_auth,
                            $ina_col_list['VALUE_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
@@ -2098,6 +2208,10 @@
                            $ina_col_list['KEY_CHILD_VARS_COL_SEQ'],
                            $ina_col_list['KEY_ASSIGN_SEQ'],
                            $col_name,
+                           $in_col_row_id,
+                           $in_col_class,
+                           $in_col_filepath,
+                           $in_col_file_md5,
                            $in_access_auth,
                            $ina_col_list['KEY_SENSITIVE_FLAG'],
                            $ina_vars_ass_list,
@@ -2130,6 +2244,9 @@
     //   $in_child_vars_col_seq:        列順序
     //   $in_vars_assign_seq:           代入順序
     //   $in_col_val:                   具体値
+    //   $in_col_row_id:                パラメータシートの項番
+    //   $in_col_class:                 カラムのクラス名
+    //   $in_col_filepath:              FileUpLoadColumnのファイルパス
     //   $in_access_auth:               アクセス権
     //   $in_sensitive_flg:             sensitive設定
     //   $ina_child_vars_ass_list:      配列変数用 代入値登録情報配列
@@ -2156,6 +2273,10 @@
                             $in_child_vars_col_seq,
                             $in_vars_assign_seq,
                             $in_col_val,
+                            $in_col_row_id,
+                            $in_col_class,
+                            $in_col_filepath,
+                            $in_col_file_md5,
                             $in_access_auth,
                             $in_sensitive_flg,
                             &$ina_vars_ass_list,
@@ -2256,8 +2377,16 @@
                                       [$in_vars_assign_seq]       = array('COLUMN_ID'=>$in_column_id);
             }
             // 代入値管理の登録に必要な情報退避
+            if(($in_col_class == "FileUploadColumn") && ($in_key_value_vars_id == "Key")) {
+                $in_col_file_md5 = "";
+            }
             $ina_vars_ass_list[] = array('TABLE_NAME'=>$in_table_name,
                                          'COL_NAME'=>$in_col_name,
+                                         'COL_ROW_ID'=>$in_col_row_id,
+                                         'COL_CLASS'=>$in_col_class,
+                                         'COL_FILEUPLOAD_PATH'=>$in_col_filepath,
+                                         'COL_FILEUPLOAD_MD5'=>$in_col_file_md5,
+                                         'REG_TYPE'=>$in_key_value_vars_id,
                                          'OPERATION_NO_UAPK'=>$in_operation_id,
                                          'PATTERN_ID'=>$in_patten_id,
                                          'SYSTEM_ID'=>$in_host_id,
@@ -2278,12 +2407,14 @@
     //   
     // パラメータ
     //   $in_varsAssignList:              代入値管理更新情報配列
+    //   $ina_table_nameTOid_list:        テーブル名配列
+    //                                    [テーブル名]=MENU_ID
     //   $in_VarsAssignRecodes:           代入値管理の全テータ配列
     //
     // 戻り値
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
-    function addStg1VarsAssDB($ina_varsass_list,&$in_VarsAssignRecodes) {
+    function addStg1VarsAssDB($ina_varsass_list,$ina_table_nameTOid_list,&$in_VarsAssignRecodes) {
         global    $db_model_ch;
         global    $objMTS;
         global    $objDBCA;
@@ -2300,6 +2431,9 @@
         global $arrayConfigOfVarAss;
         global $arrayValueTmplOfVarAss;
 
+        global $vg_varass_menuID;
+        global $vg_FileUPloadColumnBackupFilePath;
+
         $strCurTable      = $strCurTableVarsAss;
         $strJnlTable      = $strJnlTableVarsAss;
         $arrayConfig      = $arrayConfigOfVarAss;
@@ -2313,9 +2447,10 @@
                $ina_varsass_list['VARS_LINK_ID']      . "_" .
                $ina_varsass_list['ASSIGN_SEQ']        . "_" .
                "0";
+
         // 代入値管理に登録されているか判定
         if( ! isset($in_VarsAssignRecodes[$key])) {
-            return addStg2VarsAssDB($ina_varsass_list,$in_VarsAssignRecodes);
+            return addStg2VarsAssDB($ina_varsass_list,$ina_table_nameTOid_list,$in_VarsAssignRecodes);
         }
         else{
 
@@ -2325,11 +2460,8 @@
             // 代入値管理に必要なレコードを削除
             unset($in_VarsAssignRecodes[$key]);
 
-            // 具体値が変更になっているか判定する。
-            if(($tgt_row["VARS_ENTRY"]  == $ina_varsass_list['VARS_ENTRY']) &&
-               ($tgt_row["ACCESS_AUTH"]  == $ina_varsass_list['ACCESS_AUTH']) &&
-               ($tgt_row["SENSITIVE_FLAG"]  == $ina_varsass_list['SENSITIVE_FLAG'])) {
-
+            list($ret,$befFileDel,$AftFileCpy) = chkSubstitutionValueListRecodedifference($tgt_row,$ina_varsass_list);
+            if($ret === false) {
                 // トレースメッセージ
                 if ( $log_level === 'DEBUG' )
                 {
@@ -2348,7 +2480,6 @@
 
             // 最終更新者が自分でない場合、更新処理はスキップする。
             if($tgt_row["LAST_UPDATE_USER"] != $db_access_user_id){
-
 
                 // トレースメッセージ
                 if ( $log_level === 'DEBUG' ){
@@ -2392,8 +2523,6 @@
             }
         }
         if($action == "UPDATE"){
-
-
             ////////////////////////////////////////////////////////////////
             // ジャーナルシーケンスをロック                               //
             ////////////////////////////////////////////////////////////////
@@ -2415,6 +2544,7 @@
                 return false;
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
+            $tgt_row["VARS_ENTRY_FILE"]       = $ina_varsass_list['VARS_ENTRY_FILE'];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
             $tgt_row["ACCESS_AUTH"]      = $ina_varsass_list['ACCESS_AUTH'];
             $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
@@ -2422,7 +2552,6 @@
             $tgt_row["DISUSE_FLAG"]      = '0';
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
         }
-
         $temp_array = array();
         $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                              $action,
@@ -2492,6 +2621,18 @@
             unset($objQueryUtn);
             unset($objQueryJnl);
             return false;
+        }
+        if(($befFileDel === true)  || ($AftFileCpy === true)) { 
+            // アップロードアラムのディレクトリバックアップ
+            $ret = FileUPloadColumnBackup();
+            if($ret === false) {
+                return false;
+            }
+            // FileUploadColumn用ファイル配置
+            $ret = CreateFileUpLoadMenuColumnFileDirectory($befFileDel,$AftFileCpy,$tgt_row["ASSIGN_ID"],$tgt_row["JOURNAL_SEQ_NO"],$tgt_row['VARS_ENTRY_FILE_PATH'],$ina_varsass_list['COL_FILEUPLOAD_PATH']);
+            if($ret === false) {
+                return false;
+            }
         }
         unset($objQueryUtn);
         unset($objQueryJnl);
@@ -3056,12 +3197,14 @@
     //   
     // パラメータ
     //   $in_varsAssignList:              代入値管理更新情報配列
+    //   $ina_table_nameTOid_list:        テーブル名配列
+    //                                    [テーブル名]=MENU_ID
     //   $in_VarsAssignRecodes:           代入値管理の全テータ配列
     //
     // 戻り値
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
-    function addStg2VarsAssDB($ina_varsass_list,&$in_VarsAssignRecodes) {
+    function addStg2VarsAssDB($ina_varsass_list,$ina_table_nameTOid_list,&$in_VarsAssignRecodes) {
 
         global    $db_model_ch;
         global    $objMTS;
@@ -3079,6 +3222,9 @@
         global $arrayConfigOfVarAss;
         global $arrayValueTmplOfVarAss;
 
+        global $vg_varass_menuID;
+        global $vg_FileUPloadColumnBackupFilePath;
+
         $strCurTable      = $strCurTableVarsAss;
         $strJnlTable      = $strJnlTableVarsAss;
         $arrayConfig      = $arrayConfigOfVarAss;
@@ -3094,10 +3240,26 @@
                $ina_varsass_list['ASSIGN_SEQ']        . "_" .
                "1";
 
+        $befFileDel = false;
+        $AftFileCpy = false;
         if(! isset($in_VarsAssignRecodes[$key]))
         {
+
              $action  = "INSERT";
              $tgt_row = $arrayValue;
+             if(($ina_varsass_list['COL_CLASS'] == 'FileUploadColumn') &&
+                ($ina_varsass_list['REG_TYPE']  == 'Value')) {
+                 $ina_varsass_list['VARS_ENTRY_FILE'] = $ina_varsass_list['VARS_ENTRY'];
+                 $ina_varsass_list['VARS_ENTRY']      = "";
+                 if($ina_varsass_list['VARS_ENTRY_FILE'] != "") {
+                     $AftFileCpy = true;
+                 }
+             } else {
+                 $ina_varsass_list['VARS_ENTRY_FILE'] = "";
+             }
+
+             // DBの項目ではないがFileUploadCloumn用のディレクトリ作成で必要な項目の初期化
+             $tgt_row['VARS_ENTRY_FILE_PATH']   = "";
 
              // トレースメッセージ
              if ( $log_level === 'DEBUG' ){
@@ -3109,14 +3271,14 @@
                                                            $ina_varsass_list['ASSIGN_SEQ']));
                  LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
             }
-
-
         }
         else{
             // 廃止なので復活する。
             $action = "UPDATE";
 
             $tgt_row = $in_VarsAssignRecodes[$key];
+
+            list($ret,$befFileDel,$AftFileCpy) = chkSubstitutionValueListRecodedifference($tgt_row,$ina_varsass_list);
 
             unset($in_VarsAssignRecodes[$key]);
 
@@ -3166,6 +3328,7 @@
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["VARS_ENTRY_FILE"]  = $ina_varsass_list['VARS_ENTRY_FILE'];
             $tgt_row["ACCESS_AUTH"]      = $ina_varsass_list['ACCESS_AUTH'];
             $tgt_row["SENSITIVE_FLAG"]   = $ina_varsass_list['SENSITIVE_FLAG'];
             $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
@@ -3202,6 +3365,7 @@
             $tgt_row['VARS_LINK_ID']      = $ina_varsass_list['VARS_LINK_ID'];
             $tgt_row['ASSIGN_SEQ']        = $ina_varsass_list['ASSIGN_SEQ'];
             $tgt_row["VARS_ENTRY"]        = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["VARS_ENTRY_FILE"]   = $ina_varsass_list['VARS_ENTRY_FILE'];
             $tgt_row["ACCESS_AUTH"]       = $ina_varsass_list['ACCESS_AUTH'];
             $tgt_row["SENSITIVE_FLAG"]    = $ina_varsass_list['SENSITIVE_FLAG'];
             $tgt_row["VARS_ENTRY_USE_TPFVARS"] = $VARS_ENTRY_USE_TPFVARS;
@@ -3304,6 +3468,18 @@
             unset($objQueryUtn);
             unset($objQueryJnl);
             return false;
+        }
+        if(($befFileDel === true)  || ($AftFileCpy === true)) { 
+            // アップロードアラムのディレクトリバックアップ
+            $ret = FileUPloadColumnBackup();
+            if($ret === false) {
+                return false;
+            }
+            // FileUploadColumn用ファイル配置
+            $ret = CreateFileUpLoadMenuColumnFileDirectory($befFileDel,$AftFileCpy,$tgt_row["ASSIGN_ID"],$tgt_row["JOURNAL_SEQ_NO"],$tgt_row['VARS_ENTRY_FILE_PATH'],$ina_varsass_list['COL_FILEUPLOAD_PATH']);
+            if($ret === false) {
+                return false;
+            }
         }
         unset($objQueryUtn);
         unset($objQueryJnl);
@@ -3690,6 +3866,8 @@
         global $strSeqOfJnlTableVarsAss;
         global $arrayConfigOfVarAss;
         global $arrayValueTmplOfVarAss;
+
+        global $vg_varass_menuID;
     
         $strCurTable      = $strCurTableVarsAss;
         $strJnlTable      = $strJnlTableVarsAss;
@@ -3722,7 +3900,28 @@
             return false;
         }
 
+        $obj = new FileUploadColumnDirectoryControl();
         while($row = $objQueryUtn_sel->resultFetch()) {
+           $ColumnName                  = 'VARS_ENTRY_FILE';
+           $FileName                    = $row['VARS_ENTRY_FILE'];
+           $Pkey                        = $row['ASSIGN_ID'];
+           $row['VARS_ENTRY_FILE_MD5']  = "";
+           $row['VARS_ENTRY_FILE_PATH'] = "";
+           if($FileName != "") {
+               $FilePath = $obj->getFileUpLoadFilePath($vg_varass_menuID,$ColumnName,$Pkey,$FileName);
+               if( ! file_exists($FilePath)) {
+                   if ( $log_level === 'DEBUG' ){
+                       $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55270",
+                                                                array($row['ASSIGN_ID'],
+                                                                      $FilePath));
+                       LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                       $warning_flag = true;
+                       continue;
+                   }
+               }
+               $row['VARS_ENTRY_FILE_PATH'] = $FilePath;
+               $row['VARS_ENTRY_FILE_MD5'] = md5_file($FilePath);
+           }
            $key = $row["OPERATION_NO_UAPK"] . "_" .
                   $row["PATTERN_ID"]        . "_" .
                   $row["SYSTEM_ID"]         . "_" .
@@ -4010,5 +4209,106 @@
         $beforeTime  = $unixtime;
         LocalLogPrint("","","$strtime,$difftime," . $logdata);
         return array($strtime,$unixtime);
+    }
+    function FileUPloadColumnBackup() {
+        global $vg_FileUPloadColumnBackupFilePath;
+        global $vg_varass_menuID;
+        global $objMTS;
+
+        // アップロードアラムのディレクトリバックアップ
+        $FUCobj = new FileUploadColumnDirectoryControl();
+        if($vg_FileUPloadColumnBackupFilePath == "") {
+            // アップロードカラム用のディレクトリが存在しない場合があるので、ここで作成
+            $ret = $FUCobj->CreateFileUpLoadMenuColumnDirectory($vg_varass_menuID,"VARS_ENTRY_FILE");
+            $error_msg = $FUCobj->GetLastError();
+            if($ret === false) {
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55290",array($error_msg));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                unset($FUCobj);
+                return false;
+            }
+            $ret = $FUCobj->FileUPloadColumnBackup($vg_varass_menuID,"VARS_ENTRY_FILE",$vg_FileUPloadColumnBackupFilePath);
+            $error_msg = $FUCobj->GetLastError();
+            if($ret === false) {
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55288",array($error_msg));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                unset($FUCobj);
+                return false;
+            }
+            unset($FUCobj);
+        }
+        return true;
+    }
+    function FileUPloadColumnRestore() {
+        global $vg_FileUPloadColumnBackupFilePath;
+        global $vg_varass_menuID;
+        global $objMTS;
+        // バックアップが失敗している場合は、バックアップファイルは削除されている
+        if($vg_FileUPloadColumnBackupFilePath != "") {
+            if(file_exists($vg_FileUPloadColumnBackupFilePath)) {
+                $FUCobj = new FileUploadColumnDirectoryControl();
+                $ret = $FUCobj->FileUPloadColumnRestore($vg_varass_menuID,"VARS_ENTRY_FILE",$vg_FileUPloadColumnBackupFilePath);
+                $error_msg = $FUCobj->GetLastError();
+                if($ret === false) {
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55289",array($error_msg));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                    unset($FUCobj);
+                    return false;
+                }
+                unset($FUCobj);
+            }
+        }
+        return true;
+    }
+    function CreateFileUpLoadMenuColumnFileDirectory($befFileDel,$AftFileCpy,$Pkey,$JnlPkey,$oldFileName,$newFileName) {
+        global $vg_varass_menuID;
+        global $objMTS;
+        if(($befFileDel === true)  || ($AftFileCpy === true)) { 
+            // FileUploadColumn履歴ディレクトリ作成
+            $FilePath    = "";
+            $JnlFilePath = "";
+            $FUCobj = new FileUploadColumnDirectoryControl();
+            $ret = $FUCobj->CreateFileUpLoadMenuColumnFileDirectory($vg_varass_menuID,"VARS_ENTRY_FILE",$Pkey,".",$JnlPkey,$FilePath,$JnlFilePath);
+            $error_msg = $FUCobj->GetLastError();
+            if($ret === false) {
+                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55290",array($error_msg));
+                LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+
+                unset($FUCobj);
+                return false;
+            }
+            unset($FUCobj);
+            if($befFileDel === true) {
+                $tgtFile = $oldFileName;
+                $cmd = sprintf("/bin/rm -f %s",escapeshellarg($tgtFile));
+                exec($cmd . " 2>&1",$outAry,$retCode);
+                if($retCode != 0) {
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55291",array($cmd,implode("\n",$outAry)));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                    return false;
+                }
+            }
+            if($AftFileCpy === true) { 
+                $From = $newFileName;
+                $cmd = sprintf("/bin/cp -fp %s %s",escapeshellarg($From),escapeshellarg($FilePath));
+                exec($cmd . " 2>&1",$outAry,$retCode);
+                if($retCode != 0) {
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55291",array($cmd,implode("\n",$outAry)));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                    return false;
+                }
+                $cmd = sprintf("/bin/cp -fp %s %s",escapeshellarg($From),escapeshellarg($JnlFilePath));
+                exec($cmd . " 2>&1",$outAry,$retCode);
+                if($retCode != 0) {
+                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55291",array($cmd,implode("\n",$outAry)));
+                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 ?>

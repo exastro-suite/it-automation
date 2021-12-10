@@ -502,6 +502,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "I_ANS_EXEC_OPTIONS"=>$exec_opt . ' ' . $arySinglePatternSource["ANS_EXEC_OPTIONS"],
         "EXEC_MODE"=>$exec_mode,
         "I_VIRTUALENV_NAME"=>$virtualenv_name,
+        "I_ENGINE_VIRTUALENV_NAME"=>$arySinglePatternSource["ANS_ENGINE_VIRTUALENV_NAME"],
         "CONDUCTOR_NAME"=>$conductor_name,
         "CONDUCTOR_INSTANCE_NO"=>$conductor_instance_no,
         "DISUSE_FLAG"=>"0",

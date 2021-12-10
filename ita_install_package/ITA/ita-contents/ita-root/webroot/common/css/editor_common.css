@@ -80,7 +80,7 @@ line-height: 27px;
 text-align: center;
 text-shadow: 1px 1px 0 rgba( 0,0,0,.8 );
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 font-weight: bold;
 color: #FFDD00;
 }
@@ -407,6 +407,9 @@ color: #DDD;
 .panel-td {
 padding: 1px 0;
 }
+.panel-td-button {
+width: 16px;
+}
 
 #KIZI input[type="text"].panel-text,
 #KIZI input[type="number"].panel-number,
@@ -434,7 +437,7 @@ resize: vertical;
 }
 .panel-span {
 display: inline-block;
-height: auto; min-height: 24px;
+height: auto; min-height: 26px;
 background-color: rgba( 0,0,0,.2 );
 line-height: 16px;
 word-break: break-all;
@@ -745,7 +748,7 @@ border-spacing: 1px;
 .modal-table td {
 padding: 4px 8px;
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 }
 .modal-table td {
@@ -802,6 +805,127 @@ color: #999;
 .modal-select-table tbody tr.selected th,
 .modal-select-table tbody tr.selected td {
 color: #80D13D;
+}
+
+.modal-notice-select-table tbody tr {
+cursor: default;
+}
+.modal-notice-select-table thead .notice-status {
+padding: 8px;
+}
+.modal-notice-select-table tbody .notice-name {
+text-align: left;
+word-break: break-all;
+}
+.modal-notice-select-table tbody .notice-status {
+padding: 0;
+}
+.modal-notice-select-table .modal-checkbox-wrap {
+position: relative;
+z-index: 0;
+height: 40px;
+}
+.modal-notice-select-table .modal-checkbox {
+position: absolute;
+z-index: -1;
+opacity: 0;
+}
+.modal-notice-select-table .modal-checkbox-label,
+.modal-notice-select-table .modal-checkbox-check-mark {
+display: block;
+position: absolute;
+left: 0; top: 0;
+z-index: 1;
+width: 100%; height: 100%;
+border: 1px solid rgba( 0,0,0,.1 );
+cursor: pointer;
+}
+.modal-notice-select-table .modal-checkbox-check-mark {
+cursor: default;
+}
+.modal-notice-select-table .modal-checkbox-label:hover {
+background-color: rgba( 255,255,255,.1 );
+}
+.modal-notice-select-table .modal-checkbox-label::before,
+.modal-notice-select-table .modal-checkbox-check-mark::before {
+content: '';
+display: block;
+position: absolute;
+left: 50%; top: 50%;
+z-index: 2;
+transform: translate(-50%,-50%);
+width: 24px; height: 24px;
+background-color: #111;
+border-radius: 4px;
+}
+.modal-notice-select-table .modal-checkbox:checked ~ .modal-checkbox-label::before,
+.modal-notice-select-table .modal-checkbox-check-mark::before {
+background-color: rgb( 96,198,13 );
+}
+.modal-notice-select-table .modal-checkbox:checked ~ .modal-checkbox-label::after,
+.modal-notice-select-table .modal-checkbox-check-mark::after {
+content: '';
+display: block;
+position: absolute;
+left: 50%;
+top: 50%;
+z-index: 3;
+transform: translate(-7px,-5px) rotate(-45deg);
+width: 14px;
+height: 8px;
+border-left: 4px solid #FFF;
+border-bottom: 4px solid #FFF;
+}
+.notice-status-bar {
+display: block;
+width: 100%; height: 8px;
+margin-bottom: 6px;
+background-color: #CCC;
+border: 2px solid #111;
+border-radius: 4px;
+}
+.notice-status-3 { background-color: #335581; } /* 実行中 */
+.notice-status-4 { background-color: #29ABE2; } /* 実行中（遅延）*/
+.notice-status-5 { background-color: #91D21E; } /* 正常終了 */
+.notice-status-6 { background-color: #FFDC00; } /* 緊急停止 */
+.notice-status-7 { background-color: #8227B4; } /* 以上終了 */
+.notice-status-8 { background-color: #E60000; } /* 想定外エラー */
+.notice-status-11 { background-color: #FFB400; } /* 警告終了 */
+
+.modal-checkbox-check-hide {
+display: flex;
+align-items: center;
+justify-content: center;
+width: 100%; height: 100%;
+opacity: .5;
+font-size: 20px;
+}
+.hide-notice-row {
+opacity: .5;
+}
+.modal-table tbody tr.hide-notice-row th {
+background-color: hsl( 0,0%,28% )!important;
+}
+.modal-table tbody tr.hide-notice-row td {
+background-color: hsl( 0,0%,20% )!important;
+}
+
+.notice-blank-messege {
+width: calc( 100% - 1px );
+margin: 0; padding: 8px;
+background-image: linear-gradient( #444, #444 8px, #4A4A4A );
+border: solid 1px #222;
+box-shadow: 1px 1px 0 0 rgba( 255,255,255,.1 ),
+            1px 1px 0 0 rgba( 255,255,255,.1 ) inset;
+color: #EEE;
+}
+.notice-blank-messege a:link,
+.notice-blank-messege a:visited {
+color: #337FE0;
+}
+.notice-blank-messege a:hover,
+.notice-blank-messege a:active {
+color: #FF833B;
 }
 
 .editor-modal-footer-menu {
@@ -891,7 +1015,7 @@ background-color: rgba( 255,255,255,.04 );
 margin: 0; padding: 2px 8px;
 line-height: 1.5;
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #CCC;
 animation: addLog .5s;
 }

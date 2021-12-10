@@ -53,6 +53,7 @@ CONDUCTORインターフェース情報
     $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITABASEH-MNU-304030"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
+    $table->setNoRegisterFlg(true);      // 登録画面無し
 
 
     //CONDUCTOR作業用データリレイストレージパス(ITA)

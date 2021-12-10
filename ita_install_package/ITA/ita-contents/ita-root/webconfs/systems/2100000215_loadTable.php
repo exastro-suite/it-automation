@@ -82,6 +82,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-215012'));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('DEL_SUB_DIR_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_TODO_MASTER_JNL',
+    	    'TTT_SEARCH_KEY_COLUMN_ID'=>'TODO_ID',
+        	'TTT_GET_TARGET_COLUMN_ID'=>'TODO_STATUS',
+    	    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+    	    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+	        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+	    )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
 

@@ -1,13 +1,25 @@
+<?php
+$getCopy = $_GET;
+$get_parameter = "";
+$get_parameter_anp = "";
+if("" != http_build_query($getCopy)){
+    $get_parameter = "?" . http_build_query($getCopy);
+    $get_parameter_anp = "&" . http_build_query($getCopy);
+}
+$get_parameter = str_replace('+', '%20', $get_parameter);
+$get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
+?>
+
 <?= $strLoginFormHeadBody ?>
 <div id="gateLoginContainer" class="gateContainer">
- <form id="gateLoginForm" class="inputUserInfoForm" method="POST" name="loginform" action="<?= $strGateUrl ?>?login&grp=<?= $ASJTM_grp_id ?>&no=<?= $ASJTM_id ?>">
-   <table id="gateLoginItemTable" class="headerLeftTable inputItemTable" border="0">
+ <form id="gateLoginForm" class="inputUserInfoForm" method="POST" name="loginform" action="<?= $strGateUrl ?><?= $get_parameter ?>">
+   <table id="gateLoginItemTable" class="headerLeftTable inputItemTable" border="0" aria-describedby="">
      <tr>
-       <th class="inputItemExplain"><?= $strLoginIDCaption ?></th>
+       <th scope="col" class="inputItemExplain"><?= $strLoginIDCaption ?></th>
        <td class="inputItemWrapper"><input class="inputUserId" type="text" name="username" /></td>
      </tr>
      <tr>
-       <th class="inputItemExplain"><?= $strLoginPWCaption ?></th>
+       <th scope="col" class="inputItemExplain"><?= $strLoginPWCaption ?></th>
        <td class="inputItemWrapper"><div class="input_password"><input class="inputUserPw" type="password" name="password" /><div class="password_eye"></div></td>
      </tr>
    </table>
@@ -23,7 +35,7 @@
       <?php if ($item['visibleFlag'] === '1') { ?>
 
       <li class="ssoLoginItem">
-        <a href="/common/common_sso_auth.php?<?= $item['authType'] ?>&providerId=<?= $item['providerId'] ?>&grp=<?= $ASJTM_grp_id ?>&no=<?= $ASJTM_id ?>">
+        <a href="/common/common_sso_auth.php?<?= $item['authType'] ?>&providerId=<?= $item['providerId'] ?><?= $get_parameter_anp ?>">
           <span class="ssoLoginLinkInner">
           <?php if (!empty($item['providerLogo'])) { ?>
 

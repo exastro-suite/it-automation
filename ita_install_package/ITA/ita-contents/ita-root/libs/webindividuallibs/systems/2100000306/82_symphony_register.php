@@ -75,75 +75,85 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
             $ret_mov = array();
             $objJSONarrChk = 1;
 
-            //処理種別のチェック
-            if ( array_key_exists(0, $value) ){
-                $Process_type = $value[0];
-            }else{
-                $Process_type = "";
-            }
-
-            if($Process_type == $strResultType02){
-            //更新前のデータを取得
-            $tmpArrayBind = array('SYMPHONY_CLASS_NO'=>$value[2] );
-            $sql = "SELECT * FROM C_SYMPHONY_CLASS_MNG WHERE SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO";
-            $objQuery = $objDBCA->sqlPrepare($sql);
-            $objQuery->sqlBind($tmpArrayBind);
-            $r = $objQuery->sqlExecute();
-            if($r!=true){
-                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-            }
-            while($row = $objQuery->resultFetch()) {
-                if ( !(array_key_exists(3, $value)) ){
-                    $value[3] = $row['SYMPHONY_NAME'];
+            if( is_array($value) ){
+                //処理種別のチェック
+                if ( array_key_exists(0, $value) ){
+                    $Process_type = $value[0];
+                }else{
+                    $Process_type = "";
                 }
-                if ( !(array_key_exists(4, $value)) ){
-                    $value[4] = $row['DESCRIPTION'];
-                }
-            }
 
-            $tmpArrayBind = array('SYMPHONY_CLASS_NO'=>$value[2] );
-            $sql = "SELECT * FROM C_MOVEMENT_CLASS_MNG WHERE SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO";
-            $objQuery = $objDBCA->sqlPrepare($sql);
-            $objQuery->sqlBind($tmpArrayBind);
-            $r = $objQuery->sqlExecute();
-            if($r!=true){
-                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-            }
-            while($row = $objQuery->resultFetch()) {
-                if ( !(array_key_exists(9, $value)) ){
-                    if($row['NEXT_PENDING_FLAG'] == "1"){
-                        $row['NEXT_PENDING_FLAG'] = "checkedValue";
-                    }else{
-                        $row['NEXT_PENDING_FLAG'] = "";
+                if($Process_type == $strResultType02){
+                //更新前のデータを取得
+                $tmpArrayBind = array('SYMPHONY_CLASS_NO'=>$value[2] );
+                $sql = "SELECT * FROM C_SYMPHONY_CLASS_MNG WHERE SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO";
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                $objQuery->sqlBind($tmpArrayBind);
+                $r = $objQuery->sqlExecute();
+                if($r!=true){
+                    throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+                while($row = $objQuery->resultFetch()) {
+                    if ( !(array_key_exists(3, $value)) ){
+                        $value[3] = $row['SYMPHONY_NAME'];
                     }
-                    $value[9][] = array("0" => $row['ORCHESTRATOR_ID'],
-                                         "1" => $row['PATTERN_ID'],
-                                         "2" => $row['NEXT_PENDING_FLAG'],
-                                         "3" => $row['DESCRIPTION'],
-                                         "4" => $row['OPERATION_NO_IDBH']);
+                    if ( !(array_key_exists(4, $value)) ){
+                        $value[4] = $row['DESCRIPTION'];
+                    }
                 }
-            }
-            ksort($value);
-            }
 
-            //配列構造のチェック
-            switch ($Process_type) {
-                //登録、更新
-                case $strResultType01:
-                case $strResultType02:
-                        if( count($value) == 6 ){
-                            if( is_array($value[9])){
-                                $objJSONarrChk=0;
+                $tmpArrayBind = array('SYMPHONY_CLASS_NO'=>$value[2] );
+                $sql = "SELECT * FROM C_MOVEMENT_CLASS_MNG WHERE SYMPHONY_CLASS_NO = :SYMPHONY_CLASS_NO";
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                $objQuery->sqlBind($tmpArrayBind);
+                $r = $objQuery->sqlExecute();
+                if($r!=true){
+                    throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+                while($row = $objQuery->resultFetch()) {
+                    if ( !(array_key_exists(10, $value)) ){
+                        if($row['NEXT_PENDING_FLAG'] == "1"){
+                            $row['NEXT_PENDING_FLAG'] = "checkedValue";
+                        }else{
+                            $row['NEXT_PENDING_FLAG'] = "";
+                        }
+                        $value[10][] = array("0" => $row['ORCHESTRATOR_ID'],
+                                             "1" => $row['PATTERN_ID'],
+                                             "2" => $row['NEXT_PENDING_FLAG'],
+                                             "3" => $row['DESCRIPTION'],
+                                             "4" => $row['OPERATION_NO_IDBH']);
+                    }
+                }
+                ksort($value);
+                }
+
+                //配列構造のチェック
+                switch ($Process_type) {
+                    //登録、更新
+                    case $strResultType01:
+                    case $strResultType02:
+                    
+                            // #1695
+                            if ( !(array_key_exists(5, $value)) ){
+                                $value[5] = "";
                             }
-                    }
-                    break;
-                //廃止、復活
-                case $strResultType03:
-                case $strResultType04:
-                    if( count($value) == 3 )$objJSONarrChk=0;
-                    break;
-                default:
-                    break;
+
+                            if( count($value) == 7 ){
+                                if( array_key_exists( 10, $value )){
+                                    if( is_array($value[10])){
+                                        $objJSONarrChk=0;
+                                    }                                
+                                }
+                            }
+                        break;
+                    //廃止、復活
+                    case $strResultType03:
+                    case $strResultType04:
+                        if( count($value) == 3 )$objJSONarrChk=0;
+                        break;
+                    default:
+                        break;
+                }
             }
 
             //データ構造異常時
@@ -165,6 +175,33 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                         if ( !array_key_exists(4, $value) )$value[4]="";
                     }
 
+                    //アクセス権のチェック  #1695
+                    if( array_key_exists(5, $value) && !is_array($value[5]) ){
+                        $tmpAAuthList = explode( "," ,$value[5] ) ;
+                        $arrAccessAuth = array();
+                        foreach ( $tmpAAuthList as $tmpAAuth ) {
+                            $tmpArrayBind = array( 'ROLE_NAME' => $tmpAAuth );
+                            $sql = "SELECT * FROM A_ROLE_LIST WHERE ROLE_NAME = :ROLE_NAME";
+
+                            $objQuery = $objDBCA->sqlPrepare($sql);
+                            $objQuery->sqlBind($tmpArrayBind);
+                            $r = $objQuery->sqlExecute();
+                            if($r!=true){
+                                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                            }
+                            while($row = $objQuery->resultFetch()) {
+                                $arrAccessAuth[] = $row['ROLE_ID'];
+                            }
+                        }               
+                        if( $arrAccessAuth != array() ){
+                            $value[5] = implode( "," , $arrAccessAuth );
+                        }else{
+                             $value[5] = "";
+                        }
+                    }else{
+                        $value[5]="";
+                    }
+
                     //symphony要素の成形、型変換
                     $objJSONOfReceptedData[$key][3]= array();
                     unset($objJSONOfReceptedData[$key][4]);
@@ -176,6 +213,12 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                                         "name"  => "symphony_tips",
                                         "value" => $value[4]
                     );
+                    // #1695 
+                    $objJSONOfReceptedData[$key][3][]= array(
+                                        "name"  => "ACCESS_AUTH",
+                                        "value" => $value[5]
+                    );
+
                     //最終更新時刻を変換、チェック
                     if ( array_key_exists(7, $value) ){
                         if( $value[7] != "" ) $objJSONOfReceptedData[$key][7] = substr_replace($value[7], "." , 16, 0);
@@ -184,20 +227,20 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                     }
 
                     //movemnt要素の配列チェック
-                    if( array_key_exists(9, $value) ){
+                    if( array_key_exists(10, $value) ){
                         //movemnt要素の配列順＝実行順序へ
-                        foreach ($value[9] as $key1 => $value1) {
+                        foreach ($value[10] as $key1 => $value1) {
                             $tmp_ary = array( 0 => $key1+1);
-                            $value[9][$key1] = array_merge($tmp_ary, $value[9][$key1]);
+                            $value[10][$key1] = array_merge($tmp_ary, $value[10][$key1]);
                         }
                         //Movemnt要素ss;<XX>型へ変換
-                        foreach ($value[9] as $key1 => $value1) {
+                        foreach ($value[10] as $key1 => $value1) {
                             $ret_mov[] = "ss;" . implode( "ss;", $value1 );
                         }
-                        $objJSONOfReceptedData[$key][9] =  implode( "", $ret_mov ) ;
+                        $objJSONOfReceptedData[$key][10] =  implode( "", $ret_mov ) ;
 
                     }else{
-                        $objJSONOfReceptedData[$key][9] =  array() ;
+                        $objJSONOfReceptedData[$key][10] =  array() ;
                     }
 
                     break;
@@ -242,7 +285,7 @@ function symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfRecept
                     if( array_key_exists(0, $value) ) $Process_type = $value[0];
                     if( array_key_exists(2, $value) ) $intShmphonyClassId = $value[2];
                     if( array_key_exists(3, $value) ) $arrayReceptData = $value[3];
-                    if( array_key_exists(9, $value) ) $strSortedData = $value[9];
+                    if( array_key_exists(10, $value) ) $strSortedData = $value[10];
                     if( array_key_exists(7, $value) ) $strLT4UBody = $value[7];
 
                     switch ($Process_type) {

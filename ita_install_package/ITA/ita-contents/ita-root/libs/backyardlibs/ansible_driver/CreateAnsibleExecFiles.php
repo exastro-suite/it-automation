@@ -35,7 +35,8 @@
 //  F0008 CreateChildPlaybookfiles
 //  F0009 CreatePioneerDialogfiles
 //  F0010 CreateDialogfiles
-//  F0011 CheckLegacyPlaybookfiles
+//  F0011-1 CheckLegacyPlaybookfiles
+//  F0011-2 CheckVariablesDefinedInDeviceList
 //  F0012 CheckPioneerPlaybookfiles
 //  F0013 CheckChildPlaybookFormat
 //  F0014 CheckDialogfileFormat
@@ -125,6 +126,8 @@ class CreateAnsibleExecFiles {
 
     // テンプレートファイル格納ディレクトリ名
     const LC_ANS_TEMPLATE_FILES_DIR          = "template_files";
+
+    const LC_ANS_UPLOAD_FILES_DIR            = "upload_files";
 
     // ユーザー公開用データリレイストレージパス 変数の名前
     const LC_ANS_OUTDIR_DIR                  = "user_files";
@@ -227,6 +230,8 @@ class CreateAnsibleExecFiles {
     private $lv_ita_child_playbooks_Dir;           //子PlayBook格納ディレクトリ(ITA側)
     private $lv_ita_dialog_files_Dir;              //対話ファイル格納ディレクトリ(ITA側)
     private $lv_ita_template_files_Dir;            //テンプレートファイル格納ディレクトリ(ITA側)
+
+    private $lv_Ansible_upload_files_Dir;          //FileUpLoadColumnファイル格納ディレクトリ(ITA側)
 
     // テーブル名定義
     private $lv_ansible_vars_masterDB;             // 変数管理テーブルテーブル名
@@ -341,6 +346,8 @@ class CreateAnsibleExecFiles {
     private  $lv_vault_value_list;        // ansible-vaultで暗号化した具体値配列
     private  $lv_vault_value_update_list; // ansible-vaultで暗号化した具体値の更新が済んでいる代入値管理のKey配列
 
+    private  $lv_engine_virtualenv_name;  // Ansible Engine virtualenv path
+
     // LegacyRoleCheckConcreteValueIsVarで必要とする情報
     private  $LegacyRoleCheckConcreteValueIsVar_use_host_name;
     private  $LegacyRoleCheckConcreteValueIsVar_use_var_list;
@@ -391,6 +398,7 @@ class CreateAnsibleExecFiles {
     //                      ロール変数管理 テーブル名
     //   $in_ans_if_info:   ansibleインターフェース情報
     //   $in_exec_no:       作業番号
+    //   $in_engine_virtualenv_name:  Ansible Engine virtualenv path
     //   &$in_objMTS:       メッセージ定義クラス変数
     //   &$in_objDBCA:      データベースアクセスクラス変数
     // 
@@ -419,6 +427,7 @@ class CreateAnsibleExecFiles {
                          $in_ansible_role_varsDB,
                          $in_ans_if_info,    
                          $in_exec_no,
+                         $in_engine_virtualenv_name,
                          &$in_objMTS,&$in_objDBCA){
         global $root_dir_path;
 
@@ -495,6 +504,8 @@ class CreateAnsibleExecFiles {
         $this->lv_vault_pass_update_list    = array();
         $this->lv_vault_value_list          = array();
         $this->lv_vault_value_update_list   = array();
+
+        $this->lv_engine_virtualenv_name    = $in_engine_virtualenv_name;
 
         $this->LegacyRoleCheckConcreteValueIsVar_use_host_name = "";
         $this->LegacyRoleCheckConcreteValueIsVar_use_var_list  = array();
@@ -634,6 +645,7 @@ class CreateAnsibleExecFiles {
                                      $in_conductor_instance_no
                                      ){
         global $root_dir_path;
+        global $g;
 
         $this->run_operation_id = $in_operation_id;
 
@@ -827,8 +839,9 @@ class CreateAnsibleExecFiles {
             }
             // template_filesディレクトリ名を記憶
             $this->setAnsible_template_files_Dir($c_dirwk);
+
             // ホスト変数ファイル内 template_filesディレクトリパスを記憶
-            $this->setHostvarsfile_template_file_Dir(self::LC_ANS_TEMPLATE_FILES_DIR);
+            $this->setHostvarsfile_template_file_Dir($c_dirwk);
         }
         // ドライバ区分がLEGACYかPioneer、ROLEの場合にcopy_filesディレクトリを作成する。
         if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
@@ -849,8 +862,24 @@ class CreateAnsibleExecFiles {
             // copy_filesディレクトリ名を記憶
             $this->setAnsible_copy_files_Dir($c_dirwk);
             // ホスト変数ファイル内 copy_filesディレクトリパスを記憶
-            $this->setHostvarsfile_copy_file_Dir(self::LC_ANS_COPY_FILES_DIR);
+
+            $this->setHostvarsfile_copy_file_Dir($c_dirwk);
         }
+
+        //upload_filesディレクトリ作成
+        $c_dirwk = $c_indir . "/" . self::LC_ANS_UPLOAD_FILES_DIR;
+        if( !mkdir( $c_dirwk, 0777 ) ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+        if( !chmod( $c_dirwk, 0777 ) ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+        //upload_filesディレクトリ名を記憶
+        $this->setAnsible_upload_files_Dir($c_dirwk);
 
         //ssh_key_filesディレクトリ作成
         $c_dirwk = $c_indir . "/" . self::LC_ANS_SSH_KEY_FILES_DIR;
@@ -969,6 +998,7 @@ class CreateAnsibleExecFiles {
 
             // ロールパッケージファイル名(ZIP)を取得
             $zipfile = $this->getAnsible_RolePackage_file($in_zipdir,$in_role_rolepackage_id,$role_package_file);
+            $pkey = "";
 
             // ロールパッケージファイル名(ZIP)の存在確認
             if( file_exists($zipfile) === false ){
@@ -1485,6 +1515,13 @@ class CreateAnsibleExecFiles {
             return false;
         }
 
+        /////////////////////////////////////////////
+        // Movmentインスタンスステータスファイル変数生成
+        /////////////////////////////////////////////
+        $ret = $this->CreateMovementStatusFileVariables($ina_hostinfolist,$ina_host_vars,$ina_pioneer_template_host_vars);
+        if($ret === false) {
+            return false;
+        }
 
         // 作業パターンに紐づいているグローバル変数を退避
         switch($this->getAnsibleDriverID()){
@@ -1573,6 +1610,14 @@ class CreateAnsibleExecFiles {
             if ( $this->CheckLegacyPlaybookfiles($ina_hosts,$ina_host_vars,$ina_child_playbooks) === false){
                 return false;
             }
+
+            /////////////////////////////////////////////////
+            // 機器一覧の変数定義チェック                  //
+            /////////////////////////////////////////////////
+            if ( $this->CheckVariablesDefinedInDeviceList($ina_hostinfolist,$ina_host_vars) === false) {
+                return false;
+            }
+
             ////////////////////////////////////////////////
             // 子Playbook内のtemplateモジュールをチェック //
             ////////////////////////////////////////////////
@@ -1769,17 +1814,25 @@ class CreateAnsibleExecFiles {
             }
 
             $hosts_extra_args = "";
-            // hosts_extra_argsの設定の有無を判定しhosts_extra_argsの内容を退避
-            if(strlen(trim($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'])) != 0){
-                $error_line = "";
-                $ret = $this->InventryFileAddOptionCheckFormat($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'],$hosts_extra_args,$error_line);
-                if($ret === false) {
-                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000076",array($host_name,$error_line));
-                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    return false;
+            switch($this->getAnsibleDriverID()) {
+            case DF_LEGACY_DRIVER_ID:
+            case DF_LEGACY_ROLE_DRIVER_ID:
+                // hosts_extra_argsの設定の有無を判定しhosts_extra_argsの内容を退避
+                if(strlen(trim($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'])) != 0){
+                    $error_line = "";
+                    $ret = $this->InventryFileAddOptionCheckFormat($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'],$hosts_extra_args,$error_line);
+                    if($ret === false) {
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000076",array($host_name,$error_line));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                        return false;
+                    }
+                    // array->文字列に変換
+                    $hosts_extra_args = implode("<<<__TAB__>>>",$hosts_extra_args);
+                    $hosts_extra_args = str_replace('<<<__TAB__>>>' , "\n          ",$hosts_extra_args);
                 }
-                $hosts_extra_args = implode("<<<__TAB__>>>",$hosts_extra_args);
-                $hosts_extra_args = str_replace('<<<__TAB__>>>' , "\n          ",$hosts_extra_args);
+                break;
+            default:
+                break;
             }
 
             $indento_sp_host = str_pad( " ", 8 , " ", STR_PAD_LEFT );
@@ -1846,6 +1899,7 @@ class CreateAnsibleExecFiles {
 
                     // ky_encryptで中身がスクランブルされているので復元する
                     $ret = ky_file_decrypt($ssh_key_file_path,$ssh_key_file_path);
+                    $in_system_id = $ina_hostinfolist[$host_name]['SYSTEM_ID'];
                     if($ret === false) {
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -1906,6 +1960,7 @@ class CreateAnsibleExecFiles {
                                                     $win_ca_file_path);
                     // ky_encryptで中身がスクランブルされているので、復元
                     $ret = ky_file_decrypt($win_ca_file_path,$win_ca_file_path);
+                    $in_system_id = $ina_hostinfolist[$host_name]['SYSTEM_ID'];
                     if($ret === false) {
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
                         $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -2152,20 +2207,9 @@ class CreateAnsibleExecFiles {
                 $vars_list = $ina_host_vars[$host_name];
             }
 
-            $chl_vars_list = array();
-            switch($this->getAnsibleDriverID()){
-            case DF_LEGACY_ROLE_DRIVER_ID:
-                //該当ホストの配列変数を取得
-                if(@count($ina_host_child_vars[$host_name]) != 0){
-                    $chl_vars_list = $ina_host_child_vars[$host_name];
-                }
-                break;
-            }
-
             // ホスト変数定義ファイル作成
             if($this->CreateHostvarsfile("VAR",$hostname,
                                          $file_name,$vars_list) === false)
-                                         //$chl_vars_list,$ina_DB_child_vars_master) === false)
             {
                 return false;
             }
@@ -2482,14 +2526,14 @@ class CreateAnsibleExecFiles {
 
                     if($in_var_type == "VAR"){
                         // テンプレートファイル内の変数具体値登録をチェックする設定にする。
-                        $templ_vars_chk = true;
+                        $temp_vars_chk = true;
     
                         //具体値にコピー/テンプレート変数が使用されているか判定する。
                         //変数の具体値にテンプレート変数かコピー変数が設定されている場合
                         //各変数に紐づくファイルを所定のディレクトリにコピーする。
                         //テンプレート変数の場合、テンプレートファイル内に変数がある場合
                         //変数の具体値が登録されているか判定する。
-                        $ret = $this->CheckConcreteValueIsVar($templ_vars_chk,
+                        $ret = $this->CheckConcreteValueIsVar($temp_vars_chk,
                                                               $val,
                                                               $ina_var_list,
                                                               $in_host_name,
@@ -2525,14 +2569,14 @@ class CreateAnsibleExecFiles {
 
                         // playbookのテンプレートモジュールでグローバル変数を使用している場合
                         // テンプレートファイル内の変数具体値登録をチェックする設定にする。
-                        $templ_vars_chk = true;
+                        $temp_vars_chk = true;
 
                         //具体値にコピー/テンプレート変数が使用されているか判定する。
                         //変数の具体値にテンプレート変数かコピー変数が設定されている場合
                         //各変数に紐づくファイルを所定のディレクトリにコピーする。
                         //テンプレート変数の場合、テンプレートファイル内に変数がある場合
                         //変数の具体値が登録されているか判定する。
-                        $ret = $this->CheckConcreteValueIsVar(true,
+                        $ret = $this->CheckConcreteValueIsVar($temp_vars_chk,
                                                               $val,
                                                               $ina_var_list,
                                                               $in_host_name,
@@ -3321,6 +3365,130 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     // F0011
     // 処理内容
+    //   Legacy用 
+    //   Playbookで使用している変数がホスト変数に登録されているかチェックする。
+    // パラメータ
+    //   $ina_hosts:            ホスト名(IP)配列
+    //                          [管理システム項番]=ホスト名(IP)
+    // 
+    //   $ina_host_vars:        ホスト変数配列
+    //                          [ホスト名(IP)][ 変数名 ]=>具体値
+    // 
+    // 戻り値
+    //   true:   正常
+    //   false:  異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CheckVariablesDefinedInDeviceList($ina_hostinfolist,$ina_host_vars) {
+        $result_code = true;
+        $obj = new InventryFileAddOptionContlorl($this->lv_objDBCA);
+        foreach( $ina_hostinfolist as $host_name => $row ){
+            // 機器一覧のインベントファイル追加オプションを取得
+            $InventryFileAddOptionStr = $row['HOSTS_EXTRA_ARGS'];
+            if(strlen(trim($InventryFileAddOptionStr)) != 0) {
+                continue;
+            }
+            $out_yaml_array = "";
+            $error_line     = "";
+            $ret = $obj->InventryFileAddOptionCheckFormat($InventryFileAddOptionStr,$out_yaml_array,$error_line);
+            if($ret === false) {
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000076",array($host_name,$error_line));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                $result_code = false;
+                continue;
+            }
+            // ローカル変数のリスト作成
+            $local_vars = array();
+            $local_vars[] = self::LC_ANS_PROTOCOL_VAR_NAME;
+            $local_vars[] = self::LC_ANS_USERNAME_VAR_NAME;
+            $local_vars[] = self::LC_ANS_PASSWD_VAR_NAME;
+            $local_vars[] = self::LC_ANS_LOGINHOST_VAR_NAME;
+            // ユーザー公開用データリレイストレージパス 変数の名前
+            $local_vars[] = self::LC_ANS_OUTDIR_VAR_NAME;
+
+            // ユーザー公開用 symphonyインスタンス作業用データリレイストレージパス 変数の名前
+            $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
+
+            // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
+            $local_vars[]  = self::LC_CONDUCTO_DIR_VAR_NAME;
+            $varsLineArray = array();
+            $varsArray     = array();
+            $FillterVars   = true;  // Fillterを含む変数の抜き出しあり
+            // インベントリ追加オプションに定義されている変数を抜き出す。
+            SimpleFillterVerSearch(DF_HOST_VAR_HED,$InventryFileAddOptionStr,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+            foreach( $varsArray as $var_name ){ 
+                // 変数分繰り返す
+                if(@strlen($ina_host_vars[$host_name][$var_name])==0) {
+                    if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56284",
+                                                                    array($var_name, $host_name));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    }
+                    elseif($var_name == self::LC_ANS_USERNAME_VAR_NAME){
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56282",
+                                                                    array($var_name, $host_name));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    }
+                    elseif($var_name == self::LC_ANS_PASSWD_VAR_NAME){
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56283",
+                                                                    array($var_name, $host_name));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    }
+                    elseif($var_name == self::LC_ANS_LOGINHOST_VAR_NAME){
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56281",
+                                                                    array( $var_name, $host_name));
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    }
+                    else{
+                        if((array_key_exists($var_name,$ina_host_vars[$host_name])===true)) {
+                            continue;
+                        }
+                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55285",
+                                                                    array( $var_name, $host_name)); 
+                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    }
+                    // エラーリターンする
+                    $result_code = false;
+                }
+                else{
+                    //予約変数を使用している場合に対象システム一覧に該当データが登録されているか判定
+                    if($ina_host_vars[$host_name][$var_name] == self::LC_ANS_UNDEFINE_NAME){
+                        // プロトコル未登録
+                        if($var_name == self::LC_ANS_PROTOCOL_VAR_NAME){
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56284",
+                                                                        array( $var_name, $host_name));
+                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                            $result_code = false;
+                        }
+                        // ユーザー名未登録
+                        elseif($var_name == self::LC_ANS_USERNAME_VAR_NAME){
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56282",
+                                                                        array( $var_name, $host_name));
+                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                            $result_code = false;
+                        }
+                        // ログインパスワード未登録
+                        elseif($var_name == self::LC_ANS_PASSWD_VAR_NAME){
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56283",
+                                                                        array( $var_name, $host_name));
+                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                            $result_code = false;
+                        }
+                        // ホスト名未登録
+                        elseif($var_name == self::LC_ANS_LOGINHOST_VAR_NAME){
+                            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56281",
+                                                                        array( $var_name, $host_name));
+                            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                            $result_code = false;
+                        }
+                    }
+                }
+            }
+        }
+        return $result_code;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // F0011-1
+    // 処理内容
     //   Legacy用 Playbookのフォーマットをチェックする
     //   Playbookで使用している変数がホスト変数に登録されているかチェックする。
     // パラメータ
@@ -3365,12 +3533,11 @@ class CreateAnsibleExecFiles {
                 // 子PlayBookに登録されている変数を抜出す。
                 $dataString = file_get_contents($file_name);
 
-                // グローバル変数を対話ファイルから抜出しグローバル変数管理に登録されていることを確認する。
-                // グローバル変数を対話ファイルから抜きす
-                $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_GBL_HED,$dataString,$local_vars);
-                $aryResultParse = $objWSRA->getParsedResult();
-                $file_global_vars_list = $aryResultParse[1];
-                unset($objWSRA);
+                // グローバル変数を子PlayBookから抜出しグローバル変数管理に登録されていることを確認する。
+                $varsLineArray         = array();
+                $file_global_vars_list = array();
+                $FillterVars           = true;  // Fillterを含む変数の抜き出しあり
+                SimpleFillterVerSearch(DF_HOST_GBL_HED,$dataString,$varsLineArray,$file_global_vars_list,$local_vars,$FillterVars);
 
                 if(count($file_global_vars_list) != 0){
                     // グローバル変数管理にグローバル変数が未定義の判定
@@ -3382,7 +3549,7 @@ class CreateAnsibleExecFiles {
                     }
                     // Playbookから抜き出したグローバル変数がグローバル変数管理に登録されているか判定
                     foreach( $file_global_vars_list as $var_name ){
-                        if(@count($this->lva_global_vars_list[$var_name]) == 0){
+                        if(array_key_exists($var_name,$this->lva_global_vars_list) === false){
                             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90239",array(basename($file_name),$var_name));
                             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                             // エラーリターンする
@@ -3410,13 +3577,11 @@ class CreateAnsibleExecFiles {
                 $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
 
                 // ホスト変数の抜出を示すパラメータを追加
-                $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$local_vars);
+                $varsLineArray     = array();
+                $file_vars_list    = array();
+                $FillterVars       = true;  // Fillterを含む変数の抜き出しあり
+                SimpleFillterVerSearch(DF_HOST_VAR_HED,$dataString,$varsLineArray,$file_vars_list,$local_vars,$FillterVars);
 
-                $aryResultParse = $objWSRA->getParsedResult();
-                unset($objWSRA);
-
-                $file_vars_list = $aryResultParse[1];
-    
                 // 子PlayBookで変数が使用されているか判定
                 if(count($file_vars_list) == 0){
                     // 子PlayBookで変数が使用されていない場合は以降のチェックをスキップ
@@ -3667,15 +3832,13 @@ class CreateAnsibleExecFiles {
 
                     // 変数具体値がTPF/CPF変数の場合の具体値置換えでない場合
                     if($in_SpecialVarValReplace === false) {
-                        // ローカル変数のリスト作成
-                        $local_vars = array();
-
                         // グローバル変数を対話ファイルから抜出しグローバル変数管理に登録されていることを確認する。
-                        // グローバル変数を対話ファイルから抜きす
-                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_GBL_HED,$dataString,$local_vars);
-                        $aryResultParse = $objWSRA->getParsedResult();
-                        $file_global_vars_list = $aryResultParse[1];
-                        unset($objWSRA);
+                        $local_vars    = array();
+                        $varsLineArray = array();
+                        $varsArray     = array();
+                        $FillterVars   = false;  // Fillterを含む変数の抜き出しあり
+                        SimpleFillterVerSearch(DF_HOST_GBL_HED,$dataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+                        $file_global_vars_list = $varsArray;
 
                         $globalvarSetTo = array();
                         if(count($file_global_vars_list) != 0){
@@ -3687,7 +3850,7 @@ class CreateAnsibleExecFiles {
                             }
                             // 対話ファイルから抜き出したグローバル変数がグローバル変数管理に登録されているか判定
                             foreach( $file_global_vars_list as $var_name ){
-                                if(@count($this->lva_global_vars_list[$var_name]) == 0){
+                                if(array_key_exists($var_name,$this->lva_global_vars_list) === false){
                                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90237",
                                                                                 array(basename($file_name),$var_name));
                                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -3712,11 +3875,12 @@ class CreateAnsibleExecFiles {
 
                     // copy変数を対話ファイルから抜出しファイル管理に登録されていることを確認する。
                     // copy変数を対話ファイルから抜きす。
-                    $local_vars = array();
-                    $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_CPF_HED,$dataString,$local_vars);
-                    $aryResultParse = $objWSRA->getParsedResult();
-                    $file_copy_vars_list = $aryResultParse[1];
-                    unset($objWSRA);
+                    $local_vars    = array();
+                    $varsLineArray = array();
+                    $varsArray     = array();
+                    $FillterVars   = false;  // Fillterを含む変数の抜き出しあり
+                    SimpleFillterVerSearch(DF_HOST_CPF_HED,$dataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+                    $file_copy_vars_list = $varsArray;
 
                     if(count($file_copy_vars_list) == 0){
                         // 対話ファイルで変数が使用されていない場合は以降のチェックをスキップ
@@ -3765,7 +3929,12 @@ class CreateAnsibleExecFiles {
 
                     // template変数を対話ファイルから抜出しファイル管理に登録されていることを確認する。
                     // template変数を対話ファイルから抜きす。
-                    SimpleVerSearch(DF_HOST_TPF_HED,$dataString,$la_tpf_vars);
+                    $local_vars    = array();
+                    $varsLineArray = array();
+                    $varsArray     = array();
+                    $FillterVars   = false;
+                    SimpleFillterVerSearch(DF_HOST_TPF_HED,$dataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+                    $la_tpf_vars = $varsLineArray;
 
                     if(count($la_tpf_vars) == 0){
                         // 対話ファイルで変数が使用されていない場合は以降のチェックをスキップ
@@ -3826,12 +3995,12 @@ class CreateAnsibleExecFiles {
 
                         // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
                         $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
+                        $varsLineArray = array();
+                        $varsArray     = array();
+                        $FillterVars   = false;  // Fillterを含む変数の抜き出しあり
+                        SimpleFillterVerSearch(DF_HOST_VAR_HED,$dataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+                        $file_vars_list = $varsArray;
 
-                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$local_vars);
-
-                        $aryResultParse = $objWSRA->getParsedResult();
-
-                        $file_vars_list = $aryResultParse[1];
                         // 対話ファイルで変数が使用されているか判定
                         if(count($file_vars_list) == 0){
                             // 対話ファイルで変数が使用されていない場合は以降のチェックをスキップ
@@ -3942,6 +4111,11 @@ class CreateAnsibleExecFiles {
                     // グローバル変数を具体値で置換える
                     $book_upd = false;
 
+                    if(isset($objWSRA) === false) {
+                        // WrappedStringReplaceAdminクラス生成のみ
+                        $local_vars = array();
+                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_CPF_HED,$dataString,$local_vars); 
+                    }
                     // 変数具体値がTPF/CPF変数の場合の具体値置換えでない場合
                     if($in_SpecialVarValReplace === false) {
                         if(count($globalvarSetTo) != 0){
@@ -3949,10 +4123,6 @@ class CreateAnsibleExecFiles {
                             $dataString = $objWSRA->getReplacedString();
                             $book_upd = true;
                         }
-                    }
-                    else {
-                        $local_vars = array();
-                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_CPF_HED,$dataString,$local_vars);
                     }
                     if(count($copyvarSetTo) != 0){
                         $objWSRA->stringReplace($dataString,$copyvarSetTo);
@@ -6629,13 +6799,13 @@ class CreateAnsibleExecFiles {
     //   $in_operation_id:      オペレーションID
     //   $ina_host_vars:        変数一覧返却配列
     //                          [ホスト名(IP)][ 変数名 ]=>具体値
-    // 
+    //   $in_ans_if_info:       インターフェース情報
     // 戻り値
     //   true:   正常
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function getDBRoleVarList($in_pattern_id,$in_operation_id,&$ina_host_vars,
-                          &$ina_MultiArray_vars_list,&$ina_All_vars_list)
+                          &$ina_MultiArray_vars_list,&$ina_All_vars_list,$in_ans_if_info)
     {
         $vars_assign_seq_list = array();
         $child_vars_list = array();
@@ -6650,6 +6820,7 @@ class CreateAnsibleExecFiles {
                "  TBL_1.ASSIGN_ID,                                                                          \n" .
                "  TBL_1.SYSTEM_ID,                                                                          \n" .
                "  TBL_1.VARS_ENTRY,                                                                         \n" .
+               "  TBL_1.VARS_ENTRY_FILE,                                                                    \n" .
                "  TBL_1.SENSITIVE_FLAG,                                                                     \n" .
                "  TBL_1.ASSIGN_SEQ,                                                                         \n" .
                "  TBL_2.VARS_NAME_ID AS VARS_NAME_ID,                                                       \n" .
@@ -6732,6 +6903,7 @@ class CreateAnsibleExecFiles {
                "      TBL.VARS_LINK_ID,                                                                     \n" .
                "      TBL.COL_SEQ_COMBINATION_ID,                                                           \n" .
                "      TBL.VARS_ENTRY,                                                                       \n" .
+               "      TBL.VARS_ENTRY_FILE,                                                                  \n" .
                "      TBL.SENSITIVE_FLAG,                                                                   \n" .
                "      TBL.ASSIGN_SEQ                                                                        \n" .
                "    FROM                                                                                    \n" .
@@ -6784,6 +6956,11 @@ class CreateAnsibleExecFiles {
         $tgt_row = array();
         $array_tgt_row = array();
         while ( $row = $objQuery->resultFetch() ){
+            $ret = $this->setFileUploadCloumnFileEnv($in_ans_if_info,$row);
+            if($ret !== true) {
+                unset($objQuery);
+                return false;
+            }
             switch($row['VARS_ATTRIBUTE_01']){
             case self::LC_VARS_ATTR_STRUCT:       // 多次元変数
                 array_push( $array_tgt_row, $row );
@@ -6998,6 +7175,7 @@ class CreateAnsibleExecFiles {
     //   $ina_DB_child_vars_list: 
     //                          メンバー変数マスタの配列変数のメンバー変数リスト返却
     //                          [ 変数名 ][メンバー変数名]=0
+    //   $in_ans_if_info:       インターフェース情報
     // 
     // 戻り値
     //   true:   正常
@@ -7006,7 +7184,7 @@ class CreateAnsibleExecFiles {
     function getDBVarList($in_pattern_id,$in_operation_id,&$ina_host_vars,
                          &$ina_pionner_template_host_vars,
                          &$ina_vault_vars,&$ina_vault_host_vars_file_list,
-                         &$ina_child_vars_list,&$ina_DB_child_vars_list)
+                         &$ina_child_vars_list,&$ina_DB_child_vars_list,$in_ans_if_info)
     {
         $vars_assign_seq_list = array();
         $child_vars_list = array();
@@ -7063,6 +7241,7 @@ class CreateAnsibleExecFiles {
                "      TBL_6.DISUSE_FLAG       = '0' \n" .
                "  ) AS VARS_NAME_COUNT, \n" .
                "  TBL_1.VARS_ENTRY, \n" .
+               "  TBL_1.VARS_ENTRY_FILE, \n" .
                "  TBL_1.SENSITIVE_FLAG, \n" .
                "  TBL_1.ASSIGN_SEQ, \n" .
                "  TBL_2.DISUSE_FLAG, \n" .
@@ -7074,6 +7253,7 @@ class CreateAnsibleExecFiles {
                "      TBL_3.SYSTEM_ID, \n" .
                "      TBL_3.VARS_LINK_ID, \n" .
                "      TBL_3.VARS_ENTRY, \n" .
+               "      TBL_3.VARS_ENTRY_FILE, \n" .
                "      TBL_3.SENSITIVE_FLAG, \n" .
                "      TBL_3.ASSIGN_SEQ \n" .
                "    FROM \n" .
@@ -7135,6 +7315,7 @@ class CreateAnsibleExecFiles {
                "      TBL_6.DISUSE_FLAG       = '0' \n" .
                "  ) AS VARS_NAME_COUNT, \n" .
                "  TBL_1.VARS_ENTRY, \n" .
+               "  TBL_1.VARS_ENTRY_FILE, \n" .
                "  TBL_1.SENSITIVE_FLAG, \n" .
                "  TBL_1.ASSIGN_SEQ, \n" .
                "  TBL_2.DISUSE_FLAG, \n" .
@@ -7146,6 +7327,7 @@ class CreateAnsibleExecFiles {
                "      TBL_3.SYSTEM_ID, \n" .
                "      TBL_3.VARS_LINK_ID, \n" .
                "      TBL_3.VARS_ENTRY, \n" .
+               "      TBL_3.VARS_ENTRY_FILE, \n" .
                "      TBL_3.SENSITIVE_FLAG, \n" .
                "      TBL_3.ASSIGN_SEQ \n" .
                "    FROM \n" .
@@ -7195,6 +7377,11 @@ class CreateAnsibleExecFiles {
         $tgt_row = array();
         $array_tgt_row = array();
         while ( $row = $objQuery->resultFetch() ){
+            $ret = $this->setFileUploadCloumnFileEnv($in_ans_if_info,$row);
+            if($ret !== true) {
+                unset($objQuery);
+                return false;
+            }
             array_push( $tgt_row, $row );
         }
 
@@ -8494,29 +8681,18 @@ class CreateAnsibleExecFiles {
                 // 子PlayBookのtemplateモジュールが使用されているか確認
                 // $la_tpf_vars[行番号]=テンプレート変数を返す
                 ///////////////////////////////////////////////////////////////////
-                $la_tpf_vars = array();
-                $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_TPF_HED,$dataString);
-                $aryResultParse = $objWSRA->getTPFvarsarrayResult();
-                $la_tpf_vars     = $aryResultParse[0];
-                $la_tpf_errors   = $aryResultParse[1];
+                $local_vars        = array();
+                $la_tpf_vars       = array();
+                $varsArray         = array();
+                $FillterVars       = true;  // Fillterを含む変数の抜き出しあり
+                SimpleFillterVerSearch(DF_HOST_TPF_HED,$dataString,$la_tpf_vars,$varsArray,$local_vars,$FillterVars);
 
-                unset($objWSRA);
-                // エラーが発生しているか確認
-                if(count($la_tpf_errors) > 0){
-                    foreach( $la_tpf_errors as $line_no => $errcode ){
-                        //現在のエラーリスト
-                        $msgstr = $this->lv_objMTS->getSomeMessage($errcode,
-                                                                   array(basename($playbook),
-                                                                   $line_no));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                    }
-                    $result_code = false;
-                }
                 ///////////////////////////////////////////////////////////////////
                 // テンプレート変数に紐づくテンプレートファイルの情報を取得
                 ///////////////////////////////////////////////////////////////////
                 $la_tpf_files = array();
-                foreach( $la_tpf_vars as $line_no => $tpf_var_name ){
+                foreach( $la_tpf_vars as $row ){
+                  foreach( $row as $line_no => $tpf_var_name ){
                     $tpf_key       = "";
                     $tpf_file_name = "";
                     $tpf_role_only = "";
@@ -8585,7 +8761,7 @@ class CreateAnsibleExecFiles {
                     if( $ret === false ){
                         $result_code = false;
                     }
-
+                  }
                 }
                 // 前処理でエラーが発生している場合は次のファイルへ
                 if($result_code === false){
@@ -8693,7 +8869,7 @@ class CreateAnsibleExecFiles {
         if(isset($ina_tpf_vars_struct_array['GBL_vars_info']['1'])) {
             // テンプレートに登録されているグローバル変数のデータベース登録確認 
             foreach($ina_tpf_vars_struct_array['GBL_vars_info']['1'] as $var_name=>$dummy) {
-                if(@count($this->lva_global_vars_list[$var_name]) == 0){
+                if(array_key_exists($var_name,$this->lva_global_vars_list) === false){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90240",
                                                                 array($in_file_type_name, basename($in_child_playbook),
                                                                       basename($templatefile),
@@ -8706,6 +8882,10 @@ class CreateAnsibleExecFiles {
                     $use_gbl_vars_list[$var_name] = 1;
                 }
             }
+        }
+        // 未登録のグローバル変数がある場合は別のエラーとして扱われるのでリターンする
+        if($result_code === false) {
+            return false;
         }
 
         // ローカル変数のリスト初期化
@@ -8726,10 +8906,15 @@ class CreateAnsibleExecFiles {
         $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
 
         $file_vars_list = array();
-        // テンプレートからローカル変数を抜出す
-        $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$local_vars);
-        $file_vars_list = $objWSRA->getTPFVARSParsedResult();
-        unset($objWSRA);
+        // テンプレートからITA独自変数を抜出す
+        $varsLineArray         = array();
+        $file_vars_list        = array();
+        if($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) {
+            $FillterVars           = false;  // Fillterを含む変数の抜き出しなし
+        } else {
+            $FillterVars           = true;  // Fillterを含む変数の抜き出しあり
+        }
+        SimpleFillterVerSearch(DF_HOST_VAR_HED,$dataString,$varsLineArray,$file_vars_list,$local_vars,$FillterVars);
 
         // VAR変数ほ除外する。
         foreach($file_vars_list as $no=>$var_name) {
@@ -9479,6 +9664,7 @@ class CreateAnsibleExecFiles {
                "   TBL_1.DISUSE_FLAG = '0';                            \n";
 
         $objQuery = $this->lv_objDBCA->sqlPrepare($sql);
+        $in_pattern_id = "";
         if($objQuery->getStatus()===false){
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-56100",array(basename(__FILE__),__LINE__));
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -9726,7 +9912,12 @@ class CreateAnsibleExecFiles {
                 ///////////////////////////////////////////////////////////////////
                 // 子PlayBookのcopyモジュールが使用されているか確認
                 ///////////////////////////////////////////////////////////////////
-                SimpleVerSearch(DF_HOST_CPF_HED,$dataString,$la_cpf_vars);
+                $local_vars    = array();
+                $varsLineArray = array();
+                $varsArray     = array();
+                $FillterVars   = true;
+                SimpleFillterVerSearch(DF_HOST_CPF_HED,$dataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+                $la_cpf_vars = $varsLineArray;
 
                 ///////////////////////////////////////////////////////////////////
                 // copy変数に紐づくファイルの情報を取得
@@ -10442,9 +10633,16 @@ class CreateAnsibleExecFiles {
             foreach( $tgt_file_list as $tgt_file => $line_no_list ){
                 foreach( $line_no_list as $line_no => $cpf_var_name_list ){
                     foreach( $cpf_var_name_list as $cpf_var_name => $file_info_list ){
+
                         // inディレクトリ配下のcopyファイルバスを取得
                         $cpf_path = $this->getHostvarsfile_copy_file_value($file_info_list['CONTENTS_FILE_ID'],
                                                                            $file_info_list['CONTENTS_FILE']);
+
+                        // ファイルパスをansible側から見たパスに変更する。
+                        $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                $cpf_path);
+
                         // $la_cpf_path[copy変数]=inディレクトリ配下ののcopyファイルパス
                         $la_cpf_path[$cpf_var_name] = $cpf_path;
 
@@ -10557,6 +10755,30 @@ class CreateAnsibleExecFiles {
         unset($objQuery);
     
         return true;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   inディレクトリからのFileUpLoadColumnファイル格納ディレクトリパス(upload_files)を記憶
+    // パラメータ
+    //   $in_dir:      ssh_key_filesディレクトリ
+    //
+    // 戻り値
+    //   なし
+    ////////////////////////////////////////////////////////////////////////////////
+    function setAnsible_upload_files_Dir($in_indir){
+        $this->lv_Ansible_upload_files_Dir = $in_indir;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   inディレクトリからのSSH秘密鍵ファイル格納ディレクトリパス(upload_files)を取得
+    // パラメータ
+    //   なし
+    //
+    // 戻り値
+    //   copy_filesディレクトリ名
+    ////////////////////////////////////////////////////////////////////////////////
+    function getAnsible_upload_files_Dir(){
+        return($this->lv_Ansible_upload_files_Dir);
     }
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
@@ -10768,7 +10990,7 @@ class CreateAnsibleExecFiles {
     //   変数の具体値にコピー/テンプレート変数が使用されてるかを判定
     //   使用されている場合に各ファイルを所定のディレクトリにコピーする。
     // パラメータ
-    //   $in_templ_vars_chk:         テンプレート変数の場合にテンプレートファイル内の変数具体値チェック有無
+    //   $in_temp_vars_chk:         テンプレート変数の場合にテンプレートファイル内の変数具体値チェック有無
     //                               true:チェック有 false:チェック無
     //   $in_var_name:               変数名
     //   $in_var_val:                変数の具体値
@@ -10787,7 +11009,7 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     // 
     ////////////////////////////////////////////////////////////////////////////////
-    function CheckConcreteValueIsVar($in_templ_vars_chk,
+    function CheckConcreteValueIsVar($in_temp_vars_chk,
                                      $in_var_val,
                                      $ina_var_list,
                                      $in_host_name,
@@ -10872,11 +11094,14 @@ class CreateAnsibleExecFiles {
                 $la_tpf_files[$tpf_key]=$tpf_file_name;
                 switch($this->getAnsibleDriverID()){
                 case DF_LEGACY_DRIVER_ID:
+
                     // テンプレートファイルバスを取得
                     $tpf_path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
+
                     $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
                                             $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                             $tpf_path);
+
                     break;
                 case DF_PIONEER_DRIVER_ID:
                     // templateモジュールのコピー先パス生成 ホスト名は__loginhostname__
@@ -10893,14 +11118,20 @@ class CreateAnsibleExecFiles {
 
                     // templateモジュールのsrc/destパス退避
                     $this->lv_tpf_var_file_path_list[$tpf_var_name] = array();
-                    $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
+
+                    $tpf_src_path = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
+                    $tpf_src_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                $tpf_src_path);
+
+                    $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $tpf_src_path;
                     $this->lv_tpf_var_file_path_list[$tpf_var_name]['dest'] = $tmpmod_tpf_path;
                     break;
                 }
                 // テンプレートファイルパスのパスを退避
                 $ina_tpf_vars_list[$in_host_name][$tpf_var_name] = $tpf_path;
 
-                if($in_templ_vars_chk === true){
+                if($in_temp_vars_chk === true){
                     // テンプレートファイル内のホスト変数を確認
                     $ret = $this->CheckConcreteValueIsVarTemplatefile($in_host_name,$ina_var_list,
                                                                       $tpf_var_name,$tpf_key,$tpf_file_name,
@@ -10973,6 +11204,7 @@ class CreateAnsibleExecFiles {
                 $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
                                         $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                         $cpf_path);
+
                 // $ina_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
                 $ina_cpf_vars_list[$in_host_name][$cpf_var_name] = $cpf_path;
                 $this->lv_cpf_var_file_path_list[$cpf_var_name] = $cpf_path;
@@ -11056,7 +11288,7 @@ class CreateAnsibleExecFiles {
         if(isset($ina_tpf_vars_struct_array['GBL_vars_info']['1'])) {
             // テンプレートに登録されているグローバル変数のデータベース登録確認
             foreach($ina_tpf_vars_struct_array['GBL_vars_info']['1'] as $var_name=>$dummy) {
-                if(@count($this->lva_global_vars_list[$var_name]) == 0){
+                if(array_key_exists($var_name,$this->lva_global_vars_list) === false){
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000016",
                                                                 array(basename($templatefile),
                                                                       $var_name));
@@ -11078,11 +11310,15 @@ class CreateAnsibleExecFiles {
         $local_vars[] = self::LC_SYMPHONY_DIR_VAR_NAME;
         $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
 
-        $file_vars_list = array();
         // テンプレートからローカル変数を抜出す
-        $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$local_vars);
-        $file_vars_list = $objWSRA->getTPFVARSParsedResult();
-        unset($objWSRA);
+        $varsLineArray         = array();
+        $file_vars_list        = array();
+        if($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID) {
+            $FillterVars           = false;  // Fillterを含む変数の抜き出しなし
+        } else {
+            $FillterVars           = true;  // Fillterを含む変数の抜き出しあり
+        }
+        SimpleFillterVerSearch(DF_HOST_VAR_HED,$dataString,$varsLineArray,$file_vars_list,$local_vars,$FillterVars);
 
         // VAR変数ほ除外する。
         foreach($file_vars_list as $no=>$var_name) {
@@ -11287,9 +11523,10 @@ class CreateAnsibleExecFiles {
 
         $file_vars_list = array();
         // テンプレートからローカル変数を抜出す
-        $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$local_vars);
-        $file_vars_list = $objWSRA->getTPFVARSParsedResult();
-        unset($objWSRA);
+        $varsLineArray         = array();
+        $file_vars_list        = array();
+        $FillterVars           = true;  // Fillterを含む変数の抜き出しあり
+        SimpleFillterVerSearch(DF_HOST_VAR_HED,$dataString,$varsLineArray,$file_vars_list,$local_vars,$FillterVars);
 
         // VAR変数ほ除外する。
         foreach($file_vars_list as $no=>$var_name) {
@@ -11483,8 +11720,8 @@ class CreateAnsibleExecFiles {
                     $path = $this->getHostvarsfile_copy_file_value($key,$file_name);
 
                     $path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                            $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                            $path);
+                                        $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                        $path);
 
                     // $ina_legacy_Role_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
                     $ina_legacy_Role_cpf_vars_list[$var_name] = $path;
@@ -11693,7 +11930,12 @@ class CreateAnsibleExecFiles {
                     ///////////////////////////////////////////////////////////////////
                     // 対話ファイルでcopy変数が使用されているか確認
                     ///////////////////////////////////////////////////////////////////
-                    SimpleVerSearch(DF_HOST_CPF_HED,$dataString,$la_cpf_vars);
+                    $local_vars    = array();
+                    $varsLineArray = array();
+                    $varsArray     = array();
+                    $FillterVars   = false;
+                    SimpleFillterVerSearch(DF_HOST_CPF_HED,$dataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+                    $la_cpf_vars   = $varsLineArray;
 
                     ///////////////////////////////////////////////////////////////////
                     // copy変数に紐づくファイルの情報を取得
@@ -11930,7 +12172,12 @@ class CreateAnsibleExecFiles {
                     ///////////////////////////////////////////////////////////////////
                     // 対話ファイルでtemplate変数が使用されているか確認
                     ///////////////////////////////////////////////////////////////////
-                    SimpleVerSearch(DF_HOST_TPF_HED,$dataString,$la_tpf_vars);
+                    $local_vars    = array();
+                    $varsLineArray = array();
+                    $varsArray     = array();
+                    $FillterVars   = false;
+                    SimpleFillterVerSearch(DF_HOST_TPF_HED,$dataString,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+                    $la_tpf_vars = $varsLineArray;
 
                     ///////////////////////////////////////////////////////////////////
                     // template変数に紐づくファイルの情報を取得
@@ -12011,6 +12258,7 @@ class CreateAnsibleExecFiles {
 
                             // templateモジュールのsrc/destパス退避
                             $this->lv_tpf_var_file_path_list[$tpf_var_name] = array();
+
                             $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $src_tpf_path;
                             $this->lv_tpf_var_file_path_list[$tpf_var_name]['dest'] = $tmpmod_tpf_path;
                             // テンプレートファイル内のホスト変数を確認
@@ -12155,9 +12403,16 @@ class CreateAnsibleExecFiles {
             foreach( $tgt_file_list as $tgt_file => $line_no_list ){
                 foreach( $line_no_list as $line_no => $tpf_var_name_list ){
                     foreach( $tpf_var_name_list as $tpf_var_name => $file_info_list ){
+
                         // inディレクトリ配下のcopyファイルバスを取得
                         $tpf_path = $this->getHostvarsfile_template_file_value($file_info_list['CONTENTS_FILE_ID'],
                                                                                $file_info_list['CONTENTS_FILE']);
+
+                        // ファイルパスをansible側から見たパスに変更する。
+                        $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                                $tpf_path);
+
                         // $la_tpf_path[テンプレート変数]=inディレクトリ配下ののcopyファイルパス
                         $la_tpf_path[$tpf_var_name] = $tpf_path;
 
@@ -12437,15 +12692,17 @@ class CreateAnsibleExecFiles {
                 $RequestContents
                 = array(
                     //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
-                    'DATA_RELAY_STORAGE_TRUNK'=>'/tmp',
+                    'DATA_RELAY_STORAGE_TRUNK'=>$this->lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],
                     //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
                     "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
                     //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
-                    "EXE_NO"=>"9999999999",
+                    "EXE_NO"=>$this->lv_exec_no,
                     // ansible-vault 実行ユーザー
                     "EXEC_USER"=>$in_exec_user,
                     // 暗号化する文字列
-                    "TARGET_VALUE"=>$enc_in_pass);
+                    "TARGET_VALUE"=>$enc_in_pass,
+                    //Ansible Engin Virtualenv Path
+                    'ANS_ENGINE_VIRTUALENV_NAME'=>$this->lv_engine_virtualenv_name);
 
                 $proxySetting              = array();
                 $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
@@ -12561,15 +12818,17 @@ class CreateAnsibleExecFiles {
             $RequestContents
                 = array(
                     //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
-                    'DATA_RELAY_STORAGE_TRUNK'=>'/tmp',
+                    'DATA_RELAY_STORAGE_TRUNK'=>$this->lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],
                     //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
                     "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
                     //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
-                    "EXE_NO"=>"9999999999",
+                    "EXE_NO"=>$this->lv_exec_no,
                     // ansible-vault 実行ユーザー
                     "EXEC_USER"=>$in_exec_user,
                     // 暗号化する文字列
-                    "TARGET_VALUE"=>$decryptData);
+                    "TARGET_VALUE"=>$decryptData,
+                    //Ansible Engin Virtualenv Path
+                    'ANS_ENGINE_VIRTUALENV_NAME'=>$this->lv_engine_virtualenv_name);
 
             $proxySetting              = array();
             $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
@@ -12664,15 +12923,17 @@ class CreateAnsibleExecFiles {
                 $RequestContents
                 = array(
                         //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
-                        'DATA_RELAY_STORAGE_TRUNK'=>'/tmp',
+                        'DATA_RELAY_STORAGE_TRUNK'=>$this->lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],
                         //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
                         "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
                         //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
-                        "EXE_NO"=>"9999999999",
+                        "EXE_NO"=>$this->lv_exec_no,
                         // ansible-vault 実行ユーザー
                         "EXEC_USER"=>$in_exec_user,
                         // 暗号化する文字列
-                        "TARGET_VALUE"=>$enc_in_pass);
+                        "TARGET_VALUE"=>$enc_in_pass,
+                        //Ansible Engin Virtualenv Path
+                        'ANS_ENGINE_VIRTUALENV_NAME'=>$this->lv_engine_virtualenv_name);
 
                 $proxySetting              = array();
                 $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
@@ -13008,6 +13269,48 @@ if(isset($Expansion_root)) {
 
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
+    //   Movementステータスファイル変数生成
+    // パラメータ
+    //   $ina_hostinfolist:  機器一覧ホスト情報配列
+    //   $ina_host_vars:     ホスト変数定義配列
+    //   $ina_pioneer_template_host_vars:     
+    //                       pioneer tamplate用 ホスト変数定義配列
+    //
+    // 戻り値
+    //   true:  正常
+    //   false: 異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function CreateMovementStatusFileVariables($ina_hostinfolist,&$ina_host_vars,&$ina_pioneer_template_host_vars) {
+        $drive_list[DF_LEGACY_DRIVER_ID]      = 'legacy/ns';
+        $drive_list[DF_PIONEER_DRIVER_ID]     = 'pioneer/ns';
+        $drive_list[DF_LEGACY_ROLE_DRIVER_ID] = 'legacy/rl';
+
+        // ドライバ種別
+        $driver_id      = $this->getAnsibleDriverID();
+        // 作業番号
+        $execute_no     = sprintf("%010s",$this->lv_exec_no);
+        // データリレイストレージパス(ITA)
+        $ita_base_dir   = $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA');
+        // データリレイストレージパス(ansible)
+        $ans_base_dir   = $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS');
+
+        foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
+            $hostname = $hostinfo['HOSTNAME'];
+
+            $host_var_name  = "__movement_status_filepath__"; 
+            $host_var_vaule = sprintf("%s/%s/%s/out/MOVEMENT_STATUS_FILE"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+            switch($this->getAnsibleDriverID()){
+            case DF_PIONEER_DRIVER_ID:
+                $ina_pioneer_template_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
+                break;
+            }
+        }
+        return true;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
     //   Pioneer LAMG用 ローカル変数設定
     // パラメータ
     //   $ina_hostinfolist:  機器一覧ホスト情報配列
@@ -13084,14 +13387,10 @@ if(isset($Expansion_root)) {
         }
     
         $operationStr = "";
-        while ( $row = $objQuery->resultFetch() ){
-            $operationStr = sprintf("%s_%s:%s", $row['OPERATION_DATE'],
-                                    $in_operation_id,
-                                    $row['OPERATION_NAME']);
-            break;
-           
-        }
-
+        $row = $objQuery->resultFetch();
+        $operationStr = sprintf("%s_%s:%s", $row['OPERATION_DATE'],
+                                $in_operation_id,
+                                $row['OPERATION_NAME']);
         // DBアクセス事後処理
         unset($objQuery);
 
@@ -13129,6 +13428,146 @@ if(isset($Expansion_root)) {
             return false;
         }
         return true;
+    }
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   代入値管理の具体値に設定されているファイルをansible実行環境に展開
+    // パラメータ
+    //   $in_ans_if_info: インターフェース情報
+    //   $row:            代入値管理の情報
+    //
+    // 戻り値
+    //   true:  正常
+    //   false: 異常
+    ////////////////////////////////////////////////////////////////////////////////
+    function setFileUploadCloumnFileEnv($in_ans_if_info,&$row) {
+        global $root_dir_path;
+
+        if($row['VARS_ENTRY_FILE'] == "") {
+            return true;
+        }
+        $driver_id = $this->getAnsibleDriverID();
+        switch($this->getAnsibleDriverID()) {
+        case DF_LEGACY_DRIVER_ID:
+            $menuID = '2100020109';
+            break;
+        case DF_PIONEER_DRIVER_ID:
+            $menuID = '2100020210';
+            break;
+        case DF_LEGACY_ROLE_DRIVER_ID:
+            $menuID = '2100020311';
+            break;
+        default:
+            break;
+        }
+
+        $srcFilePath = sprintf("%s/uploadfiles/%s/VARS_ENTRY_FILE/%010d/%s",$root_dir_path,$menuID,$row['ASSIGN_ID'],$row['VARS_ENTRY_FILE']);
+
+        if( file_exists($srcFilePath) === false ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55292",array($row['ASSIGN_ID']));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+
+        $ITADestDirPath = sprintf("%s/%010s",$this->getAnsible_upload_files_Dir(),$row['ASSIGN_ID']);
+        $AnsDestDirPath = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                      $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                      $ITADestDirPath);
+
+        if( !is_dir( $ITADestDirPath) ){
+            //ドライバ区分ディレクトリが存在している場合はなにもしない
+            if( !mkdir( $ITADestDirPath, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+            if( !chmod( $ITADestDirPath, 0777 ) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+
+        $ITADestDirPath .= "/" . $row['VARS_ENTRY_FILE'];
+        $AnsDestDirPath .= "/" . $row['VARS_ENTRY_FILE'];
+        $cmd = sprintf("/bin/cp -f %s %s  2>&1",escapeshellarg($srcFilePath),escapeshellarg($ITADestDirPath));
+
+        $outAry = array();
+        exec($cmd ,$outAry, $ret);
+        if($ret != 0) {
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55293",array($row['ASSIGN_ID'],implode("\n",$outAry)));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+
+        $row['VARS_ENTRY'] = $AnsDestDirPath;
+        $row['VARS_ENTRY_FILE'] = "";
+
+        return true;
+    }
+    function AnsibleEnginVirtualenvPathCheck() {
+        global $root_dir_path;
+        global $vg_OrchestratorSubId;
+
+        if($this->lv_engine_virtualenv_name == "") {
+            return true;
+        }
+        require_once ($root_dir_path . '/libs/commonlibs/common_ansible_restapi.php' );
+
+        $RequestURI = "/restapi/ansible_driver/venvpathcheck.php";
+        $Method     = 'GET';
+
+        $RequestContents = array(
+                    //データリレイパス(不要だがI/Fを合わせる為にダミー値を設定)
+                    'DATA_RELAY_STORAGE_TRUNK'=>$this->lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],
+                    //オーケストレータ識別子(不要だがI/Fを合わせる為にダミー値を設定)
+                    "ORCHESTRATOR_SUB_ID"=>$vg_OrchestratorSubId,
+                    //作業実行ID(不要だがI/Fを合わせる為にダミー値を設定)
+                    "EXE_NO"=>$this->lv_exec_no,
+                    //Ansible Engin Virtualenv Path
+                    'ANS_ENGINE_VIRTUALENV_NAME'=>$this->lv_engine_virtualenv_name);
+
+        $proxySetting              = array();
+        $proxySetting['address']   = $this->lv_ans_if_info["ANSIBLE_PROXY_ADDRESS"];
+        $proxySetting['port']      = $this->lv_ans_if_info["ANSIBLE_PROXY_PORT"];
+
+        ////////////////////////////////////////////////////////////////
+        // Ansible Engin Virtualenv Path確認 REST APIコール           //
+        ////////////////////////////////////////////////////////////////
+        $rest_api_response = ansible_restapi_access( $this->lv_ans_if_info['ANSIBLE_PROTOCOL'],
+                                                     $this->lv_ans_if_info['ANSIBLE_HOSTNAME'],
+                                                     $this->lv_ans_if_info['ANSIBLE_PORT'],
+                                                     $this->lv_ans_if_info['ANSIBLE_ACCESS_KEY_ID'],
+                                                     ky_decrypt( $this->lv_ans_if_info['ANSIBLE_SECRET_ACCESS_KEY'] ),
+                                                     $RequestURI,
+                                                     $Method,
+                                                     $RequestContents,
+                                                     $proxySetting );
+
+        if( $rest_api_response['StatusCode'] == 200 ){
+             $out_vaultpass = $rest_api_response['ResponsContents']['resultdata'];
+             if($rest_api_response['ResponsContents']['status'] == "SUCCEED") {
+             } elseif($rest_api_response['ResponsContents']['status'] == "FAILED") {
+                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90310");
+                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$rest_api_response['ResponsContents']['resultdata']);
+                 return false;
+             } else {
+                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90310");
+                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                 $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
+                 return false;
+             }
+         } else {
+             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-51068",array($this->lv_exec_no));
+             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+             $this->LocalLogPrint(basename(__FILE__),__LINE__,var_export($rest_api_response,true));
+             return false;
+         }
+         return true;
+    }
+    function GetEngineVirtualenvName() {
+        return $this->lv_engine_virtualenv_name;
     }
 }
 

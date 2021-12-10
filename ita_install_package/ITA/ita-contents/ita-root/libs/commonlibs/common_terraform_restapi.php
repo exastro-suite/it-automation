@@ -1281,5 +1281,70 @@
 
     }
 
+    ///////////////////////////////
+    // outputsを取得する//
+    ///////////////////////////////
+    function get_outputs($hostname, $token, $state_version_output_id, $proxySetting){
+        //requestURI
+        $requestURI = "api/v2/state-version-outputs/$state_version_output_id";
+        //method
+        $method = "GET";
+
+        //restApiResponse
+        $restApiResponse = terraform_restapi_access(
+            $hostname, //hostname
+            $token, //token
+            $requestURI, //requestURI
+            $method, //method
+            null, //requestContents
+            $proxySetting //proxySetting
+        );
+
+        return $restApiResponse;
+
+    }
+
+    ////////////////////////////////////
+    // Workspaceをdestroyするrunsの作成//
+    ///////////////////////////////////
+    function destroy_workspace($hostname, $token, $workspaceID, $proxySetting)
+    {
+        //requestURI
+        $requestURI = "api/v2/runs/";
+        //method
+        $method = "POST";
+
+        $requestContents = array(
+            "data" => array(
+                "type"         => "runs",
+                "attributes"   => array(
+                    "is-destroy" => true,
+                    "message"    => "Triggered Destroy"
+                ),
+                "relationships" => array(
+                    "workspace" => array(
+                        "data" => array(
+                            "type" => "workspaces",
+                            "id"   => $workspaceID
+                        )
+                    )
+                )
+            ),
+        );
+
+
+        // restApiResponse
+        $restApiResponse = terraform_restapi_access(
+            $hostname, //hostname
+            $token, //token
+            $requestURI, //requestURI
+            $method, //method
+            $requestContents, //requestContents
+            $proxySetting //proxySetting
+        );
+
+        return $restApiResponse;
+    }
+
 
 ?>

@@ -1,3 +1,145 @@
+Exastro IT Automation 1.9.0 (2021-12-10)
+==================================================
+
+Installer
+---------------
+ * Changed some of the default config values when installing. #1096
+ * Fixed an issue where HYML_AJAX could not be installed. #1104
+ * Updated to Version 1.9.0. #1430
+ * Fixed an issue where Exastro IT Automation could not be installed on CentOS 8.4.2105. #1577
+
+General
+---------------
+ * Added a button that allows users to see what role they are linked to. #673
+ * Applied a fix for the history display function. #816
+ * Fixed a bug in the Progress log. #1014
+ * Fixed a bug with the REST API FILTER search function. #1015
+ * Fixed an issue where uploading UTF-8 files would freeze the upload process. #1149
+ * Fixed some of the messages for the filter search function. #1184
+ * Removed hidden rows and collumns from the Change history files. #1205
+ * Implemented SonarQube to fix problems in the source code. #1355
+ * Added "EPOCH" as a design type in the System settings. #1389
+ * Fixed a bug with the URL and GET parameter that would occur when moving to the login screen. #1441
+ * Improved the Display filter search function. #1442
+ * Improved the Pulldown search function. #1443
+ * Fixed a bug with ajax. #1491
+ * Rewrote the text for the english version of ITA. #1524
+ * Fixed an issue where the widget images would blend in with the background if the background was colored white. #1527
+ * Fixed the Calendar's z-index. #1626
+ * Fixed an issue where the login and logout button would disappear. #1670
+
+Dashboard
+---------------
+ * Made it possible to import/export link collections. #1037
+ * Fixed an issue where Menu groups would not be visible to the users. #1422
+ * Fixed the "Add widget" menu text. #1648
+
+RestAPI
+---------------
+ * Made it possible to collect resource ID through Rest API. #1128
+ * Fixed an issue where the RestAPI response would not display correct information when updating a menu with a "File upload" item. #1545
+ * Made it possible to download and upload excel files for all the menus by using RestAPI. #1550
+ * Fixed an issue where an error would occur when registering a symphony through RestAPI. #1695
+
+Management console
+---------------
+ * Made it possible to acquire version information with REST. #758
+ * Made it possible for users to remove the expiration date for user accounts. #784
+ * Improved the readability for the version information. #1006
+ * Added an option for no forced password resets for initial logins. #1081
+ * Changed the smallest and biggest value for "Maximum line output for Excel files" in the Menu list. #1366
+ * Fixed an issue where webaplogs would automatically be output when displaying the sequence list menu. #1427
+ * Fixed an issue where files in the Symphony data relay storage path would not be deleted. #1525
+ * Added "Conductor list" data to the Operation deletion list. #1526
+ * Fixed an issue where the "oaseaction" role would delete itself. #1621
+ * Changed the default Authentication period value. #1647
+
+Basic console
+---------------
+ * Made it possible to encrypt the password for the CiscoIOS special mode in the Device list's Ansible user information field. #227
+ * 【Device list】Fixed an issue where users could register files even when no files had been uploaded. #1264
+ * 【Device list】Fixed a bug with the download function for encrypted SSH secret key files. #1315
+
+Export/Import
+---------------
+ * Fixed an issue where upload files linked to deleted data would be exported. #1156
+ * Fixed a bug with the import function that would occur when there are no menu to import. #1342
+ * Made it so the Export/Import list's history displays the most recent history. #1349
+ * Fixed an issue where a log would automatically be displayed. #1421
+ * Fixed an issue where the "all menu" button would become active when there are no menus that can be imported when using the Excel bulk import function. #1510
+ * Fixed an issue where the "Mode:Environment migration" text would be underlapped by the next item when enlargening the screen. #1519
+ * Fixed an issue where the menu ID formats would be different from each other when running UPLOAD and EXECUTE Xcommand with RestAPI. #1661
+ * Fixed Export/Import's RESTAPI's error handling. #1704
+
+Symphony
+---------------
+ * Made it possible to gather input data and result data from the operation list through REST. #757
+
+Conductor
+---------------
+ * Made it possible to gather input data and result data from the operation list through REST. #757
+ * Added a notification function for the results. #312
+ * Fixed an issue with the Conditional branch function. #467
+ * Made it possible to branch succeeding processes from Movement return values. #587
+ * Added more options when using RestAPI. #1134
+ * Fixed an issue where response_code=200 would be returned. #1268
+* Fixed an issue where registering a conditional branch with a blank case would output the text "Please select a class from the Conductor class list" without opening the list. #1746
+
+Menu create function
+---------------
+ * Made it possible to reference values in parameter sheets without host from parameter sheets with host. #211
+ * Made it possible to increase the maximum byte amount. #1095
+ * Fixed an issue where the "OK" button that shows up when changing the menu to Vertical menu (REPEAT:1) would not function. #1263
+ * Made it possible to register default values for menu items. #1303
+ * Added validation for registering menus that exceeds the maximum number of repeated vertical menus. #1322
+ * Made it so the the Menu/ table link list's menu name and excel file name matches. #1518
+ * Fixed a bug where referenced password collumns in downloaded excel files would be encrypted. #1523
+ * Fixed an issue where pressing a link from a pulldown menu created with 8192 bytes would cause an error to occur. #1566
+ * Fixed an issue with the filter function for string items. #1569
+ * Fixed an issue where refreshing created vertical menus collumn groups would not display correctly. #1628
+* Fixed an issue where users could not download data in SCSV format from user-created menus. #1732
+
+Compare function
+---------------
+ * Added RestAPI for the Compare function #946
+
+Ansible-Driver
+---------------
+ * Linked file upload items and automatic registration settings. #427
+ * Made it possible to specify Env when running AnsibleEngine. #1063
+ * 【Collect function】Fixed an issue where it would seem that the array elements' collection data was not acquireable.  #1160
+ * Made it possible to have no values for global variables. #1300
+ * Made it possible to load used variables from Playbooks when using the filter function. #1301
+ * 【Collect function】Fixed an issue where configuring collected interface information would output a log. #1386
+ * Shortened the start cycle for automatic substitute value registration. #1444
+ * 【Collect function】Made it so only file upload collumns that has collected item values will be displayed in the list. #1506
+ * 【Collect function】Made it possible to specify files in addition to paths when using file upload items. #1532
+ * Fixed a bug with the manual check for restoring records in Legacy-Role. #1537
+ * Changed the process confirm cycle used when running Movements. #1541
+ * Fixed a bug that would occur when using variables in the Pioneer mode Template list. #1593
+ * Fixed a big that would occur when using Ansible tower as execute engine. #1713
+ * Fixed an issue where the Sensitive settings for the "Substitute value list" would be invalid when updating ITA to 1.6.0. #1723
+
+Terraform-Driver
+---------------
+ * Fixed a problem with conductor_workflowdir. #732
+ * Made it possible to use the destroy command in Terraform menus. #1313
+ * Shortened the start cycle for automatic substitute value registration. #1444
+ * Put Terraform Variables in the InputData.zip file. #1581
+ * Fixed an issue where the excel and web values for Terraform Substitute value auto-registration would be different from each other. #1605
+ * Fixed an issue where "Substitute value auto-registration" value would be displayed even when the "Movement-Module link" record is deleted . #1630
+
+CI/CD for IaC
+---------------
+ * Made it possible to clone git by using SSH. #1367
+ * Fixed an issue where linking files would cause the "Remarks" field to go blank. #1382
+ * Fixed an issue where pressing the "Resume" button in the "File link" menu would cause the "Status" item to go blank. #1408
+ * Changed documents and policies regarding Github password authentication. #1511
+ * Fixed an issue where linking a file with 0 bytes would cause an issue. #1586
+ * Fixed an issue that would occur when branching a remote repository menu with a blank name. #1600
+* Fixed an issue where the name of excel output remote repository files would have a different file name (Only in the English version) #1733
+
+
 Exastro IT Automation 1.8.2 (2021-11-12)
 ==================================================
 
@@ -13,7 +155,7 @@ Exastro IT Automation 1.8.2 (2021-11-12)
 
 Ansible-Driver
 ---------------
- * Changed how the yaml.load modules were handled in Pioneer mode.#1584
+ * Changed how the yaml.load modules were handled in Pioneer mode.#1589
 
 
 Exastro IT Automation 1.8.1 (2021-08-26)
@@ -68,12 +210,11 @@ Installer
  * Fixed an issue where the installer would fail because there were no MariaDB in the UBI8 Standard repository. #1146
  * Fixed an issue where repositories keeps getting added to /etc/yum.repos.d/ita.repo every time the install script is run. #1172
 
-
 General
 ---------------
  * Added a clone button to the "List/Update" sub menu in all of the parameters. #174
  * Fixed an issue with the Excel output by phpspreadhseet v1.15.0 #329
- * Fixed an issue in the Filter selection (ID Column) where error 400 would occur when trying to search for an ID that doesn't exist in LIST with RestAPI.
+ * Fixed an issue in the Filter selection (ID Column) where error 400 would occur when trying to search for an ID that doesn't exist in LIST with RestAPI. #437
  * Made it possible to download the Change history in an Excel file #482
  * Made it possible to check reserved Symphony/Conductors from the Main menu #488
  * Made adjustments to Exastro OASE user's initial Role/Menu link value #752
@@ -81,7 +222,7 @@ General
  * Fixed an issue where the "Execution process type" headline cell is not combined when downloading the Excel file #831
  * Fixed an issue where menus users don't have permission to see would be displayed #987
  * Fixed an issue where the display filter's date items would not search properly when the "from" and "to" date are the same as the item the user is searching for #1027
- * Fixed an issue where the screen would not be displayed correctly when the display filter's "Pulldown search" button is pressed repeatedly #1147
+ * Fixed an issue where the screen would not be displayed correctly when the display filter's "Pulldown search" button is pressed repeatedly #1125
  * Fixed an issue where the screen would not be displayed correctly when Darkmode is selected #1147
  * Fixed an issue where an system error would occur when filter searching #1165
  * Fixed an issue where some values would not display properly if some specific characters were included #1174
@@ -133,12 +274,11 @@ Conductor
  * Fixed an issue in Conductor Class edit hwere some abolished contents would remain #1186
  * Fixed an issue with SonarQube identification in the Conductor Regularly execution menu #1191
 
-
 Create Menu
 ---------------
  * Made it possible to choose "Yes/no" , "True/False" and "*/(blank)" from Pulldown sselections #178
  * Fixed an issue where it was possible to have the "/" character in item names when creating menus #540
- * Made it possible to configure multiunique settings from the Web screen #709
+ * Made it possible to configure multiunique settings from the Web screen #653
  * Fixed an issue where after changing the menu group of an earlier created menu, the pre-updated menu would remain in the old menu group #709
  * Removed the option to change the Menu name when editing #727
  * Fixed an issue where updating an regular expression would reset the data and it's history #887
@@ -147,8 +287,9 @@ Create Menu
  * Improved the VIEW for reference item information #1101
  * Fixed an issue where if the character "`" was written in an item name and it was referenced to a different menu, the page would not open #1222
  * Fixed an issue where a validation error would occur if there specified ID of Reference items had too many numbers #1236
- * Fixed an issue where the "Password" item in the "Menu item creation information" menu shows "Message ID is not found" #1348
+ * Fixed an issue where the "Password" item in the "Menu item creation information" menu shows "Message ID is not found" #1347
  * Made the button names and Modal names in the  Menu define/create menu unique #1348
+ * Fixed an issue where menus created in an ITA version before the RBAC function was added would not be editable. #1730
 
 Compare
 ---------------

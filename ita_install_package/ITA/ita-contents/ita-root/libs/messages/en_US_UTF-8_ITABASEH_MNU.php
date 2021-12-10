@@ -34,7 +34,9 @@ $ary["ITABASEH-MNU-102050"]         = "Login user ID";
 $ary["ITABASEH-MNU-102060"]         = "[Maximum length] 30 bytes";
 $ary["ITABASEH-MNU-102061"]         = "Login password";
 $ary["ITABASEH-MNU-102062"]         = "Management";
-$ary["ITABASEH-MNU-102063"]         = "Login password is required for ●.";
+$ary["ITABASEH-MNU-102063"]         = "Login password is required when ● is selected.";
+$ary["ITABASEH-MNU-102064"]         = "Mark with '●' in order to deactivate login password expiration.";
+$ary["ITABASEH-MNU-102065"]         = "Mark with '●' in order to deactivate forced password change upon first login.";
 $ary["ITABASEH-MNU-102070"]         = "Login password";
 $ary["ITABASEH-MNU-102071"]         = "Input for login password is mandatory when ● is set in login password management.";
 $ary["ITABASEH-MNU-102072"]         = "Input for login password is not allowed when ● is not set in login password management.";
@@ -170,7 +172,7 @@ $ary["ITABASEH-MNU-105076"]         = "Date/time when the operation was actually
 $ary["ITABASEH-MNU-105080"]         = "Display order";
 $ary["ITABASEH-MNU-105090"]         = "To control display order";
 $ary["ITABASEH-MNU-106010"]         = "Select";
-$ary["ITABASEH-MNU-106020"]         = "You can perform maintenance(view/register/update/discard) for the OS type.";
+$ary["ITABASEH-MNU-106020"]         = "Allows users to perform maintenance(view/register/update/discard) for the OS type.";
 $ary["ITABASEH-MNU-106030"]         = "OS type ID";
 $ary["ITABASEH-MNU-106040"]         = "OS type master information";
 $ary["ITABASEH-MNU-106050"]         = "OS type master information";
@@ -192,12 +194,12 @@ $ary["ITABASEH-MNU-108010"]         = "Movement";
 $ary["ITABASEH-MNU-108020"]         = "Movement Name";
 $ary["ITABASEH-MNU-108030"]         = "[Maximum length] 256 bytes";
 $ary["ITABASEH-MNU-108040"]         = "Orchestrator";
-$ary["ITABASEH-MNU-108050"]         = "The orchestrator for use is displayed.";
+$ary["ITABASEH-MNU-108050"]         = "The orcestrator used is displayed.";
 $ary["ITABASEH-MNU-108060"]         = "Delay timer";
 $ary["ITABASEH-MNU-108070"]         = "If there is a delay in the Movement as per the specified period (minutes), delayed status appears.";
 $ary["ITABASEH-MNU-108075"]         = "Dedicated information for Ansible";
 $ary["ITABASEH-MNU-108080"]         = "Host specific format";
-$ary["ITABASEH-MNU-108090"]         = "Method to specify  build node. ";
+$ary["ITABASEH-MNU-108090"]         = "Method that specifies build node. ";
 $ary["ITABASEH-MNU-108091"]         = "Number of parallel executions";
 $ary["ITABASEH-MNU-108092"]         = "NULL or positive integer";
 $ary["ITABASEH-MNU-108100"]         = "WinRM connection";
@@ -214,16 +216,16 @@ $ary["ITABASEH-MNU-108242"]         = "virtualenv";
 $ary["ITABASEH-MNU-108243"]         = "Ansible execution environment directory built with virtualenv is displayed.\nChoose the ansible execution environment you want to run.\nIf it is not choose, the ansible execution environment installed at the time of Tower installation will be used.";
 $ary["ITABASEH-MNU-108300"]         = "DSC Dedicated information";
 $ary["ITABASEH-MNU-108310"]         = "Error retry timeout";
-$ary["ITABASEH-MNU-108320"]         = "If the error persists beyond the specified time (seconds), the status will be in error.";
+$ary["ITABASEH-MNU-108320"]         = "If the error persists beyond the specified time (seconds), the status display error.";
 $ary["ITABASEH-MNU-109006"]         = "ssh private key file";
-$ary["ITABASEH-MNU-109007"]         = "This is the ssh private key file for key authentication.
+$ary["ITABASEH-MNU-109007"]         = "ssh private key file for key authentication.
 The uploaded file is encrypted and saved. 
 If you download after registration, the encrypted file will be downloaded.";
 $ary["ITABASEH-MNU-109008"]         = "Passphrase";
 $ary["ITABASEH-MNU-109009"]         = "Enter the passphrase set in the ssh private key file.";
 $ary["ITABASEH-MNU-109010"]         = "Ansible-vault encrypted ssh private key file.";
 $ary["ITABASEH-MNU-109011"]         = "ssh key credentials";
-$ary["ITABASEH-MNU-109030"]         = "You can view Symphony class. <br>By clicking “Details”, transit to Symphony class edit menu.";
+$ary["ITABASEH-MNU-109030"]         = "Allows users to view Symphony class. <br>By clicking “Details”, transit to Symphony class edit menu.";
 $ary["ITABASEH-MNU-109040"]         = "Symphony class ID";
 $ary["ITABASEH-MNU-109050"]         = "Symphony class information";
 $ary["ITABASEH-MNU-109060"]         = "Symphony class information";
@@ -243,7 +245,7 @@ $ary["ITABASEH-MNU-120007"]         = "Related Item";
 $ary["ITABASEH-MNU-120008"]         = "Table name";
 $ary["ITABASEH-MNU-120009"]         = "View name";
 $ary["ITABASEH-MNU-120010"]         = "ER Diagram Menu List";
-$ary["ITABASEH-MNU-120011"]         = "Item. Menu ID and Multi-unique";
+$ary["ITABASEH-MNU-120011"]         = "Item, Menu ID and Multi-unique";
 $ary["ITABASEH-MNU-120012"]         = "Item types can have the following states.\n・Group\n・Item";
 $ary["ITABASEH-MNU-120013"]         = "If the Item is under a group, the group's item will be set.";
 $ary["ITABASEH-MNU-120014"]         = "Pysical Item name";
@@ -260,7 +262,7 @@ $ary["ITABASEH-MNU-201020"]         = "Details";
 $ary["ITABASEH-MNU-201030"]         = "Display order";
 $ary["ITABASEH-MNU-201040"]         = "To control display order";
 $ary["ITABASEH-MNU-201050"]         = "Select";
-$ary["ITABASEH-MNU-201060"]         = "You can view Symphony execution list (execution history). <br>By clicking “Details”, transit to Symphony execution check menu.";
+$ary["ITABASEH-MNU-201060"]         = "Allows users to view Symphony execution list (execution history). <br>By clicking “Details”, transit to Symphony execution check menu.";
 $ary["ITABASEH-MNU-201070"]         = "Symphony instance ID";
 $ary["ITABASEH-MNU-201080"]         = "Symphony instance information";
 $ary["ITABASEH-MNU-201090"]         = "Symphony instance information";
@@ -275,7 +277,7 @@ $ary["ITABASEH-MNU-202060"]         = "[Original data] Operation list";
 $ary["ITABASEH-MNU-202070"]         = "Operation Name";
 $ary["ITABASEH-MNU-202080"]         = "[Maximum length] 256 bytes";
 $ary["ITABASEH-MNU-202090"]         = "Status";
-$ary["ITABASEH-MNU-203010"]         = "The following states exists for Status.\n
+$ary["ITABASEH-MNU-203010"]         = "The following status states exist.\n
 ・Unexecuted
 ・Unexecuted(schedule)
 ・Executing
@@ -293,6 +295,8 @@ $ary["ITABASEH-MNU-203060"]         = "Start";
 $ary["ITABASEH-MNU-203070"]         = "[Format]YYYY/MM/DD HH:MM";
 $ary["ITABASEH-MNU-203080"]         = "End";
 $ary["ITABASEH-MNU-203090"]         = "[Format]YYYY/MM/DD HH:MM";
+$ary["ITABASEH-MNU-203091"]         = "Notification log";
+$ary["ITABASEH-MNU-203092"]         = "Output log file.";
 $ary["ITABASEH-MNU-204010"]         = "Display order";
 $ary["ITABASEH-MNU-204020"]         = "To control display order";
 $ary["ITABASEH-MNU-204030"]         = "Select";
@@ -375,14 +379,14 @@ $ary["ITABASEH-MNU-211002"]         = "Associated menu";
 $ary["ITABASEH-MNU-211003"]         = "Associated menu";
 $ary["ITABASEH-MNU-211004"]         = "Menu group";
 $ary["ITABASEH-MNU-211005"]         = "ID";
-$ary["ITABASEH-MNU-211006"]         = "This item is not subject to be updated at the time of register or update. (Update menu ID)";
+$ary["ITABASEH-MNU-211006"]         = "This item is not subject to updates when registering/updating. (Update menu ID)";
 $ary["ITABASEH-MNU-211007"]         = "Name";
-$ary["ITABASEH-MNU-211008"]         = "This item is not subject to be updated at the time of register or update. (Update menu ID)";
+$ary["ITABASEH-MNU-211008"]         = "This item is not subject to updates when registering/updating. (Update menu ID)";
 $ary["ITABASEH-MNU-211009"]         = "Menu";
 $ary["ITABASEH-MNU-211010"]         = "ID";
-$ary["ITABASEH-MNU-211011"]         = "This item is not subject to be updated at the time of register or update. (Menu group: update menu)";
+$ary["ITABASEH-MNU-211011"]         = "This item is not subject to updates when registering/updating. (Menu group: update menu)";
 $ary["ITABASEH-MNU-211012"]         = "Name";
-$ary["ITABASEH-MNU-211013"]         = "This item is not subject to be updated at the time of register or update. (Menu group: update menu)";
+$ary["ITABASEH-MNU-211013"]         = "This item is not subject to updates when registering/updating. (Menu group: update menu)";
 $ary["ITABASEH-MNU-211014"]         = "Menu group:Menu";
 $ary["ITABASEH-MNU-211015"]         = "Sheet type";
 $ary["ITABASEH-MNU-211016"]         = "Permission role flg";
@@ -457,7 +461,7 @@ $ary["ITABASEH-MNU-302050"]         = "AD user identifier";
 $ary["ITABASEH-MNU-302060"]         = "AD user identifier";
 $ary["ITABASEH-MNU-302070"]         = "ITA user";
 $ary["ITABASEH-MNU-302080"]         = "ITA user";
-$ary["ITABASEH-MNU-303000"]         = "You can perform maintenance (view/update) of the interface information on Symphony. <br>This menu should be one record.";
+$ary["ITABASEH-MNU-303000"]         = "Allows users to perform maintenance (view/update) of the interface information on Symphony. <br>This menu should be one record.";
 $ary["ITABASEH-MNU-303010"]         = "No";
 $ary["ITABASEH-MNU-303020"]         = "Symphony Interface information";
 $ary["ITABASEH-MNU-303030"]         = "Symphony Interface information";
@@ -473,7 +477,7 @@ $ary["ITABASEH-MNU-304040"]         = "Data relay storage path";
 $ary["ITABASEH-MNU-304050"]         = "A shared directory for each Conductor instance on the ITA side.";
 $ary["ITABASEH-MNU-304060"]         = "Condition monitoring cycle (unit: millisecond)";
 $ary["ITABASEH-MNU-304070"]         = "Interval to refresh the work status when Conductor is executed. \nTuning is required for each environment, but normally 3000 milliseconds is the recommended value.";
-$ary["ITABASEH-MNU-305030"]         = "You can browse the Conductor class. <br> Click \"Details\" to go to the Conductor class edit menu.";
+$ary["ITABASEH-MNU-305030"]         = "Allows users to browse the Conductor class. <br> Click \"Details\" to go to the Conductor class edit menu.";
 $ary["ITABASEH-MNU-305040"]         = "Conductor class ID";
 $ary["ITABASEH-MNU-305050"]         = "Conductor class information";
 $ary["ITABASEH-MNU-305060"]         = "Conductor class information";
@@ -497,6 +501,8 @@ $ary["ITABASEH-MNU-305230"]         = "In connection node";
 $ary["ITABASEH-MNU-305240"]         = "Out connection node";
 $ary["ITABASEH-MNU-305250"]         = "In connection terminal";
 $ary["ITABASEH-MNU-305260"]         = "Out connection terminal";
+$ary["ITABASEH-MNU-305270"]         = "End Type";
+$ary["ITABASEH-MNU-305280"]         = "Notification settings";
 $ary["ITABASEH-MNU-306010"]         = "Conductor work list (execution history) can be viewed. <br> Click \"Details\" to go to the Conductor work confirmation menu.";
 $ary["ITABASEH-MNU-306020"]         = "Conductor instance ID";
 $ary["ITABASEH-MNU-306030"]         = "Conductor instance information";
@@ -505,13 +511,13 @@ $ary["ITABASEH-MNU-306050"]         = "Conductor name";
 $ary["ITABASEH-MNU-306060"]         = "[Original data] Conductor class list";
 $ary["ITABASEH-MNU-306070"]         = "Emergency stop flag";
 $ary["ITABASEH-MNU-306080"]         = "[Original data] Conductor work confirmation";
-$ary["ITABASEH-MNU-307001"]         = "You can run Conductor regularly according to a schedule. <br>Select the target Conductor, operation, and enter the detailed settings from \"Schedule Settings\".";
+$ary["ITABASEH-MNU-307001"]         = "Allows users to run Conductor regularly according to a schedule. <br>Select the target Conductor, operation, and enter the detailed settings from \"Schedule Settings\".";
 $ary["ITABASEH-MNU-307002"]         = "Periodic work execution ID";
 $ary["ITABASEH-MNU-307003"]         = "Regular work execution information";
 $ary["ITABASEH-MNU-307004"]         = "Regular work execution information";
 $ary["ITABASEH-MNU-307005"]         = "Check the work list";
 $ary["ITABASEH-MNU-307006"]         = "status";
-$ary["ITABASEH-MNU-307007"]         = "There are the following states in the status.\n
+$ary["ITABASEH-MNU-307007"]         = "The following status states exist.\n
 ・Preparing\n
 ・In operation\n
 ・Done\n
@@ -540,8 +546,8 @@ $ary["ITABASEH-MNU-307024"]         = "Operation name";
 $ary["ITABASEH-MNU-307025"]         = "[Original data] Operation list";
 $ary["ITABASEH-MNU-307026"]         = "Auto-input";
 $ary["ITABASEH-MNU-307027"]         = "Execution user";
-$ary["ITABASEH-MNU-307028"]         = "User to run Conductor (The registered/updated user will be automatically filled in)";
-$ary["ITABASEH-MNU-308000"]         = "You can browse the Node associated with the Conductor class.";
+$ary["ITABASEH-MNU-307028"]         = "User that executed the Conductor (The registered/updated user will be automatically filled in)";
+$ary["ITABASEH-MNU-308000"]         = "Allows users to browse the Node associated with the Conductor class.";
 $ary["ITABASEH-MNU-308001"]         = "Node class id";
 $ary["ITABASEH-MNU-308002"]         = "List of Conductor pegged nodes";
 $ary["ITABASEH-MNU-308003"]         = "Node name";
@@ -552,7 +558,7 @@ $ary["ITABASEH-MNU-308007"]         = "Conductor class no";
 $ary["ITABASEH-MNU-308008"]         = "Conductor call class no";
 $ary["ITABASEH-MNU-308009"]         = "Operation no idbh";
 $ary["ITABASEH-MNU-308010"]         = "Skip flag";
-$ary["ITABASEH-MNU-308100"]         = "You can browse the Terminal associated with the Node class.";
+$ary["ITABASEH-MNU-308100"]         = "Allows users to browse the Terminal associated with the Node class.";
 $ary["ITABASEH-MNU-308101"]         = "Terminal class id";
 $ary["ITABASEH-MNU-308102"]         = "Node pegging terminal list";
 $ary["ITABASEH-MNU-308104"]         = "Terminal type id";
@@ -562,7 +568,7 @@ $ary["ITABASEH-MNU-308107"]         = "Conductor class no";
 $ary["ITABASEH-MNU-308108"]         = "Conductor node name";
 $ary["ITABASEH-MNU-308109"]         = "Conditional id";
 $ary["ITABASEH-MNU-308110"]         = "Case no";
-$ary["ITABASEH-MNU-308200"]         = "You can browse the Conductor instance.";
+$ary["ITABASEH-MNU-308200"]         = "Allows users to browse the Conductor instance.";
 $ary["ITABASEH-MNU-308201"]         = "Conductor instance id";
 $ary["ITABASEH-MNU-308202"]         = "Conductor instance list";
 $ary["ITABASEH-MNU-308203"]         = "I Conductor class no";
@@ -575,11 +581,11 @@ $ary["ITABASEH-MNU-308209"]         = "Conductor caller no";
 $ary["ITABASEH-MNU-308210"]         = "Time book";
 $ary["ITABASEH-MNU-308211"]         = "Time start";
 $ary["ITABASEH-MNU-308212"]         = "Time end";
-$ary["ITABASEH-MNU-308300"]         = "You can browse Node instances.";
+$ary["ITABASEH-MNU-308300"]         = "Allows users to browse Node instances.";
 $ary["ITABASEH-MNU-308301"]         = "Node instance id";
 $ary["ITABASEH-MNU-308302"]         = "List of Node instances";
 $ary["ITABASEH-MNU-308303"]         = "I node class no";
-$ary["ITABASEH-MNU-309001"]         = "You can run the Conductor. <BR>-Immediate execution <BR>-Reserved execution <BR> is possible. <BR>Please select Conductor class ID and operation ID when executing.";
+$ary["ITABASEH-MNU-309001"]         = "Allows users to run the Conductor. <BR>-Immediate execution <BR>-Reserved execution <BR> is possible. <BR>Please select Conductor class ID and operation ID when executing.";
 $ary["ITABASEH-MNU-309002"]         = "Conductor [filter]";
 $ary["ITABASEH-MNU-309003"]         = "Conductor [List]";
 $ary["ITABASEH-MNU-309004"]         = "Conductor execution";
@@ -681,16 +687,90 @@ $ary["ITABASEH-MNU-310214"]         = "No";
 $ary["ITABASEH-MNU-310215"]         = "Operation name";
 $ary["ITABASEH-MNU-310216"]         = "Base date";
 $ary["ITABASEH-MNU-310217"]         = "Difference";
-$ary["ITABASEH-MNU-310218"]         = "Exchange ID has failed ({})";
+$ary["ITABASEH-MNU-310218"]         = "Failed to exchange ID. ({})";
 $ary["ITABASEH-MNU-310219"]         = "Excel output";
 $ary["ITABASEH-MNU-310220"]         = "CSV output";
 $ary["ITABASEH-MNU-310221"]         = "There is no data to compare under the specified conditions";
 $ary["ITABASEH-MNU-310222"]         = "Arial";
 $ary["ITABASEH-MNU-310223"]         = "No Difference";
-$ary["ITABASEH-MNU-310224"]         = "Exchange ID has failed (";
+$ary["ITABASEH-MNU-310224"]         = "Failed to exchange ID. (";
 $ary["ITABASEH-MNU-310225"]         = "Output:";
 $ary["ITABASEH-MNU-310226"]         = "ALL";
 $ary["ITABASEH-MNU-310227"]         = "Difference Only";
+$ary["ITABASEH-MNU-311000"]         = 'PUse PHPs cURL function to handle notifications.<br>
+■Notification setting  using Webhook<br>
+▼Example: Teams / Slack　 <br>
+&nbsp -Notification destination (CURLOPT_URL) Example: <br>
+&nbsp&nbsp&nbsp&nbspEnter the service webhook URL<br>
+&nbsp -Header (CURLOPT_HTTPHEADER)) Example: <br>
+&nbsp&nbsp&nbsp&nbsp[ "Content-Type: application/json" ]<br>
+&nbsp -Message (CURLOPT_POSTFIELDS)) Example:: <br>
+&nbsp&nbsp&nbsp&nbsp{"text": "Notification name：__NOTICE_NAME__,  &lt;br&gt;Conductor name: __CONDUCTOR_NAME__,  &lt;br&gt; Conductor instance ID:__CONDUCTOR_INSTANCE_ID__,&lt;br&gt; status: __STATUS_NAME__, &lt;br&gt; Work confirmation URL : __JUMP_URL__, &lt;br&gt; "}<br><br>
+
+※For the input format of Message (CURLOPT_POSTFIELDS) and the notation method of line breaks, refer to Sending a message by Webhook of each service.<br>
+<br>
+■About each setting item<br>
+<table>
+    <thead>
+        <tr><td>&nbsp</td><td>Input items</td><td>:</td><td>discription</td></tr>
+    </thead>
+    <tbody>
+    <tr><td>&nbsp</td><td>Notification destination (CURLOPT_URL) </td><td>:</td><td>Please enter the URL of the notification destination.</td></tr>
+    <tr><td>&nbsp</td><td>Header (CURLOPT_HTTPHEADER) </td><td>:</td><td>Please enter the header</td></tr>
+    <tr><td>&nbsp</td><td>Message (CURLOPT_POSTFIELDS) </td><td>:</td><td>Please enter the content of the notification</td></tr>
+    <tr><td>&nbsp</td><td>PROXY / URL(CURLOPT_PROXY) </td><td>:</td><td>If you need to set PROXY, please enter the URL.</td></tr>
+    <tr><td>&nbsp</td><td>PROXY / PORT(CURLOPT_PROXYPORT) </td><td>:</td><td>If you need to set PROXY, enter PORT.</td></tr>
+    <tr><td>&nbsp</td><td>Work confirmation URL (FQDN)</td><td>:</td><td>Enter the FQDN to be used in the reserved variable of the work confirmation URL.</td></tr>
+    <tr><td>&nbsp</td><td>Other </td><td>:</td><td>Please enter in JSON format.<br>（Only the options corresponding to curl_setopt () are available.<br>For more information, see PHP cURL function.</td></tr>
+    </tbody>
+</table>
+<br>
+■The following reserved variables are available in Message (CURLOPT_POSTFIELDS).<br>
+<table>
+    <thead>
+        <tr><td>&nbsp</td><td>Reserved variables</td><td>:</td><td>Item name</td></tr>
+    </thead>
+    <tbody>
+        <tr><td>&nbsp</td><td>__CONDUCTOR_INSTANCE_ID__ </td><td>:</td><td>Conductor instance ID </td></tr>
+        <tr><td>&nbsp</td><td>__CONDUCTOR_NAME__ </td><td>:</td><td>Conductor name </td></tr>
+        <tr><td>&nbsp</td><td>__OPERATION_ID__ </td><td>:</td><td>Operation ID </td></tr>
+        <tr><td>&nbsp</td><td>__OPERATION_NAME__ </td><td>:</td><td>Operation name</td></tr>
+        <tr><td>&nbsp</td><td>__STATUS_ID__ </td><td>:</td><td>Status ID </td></tr>
+        <tr><td>&nbsp</td><td>__STATUS_NAME__ </td><td>:</td><td>Status name </td></tr>
+        <tr><td>&nbsp</td><td>__EXECUTION_USER__ </td><td>:</td><td>Execution user </td></tr>
+        <tr><td>&nbsp</td><td>__TIME_BOOK__ </td><td>:</td><td>Scheduled date/time </td></tr>
+        <tr><td>&nbsp</td><td>__TIME_START__ </td><td>:</td><td>Start </td></tr>
+        <tr><td>&nbsp</td><td>__TIME_END__ </td><td>:</td><td>End </td></tr>
+        <tr><td>&nbsp</td><td>__JUMP_URL__ </td><td>:</td><td>Work confirmation URL </td></tr>
+        <tr><td>&nbsp</td><td>__NOTICE_NAME__ </td><td>:</td><td>Notification name </td></tr>
+    </tbody>
+</table>
+';
+$ary["ITABASEH-MNU-311001"]         = "Conductor notification definition";
+$ary["ITABASEH-MNU-311002"]         = "Notification name";
+$ary["ITABASEH-MNU-311003"]         = "[Maximum length] 128 bytes";
+$ary["ITABASEH-MNU-311004"]         = "HTTP Request Options";
+$ary["ITABASEH-MNU-311005"]         = "Notification destination (CURLOPT_URL)";
+$ary["ITABASEH-MNU-311006"]         = "The URL of the notification destination.";
+$ary["ITABASEH-MNU-311007"]         = "Header (CURLOPT_HTTPHEADER)";
+$ary["ITABASEH-MNU-311008"]         = "Enter HTTP header fields in JSON format.";
+$ary["ITABASEH-MNU-311009"]         = "Message (CURLOPT_POSTFIELDS)";
+$ary["ITABASEH-MNU-311010"]         = "Enter according to the specifications of the service to be notified.";
+$ary["ITABASEH-MNU-311011"]         = "PROXY";
+$ary["ITABASEH-MNU-311012"]         = "URL (CURLOPT_PROXY)";
+$ary["ITABASEH-MNU-311013"]         = "If you need to set PROXY, please enter the URL.";
+$ary["ITABASEH-MNU-311014"]         = "PORT (CURLOPT_PROXYPORT)";
+$ary["ITABASEH-MNU-311015"]         = "If you need to set PROXY, enter PORT.";
+$ary["ITABASEH-MNU-311016"]         = "Work confirmation URL (FQDN)";
+$ary["ITABASEH-MNU-311017"]         = "Use in the reserved variable of the work confirmation URL, enter the FQDN. \nExample:\nhttp://<FQDN>\nhttps://<FQDN>";
+$ary["ITABASEH-MNU-311018"]         = "Other";
+$ary["ITABASEH-MNU-311019"]         = 'Please enter in JSON format. \nAs for the available options, the one corresponding to the curl_setopt () option is available. See PHPs cURL function. Example: {"CURLOPT_CONNECTTIMEOUT": 10}';
+$ary["ITABASEH-MNU-311020"]         =  "Deterrence period";
+$ary["ITABASEH-MNU-311021"]         =  "Start date and time";
+$ary["ITABASEH-MNU-311022"]         =  "When the Conductor work is executed, the notification is suppressed if it is after the start date and time.";
+$ary["ITABASEH-MNU-311023"]         =  "End date and time";
+$ary["ITABASEH-MNU-311024"]         =  "When the Conductor work is executed, the notification is suppressed if it is before the end date and time.";
+
 $ary["ITABASEH-MNU-900001"]         = "Export";
 $ary["ITABASEH-MNU-900002"]         = "Upload";
 $ary["ITABASEH-MNU-900003"]         = "Import";
@@ -702,16 +782,16 @@ $ary["ITABASEH-MNU-900008"]         = "Export・Import data list";
 $ary["ITABASEH-MNU-900009"]         = "Import process has registred.<br>Execution No.：[<strong>{}</strong>]";
 $ary["ITABASEH-MNU-900010"]         = "The following functions are provided.<br>・View of exported or imported data list";
 $ary["ITABASEH-MNU-900011"]         = "The following functions are provided.<br>・Upload import data<br>&nbsp;&nbsp;&nbsp;&nbsp;Upload the kym file containing the compressed data to import<br><br>・Import data<br>&nbsp;&nbsp;&nbsp;&nbsp;A list of importable menus is displayed.<br>&nbsp;&nbsp;&nbsp;&nbsp;Select the menus to import and click the import button.<br>&nbsp;&nbsp;&nbsp;&nbsp;The status of imported data can be checked from the \"Export/Import data list\".";
-$ary["ITABASEH-MNU-900012"]         = "The following functions are provided.<br>&nbsp;&nbsp;&nbsp;・Menu export<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select the menu that you want to export data from and click the \"Export\" button.<br><br>Mode<br>&nbsp;&nbsp;&nbsp;・Environment migration<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports all the data of the selected menu and replaces the data in the import destination.<br><br>&nbsp;&nbsp;&nbsp;・Time specification<br>　Exports the data at the specified time.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the ID is the same as the data of the important destination, the exported data has priority over the imported data.<br><br>Obsolete information<br>&nbsp;&nbsp;&nbsp;・Include obsolote<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports with obsolete records<br>&nbsp;&nbsp;&nbsp;・Do not include Obsolete<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports without obsolete records";
+$ary["ITABASEH-MNU-900012"]         = "The following functions are provided.<br>&nbsp;&nbsp;&nbsp;・Menu export<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select the menu that you want to export data from and click the \"Export\" button.<br><br>Mode<br>&nbsp;&nbsp;&nbsp;・Environment migration<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports all the data of the selected menu and replaces the data in the import destination.<br><br>&nbsp;&nbsp;&nbsp;・Time specification<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports the data at the specified time.<br>If the ID is the same as the data of the important destination, the exported data has priority over the imported data.<br><br>Abolition data<br>&nbsp;&nbsp;&nbsp;・All records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports all records<br>&nbsp;&nbsp;&nbsp;・Exclude discarded records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports without discarded records";
 $ary["ITABASEH-MNU-900013"]         = "Execution No.";
 $ary["ITABASEH-MNU-900014"]         = "Status";
 $ary["ITABASEH-MNU-900015"]         = "File name";
 $ary["ITABASEH-MNU-900016"]         = "The following states exist for status.\n・Unexecuted\n・Executing\n・Completed\n・Completed (error)";
 $ary["ITABASEH-MNU-900017"]         = "Cannot be edited (auto-registration)";
 $ary["ITABASEH-MNU-900018"]         = "All menus";
-$ary["ITABASEH-MNU-900019"]         = "Import (without discarded data)";
+$ary["ITABASEH-MNU-900019"]         = "Import (Exclude discarded records)";
 $ary["ITABASEH-MNU-900020"]         = "Import type";
-$ary["ITABASEH-MNU-900021"]         = "The following states exist for Import type.\n・Normal\n・Without discarded data";
+$ary["ITABASEH-MNU-900021"]         = "The following states exist for Import type.\n・All records\n・Exclude discarded records";
 $ary["ITABASEH-MNU-900022"]         = "Execution type";
 $ary["ITABASEH-MNU-900023"]         = "The following states exist for Execution type.\n・Export\n・Import";
 $ary["ITABASEH-MNU-900024"]         = "The data export process has been registred.<br>Execution No.：[<strong>{}</strong>]";
@@ -719,10 +799,10 @@ $ary["ITABASEH-MNU-900025"]         = "Mode";
 $ary["ITABASEH-MNU-900026"]         = "Environment migration";
 $ary["ITABASEH-MNU-900027"]         = "Time specification";
 $ary["ITABASEH-MNU-900028"]         = "Abolition data";
-$ary["ITABASEH-MNU-900029"]         = "Normal";
-$ary["ITABASEH-MNU-900030"]         = "Without disuse data";
+$ary["ITABASEH-MNU-900029"]         = "All records";
+$ary["ITABASEH-MNU-900030"]         = "Exclude discarded records";
 $ary["ITABASEH-MNU-900031"]         = "The following modes exist.\n・Override\n・Add";
-$ary["ITABASEH-MNU-900032"]         = "The following abolition data exists.\n・Normal\n・Without disuse data";
+$ary["ITABASEH-MNU-900032"]         = "The following abolition data exists.\n・All records\n・Exclude discarded records";
 $ary["ITABASEH-MNU-900033"]         = "Specified time";
 $ary["ITABASEH-MNU-900034"]         = "If the mode is \"Time specification\", records after the specified time will be exported/imported.";
 $ary["ITABASEH-MNU-900035"]         = "Execution user";
@@ -745,6 +825,8 @@ $ary["ITABASEH-MNU-900104"]         = "Operation ID (Specified individually)";
 $ary["ITABASEH-MNU-910001"]         = "version";
 $ary["ITABASEH-MNU-910002"]         = "driver";
 $ary["ITABASEH-MNU-910003"]         = "version";
+$ary["ITABASEH-MNU-910004"]         = "Exastro IT Automation Version";
+$ary["ITABASEH-MNU-910005"]         = "Installed Driver";
 $ary["ITABASEH-MNU-920001"]         = "Symphony can be run periodically according to a schedule.
 <br>Select the target symphony, operation, and enter detailed settings from \"Schedule Setting\".";
 $ary["ITABASEH-MNU-920002"]         = "RegularlyID";
@@ -752,7 +834,7 @@ $ary["ITABASEH-MNU-920003"]         = "RegularlyWorkInformation";
 $ary["ITABASEH-MNU-920004"]         = "RegularlyWorkInformation";
 $ary["ITABASEH-MNU-920005"]         = "RegularlyWorkList";
 $ary["ITABASEH-MNU-920006"]         = "Status";
-$ary["ITABASEH-MNU-920007"]         = "The following states exists for Status.\n
+$ary["ITABASEH-MNU-920007"]         = "The following status states exist.\n
 ・In preparation\n
 ・In operation\n
 ・Completed\n
@@ -782,7 +864,7 @@ $ary["ITABASEH-MNU-920025"]         = "[Original data] Operation list";
 $ary["ITABASEH-MNU-920026"]         = "Auto-input";
 $ary["ITABASEH-MNU-920027"]         = "Execution user";
 $ary["ITABASEH-MNU-920028"]         = "User to run Symphony (The registered/updated user will be automatically filled in)";
-$ary["ITABASEH-MNU-2100000329_1"]   = "The following functions are provided.<br>&nbsp;&nbsp;&nbsp;・Excel Bulk Export<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select the menu that you want to export data from and click the \"Export\" button.<br>Obsolete information<br>&nbsp;&nbsp;&nbsp;・All records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports all records<br>&nbsp;&nbsp;&nbsp;・Exclude discarded records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports without obsolete records<br>&nbsp;&nbsp;&nbsp;・Only discarded records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports only obsolete records";
+$ary["ITABASEH-MNU-2100000329_1"]   = "The following functions are provided.<br>&nbsp;&nbsp;&nbsp;・Excel Bulk Export<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select the menu that you want to export data from and click the \"Export\" button.<br>Abolition data<br>&nbsp;&nbsp;&nbsp;・All records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports all records<br>&nbsp;&nbsp;&nbsp;・Exclude discarded records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports without discarded records<br>&nbsp;&nbsp;&nbsp;・Only discarded records<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Exports only discarded records";
 $ary["ITABASEH-MNU-2100000329_2"]   = "Excel Bulk Export";
 $ary["ITABASEH-MNU-2100000329_3"]   = "Excel batch export process accepted.<br>Execution No.：[<strong>{}</strong>]";
 $ary["ITABASEH-MNU-2100000329_4"]   = "All records";

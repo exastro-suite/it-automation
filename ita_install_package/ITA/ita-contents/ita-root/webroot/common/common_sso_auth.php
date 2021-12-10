@@ -44,19 +44,22 @@ require $root_dir_path."/libs/webcommonlibs/web_auth_class.php";
 require $root_dir_path."/libs/webcommonlibs/web_functions_for_sso_auth.php";
 // SSO認証関数----
 
-// ----リダイレクト用パラメータ保存
-$grp = '';
-if (isset($_GET['grp'])) {
-    $grp = htmlspecialchars($_GET['grp'], ENT_QUOTES, "UTF-8");
+$getCopy = $_GET;
+unset($getCopy['oauth2']);
+unset($getCopy['providerId']);
+unset($getCopy['login']);
+$get_parameter = "";
+if("" != http_build_query($getCopy)){
+    $get_parameter = "?" . http_build_query($getCopy);
 }
-$no = '';
-if (isset($_GET['no'])) {
-    $no = htmlspecialchars($_GET['no'], ENT_QUOTES, "UTF-8");
-}
+$get_parameter = str_replace('+', '%20', $get_parameter);
+
 $nextUrl = "/";
-if (!empty($grp) || !empty($no)) {
-    $nextUrl = "/common/common_auth.php?grp={$grp}&no={$no}";
+if("" != $get_parameter){
+    $nextUrl = "/common/common_auth.php{$get_parameter}";
 }
+
+
 $nextUrl = getRequestProtocol().getRequestHost().$nextUrl;
 // リダイレクト用パラメータ保存----
 

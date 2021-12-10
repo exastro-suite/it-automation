@@ -111,6 +111,7 @@
     $timeStamp_00_javascript_js=filemtime("$root_dir_path/webroot/menus/systems/{$g['page_dir']}/00_javascript.js");
 
 print <<< EOD
+    <script>const gLoginUserID = {$g['login_id']};</script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?client=all&no={$g['page_dir']}"></script>
     <script type="text/javascript" src="{$scheme_n_authority}/default/menu/02_access.php?stub=all&no={$g['page_dir']}"></script>
     
@@ -395,6 +396,10 @@ EOD;
                         <tr>
                           <th class="panel-th">Status :</th>
                           <td class="panel-td"><span id="node-status" class="panel-span"></span></td>
+                        </tr>
+                        <tr class="type-status-file">
+                          <th class="panel-th">Status file:</th>
+                          <td class="panel-td"><span id="node-status-file" class="panel-span"></span></td>
                         </tr>
                         <tr>
                           <th class="panel-th">Start time :</th>

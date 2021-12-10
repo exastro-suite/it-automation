@@ -58,6 +58,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('CREATE_MENU_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102105"),'F_CREATE_MENU_INFO','CREATE_MENU_ID','MENU_NAME','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102106"));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('CREATE_MENU_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_CREATE_MENU_INFO_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'CREATE_MENU_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
 
@@ -99,6 +111,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // 親カラムグループ
     $c = new IDColumn('COL_GROUP_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102127"),'F_COLUMN_GROUP','COL_GROUP_ID','FULL_COL_GROUP_NAME','',array('OrderByThirdColumn'=>'FULL_COL_GROUP_NAME'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102128"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('COL_GROUP_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_COLUMN_GROUP_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'COL_GROUP_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'FULL_COL_GROUP_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
 
@@ -108,6 +132,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);//登録/更新時には、入力必須
     $objVldt = new InputMethodValidator($c);
     $c->setValidator($objVldt);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('INPUT_METHOD_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'F_INPUT_METHOD_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'INPUT_METHOD_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'INPUT_METHOD_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 文字列(単一行)
@@ -127,6 +163,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new TextColumn('PREG_MATCH',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102115"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102116"));//エクセル・ヘッダでの説明
     $c->setValidator(new PregMatchValidator(0,8192));
+    $cg->addColumn($c);
+
+    // 文字列(単一行)/初期値
+    $c = new TextColumn('SINGLE_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102152"));//エクセル・ヘッダでの説明
+    $c->setValidator(new SingleDefaultValueValidator(0,8192));
     $cg->addColumn($c);
 
     $table->addColumn($cg);
@@ -150,6 +192,12 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new PregMatchValidator(0,8192));
     $cg->addColumn($c);
 
+    // 文字列(複数行)/初期値
+    $c = new MultiTextColumn('MULTI_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102152"));//エクセル・ヘッダでの説明
+    $c->setValidator(new MultiDefaultValueValidator(0,8192));
+    $cg->addColumn($c);
+
     $table->addColumn($cg);
     
     // 整数
@@ -169,6 +217,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102131"));
     $c->setValidator($objVldt);
     $c->setSubtotalFlag(false);
+    $cg->addColumn($c);
+
+    // 整数/初期値
+    $c = new NumColumn('INT_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102153"));//エクセル・ヘッダでの説明
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new IntDefaultValueValidator(null, null));
     $cg->addColumn($c);
 
     $table->addColumn($cg);
@@ -200,14 +255,64 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
+    // 小数/初期値
+    $c = new NumColumn('FLOAT_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"),14);
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102154"));//エクセル・ヘッダでの説明
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new FloatDefaultValueValidator(-99999999999999,99999999999999,14));
+    $cg->addColumn($c);
+
     $table->addColumn($cg);
-    
+
+
+    // 日時
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102149"));
+
+    // 日時/初期値
+    $c = new DateTimeColumn('DATETIME_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102155"));//エクセル・ヘッダでの説明
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
+
+    // 日付
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102150"));
+
+    // 日付/初期値
+    $c = new DateColumn('DATE_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102155"));//エクセル・ヘッダでの説明
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
+
+
     // プルダウン選択
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102126"));
 
     // プルダウン選択/メニューグループ：メニュー：項目
     $c = new IDColumn('OTHER_MENU_LINK_ID',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102123"),'G_OTHER_MENU_LINK','LINK_ID','LINK_PULLDOWN','');
     $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102124"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('OTHER_MENU_LINK_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'G_OTHER_MENU_LINK_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'LINK_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'LINK_PULLDOWN',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
+    $cg->addColumn($c);
+
+    // プルダウン選択/初期値
+    $objVldt = new IntNumValidator(null,null);
+    $c = new NumColumn('PULLDOWN_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102156"));//エクセル・ヘッダでの説明
+    $c->setValidator($objVldt);
+    $c->setSubtotalFlag(false);
+    $c->setValidator(new PulldownDefaultValueValidator());
     $cg->addColumn($c);
 
     // 参照項目
@@ -261,10 +366,35 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setValidator(new IntNumValidator(1,8192));
     $cg->addColumn($c);
 
+    // リンク/初期値
+    $c = new TextColumn('LINK_DEFAULT_VALUE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102151"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102157"));//エクセル・ヘッダでの説明
+    $c->setValidator(new SingleDefaultValueValidator(0,8192));
+    $cg->addColumn($c);
 
     $table->addColumn($cg);
 
-    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102134"));
+    // パラメータシート参照
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102158"));
+
+    // パラメータシート参照/メニューグループ：メニュー：項目
+    $c = new IDColumn('TYPE3_REFERENCE',$g['objMTS']->getSomeMessage("ITACREPAR-MNU-102159"),'G_CREATE_REFERENCE_SHEET_TYPE_3','ITEM_ID','MENU_PULLDOWN','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITACREPAR-MNU-102160"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('TYPE3_REFERENCE');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'G_CREATE_REFERENCE_SHEET_TYPE_3_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'ITEM_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_PULLDOWN',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
+    $cg->addColumn($c);
+
+    $table->addColumn($cg);
 
     // 説明
     $objVldt = new MultiTextValidator(0,1024,false);

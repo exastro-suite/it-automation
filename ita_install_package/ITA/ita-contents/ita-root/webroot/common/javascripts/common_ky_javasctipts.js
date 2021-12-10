@@ -454,7 +454,7 @@ function Graph_onmouse(type, order){
 
 function checkTypicalFlagInHADACResult(ary_result){
     var retBoolContinue = true;
-    if( ! ary_result instanceof Array){
+    if( !(ary_result instanceof Array) ){
         //----配列ではなかった
         //配列ではなかった----
     }else{
@@ -469,7 +469,7 @@ function checkTypicalFlagInHADACResult(ary_result){
 
 function checkTypicalFlagInHAGResult(ary_result){
     var retBoolContinue = true;
-    if( ! ary_result instanceof Array){
+    if( !(ary_result instanceof Array) ){
         //----配列ではなかった
         //配列ではなかった----
     }else{
@@ -548,7 +548,7 @@ function redirectTo(mode,redirectUrl,ary_post_key,intkeyStartIndex,objTgtDoc){
         }
     }
     //exit();
-    exit;
+    exec_flag_ret = false;
 }
 
 function jumpToSelfHtml(strElementId){
@@ -629,6 +629,7 @@ function formControlForFUCFileUpLoad(objTrigger,strIdOfForm,strIdOfResultArea,st
                     $('#'+strIdOfResultArea+'').html('<span class=error>'+uploadData.text+'</span>');
                 }
                 $('#'+strIdOfInputButton+'').removeAttr('disabled');
+                $('#'+strIdOfForm+' [name=file]').val('');
             });
         });
         $('#'+strIdOfInputButton+'').click(function(){
@@ -1310,7 +1311,7 @@ function relayout() {
 
 //////// 何もしないダミーファンクション ////////
 function do_nothing( ){
-    null;
+    return;
 }
 
 //////////////////////////////////////////////////////
@@ -1475,6 +1476,78 @@ function Mix2_1_InsertAccessPermission() {
 function InsertAccessPermission() {
     setAccessPermission('ins-access-auth-id="access_auth_data"');
 }
+
+
+// モーダル Body HTML(ロールボタン)
+function displayRoleModalBody( roleList, initData, valueType ) {
+    if ( valueType === undefined ) valueType = 'id';
+    const $modalBody = $('.editor-modal-body');
+        let roleHTML = ''
+        + '<div class="modal-table-wrap">'
+          + '<table class="modal-table">'
+            + '<thead>'
+              + '<th class="name">Name</th>'
+            + '</thead>'
+            + '<tbody>';
+
+    const roleLength = roleList.length;
+    for ( let i = 0; i < roleLength; i++ ) {
+      const roleName = roleList[i]['ROLE_NAME'],
+            hideRoleName = getSomeMessage("ITAWDCC92008");
+      // ********は表示しない
+      if ( roleName !== hideRoleName ) {
+        roleHTML += '<tr><td>'
+        + roleName + '</tr></td>';
+      }
+    }
+
+    roleHTML += ''      
+        + '</tbody>'
+      + '</table>'
+    + '</div>';
+
+    $modalBody.html( roleHTML );
+}
+
+
+//「ロール」ボタン用にロール一覧を取得し、選択モーダルを表示する
+function displayAccessPermission( inputDataValue ) {
+  const modal = new itaEditorFunctions,
+        printRoleListURL = '/common/common_printRoleList.php?user_id=' + gLoginUserID;
+
+  // モーダルBody
+  const modalRoleList = function() {
+
+    // ロール一覧を取得する
+    $.ajax({
+        type: 'get',
+        url: printRoleListURL,
+        dataType: 'text'
+    }).done( function( result ) {
+        if ( result !== '') {
+            const roleList = JSON.parse( result ),
+                  $input = $('input[' + inputDataValue + ']');
+            const initValue = $input.val();
+            displayRoleModalBody( roleList, initValue, 'help');
+        } else {
+            modal.modalError('Failed to get the list.');
+        }
+    }).fail( function( result ) {
+        modal.modalError('Failed to get the list.');
+    });
+  };
+  const headerTitle=getSomeMessage("ITAWDCC92178");
+  modal.displayModalOpen(headerTitle, modalRoleList,'help');
+}
+
+
+
+
+
+// 「ロール」ボタン押下時
+function role_display(){
+    displayAccessPermission('ins-access-auth-id="access_auth_data"');
+} 
 
 //////////////////////////////////////////////////////
 // 参照項目一覧取得・選択

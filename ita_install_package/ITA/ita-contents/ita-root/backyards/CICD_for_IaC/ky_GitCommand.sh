@@ -19,6 +19,11 @@ CLONE_REPO=$3
 GIT_CMD=$4
 REMOTE_USER=$5
 REMOTE_PASSWORD=$6
+SSH_PASSWORD=$7
+SSH_PASS_PASSPHRASE=$8
+SSH_EXTRAARG=$9
+
+export GIT_SSH_COMMAND=${SSH_EXTRAARG}
 
 if [ $PROXYURL != "__undefine__" ]; then
    export HTTP_PROXY="${PROXYURL}"
@@ -26,17 +31,20 @@ if [ $PROXYURL != "__undefine__" ]; then
 fi
 
 CMD="git --git-dir "$CLONE_REPO"/.git --work-tree="$CLONE_REPO" "$GIT_CMD
-
-if [ "${TYPE}" = "pass" ]; then
+# ssh の接続がhttpより時間がかかる模様 set timeoutを60に統一
+if [ "${TYPE}" = "httpUserAuth" ]; then
     expect -c "
-    set timeout  5
+    set timeout  60
     spawn $CMD
     expect {
         \"Username for \" {
-            send \"${REMOTE_USER}\n\"
+            send \"${REMOTE_USER}\r\"
             exp_continue
         } \"Password for \" {
-            send \"${REMOTE_PASSWORD}\n\"
+            send \"${REMOTE_PASSWORD}\r\"
+            exp_continue
+        } \"remote: \" {
+            set timeout -1
             exp_continue
         } timeout {
             exit 200
@@ -62,15 +70,18 @@ if [ "${TYPE}" = "pass" ]; then
     
         }
     }"
-else
+elif [ "${TYPE}" = "httpNoUserAuth" ]; then
     expect -c "
-    set timeout  5
+    set timeout  60
     spawn $CMD
     expect {
         \"Username for \" {
             exit 201
         } \"Password for \" {
             exit 202
+        } \"remote: \" {
+            set timeout -1
+            exp_continue
         } timeout {
             exit 205
         } eof {
@@ -93,6 +104,131 @@ else
             set STATUS [ lindex \$result 3 ]
             exit \$STATUS
     
+        }
+    }"
+elif [ "${TYPE}" = "sshPassAuth" ]; then
+    expect -c "
+    set timeout 60
+    spawn $CMD
+    expect {
+        \"Cloning into\" {
+            exp_continue
+        } \"continue connecting\" {
+            send \"yes\r\"
+            exp_continue
+        } \"passphrase for key \" {
+            exit 203
+        } \"Username for \" {
+            exit 201
+        } \"password:\" {
+            send \"${SSH_PASSWORD}\r\"
+            exp_continue
+        } \"remote: \" {
+            set timeout -1
+            exp_continue
+        } timeout {
+            exit 200
+        } eof {
+            catch wait result
+
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+
+        } default {
+            catch wait result
+
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+
+        }
+    }"
+elif [ "${TYPE}" = "sshKeyAuthPass" ]; then
+    expect -c "
+    set timeout 60
+    spawn $CMD
+    expect {
+        \"Cloning into\" {
+            exp_continue
+        } \"passphrase for key \*: \" {
+            send \"${SSH_PASS_PASSPHRASE}\r\"
+            exp_continue
+        } \"Username for \" {
+            exit 201
+        } \"password:\" {
+            exit 202
+        } \"remote: \" {
+            set timeout -1
+            exp_continue
+        } timeout {
+            exit 200
+        } eof {
+            catch wait result
+
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+
+        } default {
+            catch wait result
+
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+
+        }
+    }"
+elif [ "${TYPE}" = "sshKeyAuthNoPass" ]; then
+    expect -c "
+    set timeout 60
+    spawn $CMD
+    expect {
+        \"Cloning into\" {
+            exp_continue
+        } \"passphrase for key \*: \" {
+            exit 203
+        } \"Username for \" {
+            exit 201
+        } \"password:\" {
+            exit 202
+        } \"remote: \" {
+            set timeout -1
+            exp_continue
+        } timeout {
+            exit 200
+        } eof {
+            catch wait result
+
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+
+        } default {
+            catch wait result
+
+            set OS_ERROR [ lindex \$result 2 ]
+            if { \$OS_ERROR == -1 } {
+                exit 255
+            }
+            set STATUS [ lindex \$result 3 ]
+            exit \$STATUS
+
         }
     }"
 fi

@@ -303,7 +303,7 @@ class CheckAnsibleRoleFiles {
         $this->lva_rolename = array();
 
         // role変数名一覧 初期化
-        $this->llva_varname = array();
+        $this->lva_varname = array();
 
         // roleグローバル変数名一覧
         $this->lva_globalvarname = array();
@@ -667,6 +667,7 @@ class CheckAnsibleRoleFiles {
         $result_code    = true;
         $tasks_dir      = false;
         $defaults_his   = false;
+        $tmp_in_role_pkg_name = "";
 
         foreach ($files as $file){
             $fullpath = rtrim($in_dir,'/') . '/' . $file;
@@ -696,7 +697,7 @@ class CheckAnsibleRoleFiles {
                                               $ina_system_vars);
                    break;
                case "meta":
-                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, false,  false, true, true, false, true,
+                   $ret = $this->chkRoleFiles($fullpath,$in_rolename,$file, true,  false, true, true, false, true,
                                               $in_get_copyvar,$ina_copyvars_list, $in_get_tpfvar,$ina_tpfvars_list,
                                               $ina_system_vars);
                    break;
@@ -722,11 +723,11 @@ class CheckAnsibleRoleFiles {
                        $array_vars_list  = array();
                        $varsval_list     = array();
                        // defaultsディレクトリ内の変数定義を読み取る
-                       $in_role_pkg_name = $this->lva_msg_role_pkg_name;
+                       $tmp_in_role_pkg_name = $this->lva_msg_role_pkg_name;
                        $ret = $this->AnalysisDefaultVarsFiles(LC_RUN_MODE_STD,
                                                               $in_base_dir,
                                                               $fullpath,
-                                                              $in_role_pkg_name,
+                                                              $tmp_in_role_pkg_name,
                                                               $in_rolename,
                                                               $parent_vars_list,
                                                               $vars_list,
@@ -1020,34 +1021,13 @@ class CheckAnsibleRoleFiles {
 
                 // ホスト変数の抜出が指定されている場合
                 if($in_get_rolevar === true){
-                    if($in_dirname == "templates"){
-                        // テンプレートから変数を抜出す
-                        $objWSRA = new WrappedStringReplaceAdmin("",$dataString,$ina_system_vars); 
-                        $file_vars_list = $objWSRA->getTPFVARSParsedResult();
-                        unset($objWSRA);
+                    // テンプレートからグローバル変数を抜出す
+                    $local_vars = array();
+                    $varsLineArray = array();
+                    $file_global_vars_list = array();
+                    $FillterVars   = true;  // Fillterを含む変数の抜き出しあり
+                    SimpleFillterVerSearch(DF_HOST_GBL_HED,$dataString,$varsLineArray,$file_global_vars_list,$local_vars,$FillterVars);
 
-                        // テンプレートからグローバル変数を抜出す
-                        $system_vars = array();
-                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_TEMP_GBL_HED ,$dataString,$system_vars); 
-                        $file_global_vars_list = $objWSRA->getTPFVARSParsedResult();
-                        unset($objWSRA);
-
-                    }
-                    else{
-                        // テンプレート以外から変数を抜出す
-                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_VAR_HED,$dataString,$ina_system_vars); 
-                        $aryResultParse = $objWSRA->getParsedResult();
-                        $file_vars_list = $aryResultParse[1];
-                        unset($objWSRA);
-
-                        // テンプレート以外からグローバル変数を抜出す
-                        $system_vars = array();
-                        $objWSRA = new WrappedStringReplaceAdmin(DF_HOST_GBL_HED,$dataString,$system_vars); 
-                        $aryResultParse = $objWSRA->getParsedResult();
-                        $file_global_vars_list = $aryResultParse[1];
-                        unset($objWSRA);
-
-                    }
                     // ファイル内で定義されていた変数を退避
                     if(count($file_vars_list) > 0){
                          foreach ($file_vars_list as $var){
@@ -1065,8 +1045,12 @@ class CheckAnsibleRoleFiles {
                 if($in_get_var_tgt_dir === true) {
                     $tgt_file = $in_rolename . "/" . $in_dirname . "/" . $file;
                     if($in_get_copyvar === true) {
-                        $la_cpf_vars = array();
-                        SimpleVerSearch(DF_HOST_CPF_HED,$dataString,$la_cpf_vars);
+                        $local_vars    = array();
+                        $la_cpf_vars   = array();
+                        $varsArray     = array();
+                        $FillterVars       = true;  // Fillterを含む変数の抜き出しあり
+                        SimpleFillterVerSearch(DF_HOST_CPF_HED,$dataString,$la_cpf_vars,$varsArray,$local_vars,$FillterVars);
+
                         // ファイル内で定義されていたCPF変数を退避
                         if(count($la_cpf_vars) > 0){
                             foreach( $la_cpf_vars as $no => $cpf_var_list ){
@@ -1077,8 +1061,12 @@ class CheckAnsibleRoleFiles {
                         }
                     }
                     if($in_get_tpfvar === true) {
-                        $la_tpf_vars = array();
-                        SimpleVerSearch(DF_HOST_TPF_HED,$dataString,$la_tpf_vars);
+                        $local_vars    = array();
+                        $la_tpf_vars   = array();
+                        $varsArray     = array();
+                        $FillterVars       = true;  // Fillterを含む変数の抜き出しあり
+                        SimpleFillterVerSearch(DF_HOST_TPF_HED,$dataString,$la_tpf_vars,$varsArray,$local_vars,$FillterVars);
+
                         // ファイル内で定義されていたCPF変数を退避
                         if(count($la_tpf_vars) > 0){
                             foreach( $la_tpf_vars as $no => $tpf_var_list ){
@@ -2684,10 +2672,7 @@ class DefaultVarsFileAnalysis{
             }
             else{
                 $wk_var_name_path = $var;
-                if(is_numeric($var) === false)
-                    $wk_var_name = $var;
-                else
-                    $wk_var_name = $var;
+                $wk_var_name = $var;
             }
             // 配列の開始かを判定する。
             if($col_array_f == "I"){
@@ -2855,7 +2840,7 @@ class DefaultVarsFileAnalysis{
          }
          foreach($ina_play_global_vars_list as $role_name=>$vars_list){
              foreach($vars_list as $vars_name=>$dummy){
-                 if(@count($ina_global_vars_list[$vars_name])===0){
+                 if(array_key_exists($vars_name,$ina_global_vars_list) === false){
                      $in_errmsg = $in_errmsg . "\n" . $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-90242",
                                                                             array($role_name,$vars_name));
                      $ret_code  = false;
@@ -4186,7 +4171,6 @@ class VarStructAnalysisFileAccess{
             $ret = preg_match("/^LCA_[a-zA-Z0-9_]*/",$var_name);
             if($ret != 0) {
                 return "LCA";
-                $LCA_vars_use = true;
             } else {
                 // グローバル変数の場合
                 $ret = preg_match("/^GBL_[a-zA-Z0-9_]*/",$var_name);
@@ -4288,6 +4272,7 @@ class VarStructAnalysisFileAccess{
                                 &$save_vars_list) {
         global $g;
 
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -4466,7 +4451,7 @@ class VarStructAnalysisFileAccess{
                         $Array_vars_use   = false;
                         $GBL_vars_info    = array();
                         $VarVal_list      = array();
-                        $PkeyID           = $row['ANS_TEMPLATE_ID']; 
+                        $strPkeyID        = $row['ANS_TEMPLATE_ID']; 
                         $strVarsList      = $row['VARS_LIST']; 
 
                         // 変数定義の解析結果を取得
@@ -4474,7 +4459,7 @@ class VarStructAnalysisFileAccess{
 
                         // 変数定義の解析結果をファイルから取得
                         // ファイルがない場合は、変数定義を解析し解析結果をファイルに保存
-                        $ret = $fileObj->getVarStructAnalysis($PkeyID,
+                        $ret = $fileObj->getVarStructAnalysis($strPkeyID,
                                                               $strVarName,
                                                               $strVarsList,
                                                               $Vars_list,
@@ -4704,6 +4689,8 @@ class VarStructAnalysisFileAccess{
         $var_struct_errmag    = "";
         $all_err_vars_list    = array();
 
+        global $g;
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -4872,6 +4859,8 @@ class VarStructAnalysisFileAccess{
         $var_struct_errmag    = "";
         $all_err_vars_list    = array();
 
+        global $g;
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );

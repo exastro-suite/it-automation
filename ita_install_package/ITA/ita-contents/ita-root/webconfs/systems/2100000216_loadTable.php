@@ -35,6 +35,8 @@ $tmpFx = function (&$aryVariant=[], &$arySetting=[]) {
     // 主キー：シーケンス名
     $table = new simpleTableControlAgent('D_SEQUENCE', 'NAME', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230011"), null, $aryVariant);
 
+    $table->setNoRegisterFlg(true);    // 登録画面無し
+
     // Table settings
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230002"));
     $table->setGeneObject('AutoSearchStart',true); //('',true,false)
@@ -58,6 +60,18 @@ $tmpFx = function (&$aryVariant=[], &$arySetting=[]) {
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230032"));
     $c->setHiddenMainTableColumn(false);
     $c->setOutputType('update_table'  , new IDOutputType(new ReqTabHFmt(), new TextTabBFmt()));
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENU_GROUP_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_MENU_GROUP_LIST_JNL',
+	        'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_GROUP_ID',
+    	    'TTT_GET_TARGET_COLUMN_ID'=>'MENU_GROUP_NAME',
+        	'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        	'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+	        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+    	)
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // MENU
@@ -66,6 +80,18 @@ $tmpFx = function (&$aryVariant=[], &$arySetting=[]) {
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1230042"));
     $c->setHiddenMainTableColumn(false);
     $c->setOutputType('update_table'  , new IDOutputType(new ReqTabHFmt(), new TextTabBFmt()));
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('MENU_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'D_MENU_LIST_JNL',
+    	    'TTT_SEARCH_KEY_COLUMN_ID'=>'MENU_ID',
+	        'TTT_GET_TARGET_COLUMN_ID'=>'MENU_NAME',
+        	'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+	        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        	'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+    	)
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 表示順序

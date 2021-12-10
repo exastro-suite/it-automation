@@ -874,7 +874,7 @@ function getSomeMessage(strTextId,varDataResource,tmplLocation){
         }
         else{
             //----埋め込み領域あり
-            if( ! varDataResource instanceof Array){
+            if( !(varDataResource instanceof Array) && !(varDataResource instanceof Object) ){
                 if(typeof varDataResource === "string" ){
                     varDataResource = {0:varDataResource};
                 }

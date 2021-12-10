@@ -39,6 +39,21 @@
                 $aryForResultData = ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
                 //EDIT----
             }
+            else if( $strCommand == "LIST_OPTIONS" ){
+                //----EDIT
+                $aryForResultData = ReSTCommandGetPulldownExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
+                //EDIT----
+            }
+            else if( $strCommand == "DOWNLOAD_SPREADSHEET" ){
+                //----DOWNLOAD_SPREADSHEET
+                $aryForResultData = ReSTCommandExcelDowload($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
+                //DOWNLOAD_SPREADSHEET----
+            }
+            else if( $strCommand == "UPLOAD_SPREADSHEET" ){
+                //----DOWNLOAD_SPREADSHEET
+                $aryForResultData = ReSTCommandExcelUpload($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg);
+                //DOWNLOAD_SPREADSHEET----
+            }
             else{
                 $aryForResultData = array(array('ResultStatusCode'=>500,
                                                 'ResultData'=>$g['requestByREST']['preResponsContents']['errorInfo']
@@ -140,6 +155,17 @@
             }
 
             if( $strCommand == "GET" || $strCommand == "FILTER" || $strCommand == "FILTER_DATAONLY" ){
+               if( is_array($objJSONOfReceptedData) !== true ){
+                   $intResultStatusCode = 400;
+                   $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+                   $aryForResultData['Error'] = array();
+                   $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+                   $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+                   $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                         'ResultData'=>$aryForResultData);
+                   return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+               }
+                
                 //----全部一覧または一部一覧の取得
                 $aryLabelListOfOpendColumn = $objListFormatter->getLabelListOfOpendColumn(true);
 
@@ -329,7 +355,7 @@
         return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
     }
 
-    function ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg=false){
+    function ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable,$strApiFlg=false,$registSkipFlg=false){
         global $g;
         // ----ローカル変数宣言
         $intControlDebugLevel01=250;
@@ -350,6 +376,16 @@
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
 
         try{
+            if( is_array($objJSONOfReceptedData) !== true ){
+              $intResultStatusCode = 400;
+              $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+              $aryForResultData['Error'] = array();
+              $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+              $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+              $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                    'ResultData'=>$aryForResultData);
+              return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+            }
             $tmpArrayReqHeaderRaw = getallheaders();
             list($strFormatterId,$boolKeyExists) = isSetInArrayNestThenAssign($tmpArrayReqHeaderRaw,array('Formatter'),"all_dump_table");
             unset($tmpArrayReqHeaderRaw);
@@ -439,5 +475,549 @@
                               'ResultData'=>$aryForResultData);
         dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
         return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+    }
+    
+    function ReSTCommandGetPulldownExecute($strCommand, $objJSONOfReceptedData, $objTable, $strApiFlg=false){
+        global $g;
+        // ----ローカル変数宣言
+        $intControlDebugLevel01=250;
+
+        $arrayRetBody = array();
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+
+        $intResultStatusCode = null;
+        $aryForResultData = array();
+        $aryPreErrorData = null;
+
+        $intErrorPlaceMark = null;
+        $strErrorPlaceFmt = "%08d";
+
+        $strFxName = __FUNCTION__;
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+        try{
+            $tmpArrayReqHeaderRaw = getallheaders();
+            list($strFormatterId,$boolKeyExists) = isSetInArrayNestThenAssign($tmpArrayReqHeaderRaw,array('Formatter'),"json");
+            unset($tmpArrayReqHeaderRaw);
+
+            $tmpArrayVariant = array();
+            $tmpArraySetting = array();
+
+            $tmpArraySetting = array('system_function_control'=>array('DTiSFilterCheckValid'=>array('HiddenVars'=>array('DecodeOfSelectTagStringEscape'=>false))));
+
+            if( is_array($objJSONOfReceptedData) !== true ){
+                $tmpAryFilterData = array();
+            }
+            else{
+                $tmpAryFilterData = $objJSONOfReceptedData;
+            }
+
+            $objListFormatter = $objTable->getFormatter($strFormatterId);
+            if( is_a($objListFormatter, "ListFormatter") !== true ){
+                // ----リストフォーマッタクラスではない
+                $intErrorPlaceMark = 100;
+                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                // リストフォーマッタクラスではない----
+            }
+
+            if( is_a($objListFormatter, "JSONFormatter") !== true ){
+                $intErrorPlaceMark = 200;
+                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+            
+            $arrayObjColumn = $objTable->getColumns();
+            $arrayResultData = array();
+            $tmpResultData = array();
+            $arrayLabel = array();
+            $passwordMaskStr = "********";
+            
+            foreach ($arrayObjColumn as $objColumn) {
+              if( $objColumn->getOutputType("excel")->isVisible()===false ){
+                continue;
+              }
+              array_push($arrayLabel,$objColumn->getColLabel());
+              $printStaticText = "";
+              if(is_a($objColumn, "IDColumn") === true && method_exists($objColumn->getOutputType('print_table')->getBody(), 'getText')){
+                  $printStaticText = $objColumn->getOutputType('print_table')->getBody()->getText();
+              }
+              if( is_a($objColumn, "IDColumn") === true && $printStaticText != $passwordMaskStr){\
+                array_push($tmpResultData,$objColumn->getMasterTableArrayForInput());
+              }else{
+                array_push($tmpResultData,array());
+              }
+            }
+            
+            $tmpResultData[0] = array($g['objMTS']->getSomeMessage("ITAWDCH-STD-12202"),
+                                      $g['objMTS']->getSomeMessage("ITAWDCH-STD-12203"),
+                                      $g['objMTS']->getSomeMessage("ITAWDCH-STD-12204"),
+                                      $g['objMTS']->getSomeMessage("ITAWDCH-STD-12205"));
+            array_push($arrayResultData,$arrayLabel);
+            array_push($arrayResultData,$tmpResultData);
+            
+            //----正常終了（リスト全体[ヘッダーとレコード]とレコード行を返す）
+            $intResultStatusCode = 200;
+            $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
+            $aryForResultData['resultdata'] = array('CONTENTS'=>array('BODY'=>$arrayResultData,
+                                                                 )
+                                               );
+            
+            if( headers_sent() === true ){
+                $intErrorType = 900;
+                $intErrorPlaceMark = 1000;
+                throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+        }
+        catch (Exception $e){
+            $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+
+            $tmpErrMsgBody = $e->getMessage();
+            dev_log($tmpErrMsgBody, $intControlDebugLevel01);
+            if( $intResultStatusCode === null ) $intResultStatusCode = 500;
+            if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
+            if( 500 <= $intErrorType ) web_log($tmpErrMsgBody);
+        }
+        $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                              'ResultData'=>$aryForResultData);
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);        
+        return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+    }
+    
+    function ReSTCommandExcelDowload($strCommand, $objJSONOfReceptedData, $objTable, $strApiFlg=false){
+        global $g;
+        // ----ローカル変数宣言
+        $intControlDebugLevel01=250;
+
+        $intResultStatusCode = null;
+        $aryForResultData = array();
+        $aryPreErrorData = null;
+
+        $intErrorPlaceMark = null;
+        $strErrorPlaceFmt = "%08d";
+
+        $arrayRetBody = array();
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+
+        $intErrorPlaceMark = null;
+        $strErrorPlaceFmt = "%08d";
+        
+        $boolKeyExists = null;
+
+        $strFxName = __FUNCTION__;
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+        try{
+          $tmpArrayReqHeaderRaw = getallheaders();
+          list($strFormatterId,$boolKeyExists) = isSetInArrayNestThenAssign($tmpArrayReqHeaderRaw,array('Formatter'),"json");
+          unset($tmpArrayReqHeaderRaw);
+
+          $tmpArrayVariant = array();
+          $tmpArraySetting = array();
+
+          $tmpArraySetting = array('system_function_control'=>array('DTiSFilterCheckValid'=>array('HiddenVars'=>array('DecodeOfSelectTagStringEscape'=>false))));
+
+          if( is_array($objJSONOfReceptedData) !== true ){
+              $tmpAryFilterData = array();
+          }
+          else{
+              $tmpAryFilterData = $objJSONOfReceptedData;
+          }
+
+          $objListFormatter = $objTable->getFormatter($strFormatterId);
+          if( is_a($objListFormatter, "ListFormatter") !== true ){
+              // ----リストフォーマッタクラスではない
+              $intErrorPlaceMark = 100;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+              // リストフォーマッタクラスではない----
+          }
+
+          if( is_a($objListFormatter, "JSONFormatter") !== true ){
+              $intErrorPlaceMark = 200;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+          }
+
+          if( is_array($objJSONOfReceptedData) !== true ){
+              $intResultStatusCode = 400;
+              $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+              $aryForResultData['Error'] = array();
+              $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+              $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+              $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                    'ResultData'=>$aryForResultData);
+              return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+          }
+          
+          //----全部一覧または一部一覧の取得
+          $aryLabelListOfOpendColumn = $objListFormatter->getLabelListOfOpendColumn(true);
+
+          $aryFilterData = array();
+          foreach($tmpAryFilterData as $tmpIntKey=>$tmpVarValue01){
+              if( array_key_exists($tmpIntKey, $aryLabelListOfOpendColumn) ){
+                  //----Prefix(IDSOP)
+                  $strKeyPrefix = $aryLabelListOfOpendColumn[$tmpIntKey];
+                  //Prefix(IDSOP)----
+
+                  //----リッチフィルタ
+                  list($tmpAryRich,$boolKeyExists) = isSetInArrayNestThenAssign($tmpVarValue01,array('LIST'),null);
+                  if( $boolKeyExists === true ){
+                      if( is_array($aryFilterData) === true ){
+                          $tmpKeyBody = $strKeyPrefix."_RF";
+                          $tmpAryToFilter02 = array();
+                          foreach($tmpAryRich as $tmpVarValue02){
+                              switch( gettype($tmpVarValue02) ){
+                                  case "integer":
+                                  case "string":
+                                  case "NULL":
+                                      if( strlen($tmpVarValue02) == 0 ){
+                                          $tmpAryToFilter02[] = "";
+                                      }
+                                      else{
+                                          $tmpAryToFilter02[] = $tmpVarValue02;
+                                      }
+                                      break;
+                                  default:
+                                      $intResultStatusCode = 400;
+                                      $intErrorPlaceMark = 300;
+                                      throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                      break;
+                              }
+                          }
+                          $aryFilterData[$tmpKeyBody] = $tmpAryToFilter02;
+                          unset($tmpKeyBody);
+                      }
+                      else{
+                          $intResultStatusCode = 400;
+                          $intErrorPlaceMark = 400;
+                          throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                      }
+                  }
+                  //リッチフィルタ----
+
+                  //----通常(範囲型)
+                  list($tmpAryNormal,$boolKeyExists) = isSetInArrayNestThenAssign($tmpVarValue01,array('RANGE'),null);
+                  if( $boolKeyExists === true ){
+                      list($strStart,$boolKeyExists) = isSetInArrayNestThenAssign($tmpAryNormal,array('START'),"");
+                      if( $boolKeyExists === true ){
+                          $tmpKeyBody = $strKeyPrefix."__S";
+                          switch( gettype($strStart) ){
+                              case "integer":
+                              case "string":
+                                  $aryFilterData[$tmpKeyBody] = array($strStart);
+                                  break;
+                              default:
+                                  $intResultStatusCode = 400;
+                                  $intErrorPlaceMark = 500;
+                                  throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                  break;
+                          }
+                          unset($tmpKeyBody);
+                      }
+                      list($strEnded,$boolKeyExists) = isSetInArrayNestThenAssign($tmpAryNormal,array('END'),"");
+                      if( $boolKeyExists === true ){
+                          $tmpKeyBody = $strKeyPrefix."__E";
+                          switch( gettype($strEnded) ){
+                              case "integer":
+                              case "string":
+                                  $aryFilterData[$tmpKeyBody] = array($strEnded);
+                                  break;
+                              default:
+                                  $intResultStatusCode = 400;
+                                  $intErrorPlaceMark = 600;
+                                  throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                  break;
+                          }
+                          unset($tmpKeyBody);
+                      }
+                  }
+                  //通常(範囲型)----
+
+                  //----通常(そのほか)
+                  list($tmpStrNormal,$boolKeyExists) = isSetInArrayNestThenAssign($tmpVarValue01,array('NORMAL'),null);
+                  if( $boolKeyExists === true ){
+                      $tmpKeyBody = $strKeyPrefix;
+                      switch( gettype($tmpStrNormal) ){
+                          case "integer":
+                          case "string":
+                              $aryFilterData[$tmpKeyBody] = array($tmpStrNormal);
+                              break;
+                          default:
+                              $intResultStatusCode = 400;
+                              $intErrorPlaceMark = 700;
+                              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                              break;
+                      }
+                      unset($tmpKeyBody);
+                  }
+                  //通常(そのほか)----
+              }
+          }
+          
+          $tmpArrayVariant['search_filter_data'] = $aryFilterData;
+          $tmpArrayVariant['dumpDataFromTable'] = array('vars'=>array('strOutputFileType'=>'excel',
+                                                                      'strFormatterId'=>'excel'
+                                                                      )
+                                                        );
+          
+          $aryResultOfDump = dumpDataFromTable(array('to_area_type'=>'toFile'), $objTable, $tmpArrayVariant, $tmpArraySetting, $strApiFlg);
+          $objExcelFormatter = $objTable->getFormatter("excel");
+          $tmpResultData = array();
+          $filename = $objExcelFormatter->makeLocalFileName(".xlsx",time());
+          $tmpResultData['FILE_NAME'] = $filename;
+          $tmpResultData['FILE_TYPE'] = 'EXCEL';
+          if( $aryResultOfDump[1] == "301" ){
+            $tmpArrayVariant['dumpDataFromTable'] = array('vars'=>array('strOutputFileType'=>'csv',
+                                                                        'strFormatterId'=>'csv'
+                                                                        )
+                                                          );
+            $aryResultOfDump = dumpDataFromTable(array('to_area_type'=>'toFile'), $objTable, $tmpArrayVariant, $tmpArraySetting, $strApiFlg);
+            $objExcelFormatter = $objTable->getFormatter("csv");
+            $filename = $objExcelFormatter->makeLocalFileName(".scsv",time());
+            $tmpResultData['FILE_NAME'] = $filename;
+            $tmpResultData['FILE_TYPE'] = 'SCSV';
+          }
+          $aryForResultData = $aryResultOfDump[0];
+          if( $aryResultOfDump[1] !== null ){
+              //----エラー発生
+              $aryPreErrorData = $aryResultOfDump[2];
+              switch($aryResultOfDump[1]){
+                  case 1: //権限がない
+                      $intResultStatusCode = 403;
+                      break;
+                  case 2: //バリデーションエラー
+                      $intResultStatusCode = 400;
+                      break;
+                  default:
+                      $intResultStatusCode = 500;
+                      break;
+              }
+
+              $intErrorPlaceMark = 800;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+              //エラー発生----
+          }
+          else{
+              //----正常終了（リスト全体[ヘッダーとレコード]とレコード行を返す）
+              //ログイン中のアカウント情報取得
+              if($tmpResultData['FILE_TYPE'] == "SCSV" || $aryResultOfDump[5] > 0){
+                $tmpFileResult = "";
+                $tmpFileResult = base64_encode(file_get_contents($aryResultOfDump[0]));
+                
+                $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
+                $aryForResultData['resultdata'] = array('CONTENTS'=>array('BODY' => $tmpResultData,
+                                                                          'DOWNLOAD_FILE'=>$tmpFileResult));
+              }else{
+                $tmpResultData['FILE_NAME'] = '';
+                $tmpResultData['FILE_TYPE'] = '';
+                
+                $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
+                $aryForResultData['resultdata'] = array('CONTENTS'=>array('BODY' => $tmpResultData,
+                                                                          'DOWNLOAD_FILE'=>""));
+              }
+          }
+          
+          if( headers_sent() === true ){
+              $intErrorType = 900;
+              $intErrorPlaceMark = 1000;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+          }
+        }
+        catch (Exception $e){
+          // 失敗時のデータテンプレを取得
+          $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+
+          $tmpErrMsgBody = $e->getMessage();
+          dev_log($tmpErrMsgBody, $intControlDebugLevel01);
+          if( $intResultStatusCode === null ) $intResultStatusCode = 500;
+          if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
+          if( 500 <= $intErrorType ) web_log($tmpErrMsgBody);
+      }
+      $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                            'ResultData'=>$aryForResultData);;
+      return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+    }
+    
+    function ReSTCommandExcelUpload($strCommand, $objJSONOfReceptedData, $objTable, $strApiFlg=false){
+        global $g;
+        // ----ローカル変数宣言
+        $intControlDebugLevel01=250;
+
+        $intResultStatusCode = null;
+        $aryForResultData = array();
+        $aryPreErrorData = null;
+
+        $intErrorPlaceMark = null;
+        $strErrorPlaceFmt = "%08d";
+
+        $arrayRetBody = array();
+        $intErrorType = null;
+        $aryErrMsgBody = array();
+        $strErrMsg = "";
+
+        $intErrorPlaceMark = null;
+        $strErrorPlaceFmt = "%08d";
+        
+        $boolKeyExists = null;
+
+        $strFxName = __FUNCTION__;
+        dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+
+        try{
+          $tmpArrayReqHeaderRaw = getallheaders();
+          list($strFormatterId,$boolKeyExists) = isSetInArrayNestThenAssign($tmpArrayReqHeaderRaw,array('Formatter'),"json");
+          unset($tmpArrayReqHeaderRaw);
+
+          $tmpArrayVariant = array();
+          $tmpArraySetting = array();
+
+          $tmpArraySetting = array('system_function_control'=>array('DTiSFilterCheckValid'=>array('HiddenVars'=>array('DecodeOfSelectTagStringEscape'=>false))));
+
+          if( is_array($objJSONOfReceptedData) !== true ){
+              $tmpAryFilterData = array();
+          }
+          else{
+              $tmpAryFilterData = $objJSONOfReceptedData;
+          }
+
+          $objListFormatter = $objTable->getFormatter($strFormatterId);
+          if( is_a($objListFormatter, "ListFormatter") !== true ){
+              // ----リストフォーマッタクラスではない
+              $intErrorPlaceMark = 100;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+              // リストフォーマッタクラスではない----
+          }
+
+          if( is_a($objListFormatter, "JSONFormatter") !== true ){
+              $intErrorPlaceMark = 200;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+          }
+
+          if( is_array($objJSONOfReceptedData) !== true ){
+              $intResultStatusCode = 400;
+              $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+              $aryForResultData['Error'] = array();
+              $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+              $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+              $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                    'ResultData'=>$aryForResultData);
+              return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+          }
+          
+          
+          if(!array_key_exists('FILE_NAME',$objJSONOfReceptedData)){
+            //ファイル名の指定がない
+            $intResultStatusCode = 400;
+            $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+            $aryForResultData['Error'] = array();
+            $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+            $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-1121"));
+            $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                  'ResultData'=>$aryForResultData);
+            return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+          }
+          
+          $upTmpFileFullname = "/tmp/tmpfile";
+          $upload_files = base64_decode($objJSONOfReceptedData['UPLOAD_FILE']);
+          $upOrgFilename = $objJSONOfReceptedData['FILE_NAME'];
+          file_put_contents($upTmpFileFullname,$upload_files);
+          
+          if( preg_match('/\.xlsx$/',$upOrgFilename) === 1 ){
+            $intModeFileCh = 0;
+          }else if( preg_match('/\.xlsm$/',$upOrgFilename) === 1 ){
+            $intModeFileCh = 1;
+          }else if( preg_match('/\.scsv$/',$upOrgFilename) === 1 ){
+            $intModeFileCh = 1;
+          }else{
+            //ファイル種別が不正
+            $intResultStatusCode = 400;
+            $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+            $aryForResultData['Error'] = array();
+            $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+            $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-508",array('.xlsx,.xlsm,.scsv')));
+            $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                  'ResultData'=>$aryForResultData);
+            return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+          }
+
+          $tmpArrayVariant = array();
+          $tmpArraySetting = array();
+          $tmpArrayVariant['objTable'] = $objTable;
+          $tmpArrayVariant['tableIUDByQMFile']  = array('vars'=>array('strUpTmpFileFullname'=>$upTmpFileFullname,'strOrgFileNameOfUpTmpFile'=>$upOrgFilename));
+          
+          $aryResultOfTableIUD = tableIUDByQMFile(null, null, $intModeFileCh, 'all_dump_table', $tmpArrayVariant, $tmpArraySetting, true);
+          $aryNormalResultOfEditExecute = $aryResultOfTableIUD[4];
+          $deleteString = array("\t","\r");
+          $aryRawResultOfEditExecute = explode("\n", str_replace($deleteString, "", $aryResultOfTableIUD[6]));
+          $tmpAryRawResultOfEditExecute = $aryRawResultOfEditExecute;
+          foreach ($tmpAryRawResultOfEditExecute as $key => $value) {
+            if($value == ""){
+              unset($tmpAryRawResultOfEditExecute[$key]);
+            }
+          }
+          
+          $aryRawResultOfEditExecute = $tmpAryRawResultOfEditExecute;
+          
+          if( $aryResultOfTableIUD[1] !== null ){
+              //----エラー発生
+              switch($aryResultOfTableIUD[1]){
+                  case 1: // 権限がない
+                      $intResultStatusCode = 403;
+                      break;
+                  case 371: // JSON固有サイズover。
+                  case 372: // フォーマットが一致しない。
+                  case 373: // 不正なフォーマット。
+                      $intResultStatusCode = 400;
+                      break;
+                  case 374: // アップロードファイルが不正なフォーマット。
+                      $intResultStatusCode = 400;
+                      $semiNormalFlg = 1;
+                      break;
+                  default:
+                      $intResultStatusCode = 500;
+                      break;
+              }
+              if("" != $aryResultOfTableIUD[3]){
+                  $aryPreErrorData = $aryResultOfTableIUD[3];
+              }
+              else{
+                  $aryPreErrorData = getMessageFromResultOfTableIUDByQMFile($aryResultOfTableIUD[1],0);
+              }
+              $intErrorPlaceMark = 300;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+              //エラー発生----
+          }
+          else{
+              //----正常終了
+              $intResultStatusCode = 200;
+              $aryForResultData = $g['requestByREST']['preResponsContents']['successInfo'];
+              $aryForResultData['resultdata'] = array('LIST'=>array('NORMAL'=>$aryNormalResultOfEditExecute,
+                                                                    'ERROR_DETAIL'=>$aryRawResultOfEditExecute
+                                                                    )
+                                                      );
+              //正常終了----
+          }
+          unset($tmpStrTempFilename);
+          
+          if( headers_sent() === true ){
+              $intErrorType = 900;
+              $intErrorPlaceMark = 1000;
+              throw new Exception( sprintf($strErrorPlaceFmt,$intErrorPlaceMark).'-([FUNCTION]' . $strFxName . ',[FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+          }
+        }
+        catch (Exception $e){
+          // 失敗時のデータテンプレを取得
+          $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+
+          $tmpErrMsgBody = $e->getMessage();
+          dev_log($tmpErrMsgBody, $intControlDebugLevel01);
+          if( $intResultStatusCode === null ) $intResultStatusCode = 500;
+          if( $aryPreErrorData !== null ) $aryForResultData['Error'] = $aryPreErrorData;
+          if( 500 <= $intErrorType ) web_log($tmpErrMsgBody);
+      }
+      $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                            'ResultData'=>$aryForResultData);;
+      return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
     }
 ?>

@@ -69,6 +69,8 @@
         "TIME_START"=>"DATETIME",
         "TIME_END"=>"DATETIME",
         "EXEC_LOG"=>"",
+        "I_NOTICE_INFO"=>"",
+        "NOTICE_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -95,6 +97,8 @@
         "TIME_START"=>"",
         "TIME_END"=>"",
         "EXEC_LOG"=>"",
+        "I_NOTICE_INFO"=>"",
+        "NOTICE_LOG"=>"",
         "ACCESS_AUTH"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -126,6 +130,7 @@
         "TIME_END"=>"DATETIME",
         "RELEASED_FLAG"=>"",
         "EXE_SKIP_FLAG"=>"",
+        "END_TYPE"=>"",
         "OVRD_OPERATION_NO_UAPK"=>"",
         "OVRD_I_OPERATION_NAME"=>"",
         "OVRD_I_OPERATION_NO_IDBH"=>"",
@@ -160,6 +165,7 @@
         "TIME_END"=>"DATETIME",
         "RELEASED_FLAG"=>"",
         "EXE_SKIP_FLAG"=>"",
+        "END_TYPE"=>"",
         "OVRD_OPERATION_NO_UAPK"=>"",
         "OVRD_I_OPERATION_NAME"=>"",
         "OVRD_I_OPERATION_NO_IDBH"=>"",
@@ -190,6 +196,7 @@
         "POINT_Y"=>"",
         "POINT_W"=>"",
         "POINT_H"=>"",
+        "END_TYPE"=>"",
         "DISP_SEQ"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -216,6 +223,7 @@
         "POINT_Y"=>"",
         "POINT_W"=>"",
         "POINT_H"=>"",
+        "END_TYPE"=>"",
         "DISP_SEQ"=>"",
         "NOTE"=>"",
         "DISUSE_FLAG"=>"",
@@ -422,6 +430,10 @@
         unset($aryRetBody);
         
         //オーケストレータ情報の収集----
+
+        //各ドライバのインターフェース情報設定　#587
+        $arrDataRelaystoragePath = array();
+        $arrDriversList = $objOLA->getStatusFileInfo();
         
         //----存在するオーケスト—タ分回る
         foreach($aryOrcListRow as $arySingleOrcInfo){
@@ -433,6 +445,28 @@
                 $strErrStepIdInFx="00000200";
                 throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
+
+            //各ドライバのインターフェース情報取得　#587  
+            if( array_key_exists($strOrcIdNumeric, $arrDriversList) ){
+                
+                $strDriverTable = $arrDriversList[$strOrcIdNumeric]["table"];
+                $strDriverCol = $arrDriversList[$strOrcIdNumeric]["column"];
+                $strDriverPath = $arrDriversList[$strOrcIdNumeric]["path"];
+                $sql =   " SELECT * FROM {$strDriverTable} TAB_A "
+                        ." WHERE TAB_A.DISUSE_FLAG = '0' "
+                        ."";
+                $objQuery = $objDBCA->sqlPrepare($sql);
+                $r = $objQuery->sqlExecute();
+                if( $r == 1 && $strDriverCol != "" ){
+                    $row = $objQuery->resultFetch();
+                    $arrDataRelaystoragePath[$strOrcIdNumeric] = $row[$strDriverCol] ."/". $strDriverPath ;
+                }else{
+                    $arrDataRelaystoragePath[$strOrcIdNumeric] = "";
+                }                
+            }else{
+                $arrDataRelaystoragePath[$strOrcIdNumeric] = "";
+            }
+
             unset($aryRetBodyOfAddFunction);
         }
         unset($strOrcIdNumeric);
@@ -502,10 +536,7 @@
                         throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                     }
 
-                    //　親Conductorのみ実行対象へ
-                    if( $row["CONDUCTOR_CALL_FLAG"] != 2 ){
-                        $aryConductorOnRun[] = $row;
-                    }
+                    $aryConductorOnRun[] = $row;
 
                     break;
                 case "3": //実行中
@@ -1480,26 +1511,6 @@
                                             );                                    
                                     }
 
-                                    $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
-                                    $arySymInsCallUpdateTgtSource = $aryRetBody[0];
-                                    $arySymInsCallUpdateTgtSource['STATUS_ID'] = 3;     //実行中
-                                    $arySymInsCallUpdateTgtSource['TIME_START'] = "DATETIMEAUTO(6)";
-
-
-                                    // 更新用のテーブル定義
-                                    $aryConfigForIUD = $aryConfigForSymInsIUD;
-
-                                    // BIND用のベースソース
-                                    $aryBaseSourceForBind = $arySymInsCallUpdateTgtSource;
-                                    
-                                    $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
-
-                                    if( $aryRetBody !== true  ){
-                                        // 例外処理へ
-                                        $strErrStepIdInFx="00001402";
-                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                                    }
-
                                     // 呼び出しConductorインスタンスのステータスを実行中へ---
 
                                 
@@ -1535,8 +1546,14 @@
                                     $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
                                     $arySymInsCallUpdateTgtSource = $aryRetBody[0];
 
-                                    if( $arySymInsCallUpdateTgtSource['STATUS_ID'] == 5 ){
+                                    if( $arySymInsCallUpdateTgtSource['STATUS_ID'] == 5 || $arySymInsCallUpdateTgtSource['STATUS_ID'] == 11 ){
                                         $aryMovInsUpdateTgtSource['STATUS_ID']    = '9'; //正常終了
+
+                                        //Call先、警告終了時
+                                        if( $arySymInsCallUpdateTgtSource['STATUS_ID'] == 11 ){
+                                            $aryMovInsUpdateTgtSource['STATUS_ID']    = '15'; //警告終了
+                                        }
+
                                         $aryMovInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
                                         $boolNextNodeReadyflg = true;
                                         $aryMovInsUpdateTgtSource['TIME_START'] = str_replace("-","/",$aryMovInsUpdateTgtSource['TIME_START']) ;
@@ -1716,6 +1733,7 @@
                                         case "12":  //Skip完了
                                         case "9":  //正常終了
                                         case "14":  //Skip終了
+                                        case "15":  //警告終了
                                             $boolNextNodeReadyflg = true;
                                             break;
                                         default:
@@ -2099,6 +2117,7 @@
                                         break;
                                     case "9":  //正常終了
                                     case "14":  //Skip終了
+                                    case "15":  //警告終了
                                         break;
 
                                     default: // 返し値として存在してはいけない値だった場合
@@ -2126,6 +2145,7 @@
                                     case "13":  //Skip後保留中
                                     case "9":  //正常終了
                                     case "14":  //Skip終了
+                                    case "15":  //警告終了
                                         break;
 
                                     default: // 返し値として存在してはいけない値だった場合
@@ -2754,6 +2774,259 @@
 
                             }
                             break;  
+
+                        case "11":  #status-file-branch #587
+
+                            //---status-file-branch ノードステータス更新
+                            if(  $arrTargetNodeInstance['STATUS_ID'] == '2'  ){
+                                //status-file-branchノードを準備中へ
+                                $aryMovInsUpdateTgtSource['STATUS_ID'] = 3;     //実行中
+                                $aryMovInsUpdateTgtSource['TIME_START'] = "DATETIMEAUTO(6)"; 
+
+                                // 更新用のテーブル定義
+                                $aryConfigForIUD = $aryConfigForMovInsIUD;
+
+                                // BIND用のベースソース
+                                $aryBaseSourceForBind = $aryMovInsUpdateTgtSource;
+
+                                $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                                
+                                if( $aryRetBody !== true  ){
+                                    // 例外処理へ
+                                    $strErrStepIdInFx="00001600";
+                                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                }
+
+                            }else{
+                                //---status-file-branchノードのステータスを正常終了へ
+                                //status-file-branch接続先のノードインスタンスの取得
+                                $arySqlBind=array(
+                                    "CONDUCTOR_INSTANCE_NO" => $rowOfConductor['CONDUCTOR_INSTANCE_NO'],
+                                    "NODE_CLASS_NO" => $arrTargetNodeClassInfo["NODE_CLASS_NO"],
+                                    "TERMINAL_TYPE_ID" => 1, //in
+                                    );
+                                $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
+
+                                //ノードクラスの取得
+                                $arrConditionalTargetNodeClass=array();
+                                foreach ($aryRetBody as $key => $value) {
+                                    foreach ( $arrNodeClassInfo as $key2 => $value2) {
+                                        if( $value2['NODE_NAME'] == $value['CONNECTED_NODE_NAME'] ){
+                                            $arrConditionalTargetNodeClass[$value2['NODE_CLASS_NO']]=$value2; 
+                                               
+                                        }
+                                    }
+                                }
+                                //ノードインスタンスの取得
+                                $arrConditionalTargetNodeInstance = array();
+                                foreach ($arrConditionalTargetNodeClass as $key => $nclass) {
+                                    $arySqlBind=array(
+                                        "CONDUCTOR_INSTANCE_NO" => $rowOfConductor['CONDUCTOR_INSTANCE_NO'],
+                                        "NODE_CLASS_NO" => $nclass["NODE_CLASS_NO"],
+                                        "TERMINAL_TYPE_ID" => 2, //in
+                                        );
+                                    $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
+                                    $arrConditionalTargetNodeInstance[$aryRetBody[0]['NODE_INSTANCE_NO']] = $aryRetBody[0];
+                                }
+
+                                //作業NO取得
+                                $intMovExecNo = $arrConditionalTargetNodeInstance[$aryRetBody[0]['NODE_INSTANCE_NO']]['EXECUTION_NO'];
+                                $intOrcNo = $arrConditionalTargetNodeInstance[$aryRetBody[0]['NODE_INSTANCE_NO']]['I_ORCHESTRATOR_ID'];
+                                $strgetStatusfile = "";
+                                if( $arrDataRelaystoragePath[$intOrcNo] != "" ){
+                                    $strDataRelaystoragePath = $arrDataRelaystoragePath[$intOrcNo]."/". str_pad($intMovExecNo, 10, '0', STR_PAD_LEFT)."/out/MOVEMENT_STATUS_FILE";
+                                    if( file_exists($strDataRelaystoragePath) ) {
+                                        //ステータスファイル取得
+                                        $tmpgetStatusfile = file_get_contents( $strDataRelaystoragePath );
+                                        
+                                        //BOM削除
+                                        $bomcode = hex2bin('EFBBBF');
+                                        $tmpgetStatusfile = preg_replace("/^{$bomcode}/", '', $tmpgetStatusfile);
+                                        
+                                        //ステータス取得
+                                        $tmpgetStatusfile = str_replace(array("\r\n", "\r", "\n"), PHP_EOL, $tmpgetStatusfile);
+                                        $tmpgetStatusfile = explode( PHP_EOL , $tmpgetStatusfile);
+                                        foreach ($tmpgetStatusfile as $tmpStatus) {
+                                            if( $tmpStatus != "" ){
+                                                $strgetStatusfile = $tmpStatus;
+                                                break;   
+                                            }
+                                        }
+                                    }
+                                }
+
+                                //次のノードを準備中へ
+                                $strConditionalTargetNodeInsID = $aryRetBody[0]['NODE_INSTANCE_NO'];
+
+                                //#838 対応
+                                $intconditionalStopflg = 0;
+                                if( count($arrOfErrMovement) != 0 ){
+                                    foreach ($arrOfErrMovement as $tmparrOfErrMovement) {
+                                       if( $tmparrOfErrMovement['NODE_INSTANCE_NO'] != $strConditionalTargetNodeInsID ){
+                                            $intconditionalStopflg = 1;
+
+                                            //次のNode取得
+                                            $arySqlBind=array(
+                                                "CONDUCTOR_INSTANCE_NO" => $rowOfConductor['CONDUCTOR_INSTANCE_NO'],
+                                                "NODE_CLASS_NO" => $tmparrOfErrMovement['I_NODE_CLASS_NO'],
+                                                "TERMINAL_TYPE_ID" => 2, //out
+                                                );
+                                            $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
+
+                                            //クラスの取得
+                                            $arrNextTargetNodeClass=array();
+                                            foreach ($aryRetBody as  $value) {
+                                                foreach ( $arrNodeClassInfo as $value2) {
+                                                    if( $value2['NODE_NAME'] == $value['CONNECTED_NODE_NAME'] ){
+                                                        $arrNextTargetNodeClass[$value2['NODE_CLASS_NO']]=$value2;        
+                                                    }
+                                                }
+                                            }
+                                            
+                                            foreach ($arrNextTargetNodeClass as  $nclass) {
+                                                if($nclass['NODE_TYPE_ID'] == 6 ){
+                                                    $intconditionalStopflg = 0;
+                                                }
+                                            }    
+                                       }
+                                    }
+                                }
+
+                                if( $intconditionalStopflg != 1 ){
+                                    //---status-file-branchノードのステータスを正常終了へ
+                                    //status-file-branch接続先のノードインスタンスの取得
+                                    $arySqlBind=array(
+                                        "CONDUCTOR_INSTANCE_NO" => $rowOfConductor['CONDUCTOR_INSTANCE_NO'],
+                                        "NODE_CLASS_NO" => $arrTargetNodeClassInfo["NODE_CLASS_NO"],
+                                        "TERMINAL_TYPE_ID" => 2, //in
+                                        );
+                                    $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
+
+                                    $arrConditionalTargetStatusID=array();
+                                    foreach ($aryRetBody as $key => $value) {
+                                        
+                                        $strCaseNo = $value['CASE_NO'];
+                                        if( $strCaseNo == "0" ){
+                                            $strConditionalvalue = "____ELSE____";
+                                        }else{
+                                            $strConditionalvalue = $value['CONDITIONAL_ID'];
+                                        }
+
+                                        $arrConditionalTargetStatusID[$strConditionalvalue] = $value['CONNECTED_NODE_NAME'];
+                                        if( $strConditionalvalue == $strgetStatusfile ){
+                                            $strNextTargetNode = $value['CONNECTED_NODE_NAME'];
+                                        }
+                                    }
+
+                                    //ステータスファイルの値と条件に一致するノードの設定
+                                    if( isset( $arrConditionalTargetStatusID[$strgetStatusfile] ) ) {
+                                        $strNextTargetNode=$arrConditionalTargetStatusID[$strgetStatusfile];
+                                    }else{
+                                        $strNextTargetNode=$arrConditionalTargetStatusID["____ELSE____"];
+                                    }
+
+                                    //不要側のSKIP用リスト
+                                    $arrNextNodeList=array();
+                                    foreach ($arrConditionalTargetStatusID as $key => $value) {
+                                        $arrNextNodeList[$value]=$value;
+                                    }
+                                    unset($arrNextNodeList[$strNextTargetNode]);
+
+                                    //全ノードの取得、（TERMINAL-OUT）
+                                    $aryRetBody = $objOLA->getInfoOfOneNodeTerminal($rowOfConductor['I_CONDUCTOR_CLASS_NO'], 0,0,1,2);#TERMINALあり
+                                    //整形
+                                    $arrNodeClassInfo=array();
+                                    foreach ( $aryRetBody[4] as $key => $value) {
+                                            $arrNodeClassInfo[$value['NODE_CLASS_NO']]=$value; 
+                                    }
+
+                                    //不使用Case先をSKIP完了へ
+                                    $aryRetBody = callconditionalafterskip($objDBCA,$db_model_ch,$strFxName,$db_access_user_id,$aryConfigForMovInsIUD,$rowOfConductor,$arrNodeClassInfo,$arrNextNodeList);
+
+                                    //次のノードを処理
+                                    //次のノードのクラス取得
+                                    $arrTargetNodeClassID="";
+                                    foreach ( $arrNodeClassInfo as $key => $value) {
+                                        if( $value['NODE_NAME'] == $strNextTargetNode )$arrTargetNodeClassInfo=$value; 
+                                    }
+
+                                    //次のノードインスタンス取得
+                                    $arySqlBind=array(
+                                        "CONDUCTOR_INSTANCE_NO" => $rowOfConductor['CONDUCTOR_INSTANCE_NO'],
+                                        "NODE_CLASS_NO" => $arrTargetNodeClassInfo["NODE_CLASS_NO"],
+                                        "TERMINAL_TYPE_ID" => 1, //in
+                                        );
+                                    $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
+                                    $arrNextTargetNodeInstance = $aryRetBody[0];
+
+                                    $aryMovInsUpdateTgtSourceStart=$arrNextTargetNodeInstance;
+                                    $aryMovInsUpdateTgtSourceStart['STATUS_ID'] = 2;     //準備中
+                                    $aryMovInsUpdateTgtSourceStart['LAST_UPDATE_USER'] = $db_access_user_id;
+                                    $aryMovInsUpdateTgtSourceStart['TIME_START'] = "DATETIMEAUTO(6)"; 
+                                    #$aryMovInsUpdateTgtSourceStart['TIME_START'] = str_replace("-","/",$aryMovInsUpdateTgtSourceStart['TIME_START']) ;
+                                    $aryMovInsUpdateTgtSourceStart['TIME_END'] = str_replace("-","/",$aryMovInsUpdateTgtSourceStart['TIME_END']) ;
+
+                                    // 更新用のテーブル定義
+                                    $aryConfigForIUD = $aryConfigForMovInsIUD;
+
+                                    // BIND用のベースソース
+                                    $aryBaseSourceForBind = $aryMovInsUpdateTgtSourceStart;
+
+                                    $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                                    
+                                    if( $aryRetBody !== true  ){
+                                        // 例外処理へ
+                                        $strErrStepIdInFx="00001601";
+                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    }
+
+                                    //ノードのステータス更新
+                                
+                                    //---ノードを正常終了へ
+                                    $aryMovInsUpdateTgtSource = $arrTargetNodeInstance;
+                                    $aryMovInsUpdateTgtSource['STATUS_ID'] = 9;     //正常終了
+                                    $aryMovInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)"; 
+                                    $aryMovInsUpdateTgtSource['TIME_START'] = str_replace("-","/",$aryMovInsUpdateTgtSource['TIME_START']) ;
+                                    $aryMovInsUpdateTgtSource['LAST_UPDATE_USER'] = $db_access_user_id;
+                                    // 更新用のテーブル定義
+                                    $aryConfigForIUD = $aryConfigForMovInsIUD;
+
+                                    // BIND用のベースソース
+                                    $aryBaseSourceForBind = $aryMovInsUpdateTgtSource;
+
+                                    $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+
+                                    if( $aryRetBody !== true  ){
+                                        // 例外処理へ
+                                        $strErrStepIdInFx="00001602";
+                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    }
+                                }else{
+                                    //ノードを正常終了へ
+                                    $aryMovInsUpdateTgtSource = $arrTargetNodeInstance;
+                                    $aryMovInsUpdateTgtSource['STATUS_ID'] = 6;     //異常終了
+                                    $aryMovInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)"; 
+                                    $aryMovInsUpdateTgtSource['TIME_START'] = str_replace("-","/",$aryMovInsUpdateTgtSource['TIME_START']) ;
+                                    $aryMovInsUpdateTgtSource['LAST_UPDATE_USER'] = $db_access_user_id;
+                                    // 更新用のテーブル定義
+                                    $aryConfigForIUD = $aryConfigForMovInsIUD;
+
+                                    // BIND用のベースソース
+                                    $aryBaseSourceForBind = $aryMovInsUpdateTgtSource;
+
+                                    $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+
+                                    if( $aryRetBody !== true  ){
+                                        // 例外処理へ
+                                        $strErrStepIdInFx="00001602";
+                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    }
+                                }
+                            
+                            //status-file-branchノードステータス更新---
+
+                            }
+                            break;
     
                     }
 
@@ -2819,8 +3092,8 @@
                                 //全ノード中に異常系のノードが存在する場合
                                 if( count($arrOfErrMovement) != 0 ){
                                     $intErrMovcnt = 1;
-                                    //対象ノードが、正常終了、SKIP終了の場合
-                                    if( array_search($aryMovInsUpdateTgtSource['I_NODE_TYPE_ID'],array(3,4,10) )  !== false && array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14) ) !== false){
+                                    //対象ノードが、正常終了、SKIP終了、警告終了の場合
+                                    if( array_search($aryMovInsUpdateTgtSource['I_NODE_TYPE_ID'],array(3,4,10) )  !== false && array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14,15) ) !== false){
                                         $intErrMovcnt = 0;                                                
                                     }   
                                 }
@@ -2832,8 +3105,8 @@
                             }else{
                                  //conditional、異常系ノードなし、
                                 $intNextJobStopflg=1;
-                                //対象ノードが、正常終了、SKIP終了の場合、後続処理実施
-                                if( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14) ) !== false ){
+                                //対象ノードが、正常終了、SKIP終了、警告終了の場合、後続処理実施
+                                if( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14,15) ) !== false ){
                                     $boolNextNodeReadyflg = true;   
                                 }
                             }
@@ -2889,7 +3162,7 @@
                             }else{
                                 if( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(6,7,10,11) ) !== false ){
                                     $tmpNextNodeReadyflg = false;
-                                }elseif( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14) ) !== false ){
+                                }elseif( array_search($aryMovInsUpdateTgtSource['STATUS_ID'],array(9,14,15) ) !== false ){
                                     $tmpNextNodeReadyflg = true;
                                     foreach ($arrNextTargetNodeClass as $nclass) {
                                         //後続処理conditionalの場合
@@ -2917,6 +3190,7 @@
                             case "3": // mov.実行中
                             case "5": // mov.実行完了（下位オーケストレータは、正常に終了していた場合）
                             case "9": // mov.正常終了
+                            case "15": // mov.警告終了
                                 break;
                             case "4": // mov.実行中(遅延)
                                 $arySymInsUpdateTgtSource['STATUS_ID'] = 4;     //.実行中(遅延)へ
@@ -3111,7 +3385,32 @@
                         //異常系の場合、完了日時追加
                         if( $arySymInsUpdateTgtSource['STATUS_ID'] > 5 ){
                             $arySymInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
-                        } 
+                        }
+
+                        //正常終了時に、ENDオプションによるステータス上書き #467
+                        if( $arySymInsUpdateTgtSource['STATUS_ID'] == 5 ){
+                            //全ENDノードの終了タイプ確認
+                            foreach ($tmpMovement as $key => $value) {
+                                //ENDノード(正常終了)の終了タイプでConductorのステータス上書き(優先度:正常終了<正常終了(警告)<異常終了)
+                                if( $value['I_NODE_TYPE_ID'] == 2 && $value['STATUS_ID'] == 9 ){
+                                    switch ( $value['END_TYPE'] ) {
+                                        //異常終了
+                                        case '7':
+                                            $arySymInsUpdateTgtSource['STATUS_ID'] = $value['END_TYPE'];
+                                            break;
+                                        //警告終了
+                                        case '11':
+                                            if( $arySymInsUpdateTgtSource['STATUS_ID'] == 5 ){
+                                                $arySymInsUpdateTgtSource['STATUS_ID'] = $value['END_TYPE'];
+                                            }
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+
                         // 更新用のテーブル定義
                         $aryConfigForIUD = $aryConfigForSymInsIUD;
                         
@@ -3125,6 +3424,100 @@
                             $strErrStepIdInFx="00002100";
                             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
                         }
+
+                        #312
+                        //更新後の状態取得 
+                        $arySqlBind=array(
+                            "CONDUCTOR_INSTANCE_NO" => $arySymInsUpdateTgtSource['CONDUCTOR_INSTANCE_NO'],
+                            );   
+                        $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
+                        $aryConInsInfo = $aryRetBody[0];
+                        
+                        //---通知関連処理 
+                        if( isset($aryConInsInfo['CONDUCTOR_INSTANCE_NO']) ){
+
+                            $tmpNoticeInfo = json_decode($aryConInsInfo['I_NOTICE_INFO'],true);
+                            $arrNoticeInfo = $tmpNoticeInfo['NOTICE_INFO'];
+
+                            //作業No
+                            $execNo  = $rowOfConductor['CONDUCTOR_INSTANCE_NO'];
+                            //通知結果　ログ出力先
+                            $tmpNoticelogdir = $root_dir_path . "/uploadfiles/2100180006/NOTICE_LOG/" . sprintf('%010d', $execNo) ;
+                            $tmpNoticelogfile = "NoticeLog_". sprintf('%010d', $execNo) . ".log" ;
+                            $logPath = $tmpNoticelogdir . "/" . $tmpNoticelogfile;
+
+                            //ログ出力先チェック、ディレクトリ作成
+                            if( !is_dir($tmpNoticelogdir) ){
+                                if ( mkdir($tmpNoticelogdir,0777,true) ){
+                                    chmod($tmpNoticelogdir, 0777);
+                                }
+                            }
+
+                            //通知設定がある場合
+                            if( $arrNoticeInfo != array() ){
+                                foreach ($arrNoticeInfo as $strNoticeList => $strNoticeStatus) {
+                                    //通知、ステータス設定時のみ実施
+                                    if( $strNoticeStatus != "" && $strNoticeList != "" ){
+                                        //通知実行ステータス判定
+                                        if( array_search($aryConInsInfo['STATUS_ID'], explode( ",", $strNoticeStatus ) ) !== false ){
+                                            //通知処理呼び出し
+                                            $aryRetBody = $objOLA->getExecNotice($aryConInsInfo,$strNoticeList,$strNoticeStatus);
+                                            if( $aryRetBody[1] !== null ){
+                                                // 例外処理へ
+                                                $strErrStepIdInFx="00000100";
+                                                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                            }
+                                            //廃止済み通知のログ出力
+                                            if( $aryRetBody[2] !== array() ){
+                                                //通知ログ出力
+                                                foreach ($aryRetBody[2] as $subject ) {
+                                                    error_log(print_r( date('Y-m-d H:i:s') . " " . $subject . "\n", true), 3, $logPath );
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }else{
+                                if( is_file($logPath) !== true ){
+                                    //通知ログ出力
+                                    $subject = $objMTS->getSomeMessage("ITABASEH-STD-171006");//"仮：通知設定がされていない為、通知は実行されませんでした。";    
+                                    error_log(print_r( date('Y-m-d H:i:s') . " " . $subject . "\n", true), 3, $logPath );
+                                }
+                            }
+
+                            //通知ログ初回のみ登録
+                            if( $aryConInsInfo['NOTICE_LOG'] == "" && is_file($logPath) === true ){
+                                // 更新用のテーブル定義
+                                $aryConfigForIUD = array(
+                                        "JOURNAL_SEQ_NO"=>"",
+                                        "JOURNAL_ACTION_CLASS"=>"",
+                                        "JOURNAL_REG_DATETIME"=>"",
+                                        "CONDUCTOR_INSTANCE_NO"=>"",
+                                        "NOTICE_LOG"=>"",
+                                        "LAST_UPDATE_TIMESTAMP"=>"",
+                                        "LAST_UPDATE_USER"=>""
+                                    );
+                                $aryConfigForIUD = $aryConfigForSymInsIUD;
+
+
+                                // BIND用のベースソース
+                                $aryBaseSourceForBind = $aryConInsInfo;
+
+                                $aryBaseSourceForBind['NOTICE_LOG'] = "NoticeLog_". sprintf('%010d', $aryConInsInfo['CONDUCTOR_INSTANCE_NO']) . ".log" ;
+                                $aryBaseSourceForBind['TIME_BOOK'] = str_replace("-","/",$aryBaseSourceForBind['TIME_BOOK']) ;
+                                $aryBaseSourceForBind['TIME_START'] = str_replace("-","/",$aryBaseSourceForBind['TIME_START']) ;
+                                $aryBaseSourceForBind['TIME_END'] = str_replace("-","/",$aryBaseSourceForBind['TIME_END']) ;
+
+                                $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+
+                                if( $aryRetBody !== true  ){
+                                    // 例外処理へ
+                                    $strErrStepIdInFx="00002100";
+                                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                }
+                            }                            
+                        }
+
                     }elseif( $tmpexecLogMessage != "" ){
                         //待機状態で、ログのみ更新の場合　#749対応
                         // 更新用のテーブル定義
@@ -3430,9 +3823,18 @@ function getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName){
 
 
     $strQuery = "SELECT "
-                 ." * "
+               ." SINS.* , "
+               ." SYSSTATUS.SYM_EXE_STATUS_NAME AS STATUS_NAME , "
+               ." SYSABORT.SYM_ABORT_FLAG_NAME AS ABORT_FLAG_NAME "
                ." FROM "
                ." C_CONDUCTOR_INSTANCE_MNG SINS "
+               ."LEFT JOIN "
+               ." B_SYM_EXE_STATUS SYSSTATUS "
+               ." ON SINS.STATUS_ID = SYSSTATUS.SYM_EXE_STATUS_ID "
+               ."LEFT JOIN "
+               ." B_SYM_ABORT_FLAG SYSABORT "
+               ." ON SINS.ABORT_EXECUTE_FLAG = SYSABORT.SYM_ABORT_FLAG_ID "
+
                ."WHERE "
                ."    SINS.DISUSE_FLAG IN ('0') "
                ."AND SINS.CONDUCTOR_INSTANCE_NO = :CONDUCTOR_INSTANCE_NO "

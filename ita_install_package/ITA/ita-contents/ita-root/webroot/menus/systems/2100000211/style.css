@@ -16,7 +16,6 @@
     white-space: nowrap;
 }
 .export_radio_label_block {
-    width: 15%;
     display: inline-flex;
     vertical-align: top;
     white-space: nowrap;
@@ -33,7 +32,6 @@
     padding: 2px 8px;
     word-break: break-all;
     /*white-space: normal;*/
-    display: inline-flex;
     white-space: nowrap !important;
     align-items: center;
 }

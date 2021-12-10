@@ -1788,7 +1788,17 @@ class MainLinkTabBFmt extends BFmt {
 		if($this->strSql != ""){
 			$param = $this->getUrlData($strData);
 		}
+        // URLの上限に引っかからないように値を短縮する
+        $param = mb_strcut($param, 0, 1024, 'UTF-8');
+        
+		//改行コード（\n \r \r\n)の前まで取得
+		$matches = "";
+		if( 1 === preg_match('/(.*?)[\n|\r|\r\n]/s',$param,$matches)){
+			$param = $matches[1];
+		}
+
 		$param = rawurlencode($param); //エンコード処理
+
 		if(is_array($this->getLinkUrl())){
 			foreach ($this->getLinkUrl() as $value) {
 				$strLinkUrl .=  str_replace(" ","%20",$value.$param);
@@ -2451,12 +2461,16 @@ class StaticTextTabBFmt extends TabBFmt {
 		$this->text = $text;
 	}
 
+	public function getText(){
+		return $this->text;
+	}
 
 }
 
 class LinkTabBFmt extends TextTabBFmt{
 
-	public function getData($rowData,$aryVariant){
+	# $linkOff==1の場合、ダウンロード不可
+	public function getData($rowData,$aryVariant,$linkOff=null){
 		global $g;
 		$intControlDebugLevel01=250;
 		$strFxName = __CLASS__."::".__FUNCTION__;
@@ -2469,7 +2483,7 @@ class LinkTabBFmt extends TextTabBFmt{
 			if(array_key_exists("innerHtml", $aryConvValue)===true){
 				$escapedData = $this->makeSafeValueForBrowse($aryConvValue['innerHtml']);
 				$strUrl = $aryConvValue['url'];
-				if( 0 < strlen($strUrl) ){
+				if( 0 < strlen($strUrl) && $linkOff==null ){
 					$strTagInnerBody = "<a href=\"{$strUrl}\" target=\"_blank\">{$escapedData}</a>";
 				}else{
 					$strTagInnerBody = $escapedData;
@@ -2774,12 +2788,7 @@ class InputTabBFmt extends TabBFmt {
 
 	public function getFSTNameForIdentify(){
 		// フィルター系側が1タグと限らないので、フィルター系と、この関数を共有をしない
-		$retStrVal = "";
-		if( $this->getColumnIdHidden()===true ){
-			$retStrVal = $this->getIDSynonym();
-		}else{
-			$retStrVal = $this->getIDSynonym();
-		}
+		$retStrVal = $this->getIDSynonym();
 		return $retStrVal;
 	}
 
@@ -4153,13 +4162,15 @@ class FileUploadTabBFmt extends InputTabBFmt {
 		$aryOverWrite = array();
 
 		$retStrVal = "";
-
+		
 		$intControlDebugLevel01 = 50;
 
 		$boolProcessContinue = true;
 		$strTagInnerBody = "";
 
 		$arrayTempRet = $this->getCheckStorageSetting();
+
+		$FileEncryptFunctionName = $this->objColumn->getFileEncryptFunctionName();
 
 		$boolProcessContinue = $arrayTempRet[0];
 		$strTagInnerBody = $arrayTempRet[2];
@@ -4221,7 +4232,13 @@ class FileUploadTabBFmt extends InputTabBFmt {
 
 				$strLAPathOfRefTargetFile = $this->getLAPathOfAnchorHrefTarget($rowData);
 				if( file_exists($strLAPathOfRefTargetFile) === true ){
-					$strAnchorTag = "<a href=\"{$url}\" target=\"_blank\">{$fileName}</a>";
+
+					if($FileEncryptFunctionName == "ky_file_encrypt"){
+						$strAnchorTag = "{$fileName}";
+					}else{
+						$strAnchorTag = "<a href=\"{$url}\" target=\"_blank\">{$fileName}</a>";
+					}
+					
 				}else{
 					//$strAnchorTag="ファイル({$fileName})が見つかません。";
 					$strAnchorTag = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12102",$fileName);
@@ -5296,7 +5313,7 @@ class NumRangeFilterTabBFmt extends TextFilterTabBFmt {
 			$data = array_key_exists($strColId, $rowData)?$rowData[$strColId]:"";
 		}
 
-		$aryAddOnDefault["maxLength"] = 10;
+		$aryAddOnDefault["maxLength"] = $this->getMaxInputLength();
 		$aryAddOnDefault["size"] = "10";
 
 		$aryOverWrite["type"] = "text";
@@ -6329,19 +6346,7 @@ class EditLockUpdButtonTabBFmt extends ReviewTemplateTableTabBFmt {
                 //活性中の場合----
             }else{
                 //----活性中ではない場合
-                if( $strValueOfDisuseFlag === "1" ){
-                    //----廃止されている場合
-
-                    $strUpdable="disabled";
-
-                    //廃止されている場合----
-                }else{
-                    //----そのほかのステータスの場合
-
-                    $strUpdable="disabled";
-
-                    //そのほかのステータスの場合----
-                }
+                $strUpdable="disabled";
                 //活性中ではない場合----
             }
             if( $strPageType == "apply" ){

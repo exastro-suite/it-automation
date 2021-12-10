@@ -97,6 +97,8 @@ class Validator {
 		if( is_string($strModeId) === true ){
 			if( $strModeId == "" ){
 				$this->intMinLengthAsVar = (integer)$intValue;
+				//表示フィルタ利用時の最小長をnull
+				$this->aryIntMinLengthAsVarForMode["DTiS_filterDefault"] = null;
 			}else{
 				$this->aryIntMinLengthAsVarForMode[$strModeId] = (integer)$intValue;
 			}
@@ -118,6 +120,8 @@ class Validator {
 		if( is_string($strModeId) === true ){
 			if( $strModeId == "" ){
 				$this->intMaxLengthAsVar = (integer)$intValue;
+				//表示フィルタ利用時の最大長をnull
+				$this->aryIntMaxLengthAsVarForMode["DTiS_filterDefault"] = null;
 			}else{
 				$this->aryIntMaxLengthAsVarForMode[$strModeId] = (integer)$intValue;
 			}
@@ -149,15 +153,17 @@ class Validator {
 		if( is_string($strModeId) === true ){
 			if( $strModeId == "" ){
 				$this->varMinAsNum = $varValue;
+				//表示フィルタ利用時の最小値をnull
+				$this->aryVarMinAsNumForMode["DTiS_filterDefault"] = null;
 			}else{
-				$this->aryIntMinLengthAsVarForMode[$strModeId] = $varValue;
+				$this->aryVarMinAsNumForMode[$strModeId] = $varValue;
 			}
 		}
 	}
 	function getMin($strModeId=""){
 		$retIntMinLength = null;
-		if( array_key_exists($strModeId, $this->aryIntMinLengthAsVarForMode) === true ){
-			$retIntMinLength = $this->aryIntMinLengthAsVarForMode[$strModeId];
+		if( array_key_exists($strModeId, $this->aryVarMinAsNumForMode) === true ){
+			$retIntMinLength = $this->aryVarMinAsNumForMode[$strModeId];
 		}else{
 			$retIntMinLength = $this->varMinAsNum;
 		}
@@ -170,6 +176,8 @@ class Validator {
 		if( is_string($strModeId) === true ){
 			if( $strModeId == "" ){
 				$this->varMaxAsNum = $varValue;
+				//表示フィルタ利用時の最大値をnull
+				$this->aryVarMaxAsNumForMode["DTiS_filterDefault"] = null;
 			}else{
 				$this->aryVarMaxAsNumForMode[$strModeId] = $varValue;
 			}
@@ -191,6 +199,8 @@ class Validator {
 		if( is_string($strModeId) === true ){
 			if( $strModeId == "" ){
 				$this->strRegExpFormat = $strRegExp;
+				//表示フィルタ利用時の正規表現規制を何でもありに
+				$this->aryStrRegExpFormatForMode["DTiS_filterDefault"] = '/^.*$/';
 			}else{
 				$this->aryStrRegExpFormatForMode[$strModeId] = $strRegExp;
 			}
@@ -353,6 +363,8 @@ class NumberValidator extends Validator {
 		parent::__construct($min, $max, $strRegexpFormat, $strDisplayFormat);
 		$this->intDigitScale = 0;
 		$this->setMaxLength(14);	//----4バイトなので10文字+符号1文字+3バッファ
+		$this->setMin($min);
+		$this->setMax($max);
 		$this->varMinAsNum = $min;
 		$this->varMaxAsNum = $max;
 	}
@@ -468,7 +480,7 @@ class IntNumValidator extends NumberValidator {
 		if( $min===null ){
 			$min=-2147483648;
 		}
-		if($max===null){
+		if( $max===null ){
 			$max=2147483647;
 		}
 
@@ -479,6 +491,13 @@ class IntNumValidator extends NumberValidator {
 			$strDisplayFormat = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10201");
 		}
 		parent::__construct($min, $max, $strRegexpFormat, $strDisplayFormat, $aryEtcetera);
+		//表示フィルタ利用時の値がnullの場合にintの最小・最大値を設定
+		if( $this->getMin("DTiS_filterDefault")===null ){
+			$this->setMin(-2147483648,"DTiS_filterDefault");
+		}
+		if( $this->getMax("DTiS_filterDefault")===null ){
+			$this->setMax(2147483647,"DTiS_filterDefault");
+		}
 		$this->intDigitScale = 0;
 		$this->setMaxLength(14);	//----4バイトなので10文字+符号1文字+3バッファ
 		$this->varMinAsNum = $min;
@@ -508,6 +527,13 @@ class FloatNumValidator extends NumberValidator {
 			$strDisplayFormat = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10401");
         }
 		parent::__construct($min, $max, '/^((-[1-9])?[0-9]{0,}|-0)(\.[0-9]{0,})?$/s', $strDisplayFormat, $aryEtcetera);
+		//表示フィルタ利用時の値がnullの場合にfloatの最小・最大値を設定
+		if( $this->getMin("DTiS_filterDefault")===null ){
+			$this->setMin(-99999999999999,"DTiS_filterDefault");
+		}
+		if( $this->getMax("DTiS_filterDefault")===null ){
+			$this->setMax(99999999999999,"DTiS_filterDefault");
+		}
         $this->intDigitScale = $intDigitScale;
 		$this->setMaxLength(16);	//----符号+整数+小数点+小数で、16文字
 	}
@@ -524,6 +550,10 @@ class FloatNumValidator extends NumberValidator {
 				$strModeId = $aryTcaAction["ACTION_MODE"];
 				if( $strModeId=="DTiS_recCount" || $strModeId=="DTiS_currentPrint" || $strModeId=="DTiS_journalPrint" ){
 					$strModeId = "DTiS_filterDefault";//filter_table
+				}
+				//表示フィルタ利用時桁数制限を初期値(14桁)に設定
+				if($strModeId== "DTiS_filterDefault"){
+					$this->intDigitScale = 14;
 				}
 			}
 		}
@@ -716,15 +746,13 @@ class FileNameValidator extends TextValidator {
 
 	function __construct($strFSName="ext4"){
 		global $g;
-		if( $strFSName="ext4" ){
-			$min = 0;
-			$max = 255;
-			$strRegexpFormat = "/^[^,\"\t\/\r\n]*$/s";
+
+		$min = 0;
+		$max = 255;
+		$strRegexpFormat = "/^[^,\"\t\/\r\n]*$/s";
+		if( $strFSName == "ext4" ){
 			$strDisplayFormat = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10801");
 		}else{
-			$min = 0;
-			$max = 255;
-			$strRegexpFormat = "/^[^,\"\t\/\r\n]*$/s";
 			$strDisplayFormat = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-10802");
 		}
 		parent::__construct($min, $max, false, $strRegexpFormat, $strDisplayFormat);
@@ -1076,17 +1104,18 @@ class LinkRequireValidator extends Validator {
 		$aryObjColumn = $objTable->getColumns();
 		$objLinkColumn = $aryObjColumn[$this->strLinkColumnId];
 		$strColumnLabel = $objLinkColumn->getColLabel(true);
+		$arrayDispSelectTagTmp = Null;
 		if(is_a($this->objOwnerColumn,'IDColumn')){
-			$arrayDispSelectTag = $this->objOwnerColumn->getArrayMasterTableByFormatName($strMsgMode);
-			if($arrayDispSelectTag === null){
+			$arrayDispSelectTagTmp = $this->objOwnerColumn->getArrayMasterTableByFormatName($strMsgMode);
+			if($arrayDispSelectTagTmp === null){
 				if($this->objOwnerColumn->getMasterTableBodyForInput() != ""){
-					$arrayDispSelectTag = $this->objOwnerColumn->getMasterTableArrayForInput();
+					$arrayDispSelectTagTmp = $this->objOwnerColumn->getMasterTableArrayForInput();
 				}else{
-					$arrayDispSelectTag = $this->objOwnerColumn->getMasterTableArrayForFilter();
+					$arrayDispSelectTagTmp = $this->objOwnerColumn->getMasterTableArrayForFilter();
 				}
 			}
-			if( array_key_exists($value, $arrayDispSelectTag) === true ){
-				$strDispBody = $arrayDispSelectTag[$value];
+			if( array_key_exists($value, $arrayDispSelectTagTmp) === true ){
+				$strDispBody = $arrayDispSelectTagTmp[$value];
 			}else{
 				$strDispBody = $this->objOwnerColumn->getErrMsgHead()."(".$value.")".$this->objOwnerColumn->getErrMsgTail();
 			}
@@ -1296,39 +1325,19 @@ class IDValidator extends Validator{
 			if($boolExeContinue === true){
 				if( $this->objInfoBaseColumn->getAddSelectTagPrintType()===0 ){
 					//----仮想マスタモード
-					if( $strModeId==="DTiS_richFilterDefault" ){
-						//----リッチフィルタだが、仮想のマスタの鍵キーとなる列の型次第で、正規表現で規制する
-						$minorMode = $this->objInfoBaseColumn->getPrimeMasterDisplayColumnType();
-						if( $minorMode===0 ){
-							// 表示列が数値型の場合
-							$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Num");
-						}else{
-							// 表示列が文字列型の場合
-							$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Chr");
-						}
-						if( preg_match($strRegexpFormat, $value)===1 ){
-							$retBool = true;
-						}else{
-							$retBool = false;
-						}
-						//リッチフィルタだが、仮想のマスタの鍵キーとなる列の型次第で、正規表現で規制する----
+					$minorMode = $this->objInfoBaseColumn->getPrimeMasterDisplayColumnType();
+					if( $minorMode===0 ){
+						// 表示列が数値型の場合
+						$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Num");
 					}else{
-						//----テキスト検索は、正規表現で規制する
-						$minorMode = $this->objInfoBaseColumn->getPrimeMasterDisplayColumnType();
-						if( $minorMode===0 ){
-							// 表示列が数値型の場合
-							$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Num");
-						}else{
-							// 表示列が文字列型の場合
-							$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Chr");
-						}
+						// 表示列が文字列型の場合
+						$strRegexpFormat = $this->getRegExp("DTiS_filterDefault_Chr");
+					}
 
-						if( preg_match($strRegexpFormat, $value)===1 ){
-							$retBool = true;
-						}else{
-							$retBool = false;
-						}
-						//テキスト検索は、正規表現で規制する----
+					if( preg_match($strRegexpFormat, $value)===1 ){
+						$retBool = true;
+					}else{
+						$retBool = false;
 					}
 					//仮想マスタモード----
 				}else{
@@ -2171,7 +2180,7 @@ class RequiredForConfirmValidator extends Validator {
                                     $boolInputNull = true;
                                 }
                                 if($boolInputNull===true){
-                                    $objClientValidator->setErrShowPrefix(false);
+                                    $this->setErrShowPrefix(false);
                                     $arrayColumnName[] = "(".str_replace(array("<br>","<br/>","<br />"),"・",$tmpAryColumn[$strValue]->getColLabel(true)).")";
                                 }
                                 //送信されてきていないが、すでにレコードの中に値は存在しているか？----
@@ -2191,7 +2200,7 @@ class RequiredForConfirmValidator extends Validator {
             }
         }
         if($retBool===false){
-            $objClientValidator->setValidRule($retStrBody);
+            $this->setValidRule($retStrBody);
         }
         return $retBool;
     }

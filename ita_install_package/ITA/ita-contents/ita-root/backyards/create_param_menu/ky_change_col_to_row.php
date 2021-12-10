@@ -487,7 +487,7 @@ function getTableInfo($menuId, $menuTableLinkArray){
     global $objDBCA, $db_model_ch, $objMTS;
 
     $resultArray = array();
-    $columnNames;
+    $columnNames = "";
 
     // メニュー・テーブル紐付テーブルが特定できない場合はスキップ
     $menuTableLinkIdArray = array_column($menuTableLinkArray, 'MENU_ID');
@@ -650,7 +650,7 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
             $arrayValue = array_merge($arrayValue, $updateData);
             $arrayValue['DISUSE_FLAG'] = '0';
             $arrayValue['LAST_UPDATE_TIMESTAMP'] = '';
-            $arrayValue['LAST_UPDATE_USER'] =-101604;
+            $arrayValue['LAST_UPDATE_USER'] = -101604;
 
             // SQL作成
             $tmpAry = array();
@@ -732,7 +732,7 @@ function registData($hostKey, $operationId, $hostKeyName, $toTableInfo, $fromDat
         $arrayValue['NOTE'] = '';
         $arrayValue['DISUSE_FLAG'] = '0';
         $arrayValue['LAST_UPDATE_TIMESTAMP'] = '';
-        $arrayValue['LAST_UPDATE_USER'] =-101604;
+        $arrayValue['LAST_UPDATE_USER'] = -101604;
 
         // SQL作成
         $tmpAry = array();
@@ -816,7 +816,7 @@ function disuseData($hostKeyName, $toTableInfo, $toColList, $toDataArray, $exist
             $arrayValue = array_merge($arrayValue, $updateData);
             $arrayValue['DISUSE_FLAG'] = '1';
             $arrayValue['LAST_UPDATE_TIMESTAMP'] = '';
-            $arrayValue['LAST_UPDATE_USER'] =-101604;
+            $arrayValue['LAST_UPDATE_USER'] = -101604;
 
             // SQL作成
             $tmpAry = array();

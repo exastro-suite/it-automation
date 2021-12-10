@@ -221,7 +221,7 @@ border-radius: 50%;
 text-align: center;
 line-height: 58px;
 text-shadow: 1px 1px 1px rgba( 0,0,0,.6 );
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 font-weight: bold;
 font-size: 28px;
 color: #EEE;
@@ -251,17 +251,48 @@ position: absolute;
 left: 50%;
 transform: translateX(-50%);
 }
+.node-end-status {
+display: none;
+position: absolute;
+right: -5%; bottom: -10%;
+z-index: 100;
+width: 50%; height: 50%;
+padding: 2px;
+border-radius: 50%;
+background-color: #FFF;
+background-image: linear-gradient( -45deg, #CCC, #EEE );
+box-shadow: 2px 2px 4px rgb( 0,0,0,.4 );
+pointer-events: none;
+}
+.node-end-status-inner {
+display: block;
+width: 100%; height: 100%;
+background-color: #000;
+background-size: 4px 4px;
+border: 2px solid #333;
+border-radius: 50%;
+box-shadow: 0 0 4px rgba( 0,0,0,.3 ) inset;
+}
+.conductor-end .node-end-status,
+.node-result[data-result-text="ERROR"] + .node-end-status,
+.node-result[data-result-text="WARN"] + .node-end-status {
+display: block;
+}
+.conductor-end[data-end-status="done"] .node-end-status {
+display: none;
+}
 .node-type,
 .node-name {
 overflow: hidden;
 max-width: 400px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 }
 .drag .node-name {
 white-space: nowrap;
 text-overflow: ellipsis;
 }
-.node-type {
+.node-type,
+.branch-if-type {
 overflow: hidden;
 text-overflow: ellipsis;
 height: 24px;
@@ -278,7 +309,8 @@ line-height: 24px;
 font-size: 11px;
 color: #DDD;
 }
-.node-name {
+.node-name,
+.branch-if-body {
 min-height: 32px;
 padding: 4px 8px 4px 84px;
 background-color: #DDD;
@@ -361,7 +393,7 @@ line-height: 1;
 letter-spacing: 0.2em;
 font-size: 10px;
 font-weight: bold;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #DDD;
 }
 .node-out.node-terminal::before {
@@ -534,7 +566,9 @@ padding-left: 84px;
 padding: 4px 4px 4px 80px;
 }
 .conductor-call .select-conductor-name,
-.symphony-call .select-symphony-name {
+.symphony-call .select-symphony-name,
+.branch-if-value,
+.status-file-result {
 display: block;
 padding: 2px;
 background-color: #222;
@@ -543,7 +577,9 @@ box-shadow: 0 1px 0 rgba( 255,255,255,.3 );
 border-radius: 2px;
 }
 .conductor-call .select-conductor-name-inner,
-.symphony-call .select-symphony-name-inner {
+.symphony-call .select-symphony-name-inner,
+.branch-if-value-inner,
+.status-file-result-inner {
 overflow: hidden;
 display: block;
 padding: 4px 8px;
@@ -557,6 +593,19 @@ font-size: 12px;
 color: #666;
 white-space: nowrap;
 text-overflow: ellipsis;
+}
+.branch-if-value-inner,
+.status-file-result-inner {
+height: 21px;
+text-align: center;
+color: #EEE;
+}
+.node[data-status-file="unknown"] .status-file-result-inner {
+background-color: #D00;
+}
+.node-sub[data-match="true"] .branch-if-value-inner,
+.node[data-status-file="known"] .status-file-result-inner {
+background-color: #4D9E0A;
 }
 .conductor-call.call-select .select-conductor-name-inner,
 .symphony-call.call-select .select-symphony-name-inner {
@@ -594,22 +643,26 @@ right: 4px;
 /* branch, merge */
 .function-conditional,
 .function-parallel,
+.function-status-file,
 .function-merge {
 display: flex;
 align-items: center;
 }
 .function-conditional .node-sub,
 .function-parallel .node-sub,
+.function-status-file .node-sub,
 .function-merge .node-sub {
 margin: 48px 0;
 }
 .function-conditional .node-sub:first-child,
 .function-parallel .node-sub:first-child,
+.function-status-file .node-sub:first-child,
 .function-merge .node-sub:first-child {
 margin-top: 0!important;
 }
 .function-conditional .node-sub:last-child,
 .function-parallel .node-sub:last-child,
+.function-status-file .node-sub:last-child,
 .function-merge .node-sub:last-child {
 margin-bottom: 0!important;
 }
@@ -663,7 +716,7 @@ border-radius: 2px;
 line-height: 1;
 text-align: center;
 font-size: 11px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 }
 .branch-type li.done { background-color: #4D9E0A; }
@@ -671,7 +724,25 @@ color: #EEE;
 .branch-type li.error { background-color: #D60000; }
 .branch-type li.stop { background-color: #EBEB00; color: #111; }
 .branch-type li.skip { background-color: #00878A; }
+.branch-type li.warning { background-color: #FFB400; color: #111; }
 .branch-type li.other { background-color: #999999; }
+
+.function-status-file .node-body {
+width: 88px;
+}
+.branch-if-type,
+.function-status-file .node-type {
+padding: 0 8px;
+background-color: #002B62;
+}
+.branch-if-body,
+.function-status-file .node-name {
+padding: 1px 4px 0px;
+}
+.branch-if-type.branch-if-else {
+height: 56px;
+line-height: 56px;
+}
 
 .pause-resume-button {
 overflow: hidden;
@@ -750,7 +821,7 @@ border: 1px solid #000;
 border-radius: 2px;
 line-height: 16px;
 text-align: center;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 transition-duration: .5s;
 }
@@ -815,11 +886,14 @@ cursor: pointer;
 }
 .function-conditional .node-terminal.node-in,
 .function-parallel .node-terminal.node-in,
+.function-status-file .node-terminal.node-in,
 .function-merge .node-terminal.node-out {
 min-height: 56px;
 }
 .function-conditional .node-terminal.node-in::before,
 .function-parallel .node-terminal.node-in::before,
+.function-status-file .node-terminal.node-in::before,
+.function-status-file .node-terminal.node-out::before,
 .function-merge .node-terminal.node-out::before {
 content: 'IN';
 display: block;
@@ -834,14 +908,17 @@ line-height: 1;
 letter-spacing: 0.2em;
 font-size: 10px;
 font-weight: bold;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #DDD;
 }
+.function-status-file .node-terminal.node-out::before,
 .function-merge .node-terminal.node-out::before {
 content: 'OUT';
 }
 .function-conditional .node-terminal.node-in::after,
 .function-parallel .node-terminal.node-in::after,
+.function-status-file .node-terminal.node-in::after,
+.function-status-file .node-terminal.node-out::after,
 .function-merge .node-terminal.node-out::after {
 content: '';
 display: block;
@@ -892,6 +969,12 @@ fill: none;
 stroke: #EEE;
 stroke-width: 11px;
 }
+.branch-line .branch-line[data-status="unused"],
+.branch-line .branch-in-line[data-status="unused"],
+.branch-line .branch-out-line[data-status="unused"],
+.branch-line .branch-back-line[data-status="unused"] {
+filter: grayscale(1) opacity(0.1) !important;
+}
 
 #branch-condition-move {
   user-select: none;
@@ -926,7 +1009,7 @@ line-height: 1;
 letter-spacing: normal;
 font-size: 11px;
 white-space: nowrap;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 cursor: grab;
 }
@@ -935,9 +1018,48 @@ cursor: grab;
 .branch-case li.error { background-color: #D60000; }
 .branch-case li.stop { background-color: #EBEB00; color: #111; }
 .branch-case li.skip { background-color: #00878A; }
+.branch-case li.warning { background-color: #FFB400; color: #111; }
 
 .branch-case li:hover {
 opacity: 0.75;
+}
+
+#KIZI .end-status-select-list {
+position: relative;
+margin: 0; padding: 0;
+list-style: none;  
+}
+#KIZI .end-status-select-item {
+overflow: hidden;
+display: inline-block;
+margin: 0; padding: 4px;
+vertical-align: top;
+}
+.end-status-select-radio {
+position: absolute;
+left: -9999px;
+}
+.end-status-select-label {
+padding: 0 4px;
+background-color: rgba( 0,0,0,.2 );
+border: 1px solid rgba( 0,0,0,.4 );
+border-radius: 4px;
+line-height: 26px;
+font-size: 13px;
+color: #AAA;
+cursor: pointer;
+}
+.end-status-select-label:hover {
+background-color: rgba( 0,0,0,.3 );
+}
+.end-status-select-radio:checked + .end-status-select-label {
+background-color: rgba( 96,198,13,.5 );
+border: 1px solid rgba( 096,198,13,.6 );
+color: #EEE;
+cursor: default;
+}
+.end-status-select-radio:focus + .end-status-select-label {
+box-shadow: 0 0 0 1px #4F80FF;
 }
 
 
@@ -959,6 +1081,69 @@ font-size: 40px!important;
 .conductor-call .node-circle .node-gem,
 .symphony-call .node-type,
 .symphony-call .node-circle .node-gem { background-color: #002B62; }
+
+.conductor-end[data-end-status="warning"] .node-type {
+background-image:
+linear-gradient( rgba( 255,255,255,.2 ), transparent ),
+linear-gradient( -45deg, #FFB400 25%, #333 25%, #333 50%, #FFB400 50%, #FFB400 75%, #333 75% );
+background-size: 100% 100%, 16px 16px;
+text-shadow: 1px 1px 1px #333, -1px -1px 1px #333, 1px -1px 1px #333, -1px 1px 1px #333;
+}
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner,
+.conductor-end[data-end-status="warning"] .node-end-status-inner {
+background-color: #FFB400;
+}
+.conductor-end[data-end-status="error"] .node-type {
+background-image:
+linear-gradient( rgba( 255,255,255,.2 ), transparent ),
+linear-gradient( -45deg, #4C0000 25%, #ED1C24 25%, #ED1C24 50%, #4C0000 50%, #4C0000 75%, #ED1C24 75% );
+background-size: 100% 100%, 16px 16px;
+text-shadow: 1px 1px 1px #333, -1px -1px 1px #333, 1px -1px 1px #333, -1px 1px 1px #333;
+}
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner,
+.conductor-end[data-end-status="error"] .node-end-status-inner {
+background-color: #ED1C24;
+}
+.node-end-status-inner::before,
+.node-end-status-inner::after {
+content: '';
+display: block;
+position: absolute;
+}
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner::before,
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner::after,
+.conductor-end[data-end-status="warning"] .node-end-status-inner::before,
+.conductor-end[data-end-status="warning"] .node-end-status-inner::after {
+transform: translateX(-50%);
+width: 4px;
+background-color: #FFF;
+}
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner::before,
+.conductor-end[data-end-status="warning"] .node-end-status-inner::before {
+left: 50%; top: 9px;
+height: 10px;
+}
+.node-result[data-result-text="WARN"] + .node-end-status > .node-end-status-inner::after,
+.conductor-end[data-end-status="warning"] .node-end-status-inner::after {
+left: 50%; top: 23px;
+height: 4px;
+}
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner::before,
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner::after,
+.conductor-end[data-end-status="error"] .node-end-status-inner::before,
+.conductor-end[data-end-status="error"] .node-end-status-inner::after {
+left: 50%; top: 50%;
+width: 3px; height: 18px;
+background-color: #FFF;
+}
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner::before,
+.conductor-end[data-end-status="error"] .node-end-status-inner::before {
+transform: translate(-50%,-50%) rotate(45deg);
+}
+.node-result[data-result-text="ERROR"] + .node-end-status > .node-end-status-inner::after,
+.conductor-end[data-end-status="error"] .node-end-status-inner::after {
+transform: translate(-50%,-50%) rotate(-45deg);
+}
 
 .node-ansible-legacy .node-type { background-color: #DD0000; }
 .add-node.ansible-legacy,
@@ -1121,7 +1306,7 @@ text-align: center;
 line-height: 1;
 white-space: nowrap;
 font-size: 16px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 font-weight: bold;
 color: #FFF;
 transition-duration: .5s;
@@ -1173,6 +1358,9 @@ background-color: #00878A;
 background-color: #FD0;
 text-shadow: none;
 color: #000;
+}
+.complete[data-result="15"] .node-result::before {
+background-color: #FFB400;
 }
 
 
@@ -1266,7 +1454,7 @@ border-radius: 0 0 4px 4px;
 line-height: 1;
 text-shadow: -1px -1px 1px rgba( 0,0,0,.5 );
 font-size: 10px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #DDD;
 white-space: nowrap;
 cursor: pointer;
@@ -1378,7 +1566,7 @@ height: 16px;
 box-shadow: 0 0 0 1px #222;
 vertical-align: top;
 line-height: 14px;
-font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
 color: #EEE;
 }
 .node-operation-data {
@@ -1483,7 +1671,7 @@ opacity: .3;
 #select-area rect {
 fill: rgba( 96,198,13,.1 );
 stroke: #60C60D;
-storke-width: 1px;
+stroke-width: 1px;
 }
 
 .node-table-wrap {

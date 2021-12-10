@@ -16,8 +16,8 @@
 ////en_US_UTF-8_ITATERRAFORM_STD
 $ary["ITATERRAFORM99999"]   = "Dummy";
 $ary["ITATERRAFORM100001"]  = "Register with Terraform.";
-$ary["ITATERRAFORM100002"]  = "Perform an update to Terraform.";
-$ary["ITATERRAFORM100003"]  = "Perform a removal from Terraform.
+$ary["ITATERRAFORM100002"]  = "Initiate an update to Terraform.";
+$ary["ITATERRAFORM100003"]  = "Initiate a removal from Terraform.
 You cannot restore the deleted Organization.
 Also, the Workspace associated with Organization will be deleted.";
 $ary["ITATERRAFORM100004"]  = "You have successfully registered with Terraform.";
@@ -27,8 +27,8 @@ $ary["ITATERRAFORM100007"]  = "Update to Terraform failed.";
 $ary["ITATERRAFORM100008"]  = "Successfully removed from Terraform.";
 $ary["ITATERRAFORM100009"]  = "Failed to remove from Terraform.";
 $ary["ITATERRAFORM100011"]  = "Register with Terraform.";
-$ary["ITATERRAFORM100012"]  = "Perform an update to Terraform.";
-$ary["ITATERRAFORM100013"]  = "Perform a removal from Terraform.
+$ary["ITATERRAFORM100012"]  = "Initiate an update to Terraform.";
+$ary["ITATERRAFORM100013"]  = "Initiate a removal from Terraform.
 You cannot restore a deleted Workspace.";
 $ary["ITATERRAFORM100014"]  = "You have successfully registered with Terraform.";
 $ary["ITATERRAFORM100015"]  = "Registration with Terraform failed.";
@@ -41,11 +41,13 @@ $ary["ITATERRAFORM100022"]  = "Could not remove {} from Terraform.";
 $ary["ITATERRAFORM100023"]  = "Deleted relationship {} from {}.";
 $ary["ITATERRAFORM100024"]  = "Failed to Deleted relationship {} from {}.";
 $ary["ITATERRAFORM100025"]  = "Remove {} from Terraform. The deleted Organization is irreversible.";
-$ary["ITATERRAFORM100026"]  = "Remove {} from Terraform. The deleted Workspace is irreversible.";
+$ary["ITATERRAFORM100026"]  = "Remove {} from Terraform. \nThe resource will not be deleted.\nThe deleted Workspace is irreversible.";
 $ary["ITATERRAFORM100027"]  = "Remove {} from Terraform. The deleted Policy is irreversible.";
 $ary["ITATERRAFORM100028"]  = "Remove {} from Terraform. The deleted PolicySet is irreversible.";
 $ary["ITATERRAFORM100029"]  = "Delete relationship {} from {}.";
-$ary["ITATERRAFORM110001"]  = "Are you sure you want to perform emergency stop?";
+$ary["ITATERRAFORM100030"]  = "Delete the {} resource. You cannot restore a deleted resource.";
+$ary["ITATERRAFORM100031"]  = "Failed to delete the resource.";
+$ary["ITATERRAFORM110001"]  = "Are you sure you want to Initiate an emergency stop?";
 $ary["ITATERRAFORM110002"]  = "Are you sure you want to cancel the schedule?";
 $ary["ITATERRAFORM110003"]  = "Select Operation No. from the operation tracking list.";
 ?>

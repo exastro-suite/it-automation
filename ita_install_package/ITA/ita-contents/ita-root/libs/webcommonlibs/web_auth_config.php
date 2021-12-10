@@ -30,6 +30,7 @@
         $strLoginFormTailBody = "";
 
         // ルートディレクトリを取得
+        $root_dir_path = $g['root_dir_path'];
         if (empty($root_dir_path)) {
             $root_dir_path = getApplicationRootDirPath();
         }
@@ -80,17 +81,25 @@
                 break;
         }
 
+        $getCopy = $_GET;
+        unset($getCopy['login']);
+        $get_parameter = "";
+        if("" != http_build_query($getCopy)){
+            $get_parameter = "?" . http_build_query($getCopy);
+        }
+        $get_parameter = str_replace('+', '%20', $get_parameter);
+
         // 登録されているログインID一覧画面へのリンク
         if (isset($arySYSCON['IP_ADDRESS_LIST'])) {
             if ($arySYSCON['IP_ADDRESS_LIST'] == '1') {
-                $strLoginFormTailBody .= "<br><p><a href=\"{$scheme_n_authority}/common/common_account_list_browse.php?no={$ASJTM_id}\">".$strAnchorInnerToLoginIDList."</a>\n";
+                $strLoginFormTailBody .= "<br><p><a href=\"{$scheme_n_authority}/common/common_account_list_browse.php{$get_parameter}\">".$strAnchorInnerToLoginIDList."</a>\n";
             }
         }
 
         // パスワード変更画面へのリンク
         if (isset($arySYSCON['PW_CHG_FROM_OTHER'])) {
             if ($arySYSCON['PW_CHG_FROM_OTHER'] == '1') {
-                $strLoginFormTailBody .= "<br><a href=\"{$scheme_n_authority}/common/common_change_password_form.php?no={$ASJTM_id}\">".$strAnchorInnerToLoginPWUpdate."</a></p>\n";
+                $strLoginFormTailBody .= "<br><a href=\"{$scheme_n_authority}/common/common_change_password_form.php{$get_parameter}\">".$strAnchorInnerToLoginPWUpdate."</a></p>\n";
             }
         }
         // SSO認証用設定の読み込み
@@ -147,7 +156,7 @@
             case "locked_pw_error":
             case "locked_pw_match":
                 // アクセスログ出力(ロック)
-                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-11"),array($checkStatus,$strCheckTriggerName));
+                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-11", array($checkStatus,$strCheckTriggerName)));
                 
                 // アカウントロック画面にリダイレクト
                 //insideRedirectCodePrint("/common/common_account_locked_error.php",0);
@@ -259,7 +268,7 @@
         // 設定値を取得する----
 
         if (isset($VOSCT_SesIdle) === false || $VOSCT_SesIdle < 0) {
-            $VOSCT_SesIdle = 28800; // デフォルト値＜アイドル時間を8時間(28800秒)に設定＞
+            $VOSCT_SesIdle = 3600; // デフォルト値＜アイドル時間を8時間(3600秒)に設定＞
             web_log($objMTS->getSomeMessage("ITAWDCH-ERR-44"));
         }
         if (isset($VOSCT_SesExpry) === false || $VOSCT_SesExpry < 0) {
@@ -267,7 +276,7 @@
             web_log($objMTS->getSomeMessage("ITAWDCH-ERR-45"));
         }
         if ($VOSCT_SesExpry < $VOSCT_SesIdle) {
-            $VOSCT_SesIdle = 28800; // デフォルト値＜アイドル時間を8時間(28800秒)に設定＞
+            $VOSCT_SesIdle = 3600; // デフォルト値＜アイドル時間を8時間(3600秒)に設定＞
             $VOSCT_SesExpry = 86400; // デフォルト値＜有効期限を24時間(86400秒)に設定＞
             web_log($objMTS->getSomeMessage("ITAWDCH-ERR-46"));
         }
@@ -287,6 +296,8 @@
 
     function saLoginAuthentication() {
         global $pwl_expiry, $pwl_threshold, $pwl_countmax, $strExternalAuthSettingsFilename, $objDBCA, $strErrMsgBody, $objMTS;
+
+        $strCheckTriggerName = __FUNCTION__;
 
         // 接続必須情報の初期化
         $account_list = [];
@@ -341,6 +352,17 @@
 
         switch ($checkStatus) {
             case "login_success":
+
+                if (enableActiveDirectorySync($strExternalAuthSettingsFilename) && $boolLocalAuthUser === false) {
+                        $objDBCA = new DBConnectAgent();
+                        $tmpResult = $objDBCA->connectOpen();
+                        $tmpArrayBind = array('USERNAME'=>$strUsername );
+                        $sql = "UPDATE A_ACCOUNT_LIST SET LAST_LOGIN_TIME = SYSDATE() WHERE USERNAME = :USERNAME";
+                        $objQuery = $objDBCA->sqlPrepare($sql);
+                        $objQuery->sqlBind($tmpArrayBind);
+                        $r = $objQuery->sqlExecute();
+                }
+                
                 break;
             case "id_error":
             case "id_error_on_syntax":
@@ -353,7 +375,7 @@
             case "locked_pw_error":
             case "locked_pw_match":
                 // アクセスログ出力(ロック)
-                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-11"),array($checkStatus,$strCheckTriggerName));
+                web_log($objMTS->getSomeMessage("ITAWDCH-ERR-11", array($checkStatus,$strCheckTriggerName)));
 
                 // アカウントロック画面にリダイレクト
                 webRequestForceQuitFromEveryWhere(403,10310602);

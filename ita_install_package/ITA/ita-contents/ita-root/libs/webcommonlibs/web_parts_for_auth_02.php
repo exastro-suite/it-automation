@@ -32,6 +32,13 @@
     $auth = null;
     saLoginExecute($auth, $objDBCA, $ACRCM_id, true);
 
+    $getCopy = $_GET;
+    $get_parameter = "";
+    if("" != http_build_query($getCopy)){
+        $get_parameter = "&" . http_build_query($getCopy);
+    }
+    $get_parameter = str_replace('+', '%20', $get_parameter);
+
     // ----■ログアウト処理を行うフラグが、リクエストのPOSTクエリーに含まれているかをチェックする。
     if(isset($_POST['logout'])){
         // ----■ログイン処理を行うフラグが、リクエストのGETクエリーに含まれているかをチェックする。
@@ -56,14 +63,14 @@
                 $auth->logout();
                 $scriptName = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
                 $tmpStrArticleBody .= "<p>{$objMTS->getSomeMessage("ITAWDCH-STD-1102")}</p>\n";
-                $tmpStrArticleBody .= "<p><a href=\"{$scriptName}?login&grp={$ASJTM_grp_id}&no={$ASJTM_id}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1103")}</a></p>\n";
+                $tmpStrArticleBody .= "<p><a href=\"{$scriptName}?login{$get_parameter}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1103")}</a></p>\n";
                 // ログイン中の場合----
             }
             else{
                 // ----ログインしていないユーザからの、ログアウト-リクエスト
                 $scriptName = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
                 $tmpStrArticleBody .= "<p>{$objMTS->getSomeMessage("ITAWDCH-STD-1104")}</p>\n";
-                $tmpStrArticleBody .= "<p><a href=\"{$scriptName}?login&grp={$ASJTM_grp_id}&no={$ASJTM_id}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1001")}</a></p>\n";
+                $tmpStrArticleBody .= "<p><a href=\"{$scriptName}?login{$get_parameter}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1001")}</a></p>\n";
                 // ログインしていないユーザからの、ログアウト-リクエスト----
             }
             //ログアウト----
@@ -77,7 +84,7 @@
         $scriptName = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
         $tmpStrTitleId = "gateLogin";
         $tmpStrTitleText = $objMTS->getSomeMessage("ITAWDCH-STD-1001");
-        $tmpStrArticleBody .= "<p><a href=\"{$scriptName}?login&no={$ASJTM_id}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1001")}</a></p>\n";
+        $tmpStrArticleBody .= "<p><a href=\"{$scriptName}?login{$get_parameter}\">{$objMTS->getSomeMessage("ITAWDCH-STD-1001")}</a></p>\n";
         //ログインのオーダもない----
     }
     else{

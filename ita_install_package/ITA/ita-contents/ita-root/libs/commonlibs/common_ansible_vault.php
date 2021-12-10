@@ -32,6 +32,7 @@ class  AnsibleVault {
         $this->file    = '.tmpkey';
     }
 
+    // このfunctionはファイル単位のansible_vault処理なので、現在未使用　使用時はvirtualenvの対応が必要
     function FileVault($exec_user,$password_file,$vault_file,&$vaultData,&$error_msg,$indento="  ") {
         $result = true;
 
@@ -80,25 +81,41 @@ class  AnsibleVault {
         return $result;
     }
 
-    function Vault($exec_user,$password_file,$value ,&$encode_value,$indento="  ") {
+    function Vault($exec_user,$password_file,$value ,&$encode_value,$indento="  ",$in_engine_virtualenv_name, $execDirPath) {
+        global $root_dir_path;
         $result = true;
         $encode_value = ""; 
+
+        $strExecshellTemplateName = $root_dir_path . '/backyards/ansible_driver/ky_ansible_vault_command_shell_template.sh';
+        // execDirPathはTower利用時はNFSの設定に依存してしまうので、~/ita-root/tempにshellを作成
+        $strExecshellName         = sprintf("%s/temp/playbook_vault_execute_shell_%s.sh",$root_dir_path,getmypid());
 
         $path = sprintf('%s/confs/commonconfs/path_ANSIBLE_MODULE.txt',$this->root_dir_path);
         // 改行コードが付いている場合に取り除く
         $ansible_path = file_get_contents($path);
         $ansible_path = str_replace("\n","",$ansible_path);
         if($ansible_path === false) {
-            $encode_value = 'ansible path file not found';
+            $encode_value = "file not found.($path)";
             return false;
         }
+        // virtualenv が設定されている場合、ansible_vaultのパスを空白にする。
+        if($in_engine_virtualenv_name != "") {
+            $virtualenv_flg = "__define__";
+            $in_engine_virtualenv_name .= "/bin/activate";
+            $ansible_path = "";
+        } else {
+            $virtualenv_flg = "__undefine__";
+            $in_engine_virtualenv_name = "__undefine__";
+            $ansible_path .= "/";
+        }
         // CR+LFをLFに置換
-
         $value = str_replace("\r\n","\n", $value);
-        //error_log(__FILE__.__LINE__."[\n".bin2hex($value). "\n]\n");
 
-        $vault_value_file  = "/tmp/ansible_vault_value_" . getmypid();
+
+        $vault_value_file   = $root_dir_path . "/temp/ansible_vault_value_" . getmypid();
         exec("/bin/rm -rf " . $vault_value_file);
+        $vault_stderr_file  = $root_dir_path . "/temp/ansible_vault_stderr_" . getmypid();
+        exec("/bin/rm -rf " . $vault_stderr_file);
 
         $ret = file_put_contents($vault_value_file,$value);
         if($ret === false) {
@@ -107,14 +124,51 @@ class  AnsibleVault {
             return false;
         }
 
-        $cmd = "cat $vault_value_file | sudo -u $exec_user -i $ansible_path/ansible-vault encrypt --vault-password-file $password_file 2>&1";
+        $VaultCmd = "cat $vault_value_file | ${ansible_path}ansible-vault encrypt --vault-password-file $password_file";
+
+        // sshAgentの設定とPlaybookを実行するshellのテンプレートを読み込み
+        $strShell = file_get_contents($strExecshellTemplateName);
+        if($strShell === false) {
+            // 異常フラグON
+            $error_flag = 1;
+
+            // 例外処理へ
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000020");
+        }
+        // テンプレート内の変数を実値に置き換え
+        $strShell = str_replace('<<ansible_valut_command>>',$VaultCmd                       ,$strShell);
+        $strShell = str_replace('<<virtualenv_path>>'      ,escapeshellarg($in_engine_virtualenv_name) ,$strShell);
+
+        // Ansible実行shell作成
+        $boolFilePut = file_put_contents($strExecshellName, $strShell);
+        if( $boolFilePut===false ){
+            // 異常フラグON
+            $error_flag = 1;
+
+            // 例外処理へ
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000010");
+        }
+        if( !chmod( $strExecshellName, 0777 ) ){
+            // 異常フラグON
+            $error_flag = 1;
+
+            // 例外処理へ
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000020");
+        }
+
+        // Ansible_vault実行Commnad発行
+        $cmd     = "sudo -u $exec_user -i {$strExecshellName} {$virtualenv_flg} 2>{$vault_stderr_file}";
 
         exec($cmd,$output,$return_var);
+
         if($return_var != 0) {
             $indento = '';
+            $output = explode("\n", file_get_contents($vault_stderr_file));
         }
 
         exec("/bin/rm -rf " . $vault_value_file);
+        exec("/bin/rm -rf " . $vault_stderr_file);
+        exec("/bin/rm -rf " . $strExecshellName);
 
         foreach($output as $line) {
             if(strlen(trim($line)) == 0) {
@@ -167,7 +221,6 @@ class  AnsibleVault {
         if($ret === false) {
             return false;
         }
-        //$pass_file= sprintf('%s%s/%s/%s',$this->root_dir_path,$base_dir,$dir,$file);
         $pass_file = sprintf('%s/%s/%s',$base_dir,$dir,$file);
         if(file_put_contents( $pass_file,$password) === false){
             return false;

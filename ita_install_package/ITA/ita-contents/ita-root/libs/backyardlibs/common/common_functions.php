@@ -24,7 +24,7 @@
 
 /**
 * シーケンスの更新
-* 
+*
 * @param  string  $sequenceName      シーケンス名
 * @param  int     $requestSequenceID 更新したい値
 * @return boolean                    更新できたかどうか
@@ -88,7 +88,7 @@ function updateSequenceIDForBackyards($sequenceName, $requestSequenceID=NULL){
 
 /**
 * シーケンスIDの取得
-* 
+*
 * @param  string $sequenceName シーケンス名
 * @return string $result       シーケンスID
 */
@@ -310,7 +310,7 @@ function zip($dirPath, $dstPath, $zipPath=null) {
  */
 function unZip($zipPath, $dstName){
     $result = false;
-    $res = exec("unzip -r {$dstPath} {$zipPath}");
+    $res = exec("unzip -r {$dstName} {$zipPath}");
     if ($res == 0) {
         $result = true;
     }
@@ -552,7 +552,7 @@ function getUserRole($userId){
 
     $res = $objQuery->sqlBind(
         array(
-            "MENU_ID" => $menuId,
+            "USER_ID" => $userId,
         )
     );
 
@@ -568,6 +568,60 @@ function getUserRole($userId){
     $result = array();
     while ($row = $objQuery->resultFetch()) {
         $result = $row["MENU_GROUP_ID"];
+    }
+
+    return $result;
+}
+
+/**
+ * ユーザIDからユーザ名を取得する
+ *
+ * @param  string  $userId         ユーザID
+ * @return string  $userName       ユーザ名
+ */
+function getUserName($userId) {
+    global $objDBCA, $objMTS;
+
+    $sql = "SELECT
+                USERNAME_JP
+            FROM
+                A_ACCOUNT_LIST
+            WHERE
+                USER_ID = :USER_ID
+            AND
+                DISUSE_FLAG = 0";
+
+    $objQuery = $objDBCA->sqlPrepare($sql);
+    if ($objQuery->getStatus() === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage(
+            'ITABASEH-ERR-900054',
+            array(basename(__FILE__), __LINE__)
+        ));
+        outputLog(LOG_PREFIX, $sql);
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+
+    $res = $objQuery->sqlBind(
+        array(
+            "USER_ID" => $userId,
+        )
+    );
+
+    $resObj = $objQuery->sqlExecute();
+    if ($resObj === false) {
+        outputLog(LOG_PREFIX, $objMTS->getSomeMessage(
+            'ITABASEH-ERR-900054',
+            array(basename(__FILE__), __LINE__)
+        ));
+        outputLog(LOG_PREFIX, $sql);
+        outputLog(LOG_PREFIX, $objQuery->getLastError());
+        return false;
+    }
+
+    $result = array();
+    while ($row = $objQuery->resultFetch()) {
+        $result = $row["USERNAME_JP"];
     }
 
     return $result;

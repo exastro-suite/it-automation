@@ -23,14 +23,41 @@
     require_once( dirname(__FILE__) ."/82_symphony_register.php" );
 
     if($strCommand == "EDIT"){
+      if( is_array($objJSONOfReceptedData) !== true ){
+        $intResultStatusCode = 400;
+        $arrayRetBody = $g['requestByREST']['preResponsContents']['errorInfo'];
+        $arrayRetBody['Error'] = array();
+        $arrayRetBody['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+        $arrayRetBody['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+        $aryForResultData[0] = array('ResultStatusCode'=>$intResultStatusCode,
+                                     'ResultData'=>$arrayRetBody);
+        $aryForResultData[1] = null;
+      }else{
         $aryForResultData = symphonyRegisterFromRest($strCalledRestVer,$strCommand,$objJSONOfReceptedData,true);
-
+      }
     }else if ($strCommand == "FILTER" || $strCommand == "FILTER_DATAONLY"){
+      if( is_array($objJSONOfReceptedData) !== true ){
+        $intResultStatusCode = 400;
+        $arrayRetBody = $g['requestByREST']['preResponsContents']['errorInfo'];
+        $arrayRetBody['Error'] = array();
+        $arrayRetBody['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+        $arrayRetBody['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-317"));
+        $aryForResultData[0] = array('ResultStatusCode'=>$intResultStatusCode,
+                                     'ResultData'=>$arrayRetBody);
+        $aryForResultData[1] = null;
+      }else{
          $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable);
          $aryForResultData = filter_add($aryForResultData);
-
+      }
     }else if ($strCommand == "INFO" ){
          $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable);
+    }else if( isset($expandRestCommandPerMenu) === false ){
+           // WARNING:ILLEGAL_ACCESS, DETAIL:UNEXPECTED X-COMMAND SENT FOR REST CONTENT.
+           web_log($objMTS->getSomeMessage("ITAWDCH-ERR-115008"));
+
+           webRequestForceQuitFromEveryWhere(400,11510807);
+           exit();
+           //不正な要求（内容が不正）----
     }
     
 ?>

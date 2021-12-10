@@ -182,6 +182,7 @@
                 if ($widget_data != NULL) {
                     foreach ($widget_data as $key => $value) {
                         if ($key == "menu") {
+                            if(empty($value)) $value = get_panel_info(); // $value が空の場合にメニュー情報を格納
                             foreach ($value as $menu_group_id => $menu_data) {
                                 foreach ($panel_list as $panel_menu_group_id) {
                                     if ($panel_menu_group_id == $menu_group_id) {
@@ -286,8 +287,8 @@
                 );
                 return $result;
             } else {
-                throw new Exception($err_msg);
                 $err_msg = $objMTS->getSomeMessage("ITAWDCH-ERR-11404");
+                throw new Exception($err_msg);
             }
             unset($objQuery);
         }
@@ -1182,8 +1183,8 @@
                 $ric = $objQuery->resultFetch();
                 return $ric["VALUE"];
             } else {
-                throw new Exception($err_msg);
                 $err_msg = $objMTS->getSomeMessage("ITAWDCH-ERR-11404");
+                throw new Exception($err_msg);
             }
         } catch (Exception $e){
             return "";
@@ -1217,8 +1218,8 @@
                 );
                 return $result;
             } else {
-                throw new Exception($err_msg);
                 $err_msg = $objMTS->getSomeMessage("ITAWDCH-ERR-11404");
+                throw new Exception($err_msg);
             }
         } catch (Exception $e){
             $result = array(

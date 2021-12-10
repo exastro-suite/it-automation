@@ -113,6 +113,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010401"));
     $c->setRequired(true);
     $c->setHiddenMainTableColumn(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('GIT_PROTOCOL_TYPE_ROW_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_CICD_GIT_PROTOCOL_TYPE_NAME_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'GIT_PROTOCOL_TYPE_ROW_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'GIT_PROTOCOL_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     /////////////////////////////////////////////////////////
@@ -121,6 +133,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new IDColumn('GIT_REPO_TYPE_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010500"),'B_CICD_GIT_REPOSITORY_TYPE_NAME','GIT_REPO_TYPE_ROW_ID','GIT_REPO_TYPE_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('DISP_SEQ'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010501"));
     $c->setHiddenMainTableColumn(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('GIT_REPO_TYPE_ROW_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_CICD_GIT_REPOSITORY_TYPE_NAME_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'GIT_REPO_TYPE_ROW_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'GIT_REPO_TYPE_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     /////////////////////////////////////////////////////////
@@ -150,6 +174,45 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setHiddenMainTableColumn(true);
         $cg->addColumn($c);
 
+    $table->addColumn($cg);
+
+    /////////////////////////////////////////////////////////
+    // ssh接続情報
+    ///////////////////////////////////////////////////////// 
+    $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010810"));
+        /////////////////////////////////////////////////////////
+        // ssh パスワード  必須入力:false ユニーク:false
+        ///////////////////////////////////////////////////////// 
+        $objVldt = new SingleTextValidator(0,128,false);
+        $c = new PasswordColumn('SSH_PASSWORD',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010820"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010821"));
+        $c->setValidator($objVldt);
+        $c->setUpdateRequireExcept(1); // 1は空白の場合は維持、それ以外はNULL扱いで更新
+        $c->setEncodeFunctionName("ky_encrypt");
+        $c->setHiddenMainTableColumn(true);
+        $cg->addColumn($c);
+
+        /////////////////////////////////////////////////////////
+        // ssh パスフレーズ  必須入力:false ユニーク:false
+        ///////////////////////////////////////////////////////// 
+        $objVldt = new SingleTextValidator(0,128,false);
+        $c = new PasswordColumn('SSH_PASSPHRASE',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010830"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010831"));
+        $c->setValidator($objVldt);
+        $c->setUpdateRequireExcept(1); // 1は空白の場合は維持、それ以外はNULL扱いで更新
+        $c->setEncodeFunctionName("ky_encrypt");
+        $c->setHiddenMainTableColumn(true);
+        $cg->addColumn($c);
+    
+        /////////////////////////////////////////////////////////
+        // ssh core.sshCommand
+        ///////////////////////////////////////////////////////// 
+        $objVldt = new SingleTextValidator(0,512,false);
+        $c = new TextColumn('SSH_EXTRA_ARGS',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010840"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200010841"));
+        $c->setValidator($objVldt);
+        $c->setHiddenMainTableColumn(true);
+        $cg->addColumn($c);
     $table->addColumn($cg);
 
     /////////////////////////////////////////////////////////
@@ -193,6 +256,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->setHiddenMainTableColumn(true);
         $c->setDefaultValue("register_table", TD_B_CICD_MATERIAL_LINK_LIST::C_AUTO_SYNC_FLG_ON);
         $c->setRequired(true);
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('AUTO_SYNC_FLG');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_VALID_INVALID_MASTER_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'FLAG_ID',
+            'TTT_GET_TARGET_COLUMN_ID'=>'FLAG_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
         $cg->addColumn($c);
 
         /////////////////////////////////////////////////////////
@@ -497,8 +572,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         if(isset($arrayRegData['del_password_flag_COL_IDSOP_15']) && $arrayRegData['del_password_flag_COL_IDSOP_15'] == "on"){
             $password_del = true;
         }
+        // sshパスワード削除フラグ
+        $ssh_password_del = false;
+        if(isset($arrayRegData['del_password_flag_COL_IDSOP_16']) && $arrayRegData['del_password_flag_COL_IDSOP_16'] == "on"){
+            $ssh_password_del = true;
+        }
+        // sshパスフレーズ削除フラグ
+        $ssh_passphrase_del = false;
+        if(isset($arrayRegData['del_password_flag_COL_IDSOP_17']) && $arrayRegData['del_password_flag_COL_IDSOP_17'] == "on"){
+            $ssh_passphrase_del = true;
+        }
 
-        $ColumnArray = array('GIT_PROTOCOL_TYPE_ROW_ID'=>'','GIT_REPO_TYPE_ROW_ID'=>'','GIT_USER'=>'','GIT_PASSWORD'=>'PasswordCloumn','AUTO_SYNC_FLG'=>'','SYNC_INTERVAL'=>'');
+        $ColumnArray = array('GIT_PROTOCOL_TYPE_ROW_ID'=>'','GIT_REPO_TYPE_ROW_ID'=>'','GIT_USER'=>'','GIT_PASSWORD'=>'PasswordCloumn','AUTO_SYNC_FLG'=>'','SYNC_INTERVAL'=>'','SSH_PASSWORD'=>'PasswordCloumn','SSH_PASSPHRASE'=>'PasswordCloumn');
         foreach($ColumnArray as $ColumnName=>$Type) {
             // $arrayRegDataはUI入力ベースの情報
             // $arrayVariant['edit_target_row']はDBに登録済みの情報
@@ -510,36 +595,35 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             // リポジトリタイプ
             if(strlen($ColumnValueArray['GIT_REPO_TYPE_ROW_ID']['COMMIT'])==0) {
                 if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                // プロトコルがhttpsの場合は必須項目です。(項目:Visibilityタイプ)
-                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2017");
+                // プロトコルでhttpsを選択している場合は、入力が必須な項目です。(項目:Visibilityタイプ)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2080");
                 $retBool = false;
             } else {
                switch($ColumnValueArray['GIT_REPO_TYPE_ROW_ID']['COMMIT']) {
                case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PUBLIC:  // Public
                    if(strlen($ColumnValueArray['GIT_USER']['COMMIT']) != 0) {
-                       // VisibilityタイプがPublicの場合は入力不要な項目です。(項目:Gitユーザ)
                        if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2059");
+                       // プロトコルでhttpsを選択し、VisibilityタイプでPrivateを選択している場合以外は、入力が不要な項目です。(項目:Gitユーザ)
+                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2076");
                        $retBool = false;
                    }
                    if((strlen($ColumnValueArray['GIT_PASSWORD']['COMMIT']) != 0) && ($password_del === false)) {
-                       // VisibilityタイプがPublicの場合は入力不要な項目です。(項目:Gitパスワード)
                        if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2060");
+                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2077");
                        $retBool = false;
                    }
                    break;
                case TD_B_CICD_GIT_REPOSITORY_TYPE_NAME::C_GIT_REPO_TYPE_ROW_ID_PRIVATE: // Private
                    if(strlen($ColumnValueArray['GIT_USER']['COMMIT']) == 0) {
                        if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                       // VisibilityタイプがPrivateの場合は必須項目です。(項目:Gitユ ーザ)
-                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2010");
+                       // プロトコルでhttpsを選択し、VisibilityタイプでPrivateを選択している場合は、入力が必須な項目です。(項目:Gitユーザ)
+                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2081");
                        $retBool = false;
                    }
                    if((strlen($ColumnValueArray['GIT_PASSWORD']['COMMIT']) == 0) || ($password_del === true)) {
                        if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                       // VisibilityタイプがPrivateの場合は必須項目です。(項目:Gitパ スワード)
-                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2011");
+                       // プロトコルでhttpsを選択し、VisibilityタイプでPrivateを選択している場合は、入力が必須な項目です。(項目:Gitパスワード)
+                       $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2082");
                        $retBool = false;
                    }
                    break;
@@ -551,25 +635,126 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                    break;
                }
             }
+            // sshパスワード/sshパスフレーズ未入力チェック
+            if((strlen($ColumnValueArray['SSH_PASSWORD']['COMMIT']) != 0) && ($ssh_password_del === false)) {
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                // プロトコルでsshパスワード認証以外を選択している場合は、入力が不要な項目です。(項目:ssh接続情報/パスワード)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2073");
+                $retBool = false;
+            }
+            if((strlen($ColumnValueArray['SSH_PASSPHRASE']['COMMIT']) != 0) && ($ssh_passphrase_del === false)) {
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                // プロトコルでssh鍵認証(パスフレーズあり)以外を選択している場合は、入力が不要な項目です。(項目:ssh接続情報/パスフレーズ)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2074");
+                $retBool = false;
+            }
             break;
         case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_LOCAL:     // Local
             if(strlen($ColumnValueArray['GIT_REPO_TYPE_ROW_ID']['COMMIT'])!=0) {
-                // プロトコルがLocalの場合は設定不要の項目です。(項目:Visibilityタイプ)
                 if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2061");
+                // プロトコルでhttps以外を選択して いる場合は、入力が不要な項目です。(項目:Visibilityタイプ)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2075");
                 $retBool = false;
             }
             if(strlen($ColumnValueArray['GIT_USER']['COMMIT']) != 0) {
-                // プロトコルがLocalの場合は入力不要な項目です。(項目:Gitユーザ)
                 if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2062");
+                // プロトコルでhttpsを選択し、VisibilityタイプでPrivateを選択している場合以外は、入力が不要な項目です。(項目:Gitユーザ)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2076");
                 $retBool = false;
             }
             if((strlen($ColumnValueArray['GIT_PASSWORD']['COMMIT']) != 0) && ($password_del === false)) {
-                // プロトコルがLocalの場合は入力不要な項目です。(項目:Gitパスワード)
                 if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
-                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2063");
+                // プロトコルでhttpsを選択し、VisibilityタイプでPrivateを選択している場合以外は、入力が不要な項目です。(項目:Gitパスワード)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2077");
                 $retBool = false;
+            }
+            // sshパスワード/sshパスフレーズ未入力チェック
+            if((strlen($ColumnValueArray['SSH_PASSWORD']['COMMIT']) != 0) && ($ssh_password_del === false)) {
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                // プロトコルでsshパスワード認証以外を選択している場合は、入力が不要な項目です。(項目:ssh接続情報/パスワード)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2073");
+                $retBool = false;
+            }
+            if((strlen($ColumnValueArray['SSH_PASSPHRASE']['COMMIT']) != 0) && ($ssh_passphrase_del === false)) {
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                // プロトコルでssh鍵認証(パスフレーズあり)以外を選択している場合は、入力が不要な項目です。(項目:ssh接続情報/パスフレーズ)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2074");
+                $retBool = false;
+            }
+            break;
+        case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_PASS:        //ssh(パスワード認証)
+        case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_KEY:         //ssh(鍵認証パスフレーズあり)
+        case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_KEY_NOPASS:  //ssh(鍵認証パスフレーズなし)
+            if(strlen($ColumnValueArray['GIT_REPO_TYPE_ROW_ID']['COMMIT'])!=0) {
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                // プロトコルでhttps以外を選択して いる場合は、入力が不要な項目です。(項目:Visibilityタイプ)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2075");
+                $retBool = false;
+            }
+            if(strlen($ColumnValueArray['GIT_USER']['COMMIT']) != 0) {
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                // プロトコルでhttpsを選択し、VisibilityタイプでPrivateを選択している場合以外は、入力が不要な項目です。(項目:Gitユーザ)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2076");
+                $retBool = false;
+            }
+            if((strlen($ColumnValueArray['GIT_PASSWORD']['COMMIT']) != 0) && ($password_del === false)) {
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                // プロトコルでhttpsを選択し、VisibilityタイプでPrivateを選択している場合以外は、入力が不要な項目です。(項目:Gitパスワード)
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2077");
+                $retBool = false;
+            }
+            switch($ColumnValueArray['GIT_PROTOCOL_TYPE_ROW_ID']['COMMIT']) {
+            case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_PASS:        //ssh(パスワード認証)
+                // sshパスワード入力/sshパスフレーズ未入力チェック
+                if((strlen($ColumnValueArray['SSH_PASSWORD']['COMMIT']) == 0) || ($ssh_password_del === true)) {
+                    if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                    // プロトコルでsshパスワード認証を選択している場合は、入力は必須な項目です。(項目:ssh接続情報/パスワード)
+                    $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2078");
+                    $retBool = false;
+                }
+                if((strlen($ColumnValueArray['SSH_PASSPHRASE']['COMMIT']) != 0) && ($ssh_passphrase_del === false)) {
+                    if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                    // プロトコルでssh鍵認証(パスフレーズあり)以外を選択している場合は、入力が不要な項目です。(項目:ssh接続情報/パスフレーズ)
+                    $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2074");
+                    $retBool = false;
+                }
+                break;
+            case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_KEY:         //ssh(鍵認証パスフレーズあり)
+                // sshパスワード未入力/sshパスフレーズ入力チェック
+                if((strlen($ColumnValueArray['SSH_PASSWORD']['COMMIT']) != 0) && ($ssh_password_del === false)) {
+                    if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                    //プロトコルでsshパスワード認証以外を選択している場合は、入力が不要な項目です。(項目:ssh接続情報/パスワード)
+                    $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2073");
+                    $retBool = false;
+                }
+                if((strlen($ColumnValueArray['SSH_PASSPHRASE']['COMMIT']) == 0) || ($ssh_passphrase_del === true)) {
+                    if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                    //プロトコルでssh鍵認証(パスフレーズあり)を選択している場合は、入力が必須な項目です。(項目:ssh接続情報/パスフレーズ)
+                    $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2079");
+                    $retBool = false;
+                }
+                break;
+            case TD_B_CICD_GIT_PROTOCOL_TYPE_NAME::C_GIT_PROTOCOL_TYPE_ROW_ID_SSH_KEY_NOPASS:  //ssh(鍵認証パスフレーズなし)
+                // sshパスワード/sshパスフレーズ未入力チェック
+                if((strlen($ColumnValueArray['SSH_PASSWORD']['COMMIT']) != 0) && ($ssh_password_del === false)) {
+                    if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                    //プロトコルでsshパスワード認証以外を選択している場合は、入力が不要な項目です。(項目:ssh接続情報/パスワード)
+                    $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2073");
+                    $retBool = false;
+                }
+                if((strlen($ColumnValueArray['SSH_PASSPHRASE']['COMMIT']) != 0) && ($ssh_passphrase_del === false)) {
+                    if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                    //プロトコルでssh鍵認証(パスフレーズあり)以外を選択している場合は、入力が不要な項目です。(項目:ssh接続情報/パスフレーズ)
+                    $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2074");
+                    $retBool = false;
+                }
+                break;
+            default:
+                if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                // 選択されているプロトコルが不正です。
+                $retStrBody .= $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2012");
+                $retBool = false;
+                break;
             }
             break;
         default:

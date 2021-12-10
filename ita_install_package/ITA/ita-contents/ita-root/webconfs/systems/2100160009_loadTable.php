@@ -61,6 +61,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setRequired(true);//登録/更新時には、入力必須
     $objVldt = new StartCreateItemValidator($c);
     $c->setValidator($objVldt);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('CREATE_ITEM_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'G_CREATE_ITEM_INFO_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'CREATE_ITEM_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'LINK_PULLDOWN',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 項目数
@@ -74,6 +86,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new NumColumn('REPEAT_CNT',  $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104009"));
     $c->setDescription( $g['objMTS']->getSomeMessage("ITACREPAR-MNU-104010"));
     $c->setSubtotalFlag(false);
+    $c->setValidator(new IntNumValidator(2,99));
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 

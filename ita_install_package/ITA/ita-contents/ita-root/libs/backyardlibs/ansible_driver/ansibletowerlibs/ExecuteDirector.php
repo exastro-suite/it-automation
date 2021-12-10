@@ -176,7 +176,7 @@ class ExecuteDirector {
 
         // 複数の認証情報によりログが分割されるか確認
         if(count($inventoryForEachCredentials) != 1) {
-            $ret = $this->settMultipleLogMark($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_LNX']);
+            $this->settMultipleLogMark($execution_no, $ifInfoRow['ANSIBLE_STORAGE_PATH_LNX']);
         }
 
         // AnsibleTowerHost情報取得
@@ -530,6 +530,7 @@ class ExecuteDirector {
         global $vg_tower_driver_type;
         global $vg_tower_driver_id;
         global $root_dir_temp;
+        global $g;
 
         $this->logger->trace(__METHOD__);
 
@@ -539,6 +540,7 @@ class ExecuteDirector {
             "DISUSE_FLAG" => '0',
         );
 
+        $root_dir_path = $g['root_dir_path'];
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -1855,7 +1857,6 @@ class ExecuteDirector {
                     $execlogContent .= $jobFileContent . "\n";
                 }
             }
-            $execlogFullPath  = $execlogFullPath;
 
 
             if(file_put_contents($execlogFullPath, $execlogContent) === false){
@@ -1945,7 +1946,6 @@ class ExecuteDirector {
     }
     function getMultipleLogFileJsonAry() {
         return $this->MultipleLogFileJsonAry;
-        return true;
     }
     function setMultipleLogFileJsonAry($execution_no, $MultipleLogFileNameList) {
         $this->MultipleLogFileJsonAry  = json_encode($MultipleLogFileNameList);

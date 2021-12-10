@@ -405,18 +405,18 @@ callback.prototype = {
     Mix1_1_duplicate : function( result ){
         var strMixOuterFrameName = 'Mix2_Nakami';
         var strMixInnerFramePrefix = 'Mix2_';
-  
+
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-  
+
         var resultContentTag = ary_result[2];
-  
+
         var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
-  
+
         if( ary_result[0] == "000" ){
-  
+
             var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
-  
+
             switch( ary_result[1] ){
                 case "100":
                     window.alert(resultContentTag);
@@ -425,12 +425,12 @@ callback.prototype = {
                     break;
                 case "201":
                     // エラーなく登録完了
-                default:                
+                default:
                     objRegiterArea.innerHTML="";
                     $(objRegiterArea).html(resultContentTag);
-  
+
                     objAlertArea.style.display = "none";
-                    
+
                     adjustTableAuto (strMixInnerFramePrefix+'1',
                                     "sDefault",
                                     "fakeContainer_Register2",
@@ -451,7 +451,7 @@ callback.prototype = {
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
-  
+
         showForDeveloper(result);
     },
     //---- ここからカスタマイズした場合の[callback]メソッド配置域
@@ -512,11 +512,13 @@ callback.prototype = {
         }else if(result[3] == 2){
             //登録済みの場合
             resultArea.next('td').next('td').next('td').find('input').prop('disabled', false); //削除ボタン
+            resultArea.next('td').next('td').next('td').next('td').find('input').prop('disabled', false); //destroyボタン
 
         }else if(result[3] == 3){
             //更新ありの場合
             resultArea.next('td').next('td').find('input').prop('disabled', false); //更新ボタン
             resultArea.next('td').next('td').next('td').find('input').prop('disabled', false); //削除ボタン
+            resultArea.next('td').next('td').next('td').next('td').find('input').prop('disabled', false); //destroyボタン
 
         }
 
@@ -538,6 +540,30 @@ callback.prototype = {
         }else{
             //削除失敗通知メッセージ
             window.alert(getSomeMessage("ITATERRAFORM100019"));
+            Filter1Tbl_search_async();
+        }
+    },
+    destroyWorkspaceInsRegister : function (result) {
+
+        // セッションチェック
+        if (typeof result == "string") {
+            checkTypicalFlagInHADACResult(getArrayBySafeSeparator(result));
+        }
+
+        if (result[0] == true) {
+            //タスク登録成功メッセージ
+            //作業状態確認へ遷移
+            let execution_no = result[1];
+            if (typeof execution_no !== "undefined") {
+                let menu_id = "2100080010";
+                let url = '/default/menu/01_browse.php?no=' + menu_id + '&execution_no=' + execution_no;
+
+                // 作業状態確認メニューに遷移
+                location.href = url;
+            }
+        } else {
+            //削除失敗通知メッセージ
+            window.alert(getSomeMessage("ITATERRAFORM100031"));
             Filter1Tbl_search_async();
         }
     }
@@ -721,7 +747,7 @@ function Filter1Tbl_search_control( exec_flag_var, value1 ){
                 // 自動開始制御タグがない場合は、システムエラー扱い、とする。
                 // システムエラーが発生しました。
                 alert( getSomeMessage("ITAWDCC20205") );
-                exit;
+                exec_flag_ret = false;
             }else{
                 if( objFCSL.value == 'on' ){
                     // 自動開始制御タグが存在し、オートフィルタ開始の抑制が働いている可能性がある
@@ -1087,8 +1113,29 @@ function Mix1_1_deleteWorkspace(obj, workspaceID){
     //削除実行確認メッセージ
     if( window.confirm(getSomeMessage("ITATERRAFORM100013"))){
         proxy.deleteWorkspace(data);
+    } else {
+        $(obj).attr('disabled', false);
     }
 
+}
+function Mix1_1_destroyWorkspaceInsRegister(obj, workspaceID, workspaceName) {
+    //ボタンを非活性
+    $(obj).attr('disabled', true);
+    //エンコード
+    workspaceID = encodeURIComponent(workspaceID, workspaceName);
+    var data = {
+        'workspaceID': workspaceID,
+        'workspaceName': workspaceName
+    };
+
+    let decordedWorkspaceName = decodeURIComponent(escape(atob(workspaceName)));
+
+    //destroy実行確認メッセージ
+    if (window.confirm(getSomeMessage("ITATERRAFORM100030", workspaceName))) {
+        proxy.destroyWorkspaceInsRegister(data);
+    } else {
+        $(obj).attr('disabled', false);
+    }
 }
 function Mix1_1_newOpenWindow(currentElement,currentText){
   var searchText = decodeURIComponent(escape(atob(currentText)));;

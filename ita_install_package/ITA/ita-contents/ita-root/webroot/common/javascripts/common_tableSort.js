@@ -168,7 +168,7 @@ function tableSort(header_rows, objTriggerTag, tablebodyid_prefix, num, sfunc, w
     var rows_num = rows.length - 1;
     
     //----ソート対象の値 と 行オブジェクトを取得
-    for(i=0;i<rows_num - (header_rows - 1);i++){
+    for(var i=0;i<rows_num - (header_rows - 1);i++){
         xbox[i] = Object(getStr(rows[i+header_rows].cells[num]));
         xbox[i].row = rows[i+header_rows];
     }
@@ -198,7 +198,7 @@ function tableSort(header_rows, objTriggerTag, tablebodyid_prefix, num, sfunc, w
     }
 
     //結果をテーブルに反映
-    for(i=0; i<rows_num - (header_rows - 1); i++){
+    for(var i=0; i<rows_num - (header_rows - 1); i++){
         DTblbody.appendChild(xbox[i].row);
     }
 

@@ -285,7 +285,7 @@ function makeImportCheckbox($declare_list){
     $retImportAry = array();
     foreach ($tmpMenuIdFileAry as $menuIdFileInfo) {
         // フォーマットチェック
-        if (!preg_match("/^#/",$menuIdFileInfo) && (preg_match("/^[0-9]{10}:.*$/", $menuIdFileInfo) || preg_match("/^[0-9]{10}:.*$/", $menuIdFileInfo))) {
+        if (!preg_match("/^#/",$menuIdFileInfo) && preg_match("/^[0-9]{10}:.*$/", $menuIdFileInfo)) {
             $menuIdFileInfo = explode(":", $menuIdFileInfo);
             $menuId         = $menuIdFileInfo[0];
             $menuFileName   = $menuIdFileInfo[1];
@@ -986,14 +986,15 @@ function recursiveCopyFiles($srcPath, $dstPath){
  * 指定したディレクトリ内を再帰的に削除する
  */
 function removeFiles($path){
+    global $g;
 
     $output = NULL;
     $cmd = "sudo rm -rf $path 2>&1";
 
     exec($cmd, $output, $return_var);
-    web_log($cmd);
 
     if(0 != $return_var){
+        web_log($cmd);
         web_log($g['objMTS']->getSomeMessage('ITAWDCH-ERR-2001', array(print_r($output, true))));
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900001'));
     }

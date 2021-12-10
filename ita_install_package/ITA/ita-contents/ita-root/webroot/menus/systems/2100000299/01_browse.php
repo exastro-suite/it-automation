@@ -6,6 +6,8 @@
     //-- サイト個別PHP要素、ここまで--
     require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_01_browse.php");
     require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_html_statement.php");
+    $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath('ITAWDCC', 'STD', '_js');
+    $strTemplateBody = getJscriptMessageTemplate($aryImportFilePath, $g['objMTS']);
     //-- サイト個別PHP要素、ここから--
    
     //リリースファイル読み込み
@@ -17,6 +19,8 @@
             array_push($releaseFile,file_get_contents($file));
         }
     }
+    //バージョン取得
+    $strVersion = substr($releaseBase, -6);
     //表を作成
     $table_code="";
 
@@ -24,15 +28,23 @@
     $table_code_label=
 <<< EOD
 <tr class="defaultExplainRow">
-    <th><p class="generalBold">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-910002")}</p></th>
-    <th><p class="generalBold">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-910003")}</p></th>
+    <th><p class="generalBold">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-910004")}</p></th>
 </tr>
 <tr class="defaultExplainRow">
-    <td><p class="generalBold">Base</p></td>
-    <td><p class="generalBold">$releaseBase</p></td>
+    <td><p class="generalBold">$strVersion</p></td>
 </tr>
 EOD;
 
+    //表を作成
+    $table_code2="";
+
+    //テーブル項目+
+    $table_code_label2=
+<<< EOD
+<tr class="defaultExplainRow">
+    <th><p class="generalBold">{$g['objMTS']->getSomeMessage("ITABASEH-MNU-910005")}</p></th>
+</tr>
+EOD;
     foreach($releaseFile as $release) {
         //テーブル要素
         $driverName=explode(" ", $release);
@@ -40,10 +52,9 @@ EOD;
 <<< EOD
 <tr>
     <td><p>$driverName[3]</p></td>
-    <td><p>$release</p></td>
 </tr>
 EOD;
-        $table_code=$table_code.$table_code_row;
+        $table_code2=$table_code2.$table_code_row;
     }
 
     //-- サイト個別PHP要素、ここまで--
@@ -84,7 +95,11 @@ EOD;
     </h2>
     <div id="SetsumeiNakami" style="display:block" class="text">
         <div style="margin-left:10px">
-            <table class="sDefault sDefault-Headers" id="Filter1Tbl-Headers" style="margin: 0px" rules="all" >{$table_code_label}{$table_code}</table>
+            <table class="sDefault sDefault-Headers" id="Filter1Tbl-Headers" width="200" style="margin: 0px" rules="all" >{$table_code_label}</table>
+        </div>
+        <br />
+        <div style="margin-left:10px">
+            <table class="sDefault sDefault-Headers" id="Filter2Tbl-Headers" width="200" style="margin: 0px" rules="all" >{$table_code_label2}{$table_code2}</table>
         </div>
     </div>
     <!-------------------------------- 説明 -------------------------------->

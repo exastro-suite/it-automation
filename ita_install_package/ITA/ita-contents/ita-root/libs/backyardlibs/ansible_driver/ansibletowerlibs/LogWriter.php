@@ -158,7 +158,7 @@ class LogWriter {
     }
 
     function UIExecLog($message) {
-        $filepointer=fopen($this->$UIExecLogPath, "a");
+        $filepointer=fopen($this->UIExecLogPath, "a");
         flock($filepointer, LOCK_EX);
         fputs($filepointer, $message. "\n" );
         flock($filepointer, LOCK_UN);
@@ -166,7 +166,7 @@ class LogWriter {
     }
 
     function UIErrorLog($message) {
-        $filepointer=fopen($this->$UIErrorLogPath, "a");
+        $filepointer=fopen($this->UIErrorLogPath, "a");
         flock($filepointer, LOCK_EX);
         fputs($filepointer, $message. "\n" );
         flock($filepointer, LOCK_UN);

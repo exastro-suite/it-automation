@@ -134,6 +134,8 @@ try {
     $arySpecialRoles = explode(",", $strSpecialRoles);
     // SSO default role_idを特別ロールIDとして扱う
     $arySpecialRoles[] = 2100000001;
+    // oaseアクションを特別ロールIDとして扱う
+    $arySpecialRoles[] = 2100000002;
 
     ////////////////////////////////////////////////////////////////
     // AD認証(ユーザ/ロールのリストとってこれるユーザ)

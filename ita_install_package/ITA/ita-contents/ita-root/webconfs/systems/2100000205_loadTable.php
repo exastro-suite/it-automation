@@ -180,6 +180,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041502"));//エクセル・ヘッダでの説明
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('AUTOFILTER_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_TODO_MASTER_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=> 'TODO_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'TODO_STATUS',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 初回フィルタ
@@ -187,6 +199,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041602"));//エクセル・ヘッダでの説明
     $c->setRequired(true);
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('INITIAL_FILTER_FLG');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'A_TODO_MASTER_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=> 'TODO_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'TODO_STATUS',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // Web表示上限行数
@@ -211,7 +235,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1041402"));
     $c->setSubtotalFlag(false);
-    $c->setValidator(new IntNumValidator(-1, 2147483647));
+    $c->setValidator(new IntNumValidator(0, 1048576));
     $table->addColumn($c);
 
     // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。

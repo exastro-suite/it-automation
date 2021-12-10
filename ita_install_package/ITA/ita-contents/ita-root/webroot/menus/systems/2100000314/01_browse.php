@@ -428,7 +428,7 @@ EOD;
 #editArea textarea,
 #editArea input[type="text"],
 #editArea select {
-    font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", "sans-serif";
+    font-family: Consolas, "メイリオ", Meiryo, Osaka, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
     height: 24px;
     margin: 0; padding: 0 8px;
     background-color: #333;
