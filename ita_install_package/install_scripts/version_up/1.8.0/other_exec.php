@@ -62,7 +62,7 @@ $objQuery = $objDBCA->sqlPrepare($sql);
 $result = $objQuery->sqlExecute();
 
 // ホストグループ検索対象を検索
-$sql = "SELECT * FROM F_SPLIT_TARGET";
+$sql = "SELECT * FROM F_SPLIT_TARGET WHERE DISUSE_FLAG = '0'";
 
 $objQuery = $objDBCA->sqlPrepare($sql);
 $result = $objQuery->sqlExecute();
@@ -71,6 +71,8 @@ $splitTargetArray = array();
 while ($row = $objQuery->resultFetch()){
     $splitTargetArray[] = $row;
 }
+
+$tableArray = array();
 
 // ホストグループ検索対象のデータごとにループ
 foreach($splitTargetArray as $splitTarget){
@@ -83,6 +85,11 @@ foreach($splitTargetArray as $splitTarget){
 
     $tableName = explode("'", $output[0])[1];
     $tableNameJnl = $tableName . "_JNL";
+
+    if(in_array($tableName, $tableArray)){
+        continue;
+    }
+    $tableArray[] = $tableName;
 
     // パッチ適用
     $sql = "UPDATE $tableName SET KY_KEY=KY_KEY+9990000 WHERE KY_KEY>10000";

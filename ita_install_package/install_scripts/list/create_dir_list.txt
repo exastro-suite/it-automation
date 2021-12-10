@@ -30,6 +30,7 @@
 /ita-root/temp/sym_ope_import/upload
 /ita-root/temp/terraform_download_temp
 /ita-root/temp/terraform_module_temp
+/ita-root/temp/ansible_driver_temp
 /ita-root/webconfs/sheets
 /ita-root/webconfs/users
 /ita-root/webroot/menus/sheets

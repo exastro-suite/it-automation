@@ -1088,6 +1088,7 @@ PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
@@ -1117,6 +1118,7 @@ PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
@@ -1151,7 +1153,8 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
 I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
-I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -1203,7 +1206,8 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
 I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
-I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -1304,6 +1308,7 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1326,9 +1331,10 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_WINRM_ID                  ,
-        ANS_PLAYBOOK_HED_DEF      ,
+        ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1429,6 +1435,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1482,6 +1489,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1852,6 +1860,7 @@ PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
@@ -1881,6 +1890,7 @@ PATTERN_ID                        INT                              ,
 SYSTEM_ID                         INT                              ,
 VARS_LINK_ID                      INT                              ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
@@ -1915,7 +1925,8 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
 I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
-I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -1966,7 +1977,8 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              ,
 I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
-I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -2117,6 +2129,7 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2140,6 +2153,7 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2241,7 +2255,8 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
-         TAB_A.I_VIRTUALENV_NAME         ,         
+         TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2294,7 +2309,8 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
-         TAB_A.I_VIRTUALENV_NAME         ,         
+         TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2381,7 +2397,8 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションNo
 I_OPERATION_NAME                  VARCHAR (256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
-I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
 TIME_END                          DATETIME(6)                      , -- 終了日時
@@ -2432,7 +2449,8 @@ I_ANS_EXEC_OPTIONS                VARCHAR (512)                    ,
 OPERATION_NO_UAPK                 INT                              , -- オペレーションNo
 I_OPERATION_NAME                  VARCHAR (256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
-I_VIRTUALENV_NAME                 VARCHAR (256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
 TIME_END                          DATETIME(6)                      , -- 終了日時
@@ -2818,6 +2836,7 @@ SYSTEM_ID                         INT                              , -- 機器(�
 VARS_LINK_ID                      INT                              , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            INT                              , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        text                             , -- 具体値
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
@@ -2848,6 +2867,7 @@ SYSTEM_ID                         INT                              , -- 機器(�
 VARS_LINK_ID                      INT                              , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            INT                              , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        text                             , -- 具体値
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    VARCHAR (1)                      ,
 VARS_ENTRY_USE_TPFVARS            VARCHAR (1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        INT                              ,
@@ -3211,6 +3231,7 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3236,6 +3257,7 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3271,6 +3293,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -3324,6 +3347,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -4988,38 +5012,38 @@ INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040708,2100020000,'Ansible Towerホスト一覧',NULL,NULL,NULL,1,0,1,2,25,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40708,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040708,2100020000,'Ansible Towerホスト一覧',NULL,NULL,NULL,1,0,1,2,25,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100003,'a3c','5ebbc37e034d6874a2af59eb04beaa52','legacy状態確認プロシージャ',NULL,NULL,'legacy状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100003,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100003,'a3c','5ebbc37e034d6874a2af59eb04beaa52','legacy状態確認プロシージャ',NULL,NULL,'legacy状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100004,'a3e','5ebbc37e034d6874a2af59eb04beaa52','legacy作業実行プロシージャ',NULL,NULL,'legacy作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100004,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100004,'a3e','5ebbc37e034d6874a2af59eb04beaa52','legacy作業実行プロシージャ',NULL,NULL,'legacy作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100005,'a4c','5ebbc37e034d6874a2af59eb04beaa52','pioneer状態確認プロシージャ',NULL,NULL,'pioneer状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100005,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100005,'a4c','5ebbc37e034d6874a2af59eb04beaa52','pioneer状態確認プロシージャ',NULL,NULL,'pioneer状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100006,'a4e','5ebbc37e034d6874a2af59eb04beaa52','pioneer作業実行プロシージャ',NULL,NULL,'pioneer作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100006,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100006,'a4e','5ebbc37e034d6874a2af59eb04beaa52','pioneer作業実行プロシージャ',NULL,NULL,'pioneer作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100008,'a0z','5ebbc37e034d6874a2af59eb04beaa52','ansible紐付管理プロシージャ',NULL,NULL,'ansible紐付管理プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100008,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100008,'a0z','5ebbc37e034d6874a2af59eb04beaa52','ansible紐付管理プロシージャ',NULL,NULL,'ansible紐付管理プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100009,'a3a','5ebbc37e034d6874a2af59eb04beaa52','legacy変数更新プロシージャ',NULL,NULL,'legacy変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100009,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100009,'a3a','5ebbc37e034d6874a2af59eb04beaa52','legacy変数更新プロシージャ',NULL,NULL,'legacy変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100010,'a4a','5ebbc37e034d6874a2af59eb04beaa52','pioneer変数更新プロシージャ',NULL,NULL,'pioneer変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100010,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100010,'a4a','5ebbc37e034d6874a2af59eb04beaa52','pioneer変数更新プロシージャ',NULL,NULL,'pioneer変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100011,'a6c','5ebbc37e034d6874a2af59eb04beaa52','legacyRole状態確認プロシージャ',NULL,NULL,'legacyRole状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100011,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100011,'a6c','5ebbc37e034d6874a2af59eb04beaa52','legacyRole状態確認プロシージャ',NULL,NULL,'legacyRole状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100012,'a6e','5ebbc37e034d6874a2af59eb04beaa52','legacyRole作業実行プロシージャ',NULL,NULL,'legacyRole作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100012,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100012,'a6e','5ebbc37e034d6874a2af59eb04beaa52','legacyRole作業実行プロシージャ',NULL,NULL,'legacyRole作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100013,'a6a','5ebbc37e034d6874a2af59eb04beaa52','legacyRole変数更新プロシージャ',NULL,NULL,'legacyRole変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100013,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100013,'a6a','5ebbc37e034d6874a2af59eb04beaa52','legacyRole変数更新プロシージャ',NULL,NULL,'legacyRole変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100015,'a7b','5ebbc37e034d6874a2af59eb04beaa52','ansible作業履歴定期廃止プロシージャ',NULL,NULL,'ansible作業履歴定期廃止プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100015,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100015,'a7b','5ebbc37e034d6874a2af59eb04beaa52','ansible作業履歴定期廃止プロシージャ',NULL,NULL,'ansible作業履歴定期廃止プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100017,'a7b','5ebbc37e034d6874a2af59eb04beaa52','legacy代入値自動登録設定プロシージャ',NULL,NULL,'legacy代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100017,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100017,'a7b','5ebbc37e034d6874a2af59eb04beaa52','legacy代入値自動登録設定プロシージャ',NULL,NULL,'legacy代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100018,'a7c','5ebbc37e034d6874a2af59eb04beaa52','pioneer代入値自動登録設定プロシージャ',NULL,NULL,'pioneer代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100018,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100018,'a7c','5ebbc37e034d6874a2af59eb04beaa52','pioneer代入値自動登録設定プロシージャ',NULL,NULL,'pioneer代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100019,'a7d','5ebbc37e034d6874a2af59eb04beaa52','legacyRole代入値自動登録設定プロシージャ',NULL,NULL,'legacyRole代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100019,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100019,'a7d','5ebbc37e034d6874a2af59eb04beaa52','legacyRole代入値自動登録設定プロシージャ',NULL,NULL,'legacyRole代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-121006,'a10f','5ebbc37e034d6874a2af59eb04beaa52','AnsibleTower/AWXサーバデータ同期プロシージャ',NULL,NULL,NULL,'H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-121006,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-121006,'a10f','5ebbc37e034d6874a2af59eb04beaa52','AnsibleTower/AWXサーバデータ同期プロシージャ',NULL,NULL,NULL,'H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100020,'a4e','5ebbc37e034d6874a2af59eb04beaa52','Ansible作業実行プロシージャ',NULL,NULL,'Ansible作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100020,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100020,'a4e','5ebbc37e034d6874a2af59eb04beaa52','Ansible作業実行プロシージャ',NULL,NULL,'Ansible作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100003,'a3c','5ebbc37e034d6874a2af59eb04beaa52','legacy状態確認プロシージャ',NULL,NULL,NULL,NULL,'legacy状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100003,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100003,'a3c','5ebbc37e034d6874a2af59eb04beaa52','legacy状態確認プロシージャ',NULL,NULL,NULL,NULL,'legacy状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100004,'a3e','5ebbc37e034d6874a2af59eb04beaa52','legacy作業実行プロシージャ',NULL,NULL,NULL,NULL,'legacy作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100004,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100004,'a3e','5ebbc37e034d6874a2af59eb04beaa52','legacy作業実行プロシージャ',NULL,NULL,NULL,NULL,'legacy作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100005,'a4c','5ebbc37e034d6874a2af59eb04beaa52','pioneer状態確認プロシージャ',NULL,NULL,NULL,NULL,'pioneer状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100005,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100005,'a4c','5ebbc37e034d6874a2af59eb04beaa52','pioneer状態確認プロシージャ',NULL,NULL,NULL,NULL,'pioneer状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100006,'a4e','5ebbc37e034d6874a2af59eb04beaa52','pioneer作業実行プロシージャ',NULL,NULL,NULL,NULL,'pioneer作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100006,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100006,'a4e','5ebbc37e034d6874a2af59eb04beaa52','pioneer作業実行プロシージャ',NULL,NULL,NULL,NULL,'pioneer作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100008,'a0z','5ebbc37e034d6874a2af59eb04beaa52','ansible紐付管理プロシージャ',NULL,NULL,NULL,NULL,'ansible紐付管理プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100008,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100008,'a0z','5ebbc37e034d6874a2af59eb04beaa52','ansible紐付管理プロシージャ',NULL,NULL,NULL,NULL,'ansible紐付管理プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100009,'a3a','5ebbc37e034d6874a2af59eb04beaa52','legacy変数更新プロシージャ',NULL,NULL,NULL,NULL,'legacy変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100009,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100009,'a3a','5ebbc37e034d6874a2af59eb04beaa52','legacy変数更新プロシージャ',NULL,NULL,NULL,NULL,'legacy変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100010,'a4a','5ebbc37e034d6874a2af59eb04beaa52','pioneer変数更新プロシージャ',NULL,NULL,NULL,NULL,'pioneer変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100010,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100010,'a4a','5ebbc37e034d6874a2af59eb04beaa52','pioneer変数更新プロシージャ',NULL,NULL,NULL,NULL,'pioneer変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100011,'a6c','5ebbc37e034d6874a2af59eb04beaa52','legacyRole状態確認プロシージャ',NULL,NULL,NULL,NULL,'legacyRole状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100011,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100011,'a6c','5ebbc37e034d6874a2af59eb04beaa52','legacyRole状態確認プロシージャ',NULL,NULL,NULL,NULL,'legacyRole状態確認プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100012,'a6e','5ebbc37e034d6874a2af59eb04beaa52','legacyRole作業実行プロシージャ',NULL,NULL,NULL,NULL,'legacyRole作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100012,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100012,'a6e','5ebbc37e034d6874a2af59eb04beaa52','legacyRole作業実行プロシージャ',NULL,NULL,NULL,NULL,'legacyRole作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100013,'a6a','5ebbc37e034d6874a2af59eb04beaa52','legacyRole変数更新プロシージャ',NULL,NULL,NULL,NULL,'legacyRole変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100013,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100013,'a6a','5ebbc37e034d6874a2af59eb04beaa52','legacyRole変数更新プロシージャ',NULL,NULL,NULL,NULL,'legacyRole変数更新プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100015,'a7b','5ebbc37e034d6874a2af59eb04beaa52','ansible作業履歴定期廃止プロシージャ',NULL,NULL,NULL,NULL,'ansible作業履歴定期廃止プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100015,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100015,'a7b','5ebbc37e034d6874a2af59eb04beaa52','ansible作業履歴定期廃止プロシージャ',NULL,NULL,NULL,NULL,'ansible作業履歴定期廃止プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100017,'a7b','5ebbc37e034d6874a2af59eb04beaa52','legacy代入値自動登録設定プロシージャ',NULL,NULL,NULL,NULL,'legacy代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100017,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100017,'a7b','5ebbc37e034d6874a2af59eb04beaa52','legacy代入値自動登録設定プロシージャ',NULL,NULL,NULL,NULL,'legacy代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100018,'a7c','5ebbc37e034d6874a2af59eb04beaa52','pioneer代入値自動登録設定プロシージャ',NULL,NULL,NULL,NULL,'pioneer代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100018,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100018,'a7c','5ebbc37e034d6874a2af59eb04beaa52','pioneer代入値自動登録設定プロシージャ',NULL,NULL,NULL,NULL,'pioneer代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100019,'a7d','5ebbc37e034d6874a2af59eb04beaa52','legacyRole代入値自動登録設定プロシージャ',NULL,NULL,NULL,NULL,'legacyRole代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100019,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100019,'a7d','5ebbc37e034d6874a2af59eb04beaa52','legacyRole代入値自動登録設定プロシージャ',NULL,NULL,NULL,NULL,'legacyRole代入値自動登録設定プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-121006,'a10f','5ebbc37e034d6874a2af59eb04beaa52','AnsibleTower/AWXサーバデータ同期プロシージャ',NULL,NULL,NULL,NULL,NULL,'H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-121006,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-121006,'a10f','5ebbc37e034d6874a2af59eb04beaa52','AnsibleTower/AWXサーバデータ同期プロシージャ',NULL,NULL,NULL,NULL,NULL,'H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100020,'a4e','5ebbc37e034d6874a2af59eb04beaa52','Ansible作業実行プロシージャ',NULL,NULL,NULL,NULL,'Ansible作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100020,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100020,'a4e','5ebbc37e034d6874a2af59eb04beaa52','Ansible作業実行プロシージャ',NULL,NULL,NULL,NULL,'Ansible作業実行プロシージャ','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_ROLE_MENU_LINK_LIST (LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100000302,1,2100000302,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ROLE_MENU_LINK_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,LINK_ID,ROLE_ID,MENU_ID,PRIVILEGE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-302,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100000302,1,2100000302,1,'システム管理者','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

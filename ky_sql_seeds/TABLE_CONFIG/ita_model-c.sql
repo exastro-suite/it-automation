@@ -1088,6 +1088,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1117,6 +1118,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1151,7 +1153,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1203,7 +1206,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1304,6 +1308,7 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1326,9 +1331,10 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_WINRM_ID                  ,
-        ANS_PLAYBOOK_HED_DEF      ,
+        ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1429,6 +1435,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1482,6 +1489,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1852,6 +1860,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1881,6 +1890,7 @@ PATTERN_ID                        %INT%                            ,
 SYSTEM_ID                         %INT%                            ,
 VARS_LINK_ID                      %INT%                            ,
 VARS_ENTRY                        text                             ,
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -1915,7 +1925,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1966,7 +1977,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            ,
 I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -2117,6 +2129,7 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2140,6 +2153,7 @@ SELECT
         ANS_HOST_DESIGNATE_TYPE_ID    ,
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2241,7 +2255,8 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
-         TAB_A.I_VIRTUALENV_NAME         ,         
+         TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2294,7 +2309,8 @@ SELECT
          TAB_A.OPERATION_NO_UAPK         ,
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
-         TAB_A.I_VIRTUALENV_NAME         ,         
+         TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2381,7 +2397,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションNo
 I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -2432,7 +2449,8 @@ I_ANS_EXEC_OPTIONS                %VARCHR%(512)                    ,
 OPERATION_NO_UAPK                 %INT%                            , -- オペレーションNo
 I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペレーション名
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
-I_VIRTUALENV_NAME                 %VARCHR%(256)                    , -- virtualenv
+I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
+I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -2818,6 +2836,7 @@ SYSTEM_ID                         %INT%                            , -- 機器(�
 VARS_LINK_ID                      %INT%                            , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        text                             , -- 具体値
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -2848,6 +2867,7 @@ SYSTEM_ID                         %INT%                            , -- 機器(�
 VARS_LINK_ID                      %INT%                            , -- 作業パターン変数紐付
 COL_SEQ_COMBINATION_ID            %INT%                            , -- 多次元変数配列組合せ管理 Pkey
 VARS_ENTRY                        text                             , -- 具体値
+VARS_ENTRY_FILE                   text                             ,
 SENSITIVE_FLAG                    %VARCHR%(1)                      ,
 VARS_ENTRY_USE_TPFVARS            %VARCHR%(1)                      , -- 具体値のTPF変数設定有無　1:設定あり　他:設定なし
 ASSIGN_SEQ                        %INT%                            ,
@@ -3211,6 +3231,7 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3236,6 +3257,7 @@ SELECT
         ANS_PLAYBOOK_HED_DEF          ,
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
+        ANS_ENGINE_VIRTUALENV_NAME    ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3271,6 +3293,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -3324,6 +3347,7 @@ SELECT
          TAB_A.I_OPERATION_NAME          ,
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
+         TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,

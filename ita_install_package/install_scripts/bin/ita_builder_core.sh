@@ -201,7 +201,7 @@ yum_repository() {
                 dnf config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             elif [ "${LINUX_OS}" == "CentOS8" ]; then
                 yum repolist all > repolist_all.tmp 2>&1
-                POWERTOOLS_NAME=`grep -i powertools repolist_all.tmp | cut -f 1  --delim=" "`
+                POWERTOOLS_NAME=`grep -i powertools repolist_all.tmp | grep -iv powertools- | cut -f 1  --delim=" "`
                 dnf config-manager --set-enabled "${POWERTOOLS_NAME}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
                 rm -rf repolist_all.tmp
             fi
@@ -631,19 +631,15 @@ configure_php() {
 
     # Install some pear packages.
     echo "----------Installation[HTML_AJAX]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    if [ "${exec_mode}" == "3" ]; then
-        pear channel-update pear.php.net >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        pear install ${PEAR_PACKAGE["php"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    else
-        pear install ${PEAR_PACKAGE["php"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    fi
+    pear install ${PEAR_PACKAGE_HTML_AJAX} >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
     # Check installation HTML_AJAX
+    echo "----------Check Installed packages[HTML_AJAX]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     pear list | grep HTML_AJAX >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? -eq 0 ]; then
         echo "Success pear Install" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     else
-       log "ERROR:Installation failed[${PEAR_PACKAGE["php"]}]"
+       log "ERROR:Installation failed[HTML_AJAX]"
        ERR_FLG="false"
        func_exit_and_delete_file
     fi
@@ -707,7 +703,6 @@ configure_php() {
     fi
 
     #clean
-    rm -rf /tmp/pear
     rm -rf composer.json composer.lock vendor
 }
 
@@ -936,22 +931,9 @@ download() {
     done
 
     #----------------------------------------------------------------------
-    # Download pear packages.
+    # Download PHP tar.gz packages
     yum_install php-pear
 
-    for key in ${!PEAR_PACKAGE[@]}; do
-        local download_dir="${PEAR_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-        
-        log "Download packages[${PEAR_PACKAGE[$key]}]"
-        pear download ${PEAR_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        download_check
-    done
-    cd $ITA_INSTALL_SCRIPTS_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-
-    #----------------------------------------------------------------------
-    # Download PHP tar.gz packages
     for key in ${!PHP_TAR_GZ_PACKAGE[@]}; do
         local download_dir="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1106,6 +1088,8 @@ if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
 elif [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
     ITA_EXT_FILE_DIR=$ITA_INSTALL_PACKAGE_DIR/ext_files_for_CentOS7.x
 fi
+ITA_EXT_FILE_COMMON_DIR=$ITA_INSTALL_PACKAGE_DIR/ext_files
+
 
 #クラウド環境用リポジトリフラグ設定
 ARCH=$(arch)
@@ -1133,7 +1117,6 @@ LOCAL_BASE_DIR=/var/lib/ita
 declare -A LOCAL_DIR;
 LOCAL_DIR=(
     ["yum"]="$LOCAL_BASE_DIR/yum"
-    ["pear"]="$ITA_EXT_FILE_DIR/pear"
     ["pip"]="$ITA_EXT_FILE_DIR/pip"
     ["php-tar-gz"]="$ITA_EXT_FILE_DIR/php-tar-gz"
     ["phpspreadsheet-tar-gz"]="$ITA_EXT_FILE_DIR/phpspreadsheet-tar-gz"
@@ -1144,7 +1127,6 @@ DOWNLOAD_BASE_DIR=$ITA_INSTALL_SCRIPTS_DIR/rpm_files
 declare -A DOWNLOAD_DIR;
 DOWNLOAD_DIR=(
     ["yum"]="$DOWNLOAD_BASE_DIR/yum"
-    ["pear"]="$DOWNLOAD_BASE_DIR/pear"
     ["php-tar-gz"]="$DOWNLOAD_BASE_DIR/php-tar-gz"
     ["pip"]="$DOWNLOAD_BASE_DIR/pip"
     ["phpspreadsheet-tar-gz"]="$DOWNLOAD_BASE_DIR/phpspreadsheet-tar-gz"
@@ -1250,36 +1232,11 @@ YUM_PACKAGE=(
 ################################################################################
 # PEAR packages
 
-#-----------------------------------------------------------
-# directory
+# PEAR packages directory
+PEAR_PACKAGE_DIR="${ITA_EXT_FILE_COMMON_DIR}/pear"
 
-# local directory
-declare -A PEAR_PACKAGE_LOCAL_DIR;
-PEAR_PACKAGE_LOCAL_DIR=(
-    ["php"]="${LOCAL_DIR["pear"]}/php"
-)
-
-# download directory
-declare -A PEAR_PACKAGE_DOWNLOAD_DIR;
-PEAR_PACKAGE_DOWNLOAD_DIR=(
-    ["php"]="${DOWNLOAD_DIR["pear"]}/php"
-)
-
-#-----------------------------------------------------------
-# package
-
-# pear package (for php)
-declare -A PEAR_PACKAGE_PHP;
-PEAR_PACKAGE_PHP=(
-    ["remote"]="HTML_AJAX-beta"
-    ["local"]="-O `list_pear_package ${PEAR_PACKAGE_DOWNLOAD_DIR["php"]}`"
-)
-
-# all pear packages
-declare -A PEAR_PACKAGE;
-PEAR_PACKAGE=(
-    ["php"]="${PEAR_PACKAGE_PHP[${MODE}]}"
-)
+# HTML_AJAX package path
+PEAR_PACKAGE_HTML_AJAX="${PEAR_PACKAGE_DIR}/HTML_AJAX-0.5.8.tgz"
 
 
 ################################################################################

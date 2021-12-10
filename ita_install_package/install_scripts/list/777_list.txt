@@ -31,6 +31,7 @@
 /ita-root/temp/terraform_download_temp
 /ita-root/temp/terraform_module_temp
 /ita-root/temp/update_by_file_error
+/ita-root/temp/ansible_driver_temp
 /ita-root/uploadfiles
 /ita-root/webroot/uploadfiles
 /ita-root/webroot/uploadfiles/2100000204

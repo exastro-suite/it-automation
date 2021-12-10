@@ -33,6 +33,8 @@ LAST_LOGIN_TIME         %DATETIME6%             ,
 AUTH_TYPE               %VARCHR%(10)            ,
 PROVIDER_ID             %INT%                   ,
 PROVIDER_USER_ID        %VARCHR%(256)           ,
+PW_EXPIRATION           %INT%                   ,
+DEACTIVATE_PW_CHANGE    %INT%                   ,
 ACCESS_AUTH             TEXT                    ,
 NOTE                    %VARCHR%(4000)          ,
 DISUSE_FLAG             %VARCHR%(1)             ,
@@ -321,6 +323,8 @@ LAST_LOGIN_TIME         %DATETIME6%             ,
 AUTH_TYPE               %VARCHR%(10)            ,
 PROVIDER_ID             %INT%                   ,
 PROVIDER_USER_ID        %VARCHR%(256)           ,
+PW_EXPIRATION           %INT%                   ,
+DEACTIVATE_PW_CHANGE    %INT%                   ,
 ACCESS_AUTH             TEXT                    ,
 NOTE                    %VARCHR%(4000)          ,
 DISUSE_FLAG             %VARCHR%(1)             ,
@@ -925,7 +929,8 @@ ANS_PARALLEL_EXE                  %INT%                            ,
 ANS_WINRM_ID                      %INT%                            ,
 ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
-ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
+ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , -- Tower virtualenv path
+ANS_ENGINE_VIRTUALENV_NAME        %VARCHR%(512)                    , -- ansible virtualenv path
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報
@@ -959,7 +964,8 @@ ANS_PARALLEL_EXE                  %INT%                            ,
 ANS_WINRM_ID                      %INT%                            ,
 ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy Playbook.ymlのヘッダ定義
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
-ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , 
+ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , -- Tower virtualenv path
+ANS_ENGINE_VIRTUALENV_NAME        %VARCHR%(512)                    , -- ansible virtualenv path
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報
@@ -2184,6 +2190,63 @@ PRIMARY KEY(JOURNAL_SEQ_NO)
 )%%TABLE_CREATE_OUT_TAIL%%;
 -- Conductorインターフェース----
 
+
+
+-- ----Conductor通知先定義
+CREATE TABLE C_CONDUCTOR_NOTICE_INFO
+(
+NOTICE_ID                         %INT%                      ,
+
+NOTICE_NAME                       %VARCHR%(128)              ,
+
+NOTICE_URL                        %VARCHR%(512)              ,
+HEADER                            %VARCHR%(512)              ,
+FIELDS                            %VARCHR%(4000)             ,
+FQDN                              %VARCHR%(128)              ,
+PROXY_URL                         %VARCHR%(128)              ,
+PROXY_PORT                        %INT%                      ,
+OTHER                             %VARCHR%(256)              ,
+SUPPRESS_START                    %DATETIME6%                ,
+SUPPRESS_END                      %DATETIME6%                ,
+
+ACCESS_AUTH                       TEXT                       ,
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+
+PRIMARY KEY (NOTICE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+
+CREATE TABLE C_CONDUCTOR_NOTICE_INFO_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                      , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                , -- 履歴用変更種別
+
+NOTICE_ID                         %INT%                      ,
+
+NOTICE_NAME                       %VARCHR%(128)              ,
+
+NOTICE_URL                        %VARCHR%(512)              ,
+HEADER                            %VARCHR%(512)              ,
+FIELDS                            %VARCHR%(4000)             ,
+FQDN                              %VARCHR%(128)              ,
+PROXY_URL                         %VARCHR%(128)              ,
+PROXY_PORT                        %INT%                      ,
+OTHER                             %VARCHR%(256)              ,
+SUPPRESS_START                    %DATETIME6%                ,
+SUPPRESS_END                      %DATETIME6%                ,
+
+ACCESS_AUTH                       TEXT                       ,
+NOTE                              %VARCHR%(4000)             , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                      , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- Conductor通知先定義----
+
 -- ----Conductorクラス(編集用)
 CREATE TABLE C_CONDUCTOR_EDIT_CLASS_MNG
 (
@@ -2191,6 +2254,7 @@ CONDUCTOR_CLASS_NO                %INT%                      ,
 
 CONDUCTOR_NAME                    %VARCHR%(256)              ,
 DESCRIPTION                       %VARCHR%(4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2212,6 +2276,7 @@ CONDUCTOR_CLASS_NO                %INT%                      ,
 
 CONDUCTOR_NAME                    %VARCHR%(256)              ,
 DESCRIPTION                       %VARCHR%(4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2242,6 +2307,7 @@ POINT_X                           %INT%                      ,
 POINT_Y                           %INT%                      ,
 POINT_W                           %INT%                      ,
 POINT_H                           %INT%                      ,
+END_TYPE                          %INT%                      ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2275,6 +2341,7 @@ POINT_X                           %INT%                      ,
 POINT_Y                           %INT%                      ,
 POINT_W                           %INT%                      ,
 POINT_H                           %INT%                      ,
+END_TYPE                          %INT%                      ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2352,6 +2419,7 @@ CONDUCTOR_CLASS_NO                %INT%                      ,
 
 CONDUCTOR_NAME                    %VARCHR%(256)              ,
 DESCRIPTION                       %VARCHR%(4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2373,6 +2441,7 @@ CONDUCTOR_CLASS_NO                %INT%                      ,
 
 CONDUCTOR_NAME                    %VARCHR%(256)              ,
 DESCRIPTION                       %VARCHR%(4000)             ,
+NOTICE_INFO                       TEXT                       ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2403,6 +2472,7 @@ POINT_X                           %INT%                      ,
 POINT_Y                           %INT%                      ,
 POINT_W                           %INT%                      ,
 POINT_H                           %INT%                      ,
+END_TYPE                          %INT%                      ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 NOTE                              %VARCHR%(4000)             , -- 備考
@@ -2435,6 +2505,7 @@ POINT_X                           %INT%                      ,
 POINT_Y                           %INT%                      ,
 POINT_W                           %INT%                      ,
 POINT_H                           %INT%                      ,
+END_TYPE                          %INT%                      ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 NOTE                              %VARCHR%(4000)             , -- 備考
@@ -2522,6 +2593,8 @@ TIME_BOOK                         %DATETIME6%                ,
 TIME_START                        %DATETIME6%                ,
 TIME_END                          %DATETIME6%                ,
 EXEC_LOG                          TEXT                       ,
+I_NOTICE_INFO                     TEXT                       ,
+NOTICE_LOG                        %VARCHR%(256)              ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2555,6 +2628,8 @@ TIME_BOOK                         %DATETIME6%                ,
 TIME_START                        %DATETIME6%                ,
 TIME_END                          %DATETIME6%                ,
 EXEC_LOG                          TEXT                       ,
+I_NOTICE_INFO                     TEXT                       ,
+NOTICE_LOG                        %VARCHR%(256)              ,
 
 DISP_SEQ                          %INT%                      , -- 表示順序
 ACCESS_AUTH                       TEXT                       ,
@@ -2593,6 +2668,7 @@ TIME_END                          %DATETIME6%                ,
 RELEASED_FLAG                     %INT%                      ,
 
 EXE_SKIP_FLAG                     %INT%                      ,
+END_TYPE                          %INT%                      ,
 OVRD_OPERATION_NO_UAPK            %INT%                      ,
 OVRD_I_OPERATION_NAME             %VARCHR%(256)              ,
 OVRD_I_OPERATION_NO_IDBH          %INT%                      ,
@@ -2636,6 +2712,7 @@ TIME_END                          %DATETIME6%                ,
 RELEASED_FLAG                     %INT%                      ,
 
 EXE_SKIP_FLAG                     %INT%                      ,
+END_TYPE                          %INT%                      ,
 OVRD_OPERATION_NO_UAPK            %INT%                      ,
 OVRD_I_OPERATION_NAME             %VARCHR%(256)              ,
 OVRD_I_OPERATION_NO_IDBH          %INT%                      ,
@@ -2919,6 +2996,8 @@ SELECT TAB_A.USER_ID              ,
        TAB_A.MAIL_ADDRESS         ,
        TAB_A.PW_LAST_UPDATE_TIME  ,
        TAB_A.LAST_LOGIN_TIME      ,
+       TAB_A.PW_EXPIRATION        ,
+       TAB_A.DEACTIVATE_PW_CHANGE ,
        TAB_B.LOCK_ID              ,
        TAB_B.MISS_INPUT_COUNTER   ,
        TAB_B.LOCKED_TIMESTAMP     ,
@@ -2950,6 +3029,8 @@ SELECT TAB_A.JOURNAL_SEQ_NO       ,
        TAB_A.MAIL_ADDRESS         ,
        TAB_A.PW_LAST_UPDATE_TIME  ,
        TAB_A.LAST_LOGIN_TIME      ,
+       TAB_A.PW_EXPIRATION        ,
+       TAB_A.DEACTIVATE_PW_CHANGE ,
        TAB_B.LOCK_ID              ,
        TAB_B.MISS_INPUT_COUNTER   ,
        TAB_B.LOCKED_TIMESTAMP     ,
@@ -3815,28 +3896,28 @@ CREATE VIEW D_CMDB_MENU_LIST_SHEET_TYPE_1 AS
 SELECT
  *
 FROM D_CMDB_MENU_LIST TAB_A
-WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
 ;
 
 CREATE VIEW D_CMDB_MENU_LIST_SHEET_TYPE_1_JNL AS
 SELECT
  *
 FROM D_CMDB_MENU_LIST_JNL TAB_A
-WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
 ;
 
 CREATE VIEW D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_1 AS
 SELECT
  *
 FROM D_CMDB_MG_MU_COL_LIST TAB_A
-WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
 ;
 
 CREATE VIEW D_CMDB_MG_MU_COL_LIST_SHEET_TYPE_1_JNL AS
 SELECT
  *
 FROM D_CMDB_MG_MU_COL_LIST_JNL TAB_A
-WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1)
+WHERE (SHEET_TYPE IS NULL OR SHEET_TYPE = 1 OR SHEET_TYPE = 4)
 ;
 
 CREATE VIEW D_CMDB_MENU_COLUMN_SHEET_TYPE_1 AS
@@ -3849,7 +3930,6 @@ FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_1         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
-  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
@@ -3863,7 +3943,6 @@ FROM
   D_CMDB_MENU_LIST_SHEET_TYPE_1_JNL         TAB_A
   LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
-  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
@@ -3878,7 +3957,6 @@ FROM
   LEFT JOIN B_CMDB_MENU_COLUMN TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
   TAB_B.COL_CLASS   <>  'MultiTextColumn' AND
-  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
@@ -3893,7 +3971,6 @@ FROM
   LEFT JOIN B_CMDB_MENU_COLUMN_JNL TAB_B ON (TAB_A.MENU_ID = TAB_B.MENU_ID)
 WHERE
   TAB_B.COL_CLASS   <>  'MultiTextColumn' AND
-  TAB_B.COL_CLASS   <>  'FileUploadColumn' AND
   TAB_B.DISUSE_FLAG = '0'
 ;
 
@@ -3910,7 +3987,6 @@ WHERE
    WHERE
      TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
      TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
-     TBL_B.COL_CLASS   <>  'FileUploadColumn' AND
      TBL_B.DISUSE_FLAG =   '0'
   ) <> 0 
 ;
@@ -3928,7 +4004,6 @@ WHERE
    WHERE
      TBL_A.MENU_ID     =   TBL_B.MENU_ID     AND
      TBL_B.COL_CLASS   <>  'MultiTextColumn' AND
-     TBL_B.COL_CLASS   <>  'FileUploadColumn' AND
      TBL_B.DISUSE_FLAG =   '0'
   ) <> 0
 ;
