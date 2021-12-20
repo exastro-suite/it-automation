@@ -1,4 +1,4 @@
-Exastro IT Automation 1.9.0 (2021-12-10)
+Exastro IT Automation 1.9.0 (2021-12-20)
 ==================================================
 
 Installer
@@ -70,6 +70,7 @@ Export/Import
  * Fixed an issue where the "Mode:Environment migration" text would be underlapped by the next item when enlargening the screen. #1519
  * Fixed an issue where the menu ID formats would be different from each other when running UPLOAD and EXECUTE Xcommand with RestAPI. #1661
  * Fixed Export/Import's RESTAPI's error handling. #1704
+ * Fixed an issue where the "Excel Bulk export" menu would display Menus that didn't have excel output support. #1754
 
 Symphony
 ---------------
