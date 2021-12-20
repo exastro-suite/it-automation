@@ -1,4 +1,4 @@
-Exastro IT Automation 1.9.0 (2021-12-10)
+Exastro IT Automation 1.9.0 (2021-12-20)
 ==================================================
 
 インストーラ
@@ -70,6 +70,7 @@ RestAPI
  * 英語環境のメニューインポート画面縮小するとMode:Environment migration と〇がかぶる。 #1519
  * メニューインポートのREST APIのXcommandがUPLOADとEXECUTEの時にメニューIDの形式が異なっている #1661
  * メニューエクスポート/インポートのRESTAPIのエラーハンドリング修正 #1704
+ * バージョンアップした際に「Excel一括エクスポート」メニューにExcel出力が無いメニューが表示される #1754
 
 Symphony
 ---------------
