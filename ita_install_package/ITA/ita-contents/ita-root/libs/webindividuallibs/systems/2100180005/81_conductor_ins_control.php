@@ -220,7 +220,7 @@ function scramOneOfConductorInstances($fxVarsIntConductorInstanceId){
     return $arrayResult;
 }
 //保留解除[Conductor作業確認画面-操作]
-function holdReleaseOneOfNodeInstances($intNodeInstanceId){
+function holdReleaseOneOfNodeInstances($intNodeInstanceId,$intConductorInstanceId){
     global $g;
     
     // 各種ローカル定数を定義
@@ -257,6 +257,9 @@ function holdReleaseOneOfNodeInstances($intNodeInstanceId){
             }
             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
+        
+        //保留ステータス更新
+        updateConductorInstance($intConductorInstanceId);
 
     }
     catch (Exception $e){
@@ -448,6 +451,7 @@ function conductorInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSON
                 list($intSeqNo       , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('MOVEMENT_SEQ_NO') ,null);
                 if( $execReleaseflg === true ){
                     $aryRetBody = nodeInstanceHoldRelease($intNodeInstanceId);
+                    updateConductorInstance($intSymphonyInstanceId);
                     $intUIErrorMsgSaveIndex = 4;
 
                 }else{
@@ -458,7 +462,6 @@ function conductorInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSON
                         "","","",$strExpectedErrMsgBodyForUI
                     );
                 }
-
                 break;
             default:
                 $intErrorPlaceMark = 1000;
@@ -511,6 +514,159 @@ function conductorInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSON
                           'ResultData'=>$aryForResultData);
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+}
+
+function updateConductorInstance($intSymphonyInstanceId){
+  global $g;
+  
+  $strFxName = __FUNCTION__;
+  
+  $arrayConfigForSymInsIUD = array(
+      "JOURNAL_SEQ_NO"=>"",
+      "JOURNAL_ACTION_CLASS"=>"",
+      "JOURNAL_REG_DATETIME"=>"",
+      "CONDUCTOR_INSTANCE_NO"=>"",
+      "I_CONDUCTOR_CLASS_NO"=>"",
+      "I_CONDUCTOR_NAME"=>"",
+      "I_DESCRIPTION"=>"",
+      "OPERATION_NO_UAPK"=>"",
+      "I_OPERATION_NAME"=>"",
+      "STATUS_ID"=>"",
+      "PAUSE_STATUS_ID"=>"",
+      "EXECUTION_USER"=>"",
+      "ABORT_EXECUTE_FLAG"=>"",
+      "CONDUCTOR_CALL_FLAG"=>"",
+      "CONDUCTOR_CALLER_NO"=>"",
+      "TIME_BOOK"=>"DATETIME",
+      "TIME_START"=>"DATETIME",
+      "TIME_END"=>"DATETIME",
+      "ACCESS_AUTH"=>"",
+      "NOTE"=>"",
+      "DISUSE_FLAG"=>"",
+      "LAST_UPDATE_TIMESTAMP"=>"",
+      "LAST_UPDATE_USER"=>""
+  );
+  
+  // 処理開始
+  try{
+      require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/75_conductorInstanceAdmin.php");
+
+      $aryRetBody = conductorInstancePrint($intSymphonyInstanceId);
+      
+      $arySymphonySource = $aryRetBody[0]['CONDUCTOR_INSTANCE_INFO'];
+      $update_tgt_row = $aryRetBody[5];
+      $aryRowOfMovInstanceTable = $aryRetBody[6];
+      
+      foreach( $aryRowOfMovInstanceTable as $row ){
+        if($row['I_NODE_TYPE_ID'] == '8' && $row['RELEASED_FLAG'] == '1'){
+              $update_tgt_row['PAUSE_STATUS_ID']   = 1; //保留ステータスオン
+              $update_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
+              
+              $retArray = makeSQLForUtnTableUpdate($g['db_model_ch']
+                                                  ,"UPDATE"
+                                                  ,"CONDUCTOR_INSTANCE_NO"
+                                                  ,"C_CONDUCTOR_INSTANCE_MNG"
+                                                  ,"C_CONDUCTOR_INSTANCE_MNG_JNL"
+                                                  ,$arrayConfigForSymInsIUD
+                                                  ,$update_tgt_row);
+              
+              if( $retArray[0] === false ){
+                  // エラーフラグをON
+                  // 例外処理へ
+                  $strErrStepIdInFx="00000900";
+                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+              }
+              
+              $sqlUtnBody = $retArray[1];
+              $arrayUtnBind = $retArray[2];
+              
+              $sqlJnlBody = $retArray[3];
+              $arrayJnlBind = $retArray[4];
+              
+              // ----履歴シーケンス払い出し
+              $retArray = getSequenceValueFromTable('C_CONDUCTOR_INSTANCE_MNG_JSQ', 'A_SEQUENCE', FALSE );
+              if( $retArray[1] != 0 ){
+                  // エラーフラグをON
+                  // 例外処理へ
+                  $strErrStepIdInFx="00001000";
+                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+              }
+              else{
+                  $varJSeq = $retArray[0];
+                  $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
+              }
+              // 履歴シーケンス払い出し----
+              
+              $retArray01 = singleSQLCoreExecute($g['objDBCA'], $sqlUtnBody, $arrayUtnBind, $strFxName);
+              $retArray02 = singleSQLCoreExecute($g['objDBCA'], $sqlJnlBody, $arrayJnlBind, $strFxName);
+              if( $retArray01[0] !== true || $retArray02[0] !== true ){
+                  // エラーフラグをON
+                  // 例外処理へ
+                  $strErrStepIdInFx="00001100";
+                  //
+                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+              }
+              unset($retArray01);
+              unset($retArray02);
+          }else if($row['I_NODE_TYPE_ID'] == '8' && $row['RELEASED_FLAG'] == '2'){
+              $update_tgt_row['PAUSE_STATUS_ID']   = 2; //保留ステータスオフ
+              $update_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
+              
+              $retArray = makeSQLForUtnTableUpdate($g['db_model_ch']
+                                                  ,"UPDATE"
+                                                  ,"CONDUCTOR_INSTANCE_NO"
+                                                  ,"C_CONDUCTOR_INSTANCE_MNG"
+                                                  ,"C_CONDUCTOR_INSTANCE_MNG_JNL"
+                                                  ,$arrayConfigForSymInsIUD
+                                                  ,$update_tgt_row);
+              
+              if( $retArray[0] === false ){
+                  // エラーフラグをON
+                  // 例外処理へ
+                  $strErrStepIdInFx="00000900";
+                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+              }
+              
+              $sqlUtnBody = $retArray[1];
+              $arrayUtnBind = $retArray[2];
+              
+              $sqlJnlBody = $retArray[3];
+              $arrayJnlBind = $retArray[4];
+              
+              // ----履歴シーケンス払い出し
+              $retArray = getSequenceValueFromTable('C_CONDUCTOR_INSTANCE_MNG_JSQ', 'A_SEQUENCE', FALSE );
+              if( $retArray[1] != 0 ){
+                  // エラーフラグをON
+                  // 例外処理へ
+                  $strErrStepIdInFx="00001000";
+                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+              }
+              else{
+                  $varJSeq = $retArray[0];
+                  $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
+              }
+              // 履歴シーケンス払い出し----
+              
+              $retArray01 = singleSQLCoreExecute($g['objDBCA'], $sqlUtnBody, $arrayUtnBind, $strFxName);
+              $retArray02 = singleSQLCoreExecute($g['objDBCA'], $sqlJnlBody, $arrayJnlBind, $strFxName);
+              if( $retArray01[0] !== true || $retArray02[0] !== true ){
+                  // エラーフラグをON
+                  // 例外処理へ
+                  $strErrStepIdInFx="00001100";
+                  //
+                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+              }
+              unset($retArray01);
+              unset($retArray02);
+          }
+      }
+    }catch (Exception $e){
+        // エラーフラグをON
+        if( $intErrorType === null ) $intErrorType = 500;
+        $tmpErrMsgBody = $e->getMessage();
+        if( 500 <= $intErrorType ) $strSysErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
+        if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
+    }
 }
 
 ?>

@@ -273,6 +273,7 @@ EOD;
                 </div>
                 <div id="instance_status_wrapper">
                     <label for="instance_status_area">{$objMTS->getSomeMessage("ITABASEH-MNU-207090")}</label>　<span id="instance_status_area"></span><br>
+                    <label for="pause_status_area">{$objMTS->getSomeMessage("ITABASEH-MNU-202100")}</label>　<span id="pause_status_area"></span><br>
                     <label for="execution_status_area">{$objMTS->getSomeMessage("ITABASEH-MNU-201110")}</label>　<span id="execution_status_area"></span><br>
                     <label for="book_time_area">{$objMTS->getSomeMessage("ITABASEH-MNU-208010")}</label>　<span id="book_time_area"></span><br>
                     <label for="scram_exe_flag_area">{$objMTS->getSomeMessage("ITABASEH-MNU-208020")}</label>　<span id="scram_exe_flag_area"></span>

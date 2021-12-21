@@ -5022,6 +5022,7 @@ const conductorStatusUpdate = function( exeNumber ) {
   const panelConducotrInfo = [
     ['#conductor-instance-id', conductorInfo.CONDUCTOR_INSTANCE_ID ],
     ['#conductor-instance-status', conductorStatus[ conductorInfo.STATUS_ID ][1] ],
+    ['#conductor-instance-pause', conductorInfo.PAUSE_STATUS ],
     ['#conductor-instance-start', conductorInfo.TIME_START ],
     ['#conductor-instance-end', conductorInfo.TIME_END ],
     ['#conductor-instance-user', conductorInfo.EXECUTION_USER ],
@@ -5298,7 +5299,7 @@ const conductorStatusUpdate = function( exeNumber ) {
           if ( confirm( getSomeMessage("ITABASEC020006",{0:conductorInstanceID})) ) {
             $pauseButton.prop('disabled', true ).off();
             $node.find('.pause-status').attr('data-status', 'resume');
-            proxy.holdReleaseNodeInstance( nodeInfo.NODE_INSTANCE_NO );
+            proxy.holdReleaseNodeInstance( nodeInfo.NODE_INSTANCE_NO,conductorInstanceID );
           }
         });
         break;

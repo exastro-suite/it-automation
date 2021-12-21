@@ -280,6 +280,7 @@ $ary["ITABASEH-MNU-202060"]         = "[元データ]オペレーション一覧
 $ary["ITABASEH-MNU-202070"]         = "オペレーション名";
 $ary["ITABASEH-MNU-202080"]         = "[最大長]256バイト";
 $ary["ITABASEH-MNU-202090"]         = "ステータス";
+$ary["ITABASEH-MNU-202100"]         = "保留ステータス";
 $ary["ITABASEH-MNU-203010"]         = "ステータスには以下の状態が存在します。\n
 ・未実行\n
 ・未実行(予約)\n
@@ -300,6 +301,9 @@ $ary["ITABASEH-MNU-203080"]         = "終了日時";
 $ary["ITABASEH-MNU-203090"]         = "[形式]YYYY/MM/DD HH:MM:SS";
 $ary["ITABASEH-MNU-203091"]         = "通知ログ";
 $ary["ITABASEH-MNU-203092"]         = "ログファイルを出力します。";
+$ary["ITABASEH-MNU-203093"]         = "保留ステータスには以下の状態が存在します。\n
+・一時停止有り\n
+・一時停止無し";
 $ary["ITABASEH-MNU-204010"]         = "表示順序";
 $ary["ITABASEH-MNU-204020"]         = "表示順序の制御用";
 $ary["ITABASEH-MNU-204030"]         = "選択";

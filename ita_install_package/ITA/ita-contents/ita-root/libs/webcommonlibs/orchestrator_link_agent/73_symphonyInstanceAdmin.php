@@ -1049,6 +1049,30 @@ function symphonyInstancePrint($fxVarsIntSymphonyInstanceId){
     $arySymphonySource = array();
     $aryMovementInsData = array();
     
+    $arrayConfigForSymInsIUD = array(
+        "JOURNAL_SEQ_NO"=>"",
+        "JOURNAL_ACTION_CLASS"=>"",
+        "JOURNAL_REG_DATETIME"=>"",
+        "SYMPHONY_INSTANCE_NO"=>"",
+        "I_SYMPHONY_CLASS_NO"=>"",
+        "I_SYMPHONY_NAME"=>"",
+        "I_DESCRIPTION"=>"",
+        "OPERATION_NO_UAPK"=>"",
+        "I_OPERATION_NAME"=>"",
+        "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
+        "EXECUTION_USER"=>"",
+        "ABORT_EXECUTE_FLAG"=>"",
+        "TIME_BOOK"=>"DATETIME",
+        "TIME_START"=>"DATETIME",
+        "TIME_END"=>"DATETIME",
+        "ACCESS_AUTH"=>"",
+        "NOTE"=>"",
+        "DISUSE_FLAG"=>"",
+        "LAST_UPDATE_TIMESTAMP"=>"",
+        "LAST_UPDATE_USER"=>""
+    );
+    
     $strFxName = '([FUNCTION]'.__FUNCTION__.')';
     dev_log($objMTS->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     
@@ -1169,6 +1193,7 @@ function symphonyInstancePrint($fxVarsIntSymphonyInstanceId){
                                   ,'I_SYMPHONY_NAME'=>$aryRowOfSymInstanceTable['I_SYMPHONY_NAME']
                                   ,'I_DESCRIPTION'=>$aryRowOfSymInstanceTable['I_DESCRIPTION']
                                   ,'STATUS_ID'=>$aryRowOfSymInstanceTable['STATUS_ID']
+                                  ,'PAUSE_STATUS'=>'一時停止無し'
                                   ,'EXECUTION_USER'=>$aryRowOfSymInstanceTable['EXECUTION_USER']
                                   ,'ABORT_EXECUTE_FLAG'=>$aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG']
                                   ,'OPERATION_NO_UAPK'=>$aryRowOfSymInstanceTable['OPERATION_NO_UAPK']
@@ -1294,6 +1319,11 @@ function symphonyInstancePrint($fxVarsIntSymphonyInstanceId){
                 $strErrStepIdInFx="00001000";
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
+
+            $update_tgt_row = $aryRowOfSymInstanceTable;
+            if($row['I_NEXT_PENDING_FLAG'] == '1' && $row['RELEASED_FLAG'] == '1'){
+              $arySymphonySource['PAUSE_STATUS'] = '一時停止有り';
+            }
             $aryInstanceItems['RELEASED']               = $varReleasedFlag;
             
             //----実行インスタンスNo
@@ -1345,7 +1375,8 @@ function symphonyInstancePrint($fxVarsIntSymphonyInstanceId){
                         ,$aryErrMsgBody
                         ,$strErrMsg
                         ,$strExpectedErrMsgBodyForUI
-                         );
+                        ,$aryRowOfSymInstanceTable
+                        ,$aryRowOfMovInstanceTable);
     dev_log($objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     return $arrayResult;
 }

@@ -92,7 +92,7 @@
         //////////////////////////////////////////////
         //  (Conductorインスタンス)保留解除  //
         //////////////////////////////////////////////
-        function holdReleaseNodeInstance($intNodeInstanceId){
+        function holdReleaseNodeInstance($intNodeInstanceId,$conductorInstanceID){
             // グローバル変数宣言
             global $g;
 
@@ -101,7 +101,7 @@
             
             require_once($g['root_dir_path']."/libs/webindividuallibs/systems/".$g['page_dir']."/81_conductor_ins_control.php");
             
-            $arrayResult = holdReleaseOneOfNodeInstances($intNodeInstanceId);
+            $arrayResult = holdReleaseOneOfNodeInstances($intNodeInstanceId,$conductorInstanceID);
             
             if($arrayResult[0]=="000"){
                 web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
