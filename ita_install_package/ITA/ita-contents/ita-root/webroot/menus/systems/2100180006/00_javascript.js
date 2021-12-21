@@ -1022,7 +1022,7 @@ function queryDataToFilter(){
     if ( symphony_name.length > 0 || operation_name.length > 0 || user_name.length > 0){
             document.getElementById('Filter1Tbl_2').value = decodeURIComponent(symphony_name);
             document.getElementById('Filter1Tbl_3').value = decodeURIComponent(operation_name);
-            document.getElementById('Filter1Tbl_5').value = decodeURIComponent(user_name);
+            document.getElementById('Filter1Tbl_6').value = decodeURIComponent(user_name);
 
             filter_flag = true;
     }

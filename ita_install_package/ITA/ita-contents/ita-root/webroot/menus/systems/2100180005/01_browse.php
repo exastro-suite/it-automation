@@ -348,6 +348,10 @@ EOD;
                           <td class="panel-td"><span id="conductor-instance-status" class="panel-span"></span></td>
                         </tr>
                         <tr>
+                          <th class="panel-th">Pause status :</th>
+                          <td class="panel-td"><span id="conductor-instance-pause" class="panel-span"></span></td>
+                        </tr>
+                        <tr>
                           <th class="panel-th">Start time :</th>
                           <td class="panel-td"><span id="conductor-instance-start" class="panel-span"></span></td>
                         </tr>
