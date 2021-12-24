@@ -91,7 +91,10 @@
         //----ログインのオーダがある
         $tmpStrTitleId = "gateLogin";
         $tmpStrTitleText = $objMTS->getSomeMessage("ITAWDCH-STD-1001");
-        $tmpStrArticleBody = $g['tmpBuffer_AUTH'];
+        $tmpStrArticleBody = "";
+        if($g != null && array_key_exists('tmpBuffer_AUTH', $g)){
+            $tmpStrArticleBody = $g['tmpBuffer_AUTH'];
+        }
         unset($g['tmpBuffer_AUTH']);
         //ログインのオーダがある----
     }

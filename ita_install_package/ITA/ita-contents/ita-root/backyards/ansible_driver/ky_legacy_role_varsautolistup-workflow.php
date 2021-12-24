@@ -2899,7 +2899,7 @@ if ( $log_level === 'DEBUG' ){
                                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
 }
 
-                                    continue 2;
+                                    break;
                                 }
                                 $col_seq_combination_id = $lva_MemberColComb_list[$vars_name_id][$member_vars_name][$col_seq_str];
                                 // 変数の具体値を登録
@@ -3823,7 +3823,7 @@ if ( $log_level === 'DEBUG' ){
                     case 'Vars_list':
                         if((isset($def_vars_list[$rolename][$var_name])       === true) ||
                            (isset($def_array_vars_list[$rolename][$var_name]) === true)) {
-                            continue;
+                            break;
                         } else {
                             $def_vars_list[$rolename][$var_name] = $vars_struct;
                         }
@@ -3831,7 +3831,7 @@ if ( $log_level === 'DEBUG' ){
                     case 'Array_vars_list':
                         if((isset($def_vars_list[$rolename][$var_name])       === true) ||
                            (isset($def_array_vars_list[$rolename][$var_name]) === true)) {
-                            continue;
+                            break;
                         } else {
                             $def_array_vars_list[$rolename][$var_name] = $vars_struct;
                         }
