@@ -3181,7 +3181,7 @@ class SingleRowTableFormatter extends TableFormatter {
                     if($this->strFormatterId == "register_table") {
                         $RoleList = array();
                         $obj = new RoleBasedAccessControl($g['objDBCA']);
-                        if($outputRowData[$AccessAuthColumnName] == ""){
+                        if(!is_array($outputRowData) || !array_key_exists($AccessAuthColumnName, $outputRowData) || $outputRowData[$AccessAuthColumnName] == ""){
                             $RoleList = array();
                             // 廃止以外のロールリスト
                             $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'NAME',true); // 廃止を含む

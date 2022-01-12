@@ -2542,7 +2542,7 @@ class LinkButtonTabBFmt extends TabBFmt {
 			}
 		}
 
-		if($rowData["DISUSE_FLAG"] == "1" ){
+		if(is_array($rowData) && array_key_exists("DISUSE_FLAG",  $rowData) && $rowData["DISUSE_FLAG"] == "1" ){
 			$linkable = "disabled";
 		}
 
