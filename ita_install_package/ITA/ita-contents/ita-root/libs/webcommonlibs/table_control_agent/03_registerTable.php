@@ -350,7 +350,7 @@
                     //----登録前の処理
                     foreach($arrayObjColumn as $objColumn){
                         $arrayTmp = $objColumn->beforeTableIUDAction($exeRegisterData, $reqRegisterData, $aryVariant);
-                        if($arrayTmp[0]===false){
+                        if(is_array($arrayTmp) && array_key_exists(0, $arrayTmp) && $arrayTmp[0]===false){
                             $intErrorType = $arrayTmp[1];
                             $error_str = $arrayTmp[3];
                             $strErrorBuf = $arrayTmp[4];
