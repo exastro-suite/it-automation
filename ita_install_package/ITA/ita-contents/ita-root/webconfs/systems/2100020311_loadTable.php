@@ -293,7 +293,10 @@ Ansible（Legacy Role）代入値管理
 
         $strFxName = "";
 
-        $strOperationNumeric = $rowData['OPERATION_NO_UAPK'];
+        $strOperationNumeric = null;
+        if(is_array($rowData) && array_key_exists('OPERATION_NO_UAPK', $rowData)){
+            $strOperationNumeric = $rowData['OPERATION_NO_UAPK'];
+        }
 
         $strQuery = "SELECT "
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
@@ -510,8 +513,14 @@ Ansible（Legacy Role）代入値管理
 
         $strFxName = "";
 
-        $strOperationNumeric = $rowData['OPERATION_NO_UAPK'];
-        $strPatternIdNumeric = $rowData['PATTERN_ID'];
+        $strOperationNumeric = null;
+        if(is_array($rowData) && array_key_exists('OPERATION_NO_UAPK', $rowData)){
+            $strOperationNumeric = $rowData['OPERATION_NO_UAPK'];
+        }
+        $strPatternIdNumeric = null;
+        if(is_array($rowData) && array_key_exists('PATTERN_ID', $rowData)){
+            $strPatternIdNumeric = $rowData['PATTERN_ID'];
+        }
 
         $strQuery = "SELECT "
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
@@ -719,7 +728,10 @@ Ansible（Legacy Role）代入値管理
 
         $strFxName = "";
 
-        $strPatternIdNumeric = $rowData['PATTERN_ID'];
+        $strPatternIdNumeric = null;
+        if(is_array($rowData) && array_key_exists('PATTERN_ID', $rowData)){
+            $strPatternIdNumeric = $rowData['PATTERN_ID'];
+        }
 
         $strQuery = "SELECT "
                    ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
@@ -1015,7 +1027,11 @@ Ansible（Legacy Role）代入値管理
 
         $strFxName = "";
 
-        $strVarsLinkIdNumeric = $rowData['VARS_LINK_ID'];
+        $strVarsLinkIdNumeric = null;
+        if(is_array($rowData) && array_key_exists('VARS_LINK_ID', $rowData)){
+            $strVarsLinkIdNumeric = $rowData['VARS_LINK_ID'];
+        }
+
         $strQuery = "SELECT "
                    ." TAB_1.COL_SEQ_COMBINATION_ID KEY_COLUMN "
                    .",TAB_1.COMBINATION_MEMBER     DISP_COLUMN "

@@ -242,7 +242,10 @@ Ansible（Legacy）代入値管理
 
         $strFxName = "";
 
-        $strOperationNumeric = $rowData['OPERATION_NO_UAPK'];
+        $strOperationNumeric = null;
+        if(is_array($rowData) && array_key_exists('OPERATION_NO_UAPK', $rowData)){
+            $strOperationNumeric = $rowData['OPERATION_NO_UAPK'];
+        }
 
         $strQuery = "SELECT "
                    ." TAB_1.PATTERN_ID KEY_COLUMN "
@@ -577,7 +580,10 @@ Ansible（Legacy）代入値管理
 
         $strFxName = "";
 
-        $strOperationNumeric = $rowData['OPERATION_NO_UAPK'];
+        $strOperationNumeric = null;
+        if(is_array($rowData) && array_key_exists('OPERATION_NO_UAPK', $rowData)){
+            $strOperationNumeric = $rowData['OPERATION_NO_UAPK'];
+        }
 
         $strQuery = "SELECT "
                    ." TAB_1.SYSTEM_ID     KEY_COLUMN "
@@ -843,7 +849,10 @@ Ansible（Legacy）代入値管理
 
         $strFxName = "";
 
-        $strPatternIdNumeric = $rowData['PATTERN_ID'];
+        $strPatternIdNumeric = null;
+        if(is_array($rowData) && array_key_exists('PATTERN_ID', $rowData)){
+            $strPatternIdNumeric = $rowData['PATTERN_ID'];
+        }
 
         $strQuery = "SELECT "
                    ." TAB_1.VARS_LINK_ID       KEY_COLUMN "

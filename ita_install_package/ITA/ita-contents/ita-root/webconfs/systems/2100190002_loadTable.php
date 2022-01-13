@@ -201,9 +201,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         $strFxName = "";
 
-        $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
-
-        $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
+        $strMenuIDNumeric = null;
+        if(is_array($rowData) && array_key_exists('CONTRAST_LIST_ID', $rowData)){
+            $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
+        }
 
         $strQuery = "SELECT *"
                    ."FROM "
@@ -480,7 +481,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         $strFxName = "";
 
-        $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
+        $strMenuIDNumeric = null;
+        if(is_array($rowData) && array_key_exists('CONTRAST_LIST_ID', $rowData)){
+            $strMenuIDNumeric = $rowData['CONTRAST_LIST_ID'];
+        }
 
         $strQuery = "SELECT *"
                    ."FROM "
