@@ -5024,6 +5024,7 @@ const conductorStatusUpdate = function( exeNumber ) {
   const panelConducotrInfo = [
     ['#conductor-instance-id', conductorInfo.CONDUCTOR_INSTANCE_ID ],
     ['#conductor-instance-status', conductorStatus[ conductorInfo.STATUS_ID ][1] ],
+    ['#conductor-instance-pause', conductorInfo.PAUSE_STATUS ],
     ['#conductor-instance-start', conductorInfo.TIME_START ],
     ['#conductor-instance-end', conductorInfo.TIME_END ],
     ['#conductor-instance-user', conductorInfo.EXECUTION_USER ],

@@ -1249,6 +1249,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "TIME_BOOK"=>"DATETIME",
@@ -1272,6 +1273,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "TIME_BOOK"=>"",
@@ -1649,6 +1651,7 @@ class OrchestratorLinkAgent {
             $register_tgt_row['ABORT_EXECUTE_FLAG']   = 1; //緊急停止発令フラグ(未発令)=[1]
             $register_tgt_row['DISUSE_FLAG']          = '0';
             $register_tgt_row['LAST_UPDATE_USER']     = $userId;
+            $register_tgt_row['PAUSE_STATUS_ID']       = 2;
 
             $register_tgt_row['ACCESS_AUTH']     = $aryRowOfSymClassTable['ACCESS_AUTH'];
 
@@ -2012,7 +2015,21 @@ class OrchestratorLinkAgent {
                 unset($retArray01);
                 unset($retArray02);
                 // ムーブメントインスタンス登録の実行----
-
+                
+                //保留ステータス更新
+                if($aryDataForMovement['NEXT_PENDING_FLAG'] == '1' && $register_tgt_row['RELEASED_FLAG'] == '1'){
+                  $sql = "UPDATE C_SYMPHONY_INSTANCE_MNG SET PAUSE_STATUS_ID = '1' WHERE SYMPHONY_INSTANCE_NO = {$varSymphonyInstanceNo}";
+                  
+                  $tmpRetArray01 = singleSQLCoreExecute($objDBCA, $sql, array(), $strFxName);
+                  if( $tmpRetArray01[0] !== true ){
+                      // エラーフラグをON
+                      // 例外処理へ
+                      $strErrStepIdInFx="00001100";
+                      //
+                      throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
+                  }
+                  unset($tmpRetArray01);
+                }
 
                 $intFocusIndex += 1;
             }
@@ -2515,6 +2532,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "CONDUCTOR_CALL_FLAG"=>"",
@@ -2541,6 +2559,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "CONDUCTOR_CALL_FLAG"=>"",
@@ -2701,7 +2720,6 @@ class OrchestratorLinkAgent {
             /////////////////////////////////////////////////////
 
             $retArray = $this->registerInstanceConductorNode($objDBCA, $lc_db_model_ch, $objMTS, $intConductorClassId, $intOperationNoUAPK, $strPreserveDatetime, "", $aryOptionOrderOverride, $userId, $userName,$intCallNo);
-
 
             if($retArray[0] == false){
                 // エラーフラグをON
@@ -3038,6 +3056,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "CONDUCTOR_CALL_FLAG"=>"",
@@ -3064,6 +3083,7 @@ class OrchestratorLinkAgent {
             "OPERATION_NO_UAPK"=>"",
             "I_OPERATION_NAME"=>"",
             "STATUS_ID"=>"",
+            "PAUSE_STATUS_ID"=>"",
             "EXECUTION_USER"=>"",
             "ABORT_EXECUTE_FLAG"=>"",
             "CONDUCTOR_CALL_FLAG"=>"",
@@ -3222,6 +3242,7 @@ class OrchestratorLinkAgent {
             $register_tgt_row['I_CONDUCTOR_NAME']      = $aryRowOfSymClassTable['CONDUCTOR_NAME'];
             $register_tgt_row['I_DESCRIPTION']         = $aryRowOfSymClassTable['DESCRIPTION'];
             $register_tgt_row['ACCESS_AUTH']           = $aryRowOfSymClassTable['ACCESS_AUTH'];
+            $register_tgt_row['PAUSE_STATUS_ID']       = 2;
 
             #312
             $arrNoticeInfo = array();
@@ -3276,6 +3297,7 @@ class OrchestratorLinkAgent {
             //CONDUCTOR_CALLが設定されていた場合----
 
             $register_tgt_row['STATUS_ID']            = $varStatus; //未実行[1]または未実行(予約)[2]
+            $register_tgt_row['PAUSE_STATUS_ID']      = 2; //保留ステータスオフ
             $register_tgt_row['EXECUTION_USER']       = $userName;
             $register_tgt_row['OPERATION_NO_UAPK']    = $intOperationNoUAPK;
             $register_tgt_row['I_OPERATION_NAME']     = $aryRowOfOperationTable['OPERATION_NAME'];

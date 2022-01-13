@@ -257,7 +257,6 @@ function holdReleaseOneOfNodeInstances($intNodeInstanceId){
             }
             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
-
     }
     catch (Exception $e){
         // エラーフラグをON
@@ -458,7 +457,6 @@ function conductorInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSON
                         "","","",$strExpectedErrMsgBodyForUI
                     );
                 }
-
                 break;
             default:
                 $intErrorPlaceMark = 1000;

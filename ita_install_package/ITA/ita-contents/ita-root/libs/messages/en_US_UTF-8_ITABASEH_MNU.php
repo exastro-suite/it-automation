@@ -277,6 +277,7 @@ $ary["ITABASEH-MNU-202060"]         = "[Original data] Operation list";
 $ary["ITABASEH-MNU-202070"]         = "Operation Name";
 $ary["ITABASEH-MNU-202080"]         = "[Maximum length] 256 bytes";
 $ary["ITABASEH-MNU-202090"]         = "Status";
+$ary["ITABASEH-MNU-202100"]         = "Pause status";
 $ary["ITABASEH-MNU-203010"]         = "The following status states exist.\n
 ・Unexecuted
 ・Unexecuted(schedule)
@@ -297,6 +298,9 @@ $ary["ITABASEH-MNU-203080"]         = "End";
 $ary["ITABASEH-MNU-203090"]         = "[Format]YYYY/MM/DD HH:MM";
 $ary["ITABASEH-MNU-203091"]         = "Notification log";
 $ary["ITABASEH-MNU-203092"]         = "Output log file.";
+$ary["ITABASEH-MNU-203093"]         = "The following status states exist。\n
+・Pause\n
+・Not pause";
 $ary["ITABASEH-MNU-204010"]         = "Display order";
 $ary["ITABASEH-MNU-204020"]         = "To control display order";
 $ary["ITABASEH-MNU-204030"]         = "Select";

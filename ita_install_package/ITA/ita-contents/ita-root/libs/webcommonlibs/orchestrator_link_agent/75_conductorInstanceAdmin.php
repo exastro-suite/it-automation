@@ -520,6 +520,7 @@ function conductorInstanceScram($fxVarsIntConductorInstanceId){
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -644,6 +645,7 @@ function conductorInstanceScram($fxVarsIntConductorInstanceId){
         }
         
         if( $boolExecuteContinue === true ){
+            $update_tgt_row['PAUSE_STATUS_ID']      = 2; //保留ステータスオフ
             $update_tgt_row['ABORT_EXECUTE_FLAG']   = 2; //発令済
             $update_tgt_row['LAST_UPDATE_USER']     = $g['login_id'];
             
@@ -1265,6 +1267,7 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -1293,6 +1296,7 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -1928,6 +1932,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
         $arySymphonySource = array('CONDUCTOR_INSTANCE_ID'=>$intSymphonyInstanceId
                                   ,'CONDUCTOR_CLASS_NO'=>$aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO']
                                   ,'STATUS_ID'=>$aryRowOfSymInstanceTable['STATUS_ID']
+                                  ,'PAUSE_STATUS'=>''
                                   ,'EXECUTION_USER'=>$aryRowOfSymInstanceTable['EXECUTION_USER']
                                   ,'ABORT_EXECUTE_FLAG'=>$aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG']
                                   ,'OPERATION_NO_IDBH'=>$aryRowOfSymInstanceTable['OPERATION_NO_UAPK']
@@ -2099,7 +2104,13 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             $aryInstanceItems['TIME_END']               = $row['TIME_END'];
             
             $aryInstanceItems['OPERATION_ID']           = $row['OVRD_I_OPERATION_NO_IDBH']; 
-            $aryInstanceItems['OPERATION_NAME']         = $row['OVRD_I_OPERATION_NAME']; 
+            $aryInstanceItems['OPERATION_NAME']         = $row['OVRD_I_OPERATION_NAME'];
+
+            $update_tgt_row = $aryRowOfSymInstanceTable;
+            if($aryInstanceItems['NODE_TYPE_ID'] == '8' && $aryInstanceItems['STATUS'] == '8'){
+              $arySymphonySource['PAUSE_STATUS'] = '一時停止中';
+            }
+            
             $aryMovementInsData[$aryClassItems['NODE_NAME']] = $aryInstanceItems;
 
             unset($aryInstanceItems);
