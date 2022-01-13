@@ -469,10 +469,6 @@ function printSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
         strExeStatusLabelArea = 'instance_status_area';
         var objExeStatusLabelArea = document.getElementById(strExeStatusLabelArea);
         objExeStatusLabelArea.innerHTML = strExeStatusLabel;
-        
-        strExeStatusLabelArea = 'pause_status_area';
-        var objExeStatusLabelArea = document.getElementById(strExeStatusLabelArea);
-        objExeStatusLabelArea.innerHTML = arySymInfo[10];
 
         //実行ユーザ
         exeUserLabelArea = 'execution_status_area';

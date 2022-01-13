@@ -61,6 +61,7 @@
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -89,6 +90,7 @@
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -956,6 +958,45 @@
                     // BIND用のベースソース(Node)
                     $aryMovInsUpdateTgtSource = $arrTargetNodeInstance;
                     $aryMovInsUpdateTgtSource['LAST_UPDATE_USER'] = $db_access_user_id;
+                    
+                    //保留中のノードがあれば保留ステータスを更新する
+                    $currentPauseStatusId = "";
+                    $sql = "SELECT PAUSE_STATUS_ID
+                            FROM   C_CONDUCTOR_INSTANCE_MNG
+                            WHERE  CONDUCTOR_INSTANCE_NO = {$arySymInsUpdateTgtSource['CONDUCTOR_INSTANCE_NO']}";
+
+                    //SQL準備
+                    $objQuery = $objDBCA->sqlPrepare($sql);
+                    $r = $objQuery->sqlExecute();
+                    while ( $row = $objQuery->resultFetch() ){
+                        $currentPauseStatusId = $row['PAUSE_STATUS_ID'];
+                    }
+                    
+                    $pauseFlg = false;
+                    //保留中のノードがある場合
+                    if( $aryMovInsUpdateTgtSource["I_NODE_TYPE_ID"] == '8' && $aryMovInsUpdateTgtSource["RELEASED_FLAG"] == '1' && $currentPauseStatusId == '2'){
+                        $arySymInsUpdateTgtSource['PAUSE_STATUS_ID'] = 1;
+                        // 更新用のテーブル定義
+                        $aryConfigForIUD = $aryConfigForSymInsIUD;
+                        // BIND用のベースソース
+                        $aryBaseSourceForBind = $arySymInsUpdateTgtSource;
+                        $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                    //保留中のノードがない場合
+                    }else if( $aryMovInsUpdateTgtSource["I_NODE_TYPE_ID"] == '8' && $aryMovInsUpdateTgtSource["RELEASED_FLAG"] == '2' && $currentPauseStatusId == '1'){
+                        foreach ($aryMovement as $key => $value) {
+                          if($value["I_NODE_TYPE_ID"] == '8' && $value["RELEASED_FLAG"] == '1'){
+                            $pauseFlg = true;
+                          }
+                        }
+                        if($pauseFlg === false){
+                          $arySymInsUpdateTgtSource['PAUSE_STATUS_ID'] = 2;
+                          // 更新用のテーブル定義
+                          $aryConfigForIUD = $aryConfigForSymInsIUD;
+                          // BIND用のベースソース
+                          $aryBaseSourceForBind = $arySymInsUpdateTgtSource;
+                          $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                        }
+                    }
 
                     $boolNextNodeReadyflg = false;
                     $conditionalflg="";

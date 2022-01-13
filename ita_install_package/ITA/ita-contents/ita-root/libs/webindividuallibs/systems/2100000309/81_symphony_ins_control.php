@@ -126,8 +126,6 @@ function symphonyInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSONO
             case "RELEASE":
                 list($intSeqNo       , $boolKeyExists) = isSetInArrayNestThenAssign($tmpAryOrderData ,array('MOVEMENT_SEQ_NO') ,null);
                 $aryRetBody = movementInstanceHoldRelease($intSymphonyInstanceId, $intSeqNo);
-                //保留ステータス更新
-                updateSymphonyInstance($intSymphonyInstanceId);
                 $intUIErrorMsgSaveIndex = 4;
                 break;
             default:
@@ -215,7 +213,6 @@ function printOneOfSymphonyInstances($fxVarsIntSymphonyInstanceId){
         ,'OPERATION_NO_IDBH'=>"htmlspecialchars"
         ,'OPERATION_NAME'=>"htmlspecialchars"
         ,'TIME_BOOK'=>""
-        ,'PAUSE_STATUS'=>""
     );
     
     $strFxName = __FUNCTION__;
@@ -424,9 +421,6 @@ function holdReleaseOneOfMovementInstances($fxVarsIntSymphonyInstanceId,$fxVarsI
         }
         $intSymphonyInstanceId = $aryRetBody[0]['SYMPHONY_INSTANCE_ID'];
         $intSeqNo = $aryRetBody[0]['MOVEMENT_SEQ_NO'];
-
-        //保留ステータス更新
-        updateSymphonyInstance($intSymphonyInstanceId);
     }
     catch (Exception $e){
         // エラーフラグをON
@@ -445,157 +439,6 @@ function holdReleaseOneOfMovementInstances($fxVarsIntSymphonyInstanceId,$fxVarsI
                          );
     dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     return $arrayResult;
-}
-
-function updateSymphonyInstance($intSymphonyInstanceId){
-  global $g;
-  
-  $strFxName = __FUNCTION__;
-  
-  $arrayConfigForSymInsIUD = array(
-      "JOURNAL_SEQ_NO"=>"",
-      "JOURNAL_ACTION_CLASS"=>"",
-      "JOURNAL_REG_DATETIME"=>"",
-      "SYMPHONY_INSTANCE_NO"=>"",
-      "I_SYMPHONY_CLASS_NO"=>"",
-      "I_SYMPHONY_NAME"=>"",
-      "I_DESCRIPTION"=>"",
-      "OPERATION_NO_UAPK"=>"",
-      "I_OPERATION_NAME"=>"",
-      "STATUS_ID"=>"",
-      "PAUSE_STATUS_ID"=>"",
-      "EXECUTION_USER"=>"",
-      "ABORT_EXECUTE_FLAG"=>"",
-      "TIME_BOOK"=>"DATETIME",
-      "TIME_START"=>"DATETIME",
-      "TIME_END"=>"DATETIME",
-      "ACCESS_AUTH"=>"",
-      "NOTE"=>"",
-      "DISUSE_FLAG"=>"",
-      "LAST_UPDATE_TIMESTAMP"=>"",
-      "LAST_UPDATE_USER"=>""
-  );
-  
-  // 処理開始
-  try{
-      require_once($g['root_dir_path']."/libs/webcommonlibs/orchestrator_link_agent/73_symphonyInstanceAdmin.php");
-
-      $aryRetBody = symphonyInstancePrint($intSymphonyInstanceId);
-
-      $arySymphonySource = $aryRetBody[0]['SYMPHONY_INSTANCE_INFO'];
-      $update_tgt_row = $aryRetBody[5];
-      $aryRowOfMovInstanceTable = $aryRetBody[6];
-      
-      foreach( $aryRowOfMovInstanceTable as $row ){
-        if($row['I_NEXT_PENDING_FLAG'] == '1' && $row['RELEASED_FLAG'] == '1'){
-              $update_tgt_row['PAUSE_STATUS_ID']   = 1; //保留ステータスオン
-              $update_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
-              
-              $retArray = makeSQLForUtnTableUpdate($g['db_model_ch']
-                                                  ,"UPDATE"
-                                                  ,"SYMPHONY_INSTANCE_NO"
-                                                  ,"C_SYMPHONY_INSTANCE_MNG"
-                                                  ,"C_SYMPHONY_INSTANCE_MNG_JNL"
-                                                  ,$arrayConfigForSymInsIUD
-                                                  ,$update_tgt_row);
-              
-              if( $retArray[0] === false ){
-                  // エラーフラグをON
-                  // 例外処理へ
-                  $strErrStepIdInFx="00000900";
-                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-              }
-              
-              $sqlUtnBody = $retArray[1];
-              $arrayUtnBind = $retArray[2];
-              
-              $sqlJnlBody = $retArray[3];
-              $arrayJnlBind = $retArray[4];
-              
-              // ----履歴シーケンス払い出し
-              $retArray = getSequenceValueFromTable('C_SYMPHONY_INSTANCE_MNG_JSQ', 'A_SEQUENCE', FALSE );
-              if( $retArray[1] != 0 ){
-                  // エラーフラグをON
-                  // 例外処理へ
-                  $strErrStepIdInFx="00001000";
-                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-              }
-              else{
-                  $varJSeq = $retArray[0];
-                  $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
-              }
-              // 履歴シーケンス払い出し----
-              
-              $retArray01 = singleSQLCoreExecute($g['objDBCA'], $sqlUtnBody, $arrayUtnBind, $strFxName);
-              $retArray02 = singleSQLCoreExecute($g['objDBCA'], $sqlJnlBody, $arrayJnlBind, $strFxName);
-              if( $retArray01[0] !== true || $retArray02[0] !== true ){
-                  // エラーフラグをON
-                  // 例外処理へ
-                  $strErrStepIdInFx="00001100";
-                  //
-                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-              }
-              unset($retArray01);
-              unset($retArray02);
-          }else if($row['I_NEXT_PENDING_FLAG'] == '1' && $row['RELEASED_FLAG'] == '2'){
-              $update_tgt_row['PAUSE_STATUS_ID']   = 2; //保留ステータスオフ
-              $update_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
-              
-              $retArray = makeSQLForUtnTableUpdate($g['db_model_ch']
-                                                  ,"UPDATE"
-                                                  ,"SYMPHONY_INSTANCE_NO"
-                                                  ,"C_SYMPHONY_INSTANCE_MNG"
-                                                  ,"C_SYMPHONY_INSTANCE_MNG_JNL"
-                                                  ,$arrayConfigForSymInsIUD
-                                                  ,$update_tgt_row);
-              
-              if( $retArray[0] === false ){
-                  // エラーフラグをON
-                  // 例外処理へ
-                  $strErrStepIdInFx="00000900";
-                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-              }
-              
-              $sqlUtnBody = $retArray[1];
-              $arrayUtnBind = $retArray[2];
-              
-              $sqlJnlBody = $retArray[3];
-              $arrayJnlBind = $retArray[4];
-              
-              // ----履歴シーケンス払い出し
-              $retArray = getSequenceValueFromTable('C_SYMPHONY_INSTANCE_MNG_JSQ', 'A_SEQUENCE', FALSE );
-              if( $retArray[1] != 0 ){
-                  // エラーフラグをON
-                  // 例外処理へ
-                  $strErrStepIdInFx="00001000";
-                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-              }
-              else{
-                  $varJSeq = $retArray[0];
-                  $arrayJnlBind['JOURNAL_SEQ_NO'] = $varJSeq;
-              }
-              // 履歴シーケンス払い出し----
-              
-              $retArray01 = singleSQLCoreExecute($g['objDBCA'], $sqlUtnBody, $arrayUtnBind, $strFxName);
-              $retArray02 = singleSQLCoreExecute($g['objDBCA'], $sqlJnlBody, $arrayJnlBind, $strFxName);
-              if( $retArray01[0] !== true || $retArray02[0] !== true ){
-                  // エラーフラグをON
-                  // 例外処理へ
-                  $strErrStepIdInFx="00001100";
-                  //
-                  throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-              }
-              unset($retArray01);
-              unset($retArray02);
-          }
-      }
-    }catch (Exception $e){
-        // エラーフラグをON
-        if( $intErrorType === null ) $intErrorType = 500;
-        $tmpErrMsgBody = $e->getMessage();
-        if( 500 <= $intErrorType ) $strSysErrMsgBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4011",array($strFxName,$tmpErrMsgBody));
-        if( 0 < strlen($strSysErrMsgBody) ) web_log($strSysErrMsgBody);
-    }
 }
 
 ?>

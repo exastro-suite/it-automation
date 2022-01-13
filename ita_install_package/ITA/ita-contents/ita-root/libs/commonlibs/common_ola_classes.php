@@ -3297,6 +3297,7 @@ class OrchestratorLinkAgent {
             //CONDUCTOR_CALLが設定されていた場合----
 
             $register_tgt_row['STATUS_ID']            = $varStatus; //未実行[1]または未実行(予約)[2]
+            $register_tgt_row['PAUSE_STATUS_ID']      = 2; //保留ステータスオフ
             $register_tgt_row['EXECUTION_USER']       = $userName;
             $register_tgt_row['OPERATION_NO_UAPK']    = $intOperationNoUAPK;
             $register_tgt_row['I_OPERATION_NAME']     = $aryRowOfOperationTable['OPERATION_NAME'];
@@ -3399,22 +3400,6 @@ class OrchestratorLinkAgent {
                 }
             }
             unset($objQuery);
-            
-            foreach( $aryMovement as $row ){
-              if($row['NODE_TYPE_ID'] == '8'){
-                $sql = "UPDATE C_CONDUCTOR_INSTANCE_MNG SET PAUSE_STATUS_ID = '1' WHERE CONDUCTOR_INSTANCE_NO = {$varConductorInstanceNo}";
-                
-                $tmpRetArray01 = singleSQLCoreExecute($objDBCA, $sql, array(), $strFxName);
-                if( $tmpRetArray01[0] !== true ){
-                    // エラーフラグをON
-                    // 例外処理へ
-                    $strErrStepIdInFx="00001100";
-                    //
-                    throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
-                }
-                unset($tmpRetArray01);
-              }
-            }
 
             if($IF_Errormsg != "")
             {

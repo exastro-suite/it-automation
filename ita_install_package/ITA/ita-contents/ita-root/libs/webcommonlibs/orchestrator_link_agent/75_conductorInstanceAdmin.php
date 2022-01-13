@@ -1958,7 +1958,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
         $arySymphonySource = array('CONDUCTOR_INSTANCE_ID'=>$intSymphonyInstanceId
                                   ,'CONDUCTOR_CLASS_NO'=>$aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO']
                                   ,'STATUS_ID'=>$aryRowOfSymInstanceTable['STATUS_ID']
-                                  ,'PAUSE_STATUS'=>'一時停止無し'
+                                  ,'PAUSE_STATUS'=>''
                                   ,'EXECUTION_USER'=>$aryRowOfSymInstanceTable['EXECUTION_USER']
                                   ,'ABORT_EXECUTE_FLAG'=>$aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG']
                                   ,'OPERATION_NO_IDBH'=>$aryRowOfSymInstanceTable['OPERATION_NO_UAPK']
@@ -2134,7 +2134,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
 
             $update_tgt_row = $aryRowOfSymInstanceTable;
             if($aryInstanceItems['NODE_TYPE_ID'] == '8' && $aryInstanceItems['STATUS'] == '8'){
-              $arySymphonySource['PAUSE_STATUS'] = '一時停止有り';
+              $arySymphonySource['PAUSE_STATUS'] = '一時停止中';
             }
             
             $aryMovementInsData[$aryClassItems['NODE_NAME']] = $aryInstanceItems;
@@ -2165,9 +2165,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
                         ,$intErrorType
                         ,$aryErrMsgBody
                         ,$strErrMsg
-                        ,$strExpectedErrMsgBodyForUI
-                        ,$aryRowOfSymInstanceTable
-                        ,$aryRowOfMovInstanceTable);
+                        ,$strExpectedErrMsgBodyForUI);
     dev_log($objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     return $arrayResult;
 }
