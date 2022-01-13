@@ -5304,7 +5304,7 @@ const conductorStatusUpdate = function( exeNumber ) {
           if ( confirm( getSomeMessage("ITABASEC020006",{0:conductorInstanceID})) ) {
             $pauseButton.prop('disabled', true ).off();
             $node.find('.pause-status').attr('data-status', 'resume');
-            proxy.holdReleaseNodeInstance( nodeInfo.NODE_INSTANCE_NO,conductorInstanceID );
+            proxy.holdReleaseNodeInstance( nodeInfo.NODE_INSTANCE_NO );
           }
         });
         break;

@@ -1788,32 +1788,6 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
     $arySymphonySource = array();
     $aryMovementInsData = array();
     
-    $arrayConfigForSymInsIUD = array(
-        "JOURNAL_SEQ_NO"=>"",
-        "JOURNAL_ACTION_CLASS"=>"",
-        "JOURNAL_REG_DATETIME"=>"",
-        "CONDUCTOR_INSTANCE_NO"=>"",
-        "I_CONDUCTOR_CLASS_NO"=>"",
-        "I_CONDUCTOR_NAME"=>"",
-        "I_DESCRIPTION"=>"",
-        "OPERATION_NO_UAPK"=>"",
-        "I_OPERATION_NAME"=>"",
-        "STATUS_ID"=>"",
-        "PAUSE_STATUS_ID"=>"",
-        "EXECUTION_USER"=>"",
-        "ABORT_EXECUTE_FLAG"=>"",
-        "CONDUCTOR_CALL_FLAG"=>"",
-        "CONDUCTOR_CALLER_NO"=>"",
-        "TIME_BOOK"=>"DATETIME",
-        "TIME_START"=>"DATETIME",
-        "TIME_END"=>"DATETIME",
-        "ACCESS_AUTH"=>"",
-        "NOTE"=>"",
-        "DISUSE_FLAG"=>"",
-        "LAST_UPDATE_TIMESTAMP"=>"",
-        "LAST_UPDATE_USER"=>""
-    );
-    
     $strFxName = '([FUNCTION]'.__FUNCTION__.')';
     dev_log($objMTS->getSomeMessage("ITAWDCH-STD-3",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     
@@ -2165,7 +2139,8 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
                         ,$intErrorType
                         ,$aryErrMsgBody
                         ,$strErrMsg
-                        ,$strExpectedErrMsgBodyForUI);
+                        ,$strExpectedErrMsgBodyForUI
+                         );
     dev_log($objMTS->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
     return $arrayResult;
 }

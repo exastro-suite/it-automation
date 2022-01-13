@@ -220,7 +220,7 @@ function scramOneOfConductorInstances($fxVarsIntConductorInstanceId){
     return $arrayResult;
 }
 //保留解除[Conductor作業確認画面-操作]
-function holdReleaseOneOfNodeInstances($intNodeInstanceId,$intConductorInstanceId){
+function holdReleaseOneOfNodeInstances($intNodeInstanceId){
     global $g;
     
     // 各種ローカル定数を定義
