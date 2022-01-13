@@ -30,8 +30,10 @@
         $strLoginFormTailBody = "";
 
         // ルートディレクトリを取得
-        $root_dir_path = $g['root_dir_path'];
-        if (empty($root_dir_path)) {
+        if($g != null && array_key_exists('root_dir_path', $g)){
+            $root_dir_path = $g['root_dir_path'];
+        }
+        else{
             $root_dir_path = getApplicationRootDirPath();
         }
         $scheme_n_authority = getSchemeNAuthority();

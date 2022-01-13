@@ -1763,7 +1763,10 @@
                 ローカル（内部）認証ユーザーとは、外部認証設定ファイル内に記述したUSER_IDに紐づく、AD連携等の外部認証を実施しないユーザーを指す(ITA_DBのA_ACCOUNT_LISTテーブルに固定登録された”-”マイナス数や特定の正数ナンバーを持つユーザー)それ以外は外部認証ユーザーとなる。
             */
             // 入力されたユーザー名がローカル認証ユーザーリスト内に存在するかチェックする
-            $strLocalAuthUserIdList = $aryExternalAuthSettings['LocalAuthUserId']['IdList'];
+            $strLocalAuthUserIdList = "";
+            if(is_array($aryExternalAuthSettings) && array_key_exists('LocalAuthUserId', $aryExternalAuthSettings) && array_key_exists('IdList', $aryExternalAuthSettings['LocalAuthUserId'])){
+                $strLocalAuthUserIdList = $aryExternalAuthSettings['LocalAuthUserId']['IdList'];
+            }
             // アカウントリスト（ローカルDB）に認証対象のユーザーが登録されているかチェック
             if ( array_key_exists( $strUsername, $PasswordPerUsername_list ) === true ){
                 // アカウントリストに登録されていた認証対象ユーザーのID値をユーザーIDリストから取得

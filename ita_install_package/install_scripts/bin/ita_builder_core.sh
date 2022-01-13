@@ -209,16 +209,16 @@ yum_repository() {
             # Check Creating repository
             if [ "${REPOSITORY}" != "yum_all" ]; then
                case "${LINUX_OS}" in
-                    "CentOS7") create_repo_check remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "CentOS7") create_repo_check remi-php74 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "RHEL7") 
                         if [ "${CLOUD_REPO}" == "RHEL7_RHUI2" ]; then
-                            create_repo_check remi-php72 rhui-rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                            create_repo_check remi-php74 rhui-rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         elif [ "${CLOUD_REPO}" == "RHEL7_RHUI2_AWS" ]; then
-                            create_repo_check remi-php72 rhui-REGION-rhel-server-optional >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                            create_repo_check remi-php74 rhui-REGION-rhel-server-optional >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         elif [ "${CLOUD_REPO}" == "RHEL7_RHUI3" ]; then
-                            create_repo_check remi-php72 rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                            create_repo_check remi-php74 rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         else
-                            create_repo_check remi-php72 rhel-7-server-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                            create_repo_check remi-php74 rhel-7-server-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         fi
                     ;;
                     "CentOS8") create_repo_check powertools >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
@@ -618,12 +618,25 @@ configure_php() {
     echo "${CLOUD_REPO}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     # enable yum repository
     if [ "${REPOSITORY}" != "yum_all" ]; then
+        if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+            yum-config-manager --disable remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        fi
+
         if [ "${CLOUD_REPO}" != "physical" ]; then
             yum_repository ${YUM_REPO_PACKAGE["php_cloud"]}
         else
             yum_repository ${YUM_REPO_PACKAGE["php"]}
         fi
     fi
+
+    # Install php package.
+    if [ "$exec_mode" == 3 ]; then
+        if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+            dnf module -y reset php >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            dnf module -y install php:7.4 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        fi
+    fi
+
     # Install some packages.
     yum_install ${YUM_PACKAGE["php"]}
     # Check installation php packages
@@ -655,6 +668,7 @@ configure_php() {
     echo "----------Installation[php-yaml]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ "${exec_mode}" == "3" ]; then
         pecl channel-update pecl.php.net >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pecl uninstall  ${PHP_TAR_GZ_PACKAGE["yaml"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
         echo "" | pecl install ${PHP_TAR_GZ_PACKAGE["yaml"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
     else
         echo "" | pecl install ${PHP_TAR_GZ_PACKAGE["yaml"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -919,6 +933,12 @@ download() {
     fi
     download_check
 
+    # Download php.
+    if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+        dnf module -y reset php >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        dnf module install --downloadonly --resolve --downloaddir=${YUM_ALL_PACKAGE_DOWNLOAD_DIR} php:7.4 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
+
     # Download packages.
     for key in ${!YUM_PACKAGE[@]}; do
         log "Download packages[${YUM_PACKAGE[${key}]}]"
@@ -1169,18 +1189,18 @@ YUM_REPO_PACKAGE_MARIADB=(
 declare -A YUM_REPO_PACKAGE_PHP;
 YUM_REPO_PACKAGE_PHP=(
     ["RHEL8"]="--set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms"
-    ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-optional-rpms"
+    ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74 --enable rhel-7-server-optional-rpms"
     ["CentOS8"]="--set-enabled dummy"
-    ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
+    ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74"
     ["yum_all"]=""
 )
 
 declare -A YUM_REPO_PACKAGE_PHP_CLOUD;
 YUM_REPO_PACKAGE_PHP_CLOUD=(
     ["RHEL8_RHUI"]="--set-enabled codeready-builder-for-rhel-8-rhui-rpms"
-    ["RHEL7_RHUI2"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-rhel-7-server-rhui-optional-rpms"
-    ["RHEL7_RHUI2_AWS"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-REGION-rhel-server-optional"
-    ["RHEL7_RHUI3"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-rhui-optional-rpms"
+    ["RHEL7_RHUI2"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74 --enable rhui-rhel-7-server-rhui-optional-rpms"
+    ["RHEL7_RHUI2_AWS"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74 --enable rhui-REGION-rhel-server-optional"
+    ["RHEL7_RHUI3"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74 --enable rhel-7-server-rhui-optional-rpms"
     ["physical"]=""
 )
 
