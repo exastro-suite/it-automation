@@ -36,7 +36,7 @@
       }
       
       //バージョン取得
-      $strVersion = substr($releaseBase, -6);
+      $strVersion = str_replace('Exastro IT Automation Base functions version ', '',$releaseBase);
       $strVersion = str_replace(PHP_EOL, '', $strVersion);
       
       //インストール済ドライバ取得
