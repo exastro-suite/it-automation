@@ -80,7 +80,7 @@ function uploadZipFile(){
     // zipファイルであることを確認
     $objFinfo = new finfo(FILEINFO_MIME_TYPE);
     $ext = array_search($objFinfo->file($_FILES['zipfile']['tmp_name']),
-                                        array('zip' => 'application/x-gzip'));
+                                        array('zip' => 'application/x-gzip', 'zip2' => 'application/gzip'));
     if ($ext === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900005'));
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));

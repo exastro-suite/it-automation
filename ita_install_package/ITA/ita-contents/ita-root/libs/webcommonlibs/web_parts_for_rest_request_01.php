@@ -260,6 +260,7 @@
             }
             // ■システム設定情報を用いてパスワードの有効期限の設定がされているかを、チェックする。----    
 
+            $tempBoolPassWordChange = false;
             if(0 < $tempIntLength){
 
                 $tmpIntPWLDUnixTime = strtotime($pwLastUpdTime);

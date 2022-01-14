@@ -3247,7 +3247,13 @@ class SingleRowTableFormatter extends TableFormatter {
                 
             } elseif( get_class($this) == "RegisterTableFormatter" && 
                 ( get_class($objColumn) == "SensitiveMultiTextColumn" || get_class($objColumn) == "SensitiveSingleTextColumn" )) {
-                $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, $outputRowData['SENSITIVE_FLAG']);
+                if(is_array($outputRowData) && array_key_exists('SENSITIVE_FLAG', $outputRowData)){
+                    $sensitiveFlg = $outputRowData['SENSITIVE_FLAG'];
+                }
+                else{
+                    $sensitiveFlg = null;
+                }
+                $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, $sensitiveFlg);
             } elseif( get_class($this) == "RegisterTableFormatter" && get_class($objColumn) == "PasswordColumn") {
                 $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, 1);
             } else {

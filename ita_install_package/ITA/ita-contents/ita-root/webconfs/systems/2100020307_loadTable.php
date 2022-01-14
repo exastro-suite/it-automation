@@ -289,7 +289,10 @@ Ansible（Legacy Role）作業パターン詳細
 
         $strFxName = "";
 
-        $strPackageIdNumeric = $rowData['ROLE_PACKAGE_ID'];
+        $strPackageIdNumeric = null;
+        if(is_array($rowData) && array_key_exists('ROLE_PACKAGE_ID', $rowData)){
+            $strPackageIdNumeric = $rowData['ROLE_PACKAGE_ID'];
+        }
 
         $strQuery = "SELECT "
                    ." TAB_1.ROLE_ID            KEY_COLUMN "
