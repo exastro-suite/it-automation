@@ -2108,7 +2108,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
 
             $update_tgt_row = $aryRowOfSymInstanceTable;
             if($aryInstanceItems['NODE_TYPE_ID'] == '8' && $aryInstanceItems['STATUS'] == '8'){
-              $arySymphonySource['PAUSE_STATUS'] = '一時停止中';
+              $arySymphonySource['PAUSE_STATUS'] = $objMTS->getSomeMessage("ITABASEH-MNU-203094");
             }
             
             $aryMovementInsData[$aryClassItems['NODE_NAME']] = $aryInstanceItems;
