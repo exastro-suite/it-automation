@@ -1397,6 +1397,11 @@
                                                                                                 if( isset($UpdateFileData[$tmpinsertDatakey]) ){
                                                                                                     $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
                                                                                                 }
+                                                                                            }elseif( $insertData[10] != 1 ){
+                                                                                                $tmpFilter[$insertDataNO][$tmpinsertDatakey] = $insertData[$tmpinsertDatakey];
+                                                                                                if( isset($UpdateFileData[$tmpinsertDatakey]) ){
+                                                                                                    $tmpFilter['UPLOAD_FILE'][$insertDataNO][$tmpinsertDatakey] = $UpdateFileData[$tmpinsertDatakey];
+                                                                                                }  
                                                                                             }
                                                                                         }
                                                                                     }
