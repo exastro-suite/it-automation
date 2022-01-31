@@ -365,6 +365,12 @@
                         $r = $objQuery->sqlExecute();
                 }
                 
+                //csrf対策
+                if( $_POST["csrf_token"] != $_SESSION["csrf_token"] ){
+                  webRequestForceQuitFromEveryWhere(403);
+                  exit();
+                }
+                
                 break;
             case "id_error":
             case "id_error_on_syntax":
@@ -391,6 +397,7 @@
                 exit();
                 break;
         }
+        
         // ----POSTされたusername,passwordとDB or ADからの配列のusername,passwordの比較をする
         // $account_listの配列構造 $account_list = [ 'username' => md5(password) ];
         if (!empty($account_list) && $account_list[$strUsername] === (string)md5($strUserPass)) {
