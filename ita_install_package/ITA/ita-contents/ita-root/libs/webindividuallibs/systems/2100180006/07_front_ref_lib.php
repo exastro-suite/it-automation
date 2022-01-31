@@ -24,6 +24,8 @@
 
     if($strCommand == "INFO" || $strCommand == "FILTER" || $strCommand == "FILTER_DATAONLY"){
       $aryForResultData = ReSTCommandFilterExecute($strCommand,$objJSONOfReceptedData,$objTable,true);
+    }else if($strCommand == "EDIT"){
+      $aryForResultData = ReSTCommandEditExecute($strCommand,$objJSONOfReceptedData,$objTable,true);
     }else{
       if( is_array($objJSONOfReceptedData) !== true ){
         $intResultStatusCode = 400;
