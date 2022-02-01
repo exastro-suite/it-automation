@@ -465,8 +465,10 @@ window.onload = function(){
 
     if(privilege != 2){
         // 登録の初期HTMLを表示する
-        show('Mix2_Midashi' ,'Mix2_Nakami'  );
-        Mix2_1_register_async(0);
+        if ( $('#Mix2_Nakami').length ) {
+          show('Mix2_Midashi' ,'Mix2_Nakami'  );
+          Mix2_1_register_async(0);
+        }
     }
 
 // ----サイト個別、事前処理
