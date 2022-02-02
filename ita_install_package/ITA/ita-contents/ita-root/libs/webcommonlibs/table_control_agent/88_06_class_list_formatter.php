@@ -3440,8 +3440,6 @@ EOD;
 
             $strOutputStr .= "<div class=\"editing_flag\" style=\"display:none;\"></div>";
         }
-        
-        $strOutputStr .= "<input type=\"hidden\" name=\"csrf_token\" value=\"" .$_SESSION["csrf_token"]. "\">";
         return $strOutputStr;
     }
 
@@ -3837,7 +3835,6 @@ EOD;
             $strOutputStr .= "<div class=\"editing_flag\" style=\"display:none;\"></div>";
         }
 
-        $strOutputStr .= "<input type=\"hidden\" name=\"csrf_token\" value=\"" .$_SESSION["csrf_token"]. "\">";
         return $strOutputStr;
     }
 
