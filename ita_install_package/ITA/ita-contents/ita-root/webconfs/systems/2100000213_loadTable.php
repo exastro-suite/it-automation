@@ -91,18 +91,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // 廃止情報
     $c = new IDColumn('ABOLISHED_TYPE',$g['objMTS']->getSomeMessage('ITABASEH-MNU-900028'),'B_DP_ABOLISHED_TYPE','ROW_ID','ABOLISHED_TYPE','');
     $c->setDescription($g['objMTS']->getSomeMessage('ITABASEH-MNU-900032'));//エクセル・ヘッダでの説明
-    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
-    $objOT->setFirstSearchValueOwnerColumnID('ABOLISHED_TYPE');
-    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_DP_ABOLISHED_TYPE_JNL',
-	        'TTT_SEARCH_KEY_COLUMN_ID'=>'ROW_ID',
-    	    'TTT_GET_TARGET_COLUMN_ID'=>'ABOLISHED_TYPE',
-    	    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
-    	    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
-    	    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
-    	)
-    );
-    $objOT->setTraceQuery($aryTraceQuery);
-    $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
     // 指定時刻
