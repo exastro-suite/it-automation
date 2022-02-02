@@ -938,6 +938,7 @@
                                     $hostid = $aryhostInfo['SYSTEM_ID'];
                                     
                                     $arrSqlinsertParm = array();
+                                    $arrSqlinsertParmDn = array();
                                     $arrFileUploadList = array();
                                     //ソースファイルからパラメータ整形　（ファイル名、メニューID、項目名、値）
                                     foreach ( $parmdata as $filename => $vardata) {
@@ -1013,12 +1014,21 @@
                                                             //縦メニューは登録前に、メンテナンス可能な入力用メニュー、ID、テーブルを別途検索
                                                             $writemenuid = $retResult[$tmpkey]['MENU_ID'];
                                                         }
-
-                                                        $arrSqlinsertParm[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $varvalue;
-                                                        $arrTableForMenuLists[$writemenuid]=$retResult[$tmpkey]['TABLE_NAME'];
-                                                        if( $retResult[$tmpkey]['COL_CLASS'] == "FileUploadColumn" ){
-                                                            $arrFileUploadList[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $retResult[$tmpkey]['COL_CLASS'];
-                                                        } 
+                                                        
+                                                        //項目 [X]有無 （項目,,,→項目[X],,,)
+                                                        if(  !preg_match('/[\[][0-9]*[\]]$/', $retResult[$tmpkey]['COL_TITLE']) ){
+                                                            $arrSqlinsertParm[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $varvalue;
+                                                            $arrTableForMenuLists[$writemenuid]=$retResult[$tmpkey]['TABLE_NAME'];
+                                                            if( $retResult[$tmpkey]['COL_CLASS'] == "FileUploadColumn" ){
+                                                                $arrFileUploadList[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $retResult[$tmpkey]['COL_CLASS'];
+                                                            } 
+                                                        }else{
+                                                            $arrSqlinsertParmDn[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $varvalue;
+                                                            $arrTableForMenuLists[$writemenuid]=$retResult[$tmpkey]['TABLE_NAME'];
+                                                            if( $retResult[$tmpkey]['COL_CLASS'] == "FileUploadColumn" ){
+                                                                $arrFileUploadList[$filename][$writemenuid][$retResult[$tmpkey]['COL_TITLE']] = $retResult[$tmpkey]['COL_CLASS'];
+                                                            }  
+                                                        }
 
                                                     }
                                                 }
@@ -1026,6 +1036,18 @@
                                         }
                                     }
 
+                                    //代入順序1->X （項目,,,→項目[X],,,)
+                                    if( $arrSqlinsertParmDn != array() ){
+                                        foreach ($arrSqlinsertParmDn as $tmpfn => $arrrmenu) {
+                                            foreach ($arrrmenu as $tmpmid => $tmparrprm) {
+                                                if( isset($arrSqlinsertParm[$tmpfn][$tmpmid]) ){
+                                                    $arrSqlinsertParm[$tmpfn][$tmpmid] = $arrSqlinsertParm[$tmpfn][$tmpmid] + $arrSqlinsertParmDn[$tmpfn][$tmpmid] ;
+                                                }else{                                                   
+                                                    $arrSqlinsertParm[$tmpfn][$tmpmid] = $arrSqlinsertParmDn[$tmpfn][$tmpmid] ; 
+                                                }   
+                                            }
+                                        }
+                                    }
                                     $tmpFilter = array();
 
                                     if( $arrSqlinsertParm != array() ){
@@ -1211,6 +1233,10 @@
 
                                                         foreach ($tgtSource_row as $tgtSource_key => $value) {
                                                             foreach ( $arrRestInfo as $parmNO => $pramName ) {
+                                                                
+                                                                //リピート部分比較用 [項目名[X]除外]
+                                                                $tmpColname =preg_replace('/[\[][0-9]*[\]]$/',"",$tgtSource_key);
+                                                                
                                                                 //項目名：完全一致
                                                                 if( $pramName == $tgtSource_key ){
                                                                     if( isset($insertData[10]) !== true ){
@@ -1225,23 +1251,11 @@
                                                                     $insertData[$parmNO]=$value;
                                                                     if( gettype( $value ) == "NULL" || $value == "" ) $insertNullflg[$parmNO] = 1;
                                                                 //項目名：リピート部分[X]
-                                                                }elseif(mb_strpos($tgtSource_key,$pramName) !== false){
+                                                                }elseif( $tmpColname == $pramName ){
+                                                                    $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
 
-                                                                    $tmpColname =preg_replace('/\[[0-9]+?\]/u',"",$tgtSource_key);
-                                                                    if( $tmpColname == $pramName ){
-                                                                        $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
-                                                                        $insertData[$parmNO]=$value;
-                                                                        if(gettype( $value ) == "NULL" || $value == ""  ) $insertNullflg[$parmNO] = 1;
-                                                                    }
-                                                                //項目名：リピート部分[X]
-                                                                }elseif(mb_strpos($pramName,$tgtSource_key) !== false){
-
-                                                                    $tmpColname =preg_replace('/\[[0-9]+?\]/u',"",$tgtSource_key);
-                                                                    if( $tmpColname == $pramName ){
-                                                                        $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
-                                                                        $insertData[$parmNO]=$value;
-                                                                        if(gettype( $value ) == "NULL" || $value == ""  ) $insertNullflg[$parmNO] = 1;
-                                                                    }
+                                                                    $insertData[$parmNO]=$value;
+                                                                    if(gettype( $value ) == "NULL" || $value == ""  ) $insertNullflg[$parmNO] = 1;
                                                                 //その他
                                                                 }else{
                                                                     if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]=null;
