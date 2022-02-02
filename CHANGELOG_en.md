@@ -1,3 +1,26 @@
+Exastro IT Automation 1.9.1 (2022-2-2)
+==================================================
+
+ÉCÉìÉXÉgÅ[Éâ
+---------------
+ * Updated to Version 1.9.0.1 #1782
+
+ÉGÉNÉXÉ|Å[Ég/ÉCÉìÉ|Å[Ég
+---------------
+* Fixed an issue where a system error would occur when the "history" button in the Export/Import list" menu was pressed. #1768
+
+Symphony
+---------------
+* Made it possible to use EDIT (RESTAPI) in the Symphony and Conductor list menus. #1781
+
+Conductor
+---------------
+* Made it possible to use EDIT (RESTAPI) in the Symphony and Conductor list menus. #1781
+
+
+*******************************************************************************************************
+
+
 Exastro IT Automation 1.9.0 (2021-12-20)
 ==================================================
 
@@ -57,8 +80,8 @@ Management console
 Basic console
 ---------------
  * Made it possible to encrypt the password for the CiscoIOS special mode in the Device list's Ansible user information field. #227
- * „ÄêDevice list„ÄëFixed an issue where users could register files even when no files had been uploaded. #1264
- * „ÄêDevice list„ÄëFixed a bug with the download function for encrypted SSH secret key files. #1315
+ * [Device list]Fixed an issue where users could register files even when no files had been uploaded. #1264
+ * [Device list]Fixed a bug with the download function for encrypted SSH secret key files. #1315
 
 Export/Import
 ---------------
@@ -108,13 +131,13 @@ Ansible-Driver
 ---------------
  * Linked file upload items and automatic registration settings. #427
  * Made it possible to specify Env when running AnsibleEngine. #1063
- * „ÄêCollect function„ÄëFixed an issue where it would seem that the array elements' collection data was not acquireable.  #1160
+ * [Collect function]Fixed an issue where it would seem that the array elements' collection data was not acquireable.  #1160
  * Made it possible to have no values for global variables. #1300
  * Made it possible to load used variables from Playbooks when using the filter function. #1301
- * „ÄêCollect function„ÄëFixed an issue where configuring collected interface information would output a log. #1386
+ * [Collect function]Fixed an issue where configuring collected interface information would output a log. #1386
  * Shortened the start cycle for automatic substitute value registration. #1444
- * „ÄêCollect function„ÄëMade it so only file upload collumns that has collected item values will be displayed in the list. #1506
- * „ÄêCollect function„ÄëMade it possible to specify files in addition to paths when using file upload items. #1532
+ * [Collect function]Made it so only file upload collumns that has collected item values will be displayed in the list. #1506
+ * [Collect function]Made it possible to specify files in addition to paths when using file upload items. #1532
  * Fixed a bug with the manual check for restoring records in Legacy-Role. #1537
  * Changed the process confirm cycle used when running Movements. #1541
  * Fixed a bug that would occur when using variables in the Pioneer mode Template list. #1593
@@ -141,22 +164,28 @@ CI/CD for IaC
 * Fixed an issue where the name of excel output remote repository files would have a different file name (Only in the English version) #1733
 
 
+*******************************************************************************************************
+
+
 Exastro IT Automation 1.8.2 (2021-11-12)
 ==================================================
 
 
-„Ç§„É≥„Çπ„Éà„Éº„É©
+Installer
 ---------------
  * Updated to Version v1.8.2 #1617
  * Fixed an issue with the Excel output by phpspreadhseet v1.19.0 #1687
 
-„Ç®„ÇØ„Çπ„Éù„Éº„Éà/„Ç§„É≥„Éù„Éº„Éà
+Export/Import
 ---------------
  * The return value for the REST UPLOAD command for Excel bulk import is different from the one written in the manual. #1604
 
 Ansible-Driver
 ---------------
  * Changed how the yaml.load modules were handled in Pioneer mode.#1589
+
+
+*******************************************************************************************************
 
 
 Exastro IT Automation 1.8.1 (2021-08-26)
@@ -196,6 +225,9 @@ Ansible-Driver
 Terraform-Driver
 ---------------
  * [Substitution value auto-registration setting]Fixed an issue where exporting would display that the parameter item failed to convert ID #1464
+
+
+*******************************************************************************************************
 
 
 Exastro IT Automation 1.8.0 (2021-07-16)
