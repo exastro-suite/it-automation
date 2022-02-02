@@ -113,67 +113,6 @@ EOD;
     <!-------------------------------- 一覧/更新 -------------------------------->
 
 EOD;
-if($boolShowRegisterArea === true){
-//----サイト個別html要素、ここから
-    if($strHtmlFilter2Commnad != "" ){
-
-        print 
-<<<EOD
-    <!-------------------------------- 登録フィルター -------------------------------->
-    <h2>
-        <table width="100%">
-            <tr>
-                <td><div onClick=location.href="javascript:show('Filter2_Midashi','Filter2_Nakami');" class="midashi_class" >{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30051")}</div></td>
-                <td>
-                    <div id="Filter2_Midashi" align="right">
-                        <input type="button" value="{$strCmdWordAreaClose}" class="showbutton" onClick=location.href="javascript:show('Filter2_Midashi','Filter2_Nakami');" >
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </h2>
-    <div id="Filter2_Nakami" style="display:block" class="text">
-        <div style="margin-left:10px">
-            <div id="select_alert_area" class="alert_area" style="display:none" ></div>
-            <div id="select_area" class="table_area" >
-            </div>
-        </div>
-        <div style="margin-left:10px">
-{$strHtmlFilter2Commnad}
-        </div>
-    </div>
-    <!-------------------------------- 登録フィルター -------------------------------->
-EOD;
-
-    }
-//サイト個別html要素、ここまで----
-    print 
-<<<EOD
-    <!-------------------------------- 登録 -------------------------------->
-    <h2>
-        <table width="100%">
-            <tr>
-                <td><div onClick=location.href="javascript:show('Mix2_Midashi','Mix2_Nakami');" class="midashi_class" >{$g['objMTS']->getSomeMessage("ITAWDCH-STD-30051")}</div></td>
-                <td>
-                    <div id="Mix2_Midashi" align="right">
-                        <input type="button" value="{$strCmdWordAreaClose}" class="showbutton" onClick=location.href="javascript:show('Mix2_Midashi','Mix2_Nakami');" >
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </h2>
-    <div id="Mix2_Nakami" style="display:block" class="text">
-        <div style="margin-left:10px">
-            <div id="register_alert_area" class="alert_area" style="display:none" ></div>
-            <div id="register_area" class="table_area" ></div>
-        </div>
-    </div>
-    <!-------------------------------- 登録 -------------------------------->
-EOD;
-}else{
-    //----権限がないので何もしない
-    //権限がないので何もしない----
-}
 
     $allDumpMsg = ($privilege=="2")?$g['objMTS']->getSomeMessage("ITAWDCH-STD-30061"):$g['objMTS']->getSomeMessage("ITAWDCH-STD-30062");
 

@@ -231,6 +231,30 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     unset($tmpAryColumn);
 
     $table->setGeneObject('webSetting', $arrayWebSetting);
+
+    $tmpAryColumn = $table->getColumns();
+    $tmpAryColumn['ROW_EDIT_BY_FILE']->setResultCount(
+        array(
+         'update'  =>array('name'=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12203"), 'ct'=>0),
+         'delete'  =>array('name'=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12204"), 'ct'=>0),
+         'revive'  =>array('name'=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12205"), 'ct'=>0),
+         'error'   =>array('name'=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12206"), 'ct'=>0)
+        )
+    );
+    $tmpAryColumn['ROW_EDIT_BY_FILE']->setCommandArrayForEdit(
+        array(
+            2=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12203"),
+            3=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12204"),
+            4=>$g['objMTS']->getSomeMessage("ITAWDCH-STD-12205")
+        )
+    );
+    // 複製ボタン
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('filter_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('print_journal_table')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('excel')->setVisible(false);
+    $tmpAryColumn['WEB_BUTTON_DUPLICATE']->getOutputType('json')->setVisible(false);
+
     return $table;
 };
 loadTableFunctionAdd($tmpFx,__FILE__);
