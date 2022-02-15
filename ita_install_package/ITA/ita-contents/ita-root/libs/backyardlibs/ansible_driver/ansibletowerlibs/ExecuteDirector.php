@@ -32,7 +32,6 @@ if(empty($root_dir_path)) {
 require_once($root_dir_path . "/libs/commonlibs/common_php_functions.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/AnsibleTowerCommonLib.php");   
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/setenv.php");
-require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/test.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/MessageTemplateStorageHolder.php");
 require_once($root_dir_path . '/libs/commonlibs/common_ansible_vault.php');
 require_once($root_dir_path . '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php');
@@ -329,6 +328,8 @@ class ExecuteDirector {
             $this->errorLogOut($errorMessage);
             return -1;
         }
+
+
         return $workflowTplId;
     }
 
@@ -526,6 +527,7 @@ class ExecuteDirector {
                     return $result_code;
                 }
             }
+
             @unlink($tmp_log_file);
             @unlink($tmp_TowerInfo_File);
 
@@ -576,6 +578,7 @@ class ExecuteDirector {
                     return $result_code;
                 }
             }
+
             @unlink($tmp_log_file);
             @unlink($tmp_TowerInfo_File);
 
@@ -625,6 +628,7 @@ class ExecuteDirector {
                     return $result_code;
                 }
             }
+
             @unlink($tmp_log_file);
             @unlink($tmp_TowerInfo_File);
 
@@ -675,6 +679,7 @@ class ExecuteDirector {
                         return $result_code;
                     }
                 }
+
                 @unlink($tmp_log_file);
                 @unlink($tmp_TowerInfo_File);
             }
@@ -726,6 +731,7 @@ class ExecuteDirector {
                         return $result_code;
                     }
                 }
+
                 @unlink($tmp_log_file);
                 @unlink($tmp_TowerInfo_File);
             }
@@ -774,6 +780,7 @@ class ExecuteDirector {
                         return $result_code;
                     }
                 }
+
                 @unlink($tmp_log_file);
                 @unlink($tmp_TowerInfo_File);
             }
@@ -836,6 +843,7 @@ class ExecuteDirector {
                 @unlink($tmp_log_file);
                 @unlink($tmp_TowerInfo_File);
             }
+
         }
         return $result_code;
     }
@@ -902,6 +910,7 @@ class ExecuteDirector {
                     }
                 }
             }
+
             @unlink($tmp_log_file);
             @unlink($tmp_TowerInfo_File);
 
@@ -953,6 +962,7 @@ class ExecuteDirector {
                     }
                 }
             }
+
             @unlink($tmp_log_file);
             @unlink($tmp_TowerInfo_File);
 
@@ -1002,6 +1012,7 @@ class ExecuteDirector {
                     return $result_code;
                 }
             }
+
             @unlink($tmp_log_file);
             @unlink($tmp_TowerInfo_File);
 
@@ -1051,6 +1062,7 @@ class ExecuteDirector {
                     return $result_code;
                 }
             }
+
             @unlink($tmp_log_file);
             @unlink($tmp_TowerInfo_File);
 
@@ -1100,6 +1112,7 @@ class ExecuteDirector {
                     return $result_code;
                 }
             }
+
             @unlink($tmp_log_file);
             @unlink($tmp_TowerInfo_File);
         }
