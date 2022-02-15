@@ -8,12 +8,15 @@ if("" != http_build_query($getCopy)){
 }
 $get_parameter = str_replace('+', '%20', $get_parameter);
 $get_parameter_anp = str_replace('+', '%20', $get_parameter_anp);
+
+$_SESSION["csrf_token"] = bin2hex(random_bytes(32));
 ?>
 
 <?= $strLoginFormHeadBody ?>
 <div id="gateLoginContainer" class="gateContainer">
  <form id="gateLoginForm" class="inputUserInfoForm" method="POST" name="loginform" action="<?= $strGateUrl ?><?= $get_parameter ?>">
    <table id="gateLoginItemTable" class="headerLeftTable inputItemTable" border="0" aria-describedby="">
+     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION["csrf_token"]; ?>">
      <tr>
        <th scope="col" class="inputItemExplain"><?= $strLoginIDCaption ?></th>
        <td class="inputItemWrapper"><input class="inputUserId" type="text" name="username" /></td>

@@ -364,6 +364,11 @@
                         $objQuery->sqlBind($tmpArrayBind);
                         $r = $objQuery->sqlExecute();
                 }
+                //csrf対策
+                if( $_POST["csrf_token"] != $_SESSION["csrf_token"] ){
+                  header("Location: /common/common_forbidden.php");
+                  exit();
+                } 
                 
                 break;
             case "id_error":
