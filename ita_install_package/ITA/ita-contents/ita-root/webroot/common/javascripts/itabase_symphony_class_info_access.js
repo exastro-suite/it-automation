@@ -230,6 +230,7 @@ function scramSymphonyInstance(boolCallProxy, aryResultOfCalledProxy){
     if( boolCallProxy===true ){
         if( symphony_instance_id != '' ){
             if( window.confirm(getSomeMessage("ITABASEC010110",{0:symphony_instance_id})) === true ){
+                clearInterval(timerID);
                 minorPhase = 22;
                 drawCommandButtons(minorPhase);
                 proxy.scramSymphonyInstance(symphony_instance_id);

@@ -333,6 +333,57 @@
         }
         //具体値 変数名----
 
+        //セッション切れの際に二重でセッション切れメッセージが出力されるのを避けるため、Mix2_1_vars_regから派生
+        function Mix2_1_vars_reg2($strVarsLinkIdNumeric)
+        {
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix2_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+
+            $aryVariant = array('VAL_VARS_LINK_ID'=>$strVarsLinkIdNumeric, 'VAL_COL_SEQ_COMBINATION_ID' => "");
+
+            // メンバー変数名用
+            $int_seq_no = 9;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "register_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            // 結果判定
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream);
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+        //具体値 変数名----
+
         //----Key　変数名
         function Mix1_1_key_vars_upd($strVarsLinkIdNumeric){
             // グローバル変数宣言
@@ -382,6 +433,58 @@
         }
         
         function Mix2_1_key_vars_reg($strVarsLinkIdNumeric)
+        {
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix2_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+
+            $aryVariant = array('KEY_VARS_LINK_ID'=>$strVarsLinkIdNumeric, 'KEY_COL_SEQ_COMBINATION_ID' => "");
+
+
+            // メンバー変数名用
+            $int_seq_no = 6;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "register_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            // 結果判定
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream);
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+        //カラム 変数名----
+
+        //セッション切れの際に二重でセッション切れメッセージが出力されるのを避けるため、Mix2_1_key_vars_regから派生
+        function Mix2_1_key_vars_reg2($strVarsLinkIdNumeric)
         {
             // グローバル変数宣言
             global $g;

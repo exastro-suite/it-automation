@@ -1193,6 +1193,10 @@ function Mix1_1_monitor_execution( objButton,execution_no,menu_no ){
        open( url, "_blank") ;
     }else{
         window.alert(cicdifinfoURL["ERROR_MSG"]);
+        if(cicdifinfoURL["STATUS"]  == "redirectOrderForHADACClient") {
+            var redirectUrl =cicdifinfoURL['URL'][1] + location.search.replace('?','&');
+            redirectTo(cicdifinfoURL['URL'][0],redirectUrl,cicdifinfoURL['URL'][2]);
+        }
     }
 }
 

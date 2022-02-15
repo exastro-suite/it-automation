@@ -1432,6 +1432,11 @@ function setAccessPermission( inputDataValue ) {
           if ( result !== '') {
               const roleList = JSON.parse( result ),
                     $input = $('input[' + inputDataValue + ']');
+              if ( roleList[0] == 'redirectOrderForHADACClient' ) {
+                  window.alert( roleList[2] );
+                  var redirectUrl = roleList[1][1] + location.search.replace('?','&');
+                  return redirectTo(roleList[1][0], redirectUrl, roleList[1][2]);
+              }
               if ( $input.length ) {
                   const initValue = $input.val();
                   // 決定時の処理    
@@ -1528,6 +1533,11 @@ function displayAccessPermission( inputDataValue ) {
             const roleList = JSON.parse( result ),
                   $input = $('input[' + inputDataValue + ']');
             const initValue = $input.val();
+            if ( roleList[0] == 'redirectOrderForHADACClient') {
+                window.alert( roleList[2] );
+                var redirectUrl = roleList[1][1] + location.search.replace('?','&');
+                return redirectTo(roleList[1][0], redirectUrl, roleList[1][2]);  
+            }
             displayRoleModalBody( roleList, initValue, 'help');
         } else {
             modal.modalError('Failed to get the list.');

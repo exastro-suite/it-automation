@@ -120,9 +120,11 @@ try {
 
     //Sessionのログインチェックをして、ユーザが一致していたら処理を継続
     $auth = null;
+    $sessiontimeoutFlag = FALSE;
     saLoginExecute($auth, $objDBCA, null, false);
     $loginCheck = $auth->checkAuth();
     if($loginCheck == false){
+        $sessiontimeoutFlag = TRUE;
         $AddMsg = $objMTS->getSomeMessage("ITAWDCH-ERR-60005");
         $Exception['ERROR_LOG'] = sprintf($ErrorMsgBase,__FILE__,__LINE__,$AddMsg);
         $Exception['RESPONS_MSG'] = $objMTS->getSomeMessage("ITAWDCH-ERR-112"); // システムエラー
@@ -229,6 +231,10 @@ try {
         }
     }
     $ErrorMsg = $Exception['RESPONS_MSG'];
+    if ( $sessiontimeoutFlag == TRUE ){
+        $ErrorMsg = $objMTS->getSomeMessage("ITAWDCH-MNU-1300006");
+        HttpResponse("redirectOrderForHADACClient",["0","/common/common_auth.php?login",'status'],$ErrorMsg);
+    }
     HttpResponse("ER","",$Exception['RESPONS_MSG']);
 }
 function HttpResponse($Status,$AccessAuth,$ErrorMsg) {
