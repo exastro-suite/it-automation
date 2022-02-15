@@ -850,6 +850,11 @@ const getpulldownDefaultValueList = function($item, defaultValue = ""){
           }else{
             //選択可能な参照項目の一覧を取得し、セレクトボックスを生成
             selectDefaultValueList = JSON.parse( result );
+            if ( selectDefaultValueList[0] == 'redirectOrderForHADACClient' ) {
+              window.alert( selectDefaultValueList[2] );
+              var redirectUrl = selectDefaultValueList[1][1] + location.search.replace('?','&');
+              return redirectTo(selectDefaultValueList[1][0], redirectUrl, selectDefaultValueList[1][2]);
+            }
             const selectPulldownDefaultListLength = selectDefaultValueList.length;
             let selectPulldownDefaultListHTML = '<option value=""></option>'; //一つ目に空を追加
             let defaultCheckFlg = false;
@@ -2316,6 +2321,11 @@ const modalReferenceItemList = function($target) {
   }).done( function( result ) {
       //選択可能な参照項目の一覧を取得
       targetReferenceItem = JSON.parse( result );
+      if ( targetReferenceItem[0] == 'redirectOrderForHADACClient' ) {
+        window.alert( targetReferenceItem[2] );
+        var redirectUrl = targetReferenceItem[1][1] + location.search.replace('?','&');
+        return redirectTo(targetReferenceItem[1][0], redirectUrl, targetReferenceItem[1][2]);   
+      }
       setRerefenceItemSelectModalBody(targetReferenceItem, initItemList, okEvent, cancelEvent, closeEvent);
 
   }).fail( function( result ) {

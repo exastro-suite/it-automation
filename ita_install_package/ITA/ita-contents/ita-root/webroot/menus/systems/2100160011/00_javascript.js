@@ -22,6 +22,9 @@ callback.prototype = {
     registerTable : function(result){
         var ary_result = getArrayBySafeSeparator(result);
         // 正常の場合
+
+        checkTypicalFlagInHADACResult(ary_result);
+
         if( ary_result[0] == "000" ){
             var result = JSON.parse(ary_result[2]);
             var id  = result['CREATE_MENU_ID'];
@@ -43,10 +46,6 @@ callback.prototype = {
         else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
-        // セッション切れの場合
-        if( ary_result[0]  == "redirectOrderForHADACClient"){
-            window.location.replace(ary_result[2]);
-        }
     },
     /////////////////////
     // callback: 更新
@@ -54,6 +53,13 @@ callback.prototype = {
     updateTable : function(result){
         var ary_result = getArrayBySafeSeparator(result);
         // 正常の場合
+
+        if( ary_result[0]=='redirectOrderForHADACClient' ){
+            var conductorInstanceId = location.search.split('&');
+            ary_result[2] = ary_result[2] + '&' + conductorInstanceId[1] + '&' + conductorInstanceId[2];
+            checkTypicalFlagInHADACResult(ary_result);
+        }
+
         if( ary_result[0] == "000" ){
             var result = JSON.parse(ary_result[2]);
             var id  = result['CREATE_MENU_ID'];
@@ -74,10 +80,6 @@ callback.prototype = {
         // システムエラーの場合
         else{
             window.alert(getSomeMessage("ITAWDCC90101"));
-        }
-        // セッション切れの場合
-        if( ary_result[0]  == "redirectOrderForHADACClient"){
-            window.location.replace(ary_result[2]);
         }
     },
     /////////////////////

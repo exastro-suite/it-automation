@@ -176,9 +176,20 @@ callback.prototype = {
     printSymphonyInstance : function( result ){
 
         var strAlertAreaName = 'symphony_message';
-
+        
         var ary_result = getArrayBySafeSeparator(result);
-        checkTypicalFlagInHADACResult(ary_result);
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                alert(getSomeMessage("ITAWDCC20206"));
+                var symphonyClassId = location.search.split('&');
+                ary_result[2] = ary_result[2] + '&' + symphonyClassId[1];
+                redirectTo(ary_result[1],ary_result[2],ary_result,3);
+                //再帰を停止するためreturnを入れていない
+            }
+        }
 
         if( ary_result[0] == "000" ){
 
@@ -196,7 +207,7 @@ callback.prototype = {
             objAlertArea.innerHTML="";
             objAlertArea.innerHTML = resultContentTag;
             objAlertArea.style.display = "block";
-        }else{
+        }else if ( ary_result[0] != 'redirectOrderForHADACClient' ){
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
         showForDeveloper(result);
@@ -241,7 +252,18 @@ callback.prototype = {
         var strAlertAreaName = 'symphony_message';
 
         var ary_result = getArrayBySafeSeparator(result);
-        checkTypicalFlagInHADACResult(ary_result);
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                alert(getSomeMessage("ITAWDCC20206"));
+                var symphonyClassId = location.search.split('&');
+                ary_result[2] = ary_result[2] + '&' + symphonyClassId[1]
+                redirectTo(ary_result[1],ary_result[2],ary_result,3);
+                return;
+            }
+        }
 
         if( ary_result[0] == "000" ){
 
@@ -270,7 +292,12 @@ callback.prototype = {
         var strAlertAreaName = 'symphony_message';
 
         var ary_result = getArrayBySafeSeparator(result);
-        checkTypicalFlagInHADACResult(ary_result);
+        if( ary_result[0]=='redirectOrderForHADACClient' ){
+            clearInterval(timerID);
+            var symphonyClassId = location.search.split('&');
+            ary_result[2] = ary_result[2] + '&' + symphonyClassId[1]
+            checkTypicalFlagInHADACResult(ary_result);
+        }
 
         if( ary_result[0] == "000" ){
 

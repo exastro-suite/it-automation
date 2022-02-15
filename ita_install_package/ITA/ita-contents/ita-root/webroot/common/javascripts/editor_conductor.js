@@ -5302,6 +5302,7 @@ const conductorStatusUpdate = function( exeNumber ) {
         
         $pauseButton.prop('disabled', false ).on('click', function() {
           if ( confirm( getSomeMessage("ITABASEC020006",{0:conductorInstanceID})) ) {
+            clearTimeout( pollingTimerID );
             $pauseButton.prop('disabled', true ).off();
             $node.find('.pause-status').attr('data-status', 'resume');
             proxy.holdReleaseNodeInstance( nodeInfo.NODE_INSTANCE_NO );

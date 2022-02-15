@@ -144,6 +144,14 @@ callback.prototype = {
     //----Conductor系メソッド
     //----Conductor再描画用-----//
     printconductorClass : function( result ){
+        
+        var ary_result = getArrayBySafeSeparator(result);
+        if( ary_result[0] == "redirectOrderForHADACClient" ) {
+            var conductorClassId = location.search.split('&');
+            ary_result[2] = ary_result[2] + '&' + conductorClassId[1];
+            checkTypicalFlagInHADACResult(ary_result);
+        }
+
         conductorUseList.conductorData = result;
         if ( conductorGetMode === 'starting') {
           initEditor('view');
@@ -239,6 +247,11 @@ function conductorResultMessage( type, result ) {
 
   // セッション切れのチェック
   var ary_result = getArrayBySafeSeparator(result);
+  var conductorClassId = location.search.split('&');
+  //conductorClassIdがある
+  if( conductorClassId[1] != 'undefined'){
+    ary_result[2] = ary_result[2] + '&' + conductorClassId[1]
+  }
   checkTypicalFlagInHADACResult(ary_result);
 
   switch( result[0] ) {

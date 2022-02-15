@@ -431,7 +431,15 @@ callback.prototype = {
     },
     dispMenuList : function(result){
         var ary_result = getArrayBySafeSeparator(result);
-        checkTypicalFlagInHADACResult(ary_result);
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0] == 'redirectOrderForHADACClient' ){
+                redirectTo(ary_result[1], ary_result[2], ary_result,3);
+                return;
+            }
+        }
         if ( result == "unexpected_error" ){
             window.alert(getSomeMessage("ITAWDCC90101"));
         }else{
