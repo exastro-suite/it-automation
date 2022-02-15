@@ -805,6 +805,7 @@ class CreateAnsibleExecFiles {
      
         // ホスト変数定義ファイルに記載するパスなのでAnsible側のストレージパスに変更
         $this->lv_user_out_Dir = $this->setAnsibleSideFilePath($user_out_Dir,self::LC_ITA_OUT_DIR);
+
         // symphonyからの起動か判定 ディレクトリはsymphonyバックヤードで作成済み
         if(strlen($in_symphony_instance_no) != 0) {
             // ユーザー公開用symphonyインスタンス作業用 データリレイストレージパス
@@ -3311,7 +3312,7 @@ class CreateAnsibleExecFiles {
             $host_vars_list = array();
             $idx=0;
             //[INCLUDE順番][素材管理Pkey]=対話ファイル
-            foreach( $dialog_file_list as $inclod\n=>$pkeylist ){
+            foreach( $dialog_file_list as $inclodeno=>$pkeylist ){
                  foreach( $pkeylist as $pkey=>$dialog_file ){
                      $idx++;
                      //変数名生成 var%d
@@ -3325,7 +3326,6 @@ class CreateAnsibleExecFiles {
                                          $hostname_2,
                                          str_pad( $pkey, $intNumPadding, "0", STR_PAD_LEFT ),       
                                          $dialog_file);
-
                     $file_path = $this->setAnsibleSideFilePath($arry_val,self::LC_ITA_IN_DIR);
 
                      //[対話ファイル変数名]=対話ファイル名
@@ -3441,7 +3441,7 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function CreateDialogfiles($in_hostname,$dialog_file_list){
-        foreach( $dialog_file_list as $includ\n=>$pkeylist ){
+        foreach( $dialog_file_list as $includeno=>$pkeylist ){
             foreach( $pkeylist as $pkey=>$dialogfile ){
                 //ITA側で管理されている対話ファイルが存在しているか確認
                 $src_file = $this->getITA_dialog_file($pkey,$dialogfile);
@@ -3884,7 +3884,7 @@ class CreateAnsibleExecFiles {
         foreach( $ina_hosts as $no=>$host_name ){
             // 対話ファイル配列より該当ホストの対話ファイル配列取得            
             $dialog_file_list = $ina_dialog_files[$host_name];
-            foreach( $dialog_file_list as $includ\n=>$pkeylist ){
+            foreach( $dialog_file_list as $includeno=>$pkeylist ){
                 foreach( $pkeylist as $playbook_pkey=>$playbook ){
                     // 対話ファイルのパス取得(オリジナル版)
                     foreach($ina_hostprotcollist[$host_name] as $hostname=>$prolist)
@@ -3933,7 +3933,7 @@ class CreateAnsibleExecFiles {
         foreach( $ina_hosts as $no=>$host_name ){
             // 対話ファイル配列より該当ホストの対話ファイル配列取得            
             $dialog_file_list = $ina_dialog_files[$host_name];
-            foreach( $dialog_file_list as $includ\n=>$pkeylist ){
+            foreach( $dialog_file_list as $includeno=>$pkeylist ){
                 foreach( $pkeylist as $playbook_pkey=>$playbook ){
                     // Movement詳細に同一対話ファイル(TPF/CPF変数を使用)が複数登録された場合
                     // 複数回処理されないようにガードする。
@@ -11854,7 +11854,6 @@ class CreateAnsibleExecFiles {
                     }
                     // inディレクトリ配下のcopyファイルバスを取得
                     $path = $this->getHostvarsfile_copy_file_value($key,$file_name);
-
                     $path = $this->setAnsibleSideFilePath($path,self::LC_ITA_IN_DIR);
 
                     // $ina_legacy_Role_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
@@ -11893,7 +11892,6 @@ class CreateAnsibleExecFiles {
                     }
                     // inディレクトリ配下のテンプレートファイルバスを取得
                     $path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
-
                     $path = $this->setAnsibleSideFilePath($path,self::LC_ITA_IN_DIR);
 
                     // $ina_legacy_Role_tpf_vars_list[copy変数]=inディレクトリ配下のテンプレートファイルパス
@@ -12050,7 +12048,7 @@ class CreateAnsibleExecFiles {
 
             // 対話ファイル配列より該当ホストの対話ファイル配列取得
             $dialog_file_list = $ina_dialog_files[$host_name];
-            foreach( $dialog_file_list as $includ\n=>$pkeylist ){
+            foreach( $dialog_file_list as $includeno=>$pkeylist ){
                 foreach( $pkeylist as $playbook_pkey=>$playbook ){
                     // Ansible実行時の対話ファイル名は Pkey(10桁)-対話ファイル名 する
                     // 対話ファイルのパス取得
@@ -12114,7 +12112,6 @@ class CreateAnsibleExecFiles {
 
                             // inディレクトリ配下のcopyファイルバスを取得
                             $cpf_path = $this->getHostvarsfile_pioneer_copy_file_value($cpf_key,$cpf_file_name);
-
                             $cpf_path = $this->setAnsibleSideFilePath($cpf_path,self::LC_ITA_IN_DIR);
 
                             // $la_cpf_path[copy変数]=inディレクトリ配下のcopyファイルパス
@@ -12289,7 +12286,7 @@ class CreateAnsibleExecFiles {
 
             // 対話ファイル配列より該当ホストの対話ファイル配列取得
             $dialog_file_list = $ina_dialog_files[$host_name];
-            foreach( $dialog_file_list as $includ\n=>$pkeylist ) {
+            foreach( $dialog_file_list as $includeno=>$pkeylist ) {
                 foreach( $pkeylist as $playbook_pkey=>$playbook ) {
                     // Ansible実行時の対話ファイル名は Pkey(10桁)-対話ファイル名 とする
                     // 対話ファイルのパス取得
@@ -12366,7 +12363,6 @@ class CreateAnsibleExecFiles {
 
                             // inディレクトリ配下のtemplateファイルバスを取得
                             $tpf_path = $this->getHostvarsfile_pioneer_template_file_value($tpf_key,$tpf_file_name,$hostname);
-
                             $tpf_path = $this->setAnsibleSideFilePath($tpf_path,self::LC_ITA_IN_DIR);
 
                             // $la_tpf_path[template変数]=inディレクトリ配下のtemplateファイルパス

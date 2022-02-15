@@ -1301,7 +1301,7 @@ $ary["ITAANSIBLEH-MNU-9010000035"] = "Ansible Automation Controller dedicated in
 $ary["ITAANSIBLEH-MNU-9010000036"] = "Execution environment";
 $ary["ITAANSIBLEH-MNU-9010000037"] = "Displays the Execution environments constructed in the Ansible Automation Controller server.
 Please select the Execution environment you want to operate.
-If nothing is selected, "Default execution environment" will be selected by default.";
+If nothing is selected, \"Default execution environment\" will be selected by default.";
 $ary["ITAANSIBLEH-MNU-9010000038"]  = "ansible.cfg";
 $ary["ITAANSIBLEH-MNU-9010000039"] = "Uploads the ansible.cfg file.
 If the file hasn't been uploaded, the default value will be used.

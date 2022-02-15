@@ -42,7 +42,6 @@ global $objDBCA;
     require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php" );
     require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiConfig.php");
     require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/setenv.php");
-    require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/test.php");
     
     ////////////////////////////////
     // ログ出力設定
@@ -298,7 +297,6 @@ global $objDBCA;
             // トレースメッセージ
             $logger->debug("Update execution_management row. status=>" . $status);
             break;
-
         case DF_RESULTFILETRANSFER_FUNCTION:
             if($process_has_error) {
                 break;

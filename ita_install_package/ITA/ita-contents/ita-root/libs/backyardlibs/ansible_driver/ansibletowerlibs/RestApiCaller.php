@@ -223,7 +223,7 @@ class RestApiCaller {
                     $this->logger->error($print_url);
                     $this->logger->error($print_HttpContext);
                     $this->logger->error($print_HttpResponsHeader);
-                    $this->logger->error('http response content\n%s' . print_r($response_array['responseContents'],true));
+                    $this->logger->error('http response content\n' . print_r($response_array['responseContents'],true));
                 } else {
                     $response_array['responseHeaders']  = $http_response_header;
                     $response_array['responseContents'] = $responseContents;
@@ -234,10 +234,6 @@ class RestApiCaller {
                             }
                         }
                     }
-
-global $g;
-unset($g['responseHeaders']);
-$g['responseHeaders'] = $response_array['responseContents'];
 
                     $this->logger->debug($print_backtrace);
                     $this->logger->debug($print_url);
