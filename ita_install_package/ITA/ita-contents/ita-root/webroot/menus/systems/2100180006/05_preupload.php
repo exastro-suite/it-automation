@@ -56,6 +56,7 @@
     $conductorInsTable = "C_CONDUCTOR_INSTANCE_MNG";
 
     //Input/Resultデータ場所
+    $_GET['mode'] = 'dl';
     $legacyDir = $root_dir_path."/uploadfiles/2100020113/".$inOrOut."/";
     $roleDir =  $root_dir_path."/uploadfiles/2100020314/".$inOrOut."/";
     $pioneerDir = $root_dir_path."/uploadfiles/2100020213/".$inOrOut."/";
@@ -263,11 +264,7 @@ EOD;
     }
 
     //-- サイト個別PHP要素、ここまで-- 
-    noRetFileWithColumnAccessAgent($objDefaultTable);
-    //-- サイト個別PHP要素、ここから--
-    //-- サイト個別PHP要素、ここまで--
-
     // ----アクセスログ出力
-    web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-603"));
+    web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4051",array(basename(__FILE__),$filepath.$filename)));
     // アクセスログ出力----
 ?>

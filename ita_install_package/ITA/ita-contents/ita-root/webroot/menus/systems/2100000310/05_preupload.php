@@ -50,6 +50,7 @@
 
 
     //-- サイト個別PHP要素、ここまで--
+    $_GET['mode'] = 'dl';
     require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_05_preupload.php");
     //-- サイト個別PHP要素、ここから--
     require_once ( $root_dir_path . "/libs/webcommonlibs/table_control_agent/web_parts_for_template_02_access.php");
@@ -139,17 +140,10 @@ EOD;
             //DL後ZIPファイル削除
             unlink($filepath.$filename);
         }
- 
-
-
     }
 
     //-- サイト個別PHP要素、ここまで-- 
-    noRetFileWithColumnAccessAgent($objDefaultTable);
-    //-- サイト個別PHP要素、ここから--
-    //-- サイト個別PHP要素、ここまで--
-
     // ----アクセスログ出力
-    web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-603"));
+    web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4051",array(basename(__FILE__),$filepath.$filename)));
     // アクセスログ出力----
 ?>

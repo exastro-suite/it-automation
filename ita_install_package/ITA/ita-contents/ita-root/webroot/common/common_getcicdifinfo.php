@@ -96,9 +96,11 @@ try {
 
     //Sessionのログインチェックをして、ユーザが一致していたら処理を継続
     $auth = null;
+    $sessiontimeoutFlag = FALSE;
     saLoginExecute($auth, $objDBCA, null, false);
     $loginCheck = $auth->checkAuth();
     if($loginCheck == false){
+        $sessiontimeoutFlag = TRUE;
         $strFxName = "[FILE]" . basename(__FILE__) . "[LINE]" . __LINE__;
         $ErrorMsg = $strFxName . $objMTS->getSomeMessage("ITACICDFORIAC-ERR-6000");
         throw new Exception($ErrorMsg);
@@ -178,6 +180,10 @@ try {
 }catch (Exception $e){
     web_log($e->getMessage());
     $ErrorMsg = $objMTS->getSomeMessage("ITAWDCH-MNU-5000002");
+    if ( $sessiontimeoutFlag == TRUE ){
+        $ErrorMsg = $objMTS->getSomeMessage("ITAWDCH-MNU-1300006");
+        HttpResponse("redirectOrderForHADACClient",["0","/common/common_auth.php?login",'status'],$ErrorMsg);
+    }
     HttpResponse("ER","",$ErrorMsg);
 }
 function HttpResponse($Status,$URL,$ErrorMsg) {

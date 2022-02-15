@@ -54,6 +54,13 @@ callback.prototype = {
     //----Conductor登録----//
     printConductorStatus : function( result ){
         //console.log( result );
+        if ( typeof(result) === 'string') {
+          var ary_result = getArrayBySafeSeparator(result);
+          var conductorInstanceId = location.search.split('&');
+          ary_result[2] = ary_result[2] + '&' + conductorInstanceId[1];
+          checkTypicalFlagInHADACResult(ary_result);
+        }
+
         conductorUseList.conductorStatus = JSON.parse( result );
 
         //ステータス情報がが無い場合はConductor作業一覧へ飛ばす
@@ -83,7 +90,14 @@ callback.prototype = {
     },
     //----Conductor強制停止----//
     scramConducrtorInstance : function( result ){
-        //console.log(result);
+      
+        var ary_result = getArrayBySafeSeparator(result);
+        if( ary_result[0]=='redirectOrderForHADACClient' ){
+          var conductorInstanceId = location.search.split('&');
+          ary_result[2] = ary_result[2] + '&' + conductorInstanceId[1]
+          checkTypicalFlagInHADACResult(ary_result);
+      }
+
         var errorType = '',
             errorMessage = '';
         if ( result[0] === '000' ) {
@@ -101,8 +115,16 @@ callback.prototype = {
     },
     //----Conductor保留解除----//
     holdReleaseNodeInstance : function( result ){
+        var ary_result = getArrayBySafeSeparator(result);
+        if( ary_result[0]=='redirectOrderForHADACClient' ){
+          var conductorInstanceId = location.search.split('&');
+          ary_result[2] = ary_result[2] + '&' + conductorInstanceId[1]
+          checkTypicalFlagInHADACResult(ary_result);
+      }
+
         if ( result[0] === '000') {
           editor.log.set('notice', getSomeMessage("ITABASEC020007",{0:result[2]}));
+          proxy.printConductorStatus( conductorInstanceID );
         } else {
           editor.log.set('error', 'Pause release error');
         }

@@ -22,7 +22,11 @@ function callback() {}
     {
         dispExecution : function(result){
             var ary_result = getArrayBySafeSeparator(result);
-            checkTypicalFlagInHADACResult(ary_result);
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                var executionNo = location.search.split('&');
+                ary_result[2] = ary_result[2] + '&' + executionNo[1];
+                checkTypicalFlagInHADACResult(ary_result);
+            }
             if ( result.match(/^unexpected_error/) ){
                 // リダイレクト先URLを取得
                 var redirect_url = result.substr(16);
@@ -100,8 +104,13 @@ function callback() {}
             }
         },
         ScramExecution : function(result){
+            clearInterval(timerID);
             var ary_result = getArrayBySafeSeparator(result);
-            checkTypicalFlagInHADACResult(ary_result);
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                var executionNo = location.search.split('&');
+                ary_result[2] = ary_result[2] + '&' + executionNo[1];
+                checkTypicalFlagInHADACResult(ary_result);
+            }
             if ( result.match(/^unexpected_error/) ){
                 // エラーメッセージ表示
                 //システムエラーが発生しました
@@ -155,6 +164,7 @@ function disp_execution(){
 function scrum_execution(){
     // '緊急停止してよろしいですか？'
     if( window.confirm( getSomeMessage("ITAANSIBLEC101050") ) ){
+        clearInterval(timerID);
         // ボタンを非活性にする
         document.getElementById('scrumTryExecute').disabled = true;
         
