@@ -44,6 +44,8 @@ function CreateExecInstMngArray(&$ary) {
     $ary["I_OPERATION_NO_IDBH"]          = "";
     $ary["I_VIRTUALENV_NAME"]            = "";
     $ary["I_ENGINE_VIRTUALENV_NAME"]     = "";
+    $ary["I_EXECUTION_ENVIRONMENT_NAME"] = "";
+    $ary["I_ANSIBLE_CONFIG_FILE"]        = "";
     $ary["TIME_BOOK"]                    = "";
     $ary["TIME_START"]                   = "";
     $ary["TIME_END"]                     = "";

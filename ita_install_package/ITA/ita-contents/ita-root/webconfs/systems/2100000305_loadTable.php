@@ -23,11 +23,13 @@
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     global $g;
+    $strLrWebRootToThisPageDir = substr(basename(__FILE__), 0, 10);
     $root_dir_path = $g['root_dir_path'];
     $arrayWebSetting = array();
     $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITABASEH-MNU-107070");
 
     require_once ($root_dir_path . "/libs/backyardlibs/common/common_db_access.php");
+    require_once ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
     $dbobj = new CommonDBAccessCoreClass($g['db_model_ch'],$g['objDBCA'],$g['objMTS'],$g['login_id']);
 
     $sqlBody   = "select ANSIBLE_EXEC_MODE from B_ANSIBLE_IF_INFO where DISUSE_FLAG='0'";
@@ -152,13 +154,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $c->setOutputType('print_journal_table',$objOT);
             $cg->addColumn($c);
             
-            /* Ansible virtualenv path*/
-            $objVldt = new SingleTextValidator(0,512,false);
-            $c = new TextColumn('ANS_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
-            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
-            $c->setValidator($objVldt);
-            $c->setRequired(false);
-            $cg->addColumn($c);
 
             /* 親Playbookのヘッダーセクション */
             $objVldt = new MultiTextValidator(0,512,false);
@@ -177,33 +172,68 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $cg->addColumn($c);
 
         $table->addColumn($cg);
+        // ANSIBLEインターフェース情報の実行エンジンがAnsible Engineの場合に利Ansible Engine用情報を表示
+        $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000040") );
+            /* Ansible virtualenv path*/
+            $objVldt = new SingleTextValidator(0,512,false);
+            $c = new TextColumn('ANS_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
+            $c->setValidator($objVldt);
+            $c->setRequired(false);
+            $cg->addColumn($c);
+        $table->addColumn($cg);
 
         // ANSIBLEインターフェース情報の実行エンジンがTowerの場合にTower利用情報を表示
-        if($ansible_exec_mode == 2) {
-
-            // Tower利用情報
-            $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITABASEH-MNU-108241") );
-
-                // virtualenv
-                $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
-                $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030")); //エクセル・ヘッダでの説明
-                $c->setHiddenMainTableColumn(true); //コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
-                $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
-                $objOT->setFirstSearchValueOwnerColumnID('ANS_VIRTUALENV_NAME');
-                $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_VIRTUALENV_JNL',
+        $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITABASEH-MNU-108241") );
+            // virtualenv
+            $c = new IDColumn('ANS_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030")); //エクセル・ヘッダでの説明
+            $c->setHiddenMainTableColumn(true); //コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('ANS_VIRTUALENV_NAME');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_VIRTUALENV_JNL',
                     'TTT_SEARCH_KEY_COLUMN_ID'=>'VIRTUALENV_NAME',
                     'TTT_GET_TARGET_COLUMN_ID'=>'VIRTUALENV_NAME',
                     'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
                     'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
                     'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
                     )
-                );
-                $objOT->setTraceQuery($aryTraceQuery);
-                $c->setOutputType('print_journal_table',$objOT);
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
             $cg->addColumn($c);
 
-            $table->addColumn($cg);
-        }
+        $table->addColumn($cg);
+
+        // ANSIBLEインターフェース情報の実行エンジンがansible automation controllerの場合にansible automation controller利用情報を表示
+        $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000035") );
+            // 実行環境
+            $c = new IDColumn('ANS_EXECUTION_ENVIRONMENT_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000036"),'B_ANS_TWR_EXECUTION_ENVIRONMENT','EXECUTION_ENVIRONMENT_NAME','EXECUTION_ENVIRONMENT_NAME','');
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000037")); //エクセル・ヘッダでの説明
+            $c->setHiddenMainTableColumn(true); //コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('ANS_EXECUTION_ENVIRONMENT_NAME');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_EXECUTION_ENVIRONMENT_JNL',
+                    'TTT_SEARCH_KEY_COLUMN_ID'=>'EXECUTION_ENVIRONMENT_NAME',
+                    'TTT_GET_TARGET_COLUMN_ID'=>'EXECUTION_ENVIRONMENT_NAME',
+                    'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                    'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                    'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                    )
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
+            $cg->addColumn($c);
+
+        $table->addColumn($cg);
+
+        /* ansible.cfg */
+        $c = new FileUploadColumn('ANS_ANSIBLE_CONFIG_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000038"));
+//, "{$g['scheme_n_authority']}/default/menu/05_preupload.php?no={$strLrWebRootToThisPageDir}");
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000039"));//エクセル・ヘッダでの説明
+        $c->setFileHideMode(true);
+        $c->setHiddenMainTableColumn(true);
+        $table->addColumn($c);
     }
 
     // OpenStack利用情報

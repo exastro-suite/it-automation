@@ -1,5 +1,5 @@
 #!/usr/bin/expect
-#   Copyright 2019 NEC Corporation
+#   Copyright 2022 NEC Corporation
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,25 +16,22 @@
 ######################################################################
 ##
 ##  【概要】
-##      リモートホストへのファイル転送
+##      リモートホスト内　ファイルコピー
 ##
 ##  【特記事項】
 ##      <<引数>>
-##      expect ky_ansible_materials_transfer.exp
+##      expect ky_ansible_materials_remotecopy.exp
 ##      <<環境変数>>
 ##       HOST:            リモートホスト
 ##       TYPE:            認証方式
-##                        パスワード認証:             pass  
-##                        鍵認証:                     key
-##                        鍵認証(パスフレーズあり:    key
-##                        鍵認証(鍵交換済み):         none  
+##                        パスワード認証: pass
+##                        鍵認証:         key
+##                        パスワード省略: none
 ##       USER:            ユーザー名
 ##       PASSWD:          パスワード
 ##       KEY_FILE_PATH:   鍵認証ファイル
-##       SRC_PATH:        ファイル転送元パス
-##       DEST_PATH:       ファイル転送先パス
-##       FROMTO:          転送方向
-##                          ITA: ITA->TOWER   TOWER:  TOWER->ITA
+##       SRC_PATH:        コピー元パス
+##       DEST_PATH:       コピー先パス
 ##      <<exit code>>
 ##       0:   正常
 ##       他:　異常
@@ -45,22 +42,14 @@ set TYPE             $env(TYPE)
 set USER             $env(USER)
 set PASSWD           $env(PASSWD)
 set KEY_FILE_PATH    " "
-set SRC_PATH         $env(SRC_PATH)
 set DEST_PATH        $env(DEST_PATH)
-set FROMTO           $env(FROMTO)
-if { ${FROMTO} == "ITA" } {
-   set REMOTE_SRC       ${SRC_PATH}
-   set REMOTE_DEST      ${USER}@${HOST}:${DEST_PATH}
-} else {
-   set REMOTE_SRC       ${USER}@${HOST}:${SRC_PATH}
-   set REMOTE_DEST      ${DEST_PATH}
-}
-if { ${FROMTO} == "key" } {
+set SRC_PATH         $env(SRC_PATH)
+if { ${TYPE} == "key" } {
    set KEY_FILE_PATH    $env(KEY_FILE_PATH)
 }
 set timeout 120
 if { ${TYPE} == "pass" } {
-    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${REMOTE_SRC} ${REMOTE_DEST}
+    spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${USER}@${HOST} /bin/cp -rfp ${SRC_PATH} ${DEST_PATH}
     expect "assword:" {
         send "${PASSWD}\n"
         exp_continue
@@ -81,7 +70,7 @@ if { ${TYPE} == "pass" } {
        exit ${STATUS}
     }
 } elseif { ${TYPE} == "key" } {
-    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${KEY_FILE_PATH} ${SRC_PATH} ${REMOTE_SRC} ${REMOTE_DEST}
+    spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${KEY_FILE_PATH} ${USER}@${HOST} /bin/cp -rfp ${SRC_PATH} ${DEST_PATH}
     expect "assword:" {
         exit 201
     } "(yes/no)?" {
@@ -101,7 +90,7 @@ if { ${TYPE} == "pass" } {
     }
 }
 if { ${TYPE} == "none" } {
-    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${REMOTE_SRC} ${REMOTE_DEST}
+    spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${USER}@${HOST} /bin/cp -rfp ${SRC_PATH} ${DEST_PATH}
     expect "password:" {
         exit 201
     } "(yes/no)?" {

@@ -931,6 +931,8 @@ ANS_PLAYBOOK_HED_DEF              VARCHAR (512)                    , -- legacy P
 ANS_EXEC_OPTIONS                  VARCHAR (512)                    ,
 ANS_VIRTUALENV_NAME               VARCHAR (512)                    , -- Tower virtualenv path
 ANS_ENGINE_VIRTUALENV_NAME        VARCHAR (512)                    , -- ansible virtualenv path
+ANS_EXECUTION_ENVIRONMENT_NAME    VARCHAR (512)                    , -- AAP 実行環境
+ANS_ANSIBLE_CONFIG_FILE           VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 OPENST_TEMPLATE                   VARCHAR (256)                    ,
 OPENST_ENVIRONMENT                VARCHAR (256)                    ,
 TERRAFORM_WORKSPACE_ID            INT                              , -- Terraform利用情報
@@ -966,6 +968,8 @@ ANS_PLAYBOOK_HED_DEF              VARCHAR (512)                    , -- legacy P
 ANS_EXEC_OPTIONS                  VARCHAR (512)                    ,
 ANS_VIRTUALENV_NAME               VARCHAR (512)                    , -- Tower virtualenv path
 ANS_ENGINE_VIRTUALENV_NAME        VARCHAR (512)                    , -- ansible virtualenv path
+ANS_EXECUTION_ENVIRONMENT_NAME    VARCHAR (512)                    , -- AAP 実行環境
+ANS_ANSIBLE_CONFIG_FILE           VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 OPENST_TEMPLATE                   VARCHAR (256)                    ,
 OPENST_ENVIRONMENT                VARCHAR (256)                    ,
 TERRAFORM_WORKSPACE_ID            INT                              , -- Terraform利用情報

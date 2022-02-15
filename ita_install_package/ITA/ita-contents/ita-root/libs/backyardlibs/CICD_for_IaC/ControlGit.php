@@ -572,7 +572,7 @@ class ControlGit {
      *  remote: Compressing objects: 100% (8/8), done.
      *  remote: Total 12 (delta 2), reused 0 (delta 0), pack-reused 0
      *  Unpacking objects: 100% (12/12), done.
-     *  From https://github.com/enomantest/newrepo
+     *  From https://github.com/......
      *     a40645c..067a362  master     -> origin/master
      *  Updating a40645c..067a362
      *  Fast-forward
@@ -583,7 +583,7 @@ class ControlGit {
      *  delete mode 100644 adddir/add1
      *  create mode 100644 hoge1/roles/test.yml
      * 1ファイルの変更
-     * From https://github.com/enomantest/newrepo
+     * From https://github.com/.....
      *    710b91d..288610f  master     -> origin/master
      * Updating 710b91d..288610f
      * Fast-forward

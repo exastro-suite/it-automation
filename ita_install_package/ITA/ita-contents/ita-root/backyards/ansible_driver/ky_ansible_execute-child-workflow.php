@@ -168,6 +168,24 @@
         }
 
         ////////////////////////////////////////////////////////////////
+        // Symphonyインタフェース情報を取得                           //
+        ////////////////////////////////////////////////////////////////
+        $lv_Symphony_if_info = array();
+        $ret = cm_getSymphonyInterfaceInfo($dbobj,'-',$lv_Symphony_if_info,$FREE_LOG);
+        if($ret === false) {
+            $error_flag = 1; throw new Exception( $FREE_LOG );
+        }
+
+        ////////////////////////////////////////////////////////////////
+        // Conductorインタフェース情報を取得                          //
+        ////////////////////////////////////////////////////////////////
+        $lv_Conductor_if_info = array();
+        $ret = cm_getConductorInterfaceInfo($dbobj,'-',$lv_Conductor_if_info,$FREE_LOG);
+        if($ret === false) {
+            $error_flag = 1; throw new Exception( $FREE_LOG );
+        }
+
+        ////////////////////////////////////////////////////////////////
         // トランザクション開始
         ////////////////////////////////////////////////////////////////
         $ret = cm_transactionStart($tgt_execution_no,$FREE_LOG);
@@ -235,6 +253,9 @@
                                              $lv_ans_if_info['ANSIBLE_STORAGE_PATH_LNX'],
                                              $lv_ans_if_info['ANSIBLE_STORAGE_PATH_ANS'],  
                                              $lv_ans_if_info['SYMPHONY_STORAGE_PATH_ANS'],
+                                             $lv_ans_if_info['CONDUCTOR_STORAGE_PATH_ANS'],
+                                             $lv_Symphony_if_info["SYMPHONY_STORAGE_PATH_ITA"],
+                                             $lv_Conductor_if_info["CONDUCTOR_STORAGE_PATH_ITA"],
                                              $vg_legacy_playbook_contents_dir,
                                              $vg_pioneer_playbook_contents_dir,
                                              $vg_template_contents_dir,
@@ -254,6 +275,7 @@
                                              $lv_ans_if_info,
                                              $tgt_execution_no,
                                              $cln_execution_row['I_ENGINE_VIRTUALENV_NAME'],
+                                             $cln_execution_row['I_ANSIBLE_CONFIG_FILE'],
                                              $objMTS,
                                              $objDBCA);
 
@@ -1783,6 +1805,17 @@
                 // 8:緊急停止
 
                 /////////////////////////////////////////////////////
+                // 実行結果ファイルをTowerから転送
+                /////////////////////////////////////////////////////
+                // 実行エンジンを判定
+                if($lv_ans_exec_mode != DF_EXEC_MODE_ANSIBLE) {
+                    // 戻り値は確認しない。
+                    $MultipleLogMark = "";        // 定義のみ値は返却されない
+                    $MultipleLogFileJsonAry = ""; // 定義のみ値は返却されない
+                    AnsibleTowerExecution(DF_RESULTFILETRANSFER_FUNCTION,$in_ans_if_info,$TowerHostList,$in_execution_row,$in_ansdrv->getAnsible_out_Dir(),$UIExecLogPath,$UIErrorLogPath,$MultipleLogMark,$MultipleLogFileJsonAry,$Status);
+                }
+
+                /////////////////////////////////////////////////////
                 // 結果データ用ZIPファイル作成                     //
                 /////////////////////////////////////////////////////
                 $ret = fileCreateZIPFile($zip_data_source_dir,
@@ -1878,8 +1911,10 @@
             }
             // SQL(UPDATE)をEXECUTEすると判断した場合
             if( $sql_exec_flag == 1 ){
+
                 // 遅延中以外の場合に結果データ用ZIP 履歴ファイル作成
                 if($out_execution_row['STATUS_ID'] != 4) {
+
                     /////////////////////////////////////////////////////
                     // 結果データ用ZIP 履歴ファイル作成                //
                     /////////////////////////////////////////////////////
