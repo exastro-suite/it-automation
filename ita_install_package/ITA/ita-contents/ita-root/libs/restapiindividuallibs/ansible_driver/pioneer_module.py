@@ -154,7 +154,7 @@ def main():
   host_vars_file = module.params['host_vars_file']
   shell_name = module.params['grep_shell_dir']
   shell_name = shell_name + '/ky_pionner_grep_side_Ansible.sh'
-  log_file_name = module.params['log_file_dir'] + '/private.log'
+  log_file_name = module.params['log_file_dir'] + '/' + host_name + '_private.log'
   ssh_key_file   = module.params['ssh_key_file']
   extra_args = module.params['extra_args']
   lang       = module.params['lang']

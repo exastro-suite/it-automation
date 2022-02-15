@@ -1,5 +1,5 @@
-#!/bin/bash
-#   Copyright 2019 NEC Corporation
+#!/usr/bin/expect
+#   Copyright 2022 NEC Corporation
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -16,32 +16,27 @@
 ######################################################################
 ##
 ##  【概要】
-##      リモートホストへのファイル転送
+##      リモートホスト内 ファイル
 ##
 ##  【特記事項】
 ##      <<引数>>
-##      sh ./ky_ansible_materials_transfer.sh $1
-##      $1:  Tower接続情報ファイル
+##      sh ky_ansible_materials_remotecopy.sh %0
 ##      <<Tower接続情報ファイル>>
-##          リモートホスト\t認証方式\tユーザー名\tパスワード\t鍵認証ファイル\tファイル転送元パス\tファイル転送先パス\t鍵認証ファイル パスフレーズ\tita-rootパス\t
+##          リモートホスト\t認証方式\tユーザー名\tパスワード\t鍵認証ファイル\tコピー元バス\tコピー先パス\t鍵認証ファイルパスフレーズ\tita-rootパス\t
 ##      <<環境変数>>
 ##       HOST:            リモートホスト
 ##       TYPE:            認証方式
-##                        パスワード認証:             pass
-##                        鍵認証:                     key
-##                        鍵認証(パスフレーズあり:    key
-##                        鍵認証(鍵交換済み):         none
+##                          パスワード認証: pass
+##                          鍵認証:         key
+##                          パスワード省略: none
 ##       USER:            ユーザー名
 ##       PASSWD:          パスワード
-##       KEY_FILE_PATH:   鍵認証ファイル
-##       SRC_PATH:        ファイル転送元パス
-##       DEST_PATH:       ファイル転送先パス
-##       RAS_FILE:        鍵認証ファイル 
+##       KEY_FILE_PATH:   鍵認証ファイルパス
+##       SRC_PATH:        コピー元バス
+##       DEST_PATH:       コピー先パス
 ##       RAS_FILE_PASSWD: 鍵認証ファイル パスフレーズ
 ##                          パスフレーズなし: undefine
 ##       BASE_DIR:        ita-rootパス
-##       FROMTO:          転送方向
-##                          ITA: ITA->TOWER   TOWER:  TOWER->ITA 
 ##      <<exit code>>
 ##       0:   正常
 ##       他:　異常
@@ -62,7 +57,6 @@ do
     export RAS_FILE=${KEY_FILE_PATH}
     export RAS_FILE_PASSWD=${LINE[7]}
     export BASE_DIR=${LINE[8]}
-    export FROMTO=${LINE[9]}
     break
 done < ${FILE}
 ## 鍵認証ファイル パスフレーズが設定されている場合にssh-agentにパスフレーズ登録
@@ -72,7 +66,7 @@ if [ "${RAS_FILE_PASSWD}" != "undefine" ]; then
     echo "failed to startup ssh-agent." >> /dev/stderr
     exit 100
   fi
-  # expect 
+  # expect
   expect ${BASE_DIR}/backyards/ansible_driver/ky_ansible_ssh_add.exp 1>/dev/null 2>>/dev/stderr
   EXIT_CODE=$?
   if [ ${EXIT_CODE}  -ne 0 ]; then
@@ -90,10 +84,9 @@ if [ "${RAS_FILE_PASSWD}" != "undefine" ]; then
     exit 100
   fi
 fi
-expect ${BASE_DIR}/backyards/ansible_driver/ky_ansible_materials_transfer.exp 
+expect ${BASE_DIR}/backyards/ansible_driver/ky_ansible_materials_remotecopy.exp
 RET_CODE=$?
 if [ "${RAS_FILE_PASSWD}" != "undefine" ]; then
   eval `ssh-agent -k` 1>/dev/null
 fi
 exit ${RET_CODE}
-

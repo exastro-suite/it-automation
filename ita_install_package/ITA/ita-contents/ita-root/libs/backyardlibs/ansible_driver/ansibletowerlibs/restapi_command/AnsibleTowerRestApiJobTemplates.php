@@ -138,6 +138,13 @@ class AnsibleTowerRestApiJobTemplates extends AnsibleTowerRestApiBase {
             return $response_array;
         }
 
+        // 実行環境が設定させている場合に設定
+        if(!empty($param['execution_environment'])) {
+            if($param['execution_environment'] !== false) {
+                $content['execution_environment'] = $param['execution_environment'];
+            }
+        }
+
         //---- Ansible Tower Version Check (Ver3.5)
         if($RestApiCaller->getTowerVersion() == TOWER_VER35) {
             if(!empty($param['credential'])) {
