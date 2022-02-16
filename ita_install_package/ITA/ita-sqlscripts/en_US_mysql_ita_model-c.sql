@@ -1192,7 +1192,7 @@ I_OPERATION_NO_IDBH               INT                              ,
 I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
 I_EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                    , -- AAP 実行環境
-I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , ansible.cfg アップロードカラム
+I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -1247,7 +1247,7 @@ I_OPERATION_NO_IDBH               INT                              ,
 I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
 I_EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                    , -- AAP 実行環境
-I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , ansible.cfg アップロードカラム
+I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
