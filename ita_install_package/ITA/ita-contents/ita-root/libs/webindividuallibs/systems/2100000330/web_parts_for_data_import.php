@@ -114,7 +114,13 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
 
             // POSTされたメニューIDリストを作成
             makeImportMenuIdList();
-
+            // トランザクション開始
+            $varTrzStart = $g['objDBCA']->transactionStart();
+            if ($varTrzStart === false) {
+                web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900015',
+                                                     array(basename(__FILE__), __LINE__)));
+                throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+            }
             // データ登録
             $taskNo = insertBulkExcelTask();
             $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-2100000330_10', array($taskNo));
@@ -131,7 +137,13 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
             if (file_exists($filePath) === true) {
                 unlink($filePath);
             }
-
+            //トランザクション処理終了
+            $res = $g['objDBCA']->transactionCommit();
+            if ($res === false) {
+                web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900036',
+                                                     array(basename(__FILE__), __LINE__)));
+                throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+            }
         }
 
         $resultFlg = true;
@@ -139,7 +151,8 @@ if (isset($_REQUEST['post_kind']) === false || strlen($_REQUEST['post_kind']) ==
 
     } catch (DBException $e) {
         web_log($e->getMessage());
-        $res = $g['objDBCA']->transactionRollBack();
+        //トランザクション処理が実行中か確認、エラー時ロールバック
+        $res = $g['objDBCA']->transactionExit();
         if ($res === false) {
             web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900050', array(__FILE__, __LINE__)));
             throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
