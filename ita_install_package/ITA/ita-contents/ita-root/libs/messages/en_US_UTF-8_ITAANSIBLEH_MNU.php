@@ -606,11 +606,14 @@ $ary["ITAANSIBLEH-MNU-1202050"]     = "Ansible Interface information";
 $ary["ITAANSIBLEH-MNU-1202060"]     = "Data relay storage path (ITA)";
 $ary["ITAANSIBLEH-MNU-1202070"]     = "This is a shared directory with ITA server.";
 $ary["ITAANSIBLEH-MNU-1202080"]     = "Data relay storage path (Ansible)";
-$ary["ITAANSIBLEH-MNU-1202090"]     = "This is a shared directory with Ansible server.";
+$ary["ITAANSIBLEH-MNU-1202090"]     = "This is the Ansible server shared directory.
+This information is not used if the execution engine is not set to Ansible Core.";
 $ary["ITAANSIBLEH-MNU-1202095"]     = "Symphony instance data relay storage path(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202096"]     = "Path for the Ansible to share the directory shared by each Movement of the Symphony instance.";
+$ary["ITAANSIBLEH-MNU-1202096"]     = "This path is used to share the Symphony instance Movements' shared directory within Ansible Server.
+This information is not used if the execution engine is not set to Ansible Core.";
 $ary["ITAANSIBLEH-MNU-1202097"]     = "Conductor instance data relay storage path(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202098"]     = "Path for the Ansible server to share the directory shared by each Movement of the Conductor instance.";
+$ary["ITAANSIBLEH-MNU-1202098"]     = "This path is used to share the Conductor instance Movements' shared directory within Ansible Server.
+This information is not used if the execution engine is not set to Ansible Core.";
 $ary["ITAANSIBLEH-MNU-1203010"]     = "Protocol";
 $ary["ITAANSIBLEH-MNU-1203020"]     = "Enter http or https.\nrecommended value is https.";
 $ary["ITAANSIBLEH-MNU-1203021"]     = "Enter http or https.\nrecommended value is https.";
@@ -624,7 +627,12 @@ Normal is 80 for http and 443 for https.";
 $ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Tower(Ansible Automation Controller) server connection port.
 Normal is 443.";
 $ary["ITAANSIBLEH-MNU-1203065"]     = "execution engine";
-$ary["ITAANSIBLEH-MNU-1203066"]     = "Select the execution engine.";
+$ary["ITAANSIBLEH-MNU-1203066"]     = "Select the execution engine.
+・Ansible Core
+・Ansible Tower
+・Ansible Automation controller
+※Ansible Tower changed to Ansible Automation controller in Ansible Automation Platform 2.0.
+Configuring the Ansible Core interface is required in order to use ansible-vault commands, even if Ansible Core is not selected as the execution engine.";
 $ary["ITAANSIBLEH-MNU-1203070"]     = "Access_key_id";
 $ary["ITAANSIBLEH-MNU-1203080"]     = "Access Key ID that is used for authentication to connect with the Ansible server.";
 $ary["ITAANSIBLEH-MNU-1203090"]     = "Secret_access_key";
@@ -1307,7 +1315,7 @@ $ary["ITAANSIBLEH-MNU-9010000039"] = "Uploads the ansible.cfg file.
 If the file hasn't been uploaded, the default value will be used.
 If a zip file containing ansible.cfg is uploaded to the role package list, the uploaded ansible.cfg will be overwritten.";
 $ary["ITAANSIBLEH-MNU-9010000040"]  = "Ansible-Core dedicated information";
-$ary["ITAANSIBLEH-MNU-9010001000"]  = "Maintenance (view/update) can be performe Ansible Tower(Ansible Automation Controller) host information.\ncase of cluster configuration, it is necessary to register the host information of Ansible Tower(Ansible Automation Controller) that constitutes the cluster.";
+$ary["ITAANSIBLEH-MNU-9010001000"]  = "Maintenance (view/update) can be performe Ansible Tower(Ansible Automation Controller) host information.\ncase of cluster configuration, If constructed with a cluster configuration, register the node information(excluding the hop node within the cluster). If it is not constructed with a cluster configuration, register information for the target node (for 1 node).";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "No.";
 $ary["ITAANSIBLEH-MNU-9010001002"]  = "AnsibleTower(AAC)hostlist";
 $ary["ITAANSIBLEH-MNU-9010001003"]  = "AnsibleTower(AAC)hostlist";
@@ -1336,7 +1344,7 @@ $ary["ITAANSIBLEH-MNU-9010001053"]  = "Enter the passphrase set in the ssh priva
 $ary["ITAANSIBLEH-MNU-9010001054"]  = "Ansible-vault encrypted ssh private key file.";
 $ary["ITAANSIBLEH-MNU-9010001055"]  = "ssh key credentials";
 $ary["ITAANSIBLEH-MNU-9010001060"]  = "isolated Tower";
-$ary["ITAANSIBLEH-MNU-9010001061"]  = "Select ● for isolated Tower.";
+$ary["ITAANSIBLEH-MNU-9010001061"]  = "If the target node is an isolated node for Ansible Tower or an execution node for Ansible Automation Controller, select \"●\"";
 $ary["ITAANSIBLEH-MNU-9010002000"]  = "Sensitive setting";
 $ary["ITAANSIBLEH-MNU-9010002010"]  = "If \"ON\", the specific value will not be displayed after registration.";
 ?>
