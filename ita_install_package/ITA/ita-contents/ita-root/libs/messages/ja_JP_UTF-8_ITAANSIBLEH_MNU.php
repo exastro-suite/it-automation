@@ -606,11 +606,15 @@ $ary["ITAANSIBLEH-MNU-1202050"]     = "Ansibleインターフェース情報";
 $ary["ITAANSIBLEH-MNU-1202060"]     = "データリレイストレージパス(ITA)";
 $ary["ITAANSIBLEH-MNU-1202070"]     = "ITAサーバとの共有ディレクトリです。";
 $ary["ITAANSIBLEH-MNU-1202080"]     = "データリレイストレージパス(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202090"]     = "Ansibleサーバとの共有ディレクトリです。";
+$ary["ITAANSIBLEH-MNU-1202090"]     = "Ansibleサーバとの共有ディレクトリです。
+実行エンジンがAnsible Core以外では使用しない情報です。";
 $ary["ITAANSIBLEH-MNU-1202095"]     = "Symphonyインスタンスデータリレイストレージパス(Ansible)";
 $ary["ITAANSIBLEH-MNU-1202096"]     = "Symphonyインスタンスの各Movementが共有するディレクトリをAnsibleサーバで共有する為のパスです。";
+$ary["ITAANSIBLEH-MNU-1202096"]     = "Symphonyインスタンスの各Movementが共有するディレクトリをAnsibleサーバで共有する為のパスです。
+実行エンジンがAnsible Core以外では使用しない情報です。";
 $ary["ITAANSIBLEH-MNU-1202097"]     = "Conductorインスタンスデータリレイストレージパス(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202098"]     = "Conductorインスタンスの各Movementが共有するディレクトリをAnsibleサーバで共有する為のパスです。";
+$ary["ITAANSIBLEH-MNU-1202098"]     = "Conductorインスタンスの各Movementが共有するディレクトリをAnsibleサーバで共有する為のパスです。
+実行エンジンがAnsible Core以外では使用しない情報です。";
 $ary["ITAANSIBLEH-MNU-1203010"]     = "プロトコル";
 $ary["ITAANSIBLEH-MNU-1203020"]     = "http/httpsのいずれかです。
 通常はhttps
@@ -631,7 +635,12 @@ httpsの場合443
 $ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Tower(Ansible Automation Controller)サーバの接続ポートです。
 通常は443です。";
 $ary["ITAANSIBLEH-MNU-1203065"]     = "実行エンジン";
-$ary["ITAANSIBLEH-MNU-1203066"]     = "実行するエンジンを選択します。";
+$ary["ITAANSIBLEH-MNU-1203066"]     = "実行するエンジンを3種類から選択します。
+・Ansible Core
+・Ansible Tower
+・Ansible Automation controller
+※Ansible TowerはAnsible Automation Pratform2.0以降でAnsible Automation controllerに変更になりました。
+Ansible Core以外を選択した場合もansible-vaultコマンドを実行するAnsible Coreインターフェースの設定が必要です。";
 $ary["ITAANSIBLEH-MNU-1203070"]     = "Access_key_id";
 $ary["ITAANSIBLEH-MNU-1203080"]     = "Ansibleサーバ接続時の認証に使用するアクセスキーIDです。";
 $ary["ITAANSIBLEH-MNU-1203090"]     = "Secret_access_key";
@@ -1316,7 +1325,8 @@ $ary["ITAANSIBLEH-MNU-9010000039"]  = "作業実行時に使用するansible.cfg
 未アップロードの場合は、デフォルトが使用されます。
 また、ロールパッケージ管理でアップロードされているzipファイルにansible.cfgが含まれている場合は、アップロードしたansible.cfgで上書きされます。";
 $ary["ITAANSIBLEH-MNU-9010000040"]  = "Ansible-Core利用情報";
-$ary["ITAANSIBLEH-MNU-9010001000"]  = "Ansible Tower(Ansible Automation Controller)のホスト情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>クラスタ構成の場合、クラスタを構成しているAnsible Tower(Ansible Automation Controller)のホスト情報を登録する必要があります。";
+$ary["ITAANSIBLEH-MNU-9010001000"]  = "Ansible Tower(Ansible Automation Controller)のホスト情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>クラスター構成で構築されている場合、クラスター内のホップノードを除いたノード情報を登録して下さい。
+クラスター構成でない場合は、対象ノード(1台)の情報を登録して下さい。";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "項番";
 $ary["ITAANSIBLEH-MNU-9010001002"]  = "Ansible Tower(AAC)ホスト一覧";
 $ary["ITAANSIBLEH-MNU-9010001003"]  = "Ansible Tower(AAC)ホスト一覧";
@@ -1345,7 +1355,7 @@ $ary["ITAANSIBLEH-MNU-9010001053"]  = "ssh秘密鍵ファイルに設定され�
 $ary["ITAANSIBLEH-MNU-9010001054"]  = "ansible-vaultで暗号化されたssh秘密鍵ファイル";
 $ary["ITAANSIBLEH-MNU-9010001055"]  = "ssh鍵認証情報";
 $ary["ITAANSIBLEH-MNU-9010001060"]  = "isolated Tower";
-$ary["ITAANSIBLEH-MNU-9010001061"]  = "isolated Towerは●を選択します。";
+$ary["ITAANSIBLEH-MNU-9010001061"]  = "対象ノードがAnsible Towerのisolated node／Ansible Automation Controllerのexecution nodeの場合に「●」を選択します。";
 $ary["ITAANSIBLEH-MNU-9010002000"]  = "Sensitive設定";
 $ary["ITAANSIBLEH-MNU-9010002010"]  = "「ON」の場合、登録後に具体値が表示されなくなります。";
 ?>
