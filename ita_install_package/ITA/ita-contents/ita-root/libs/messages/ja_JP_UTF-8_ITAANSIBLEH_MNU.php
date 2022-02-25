@@ -609,7 +609,6 @@ $ary["ITAANSIBLEH-MNU-1202080"]     = "データリレイストレージパス(A
 $ary["ITAANSIBLEH-MNU-1202090"]     = "Ansibleサーバとの共有ディレクトリです。
 実行エンジンがAnsible Core以外では使用しない情報です。";
 $ary["ITAANSIBLEH-MNU-1202095"]     = "Symphonyインスタンスデータリレイストレージパス(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202096"]     = "Symphonyインスタンスの各Movementが共有するディレクトリをAnsibleサーバで共有する為のパスです。";
 $ary["ITAANSIBLEH-MNU-1202096"]     = "Symphonyインスタンスの各Movementが共有するディレクトリをAnsibleサーバで共有する為のパスです。
 実行エンジンがAnsible Core以外では使用しない情報です。";
 $ary["ITAANSIBLEH-MNU-1202097"]     = "Conductorインスタンスデータリレイストレージパス(Ansible)";
