@@ -985,7 +985,9 @@
                     }else if( $aryMovInsUpdateTgtSource["I_NODE_TYPE_ID"] == '8' && $aryMovInsUpdateTgtSource["RELEASED_FLAG"] == '2' && $currentPauseStatusId == '1'){
                         foreach ($aryMovement as $key => $value) {
                           if($value["I_NODE_TYPE_ID"] == '8' && $value["RELEASED_FLAG"] == '1'){
-                            $pauseFlg = true;
+                            if($value["STATUS_ID"] != 14){
+                              $pauseFlg = true;
+                            }
                           }
                         }
                         if($pauseFlg === false){
@@ -996,6 +998,67 @@
                           $aryBaseSourceForBind = $arySymInsUpdateTgtSource;
                           $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
                         }
+                    }
+                    
+                    //ConductorCallがある場合
+                    if($rowOfFocusMovement['CONDUCTOR_INSTANCE_CALL_NO'] != ''){
+                      $aryConductorCallNo = array();
+                      $sql = "SELECT CONDUCTOR_INSTANCE_CALL_NO
+                              FROM   C_NODE_INSTANCE_MNG
+                              WHERE  CONDUCTOR_INSTANCE_NO = {$rowOfFocusMovement['CONDUCTOR_INSTANCE_NO']}";
+
+                      //SQL準備
+                      $objQuery = $objDBCA->sqlPrepare($sql);
+                      $r = $objQuery->sqlExecute();
+                      while ( $row = $objQuery->resultFetch() ){
+                        if($row['CONDUCTOR_INSTANCE_CALL_NO'] != ''){
+                          $aryConductorCallNo[] = $row['CONDUCTOR_INSTANCE_CALL_NO'];
+                        }
+                      }
+
+                      //呼び出し先のConductorのPAUSE_STATUS_ID取得
+                      $aryCurrentCallConductorPauseStatusId = array();
+                      foreach ($aryConductorCallNo as $key => $value) {
+                        $sql = "SELECT PAUSE_STATUS_ID
+                                FROM   C_CONDUCTOR_INSTANCE_MNG
+                                WHERE  CONDUCTOR_INSTANCE_NO = {$value}";
+
+                        //SQL準備
+                        $objQuery = $objDBCA->sqlPrepare($sql);
+                        $r = $objQuery->sqlExecute();
+                        while ( $row = $objQuery->resultFetch() ){
+                            $aryCurrentCallConductorPauseStatusId[] = $row['PAUSE_STATUS_ID'];
+                        }
+                      }
+                      
+                      //呼び出し元のConductorのPAUSE_STATUS_ID取得
+                      $currentPauseStatusId = '';
+                      $sql = "SELECT PAUSE_STATUS_ID
+                              FROM   C_CONDUCTOR_INSTANCE_MNG
+                              WHERE  CONDUCTOR_INSTANCE_NO = {$arySymInsUpdateTgtSource["CONDUCTOR_INSTANCE_NO"]}";
+
+                      //SQL準備
+                      $objQuery = $objDBCA->sqlPrepare($sql);
+                      $r = $objQuery->sqlExecute();
+                      while ( $row = $objQuery->resultFetch() ){
+                          $currentPauseStatusId = $row['PAUSE_STATUS_ID'];
+                      }
+                      
+                      if($currentPauseStatusId == '2' && in_array('1', $aryCurrentCallConductorPauseStatusId)){
+                        $arySymInsUpdateTgtSource['PAUSE_STATUS_ID'] = 1;
+                        // 更新用のテーブル定義
+                        $aryConfigForIUD = $aryConfigForSymInsIUD;
+                        // BIND用のベースソース
+                        $aryBaseSourceForBind = $arySymInsUpdateTgtSource;
+                        $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                      }elseif ($currentPauseStatusId == '1' && in_array('1', $aryCurrentCallConductorPauseStatusId) === false) {
+                        $arySymInsUpdateTgtSource['PAUSE_STATUS_ID'] = 2;
+                        // 更新用のテーブル定義
+                        $aryConfigForIUD = $aryConfigForSymInsIUD;
+                        // BIND用のベースソース
+                        $aryBaseSourceForBind = $arySymInsUpdateTgtSource;
+                        $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                      }
                     }
 
                     $boolNextNodeReadyflg = false;
