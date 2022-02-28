@@ -571,6 +571,42 @@ CREATE TABLE B_ANS_TWR_VIRTUALENV_JNL (
 -- 履歴系テーブル作成----
 
 -- ------------------------------
+-- -- Tower 実行環境マスタ
+-- ------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_TWR_EXECUTION_ENVIRONMENT ( 
+  ROW_ID                          INT                               , 
+  EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                     , 
+  EXECUTION_ENVIRONMENT_NO        INT                               , 
+  DISP_SEQ                        INT                               , 
+  ACCESS_AUTH                     TEXT                              ,
+  NOTE                            VARCHAR (4000)                    , 
+  DISUSE_FLAG                     VARCHAR (1)                       , 
+  LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
+  LAST_UPDATE_USER                INT                               , 
+  PRIMARY KEY (ROW_ID) 
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_TWR_EXECUTION_ENVIRONMENT_JNL ( 
+  JOURNAL_SEQ_NO                  INT                               , 
+  JOURNAL_REG_DATETIME            DATETIME(6)                       , 
+  JOURNAL_ACTION_CLASS            VARCHAR (8)                       , 
+  ROW_ID                          INT                               , 
+  EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                     , 
+  EXECUTION_ENVIRONMENT_NO        INT                               , 
+  DISP_SEQ                        INT                               , 
+  ACCESS_AUTH                     TEXT                              ,
+  NOTE                            VARCHAR (4000)                    , 
+  DISUSE_FLAG                     VARCHAR (1)                       , 
+  LAST_UPDATE_TIMESTAMP           DATETIME(6)                       , 
+  LAST_UPDATE_USER                INT                               , 
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)ENGINE = InnoDB, CHARSET = utf8, COLLATE = utf8_bin, ROW_FORMAT=COMPRESSED ,KEY_BLOCK_SIZE=8; 
+-- 履歴系テーブル作成----
+
+-- ------------------------------
 -- -- Tower 組織名マスタ
 -- ------------------------------
 -- ----更新系テーブル作成
@@ -1155,6 +1191,8 @@ I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -1208,6 +1246,8 @@ I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -1309,6 +1349,8 @@ SELECT
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1335,6 +1377,8 @@ SELECT
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1436,6 +1480,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1490,6 +1536,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1927,6 +1975,8 @@ I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -1979,6 +2029,8 @@ I_OPERATION_NAME                  VARCHAR (256)                    ,
 I_OPERATION_NO_IDBH               INT                              ,
 I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         DATETIME(6)                      ,
 TIME_START                        DATETIME(6)                      ,
 TIME_END                          DATETIME(6)                      ,
@@ -2130,6 +2182,8 @@ SELECT
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2154,6 +2208,8 @@ SELECT
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2257,6 +2313,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2311,6 +2369,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2399,6 +2459,8 @@ I_OPERATION_NAME                  VARCHAR (256)                    , -- オペ�
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
 I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
 TIME_END                          DATETIME(6)                      , -- 終了日時
@@ -2451,6 +2513,8 @@ I_OPERATION_NAME                  VARCHAR (256)                    , -- オペ�
 I_OPERATION_NO_IDBH               INT                              , -- オペレーションID
 I_VIRTUALENV_NAME                 VARCHAR (512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          VARCHAR (512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      VARCHAR (512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             VARCHAR (512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         DATETIME(6)                      , -- 予約日時
 TIME_START                        DATETIME(6)                      , -- 開始日時
 TIME_END                          DATETIME(6)                      , -- 終了日時
@@ -3232,6 +3296,8 @@ SELECT
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3258,6 +3324,8 @@ SELECT
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3294,6 +3362,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -3348,6 +3418,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -4903,6 +4975,10 @@ INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) 
 
 INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_PNS_LANG_MASTER_JSQ',3,NULL,2100290028,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
 
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_EXECUTION_ENVIRONMENT_RIC',1,NULL,2100290029,NULL,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
+INSERT INTO A_SEQUENCE (NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP) VALUES('B_ANS_TWR_EXECUTION_ENVIRONMENT_JSQ',1,NULL,2100290030,'for the history table.',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'));
+
 
 INSERT INTO A_MENU_GROUP_LIST (MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100020000,'Ansible Common','anscmn.png',70,'Ansible Common','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_GROUP_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_GROUP_ID,MENU_GROUP_NAME,MENU_GROUP_ICON,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20000,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100020000,'Ansible Common','anscmn.png',70,'Ansible Common','0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -5009,8 +5085,8 @@ INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRI
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-20322,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100020322,2100020003,'Reading variable list',NULL,NULL,NULL,1,0,1,2,1000,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040707,2100020000,'Common variable use list',NULL,NULL,NULL,1,0,1,1,290,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40707,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040707,2100020000,'Common variable use list',NULL,NULL,NULL,1,0,1,1,290,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040708,2100020000,'Ansible tower host list',NULL,NULL,NULL,1,0,1,2,25,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40708,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040708,2100020000,'Ansible tower host list',NULL,NULL,NULL,1,0,1,2,25,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST (MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2100040708,2100020000,'Ansible tower (Ansible Automation Controller) host list',NULL,NULL,NULL,1,0,1,2,25,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO A_MENU_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,MENU_ID,MENU_GROUP_ID,MENU_NAME,WEB_PRINT_LIMIT,WEB_PRINT_CONFIRM,XLS_PRINT_LIMIT,LOGIN_NECESSITY,SERVICE_STATUS,AUTOFILTER_FLG,INITIAL_FILTER_FLG,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-40708,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2100040708,2100020000,'Ansible tower (Ansible Automation Controller) host list',NULL,NULL,NULL,1,0,1,2,25,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO A_ACCOUNT_LIST (USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100003,'a3c','5ebbc37e034d6874a2af59eb04beaa52','Legacy status checking procedure',NULL,NULL,NULL,NULL,'Legacy status checking procedure','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO A_ACCOUNT_LIST_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,USER_ID,USERNAME,PASSWORD,USERNAME_JP,MAIL_ADDRESS,PW_EXPIRATION,DEACTIVATE_PW_CHANGE,AUTH_TYPE,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(-100003,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',-100003,'a3c','5ebbc37e034d6874a2af59eb04beaa52','Legacy status checking procedure',NULL,NULL,NULL,NULL,'Legacy status checking procedure','H',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
@@ -5244,10 +5320,12 @@ INSERT INTO B_ANS_PNS_LANG_MASTER_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURN
 INSERT INTO B_ANS_PNS_LANG_MASTER (ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,'euc',3,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_ANS_PNS_LANG_MASTER_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',3,'euc',3,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
-INSERT INTO B_ANSIBLE_EXEC_MODE (ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Ansible Engine',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
-INSERT INTO B_ANSIBLE_EXEC_MODE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Ansible Engine',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANSIBLE_EXEC_MODE (ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'Ansible-Core',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANSIBLE_EXEC_MODE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'Ansible-Core',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_ANSIBLE_EXEC_MODE (ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,'Ansible Tower',2,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_ANSIBLE_EXEC_MODE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(2,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',2,'Ansible Tower',2,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANSIBLE_EXEC_MODE (ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,'Ansible Automation Controller',3,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
+INSERT INTO B_ANSIBLE_EXEC_MODE_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ID,NAME,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(3,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',3,'Ansible Automation Controller',3,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 
 INSERT INTO B_ANS_TWR_JOBTP_PROPERTY (ROWID,KEY_NAME,SHORT_KEY_NAME,PROPERTY_TYPE,PROPERTY_NAME,TOWERONLY,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,'--forks=','-f(\\s)+','1','forks','0',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);
 INSERT INTO B_ANS_TWR_JOBTP_PROPERTY_JNL (JOURNAL_SEQ_NO,JOURNAL_REG_DATETIME,JOURNAL_ACTION_CLASS,ROWID,KEY_NAME,SHORT_KEY_NAME,PROPERTY_TYPE,PROPERTY_NAME,TOWERONLY,DISP_SEQ,NOTE,DISUSE_FLAG,LAST_UPDATE_TIMESTAMP,LAST_UPDATE_USER) VALUES(1,STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),'INSERT',1,'--forks=','-f(\\s)+','1','forks','0',1,NULL,'0',STR_TO_DATE('2015/04/01 10:00:00.000000','%Y/%m/%d %H:%i:%s.%f'),1);

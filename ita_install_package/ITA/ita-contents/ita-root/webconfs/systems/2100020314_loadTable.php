@@ -105,16 +105,6 @@ Ansible(Legacy)作業管理
     $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
-    //Ansible virtualenv
-    $c = new TextColumn('I_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000031"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000033"));//エクセル・ヘッダでの説明
-    $table->addColumn($c);
-
-    //Tower virtualenv
-    $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000032"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000034"));//エクセル・ヘッダでの説明
-    $table->addColumn($c);
-
     //シンフォニークラス
     $c = new TextColumn('SYMPHONY_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1108120"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1108130"));//エクセル・ヘッダでの説明
@@ -203,6 +193,62 @@ Ansible(Legacy)作業管理
     $cg2->addColumn($c);
 
     $cg->addColumn($cg2);
+
+    // Ansible Engine利用情報
+    $cg3 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000040") );
+        /* Ansible virtualenv path*/
+        $c = new TextColumn('I_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
+        $cg3->addColumn($c);
+    $cg->addColumn($cg3);
+
+    // Tower利用情報
+    $cg4 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000013") );
+        // virtualenv
+        $c = new IDColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030"));
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('I_VIRTUALENV_NAME');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_VIRTUALENV_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'VIRTUALENV_NAME',
+            'TTT_GET_TARGET_COLUMN_ID'=>'VIRTUALENV_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
+        $cg4->addColumn($c);
+    $cg->addColumn($cg4);
+
+    // ansible automation controller利用情報
+    $cg5 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000035") );
+        // 実行環境
+        $c = new IDColumn('I_EXECUTION_ENVIRONMENT_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000036"),'B_ANS_TWR_EXECUTION_ENVIRONMENT','EXECUTION_ENVIRONMENT_NAME','EXECUTION_ENVIRONMENT_NAME','');
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000037")); //エクセル・ヘッダでの説明
+        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+        $objOT->setFirstSearchValueOwnerColumnID('I_EXECUTION_ENVIRONMENT_NAME');
+        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_EXECUTION_ENVIRONMENT_JNL',
+            'TTT_SEARCH_KEY_COLUMN_ID'=>'EXECUTION_ENVIRONMENT_NAME',
+            'TTT_GET_TARGET_COLUMN_ID'=>'EXECUTION_ENVIRONMENT_NAME',
+            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+            )
+        );
+        $objOT->setTraceQuery($aryTraceQuery);
+        $c->setOutputType('print_journal_table',$objOT);
+        $cg5->addColumn($c);
+
+    $cg->addColumn($cg5);
+
+    $c = new FileUploadColumn('I_ANSIBLE_CONFIG_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000038"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000039"));//エクセル・ヘッダでの説明
+    $c->setFileHideMode(true);
+    $c->setHiddenMainTableColumn(true);
+    $cg->addColumn($c);
+
     $table->addColumn($cg);
 
     //----オペレーション

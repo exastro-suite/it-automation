@@ -606,11 +606,14 @@ $ary["ITAANSIBLEH-MNU-1202050"]     = "Ansible Interface information";
 $ary["ITAANSIBLEH-MNU-1202060"]     = "Data relay storage path (ITA)";
 $ary["ITAANSIBLEH-MNU-1202070"]     = "This is a shared directory with ITA server.";
 $ary["ITAANSIBLEH-MNU-1202080"]     = "Data relay storage path (Ansible)";
-$ary["ITAANSIBLEH-MNU-1202090"]     = "This is a shared directory with Ansible or Ansible Tower server.";
+$ary["ITAANSIBLEH-MNU-1202090"]     = "This is the Ansible server shared directory.
+This information is not used if the execution engine is not set to Ansible Core.";
 $ary["ITAANSIBLEH-MNU-1202095"]     = "Symphony instance data relay storage path(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202096"]     = "Path for the Ansible or Ansible Tower server to share the directory shared by each Movement of the Symphony instance.";
+$ary["ITAANSIBLEH-MNU-1202096"]     = "This path is used to share the Symphony instance Movements' shared directory within Ansible Server.
+This information is not used if the execution engine is not set to Ansible Core.";
 $ary["ITAANSIBLEH-MNU-1202097"]     = "Conductor instance data relay storage path(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202098"]     = "Path for the Ansible or Ansible Tower server to share the directory shared by each Movement of the Conductor instance.";
+$ary["ITAANSIBLEH-MNU-1202098"]     = "This path is used to share the Conductor instance Movements' shared directory within Ansible Server.
+This information is not used if the execution engine is not set to Ansible Core.";
 $ary["ITAANSIBLEH-MNU-1203010"]     = "Protocol";
 $ary["ITAANSIBLEH-MNU-1203020"]     = "Enter http or https.\nrecommended value is https.";
 $ary["ITAANSIBLEH-MNU-1203021"]     = "Enter http or https.\nrecommended value is https.";
@@ -621,10 +624,15 @@ $ary["ITAANSIBLEH-MNU-1203042"]     = "The host name of the ansible tower that c
 $ary["ITAANSIBLEH-MNU-1203050"]     = "Port";
 $ary["ITAANSIBLEH-MNU-1203060"]     = "Ansible server connection port.
 Normal is 80 for http and 443 for https.";
-$ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Tower server connection port.
+$ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Tower(Ansible Automation Controller) server connection port.
 Normal is 443.";
 $ary["ITAANSIBLEH-MNU-1203065"]     = "execution engine";
-$ary["ITAANSIBLEH-MNU-1203066"]     = "Select the execution engine.";
+$ary["ITAANSIBLEH-MNU-1203066"]     = "Select the execution engine.
+・Ansible Core
+・Ansible Tower
+・Ansible Automation controller
+※Ansible Tower changed to Ansible Automation controller in Ansible Automation Platform 2.0.
+Configuring the Ansible Core interface is required in order to use ansible-vault commands, even if Ansible Core is not selected as the execution engine.";
 $ary["ITAANSIBLEH-MNU-1203070"]     = "Access_key_id";
 $ary["ITAANSIBLEH-MNU-1203080"]     = "Access Key ID that is used for authentication to connect with the Ansible server.";
 $ary["ITAANSIBLEH-MNU-1203090"]     = "Secret_access_key";
@@ -636,7 +644,7 @@ Ansible:
 　Set the parameters of nible-playbook command.
 　ITA sets -i option.
 
-Ansible Tower:
+Ansible Tower(Ansible Automation Controller):
 　Options that can be set
 　　-verbosity
 　　-f FORKS,--forks=FORKS
@@ -647,7 +655,7 @@ Ansible Tower:
 　　-D,--diff
 　　--skip-tags=SKIP_TAGS
 　　--start-at-task=START_AT_TASK
-  Ansible Tower only parameters
+　Ansible Tower(Ansible Automation Controller) only parameters
 　　-ufc,--use_fact_cache　　　
 　　-as,--allow_simultaneous　
 　　-jsc,--job_slice_count
@@ -1203,21 +1211,21 @@ $ary["ITAANSIBLEH-MNU-5010003"]     = "confirmation";
 $ary["ITAANSIBLEH-MNU-6000000"]     = "NULL link";
 $ary["ITAANSIBLEH-MNU-6000001"]     = "If specific value of parameter sheet is NULL, set whether to enable Substitution value list registration.\nBlank: Follow Null linkage of Ansible common interface information.\nvalid: Register NULL data.\nInvalid: Do not register null data.";
 $ary["ITAANSIBLEH-MNU-6000002"]     = "If specific value of parameter sheet is NULL in Substitut val-auto-reg, validates registration in Substitution value list or set default.\nvalid: Register NULL data.\nInvalid: Do not register null data.";
-$ary["ITAANSIBLEH-MNU-907342701"]   = "AnsibleTowerInstanceGroupList";
+$ary["ITAANSIBLEH-MNU-907342701"]   = "non use";
 $ary["ITAANSIBLEH-MNU-907350509"]   = "Select whether to delete temporary objects created in Ansible Tower.";
-$ary["ITAANSIBLEH-MNU-907352702"]   = "Instance group name";
-$ary["ITAANSIBLEH-MNU-907352703"]   = "The instance group ID set in AnsibleTower.";
-$ary["ITAANSIBLEH-MNU-907362701"]   = "AnsibleTowerInstanceGroupList";
+$ary["ITAANSIBLEH-MNU-907352702"]   = "non use";
+$ary["ITAANSIBLEH-MNU-907352703"]   = "non use";
+$ary["ITAANSIBLEH-MNU-907362701"]   = "non use";
 $ary["ITAANSIBLEH-MNU-907390509"]   = "Delete runtime data";
 $ary["ITAANSIBLEH-MNU-907392701"]   = "No.";
 $ary["ITAANSIBLEH-MNU-907392702"]   = "Instance group name";
 $ary["ITAANSIBLEH-MNU-907392703"]   = "Instance group ID";
 $ary["ITAANSIBLEH-MNU-9010000000"]  = "Authentication token";
-$ary["ITAANSIBLEH-MNU-9010000001"]  = "A user authentication token for connecting to AnsibleTower from astrol using RestAPI. Enter the token generated by AnsibleTower.. Enter the token generated by AnsibleTower.";
+$ary["ITAANSIBLEH-MNU-9010000001"]  = "A user authentication token for connecting to Ansible Tower(Ansible Automation Controller) from astrol using RestAPI. Enter the token generated by Ansible Tower(Ansible Automation Controller). Enter the token generated by Ansible Tower(Ansible Automation Controller).";
 $ary["ITAANSIBLEH-MNU-9010000002"]  = "Organization name";
-$ary["ITAANSIBLEH-MNU-9010000003"]  = "Enter the Organization name registered in AnsibleTower.";
-$ary["ITAANSIBLEH-MNU-9010000004"]  = "Ansible Engine interface";
-$ary["ITAANSIBLEH-MNU-9010000005"]  = "Ansible Tower interface";
+$ary["ITAANSIBLEH-MNU-9010000003"]  = "Enter the Organization name registered in Ansible Tower(Ansible Automation Controller).";
+$ary["ITAANSIBLEH-MNU-9010000004"]  = "Ansible-Core interface";
+$ary["ITAANSIBLEH-MNU-9010000005"]  = "Ansible Tower(Ansible Automation Controller) interface";
 $ary["ITAANSIBLEH-MNU-9010000006"]  = "Legacy\n";
 $ary["ITAANSIBLEH-MNU-9010000007"]  = "Legacy Role\n";
 $ary["ITAANSIBLEH-MNU-9010000008"]  = "Header section";
@@ -1229,7 +1237,7 @@ Ansible:
     gather_facts: no
     become: yes
 
-Ansible Tower:
+Ansible Tower(Ansible Automation Controller):
   - hosts: all
     gather_facts: no
     become: yes
@@ -1241,7 +1249,7 @@ Ansible:
 　Set the parameters of nible-playbook command.
 　ITA sets -i option.
 
-Ansible Tower:
+Ansible Tower(Ansible Automation Controller):
 　Options that can be set
 　　-verbosity
 　　-f FORKS,--forks=FORKS
@@ -1252,7 +1260,7 @@ Ansible Tower:
 　　-D,--diff
 　　--skip-tags=SKIP_TAGS
 　　--start-at-task=START_AT_TASK
-  Ansible Tower only parameters
+  Ansible Tower(Ansible Automation Controller) only parameters
 　　-ufc,--use_fact_cache　　　
 　　-as,--allow_simultaneous　
 　　-jsc,--job_slice_count
@@ -1265,19 +1273,19 @@ Ansible:
     gather_facts: no
     become: yes
 
-Ansible Tower:
+Ansible Tower(Ansible Automation Controller):
   - hosts: all
     gather_facts: no
     become: yes
 become is omitted for winrm connection.";
-$ary["ITAANSIBLEH-MNU-9010000013"]  = "Tower Dedicated information";
+$ary["ITAANSIBLEH-MNU-9010000013"]  = "Ansible Tower Dedicated information";
 $ary["ITAANSIBLEH-MNU-9010000014"]  = "virtualenv";
-$ary["ITAANSIBLEH-MNU-9010000015"]  = "Ansible execution environment directory built with virtualenv is displayed.\nChoose the ansible execution environment you want to run.\nIf it is not choose, the ansible execution environment installed at the time of Tower installation will be used.";
+$ary["ITAANSIBLEH-MNU-9010000015"]  = "Ansible execution environment directory built with virtualenv is displayed.\nChoose the ansible execution environment you want to run.\nIf it is not choose, the ansible execution environment installed at the time of Ansible Tower(Ansible Automation Controller) installation will be used.";
 $ary["ITAANSIBLEH-MNU-9010000016"]  = "virtualenv";
 $ary["ITAANSIBLEH-MNU-9010000017"]  = "Ansible execution environment directory built with virtualenv is displayed.";
 $ary["ITAANSIBLEH-MNU-9010000018"]  = "It is a required item. (Item:{})";
 $ary["ITAANSIBLEH-MNU-9010000019"]  = "Host list";
-$ary["ITAANSIBLEH-MNU-9010000020"]  = "A list of Ansible Tower hosts. \nFor cluster configuration, register the host information of ansible tower that configures the cluster.";
+$ary["ITAANSIBLEH-MNU-9010000020"]  = "A list of Ansible Tower(Ansible Automation Controller) hosts. \nFor cluster configuration, register the host information of Ansible Tower(Ansible Automation Controller) that configures the cluster.";
 $ary["ITAANSIBLEH-MNU-9010000021"]  = "Proxy";
 $ary["ITAANSIBLEH-MNU-9010000022"]  = "Address";
 $ary["ITAANSIBLEH-MNU-9010000023"]  = "Proxy server address";
@@ -1290,21 +1298,31 @@ If the virtualenv environment doesnt exist or does not have ansible installed, t
 If nothing is input, the operation will be run with the ansible installed in the ansible server.
 [Max length 512 bytes]";
 $ary["ITAANSIBLEH-MNU-9010000029"]  = "virtualenv";
-$ary["ITAANSIBLEH-MNU-9010000030"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible tower server's /var/lib/awx/venv.
+$ary["ITAANSIBLEH-MNU-9010000030"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible Tower(Ansible Automation Controller) server's /var/lib/awx/venv.
 If you want to run operations in the ansible execution environment constructed with virtualenv, please select the full path for \"virtualenv\".
-If nothing is selelcted, the ansible environment that was installed when installing Tower will be used.";
+If nothing is selelcted, the ansible environment that was installed when installing Ansible Tower(Ansible Automation Controller) will be used.";
 $ary["ITAANSIBLEH-MNU-9010000031"]  = "Ansible engin virtualenv path";
-$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible tower virtualenv path";
+$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible Tower(Ansible Automation Controller) virtualenv path";
 $ary["ITAANSIBLEH-MNU-9010000033"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible server.";
-$ary["ITAANSIBLEH-MNU-9010000034"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible tower server's /var/lib/awx/venv.";
-$ary["ITAANSIBLEH-MNU-9010001000"]  = "Maintenance (view/update) can be performe Ansible Tower host information.\ncase of cluster configuration, it is necessary to register the host information of ansible tower that constitutes the cluster.";
+$ary["ITAANSIBLEH-MNU-9010000034"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible Tower(Ansible Automation Controller) server's /var/lib/awx/venv.";
+$ary["ITAANSIBLEH-MNU-9010000035"] = "Ansible Automation Controller dedicated information";
+$ary["ITAANSIBLEH-MNU-9010000036"] = "Execution environment";
+$ary["ITAANSIBLEH-MNU-9010000037"] = "Displays the Execution environments constructed in the Ansible Automation Controller server.
+Please select the Execution environment you want to operate.
+If nothing is selected, \"Default execution environment\" will be selected by default.";
+$ary["ITAANSIBLEH-MNU-9010000038"]  = "ansible.cfg";
+$ary["ITAANSIBLEH-MNU-9010000039"] = "Uploads the ansible.cfg file.
+If the file hasn't been uploaded, the default value will be used.
+If a zip file containing ansible.cfg is uploaded to the role package list, the uploaded ansible.cfg will be overwritten.";
+$ary["ITAANSIBLEH-MNU-9010000040"]  = "Ansible-Core dedicated information";
+$ary["ITAANSIBLEH-MNU-9010001000"]  = "Maintenance (view/update) can be performe Ansible Tower(Ansible Automation Controller) host information.\ncase of cluster configuration, If constructed with a cluster configuration, register the node information(excluding the hop node within the cluster). If it is not constructed with a cluster configuration, register information for the target node (for 1 node).";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "No.";
-$ary["ITAANSIBLEH-MNU-9010001002"]  = "AnsibleTowerHostList";
-$ary["ITAANSIBLEH-MNU-9010001003"]  = "AnsibleTowerHostList";
+$ary["ITAANSIBLEH-MNU-9010001002"]  = "AnsibleTower(AAC)hostlist";
+$ary["ITAANSIBLEH-MNU-9010001003"]  = "AnsibleTower(AAC)hostlist";
 $ary["ITAANSIBLEH-MNU-9010001010"]  = "Host";
-$ary["ITAANSIBLEH-MNU-9010001011"]  = "It is host name (or IP address) of Ansible Tower.";
+$ary["ITAANSIBLEH-MNU-9010001011"]  = "It is host name (or IP address) of Ansible Tower(Ansible Automation Controller).";
 $ary["ITAANSIBLEH-MNU-9010001020"]  = "Authentication method";
-$ary["ITAANSIBLEH-MNU-9010001021"]  = "Select the authentication method when connecting to Ansible Tower with ssh.
+$ary["ITAANSIBLEH-MNU-9010001021"]  = "Select the authentication method when connecting to Ansible Tower(Ansible Automation Controller) with ssh.
 -Password authentication
  Select ● in the login password management and enter the login password.
 -Key authentication (no passphrase)
@@ -1314,7 +1332,7 @@ $ary["ITAANSIBLEH-MNU-9010001021"]  = "Select the authentication method when con
 -Key authentication (key exchanged)
  No upload of ssh private key file is required.";
 $ary["ITAANSIBLEH-MNU-9010001030"]  = "User";
-$ary["ITAANSIBLEH-MNU-9010001031"]  = "User when connecting to Ansible Tower with ssh. Write permission to the project path (/var/lib/awx/projects) is required.";
+$ary["ITAANSIBLEH-MNU-9010001031"]  = "User when connecting to Ansible Tower(Ansible Automation Controller) with ssh. Write permission to the project path (/var/lib/awx/projects) is required.";
 $ary["ITAANSIBLEH-MNU-9010001040"]  = "Password";
 $ary["ITAANSIBLEH-MNU-9010001041"]  = "Password for password authentication.";
 $ary["ITAANSIBLEH-MNU-9010001050"]  = "ssh private key file";
@@ -1326,7 +1344,7 @@ $ary["ITAANSIBLEH-MNU-9010001053"]  = "Enter the passphrase set in the ssh priva
 $ary["ITAANSIBLEH-MNU-9010001054"]  = "Ansible-vault encrypted ssh private key file.";
 $ary["ITAANSIBLEH-MNU-9010001055"]  = "ssh key credentials";
 $ary["ITAANSIBLEH-MNU-9010001060"]  = "isolated Tower";
-$ary["ITAANSIBLEH-MNU-9010001061"]  = "Select ● for isolated Tower.";
+$ary["ITAANSIBLEH-MNU-9010001061"]  = "If the target node is an isolated node for Ansible Tower or an execution node for Ansible Automation Controller, select \"●\"";
 $ary["ITAANSIBLEH-MNU-9010002000"]  = "Sensitive setting";
 $ary["ITAANSIBLEH-MNU-9010002010"]  = "If \"ON\", the specific value will not be displayed after registration.";
 ?>

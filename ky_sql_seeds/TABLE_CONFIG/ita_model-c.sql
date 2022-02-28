@@ -571,6 +571,42 @@ CREATE TABLE B_ANS_TWR_VIRTUALENV_JNL (
 -- 履歴系テーブル作成----
 
 -- ------------------------------
+-- -- Tower 実行環境マスタ
+-- ------------------------------
+-- ----更新系テーブル作成
+CREATE TABLE B_ANS_TWR_EXECUTION_ENVIRONMENT ( 
+  ROW_ID                          %INT%                             , 
+  EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                     , 
+  EXECUTION_ENVIRONMENT_NO        %INT%                             , 
+  DISP_SEQ                        %INT%                             , 
+  ACCESS_AUTH                     TEXT                              ,
+  NOTE                            %VARCHR%(4000)                    , 
+  DISUSE_FLAG                     %VARCHR%(1)                       , 
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , 
+  LAST_UPDATE_USER                %INT%                             , 
+  PRIMARY KEY (ROW_ID) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+CREATE TABLE B_ANS_TWR_EXECUTION_ENVIRONMENT_JNL ( 
+  JOURNAL_SEQ_NO                  %INT%                             , 
+  JOURNAL_REG_DATETIME            %DATETIME6%                       , 
+  JOURNAL_ACTION_CLASS            %VARCHR%(8)                       , 
+  ROW_ID                          %INT%                             , 
+  EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                     , 
+  EXECUTION_ENVIRONMENT_NO        %INT%                             , 
+  DISP_SEQ                        %INT%                             , 
+  ACCESS_AUTH                     TEXT                              ,
+  NOTE                            %VARCHR%(4000)                    , 
+  DISUSE_FLAG                     %VARCHR%(1)                       , 
+  LAST_UPDATE_TIMESTAMP           %DATETIME6%                       , 
+  LAST_UPDATE_USER                %INT%                             , 
+  PRIMARY KEY (JOURNAL_SEQ_NO) 
+)%%TABLE_CREATE_OUT_TAIL%%; 
+-- 履歴系テーブル作成----
+
+-- ------------------------------
 -- -- Tower 組織名マスタ
 -- ------------------------------
 -- ----更新系テーブル作成
@@ -1155,6 +1191,8 @@ I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
 I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1208,6 +1246,8 @@ I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
 I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1309,6 +1349,8 @@ SELECT
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1335,6 +1377,8 @@ SELECT
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -1436,6 +1480,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1490,6 +1536,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -1927,6 +1975,8 @@ I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
 I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -1979,6 +2029,8 @@ I_OPERATION_NAME                  %VARCHR%(256)                    ,
 I_OPERATION_NO_IDBH               %INT%                            ,
 I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      ,
 TIME_START                        %DATETIME6%                      ,
 TIME_END                          %DATETIME6%                      ,
@@ -2130,6 +2182,8 @@ SELECT
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2154,6 +2208,8 @@ SELECT
         ANS_PARALLEL_EXE              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         ANS_EXEC_OPTIONS              ,
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
@@ -2257,6 +2313,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2311,6 +2369,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -2399,6 +2459,8 @@ I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペ�
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
 I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -2451,6 +2513,8 @@ I_OPERATION_NAME                  %VARCHR%(256)                    , -- オペ�
 I_OPERATION_NO_IDBH               %INT%                            , -- オペレーションID
 I_VIRTUALENV_NAME                 %VARCHR%(512)                    , -- tower virtualenv path
 I_ENGINE_VIRTUALENV_NAME          %VARCHR%(512)                    , -- ansible  virtualenv path
+I_EXECUTION_ENVIRONMENT_NAME      %VARCHR%(512)                    , -- AAP 実行環境
+I_ANSIBLE_CONFIG_FILE             %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 TIME_BOOK                         %DATETIME6%                      , -- 予約日時
 TIME_START                        %DATETIME6%                      , -- 開始日時
 TIME_END                          %DATETIME6%                      , -- 終了日時
@@ -3232,6 +3296,8 @@ SELECT
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3258,6 +3324,8 @@ SELECT
         ANS_EXEC_OPTIONS              ,
         ANS_VIRTUALENV_NAME           ,
         ANS_ENGINE_VIRTUALENV_NAME    ,
+        ANS_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+        ANS_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
         DISP_SEQ                      ,
         ACCESS_AUTH                   ,
         NOTE                          ,
@@ -3294,6 +3362,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,
@@ -3348,6 +3418,8 @@ SELECT
          TAB_A.I_OPERATION_NO_IDBH       ,
          TAB_A.I_VIRTUALENV_NAME         ,
          TAB_A.I_ENGINE_VIRTUALENV_NAME  ,
+         TAB_A.I_EXECUTION_ENVIRONMENT_NAME, -- AAP 実行環境
+         TAB_A.I_ANSIBLE_CONFIG_FILE       , -- ansible.cfg アップロードカラム
          TAB_A.TIME_BOOK                 ,
          TAB_A.TIME_START                ,
          TAB_A.TIME_END                  ,

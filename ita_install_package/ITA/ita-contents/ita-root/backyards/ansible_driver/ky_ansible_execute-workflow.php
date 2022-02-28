@@ -223,14 +223,6 @@
         // 並列実行数
         $lv_num_of_parallel_exec  = $lv_ans_if_info['ANSIBLE_NUM_PARALLEL_EXEC'];
 
-        // トレースメッセージ
-        if ( $log_level === 'DEBUG' ){
-            // 処理対象レコード検出(EXECUTION_No.:Legacy:16,Legacy:17)
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-51004",implode(",", $tgt_execution_no_array));
-            require ($root_dir_path . $log_output_php );
-        }
-        
-        
         ////////////////////////////////////////////////////////////////////////////////
         // 処理実行順に対象作業インスタンスを実行
         ////////////////////////////////////////////////////////////////////////////////

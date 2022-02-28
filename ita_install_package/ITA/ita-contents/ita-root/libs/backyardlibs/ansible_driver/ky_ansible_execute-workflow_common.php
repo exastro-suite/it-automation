@@ -75,6 +75,171 @@
         
         return true;
     }
+    function cm_getSymphonyInterfaceInfo($in_dbobj,$in_execution_no,&$in_if_info,&$in_ErrorMsg) {
+        global $objDBCA;
+        global $objMTS;
+        global $db_model_ch;
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+
+        $in_if_info = array();
+        $in_ErrorMsg     = "";
+            
+        ////////////////////////////////////////////////////////////////
+        // Symphonyインタフェース情報を取得                           //
+        ////////////////////////////////////////////////////////////////
+        // SQL作成
+        $sqlBody = "SELECT *
+                    FROM   C_SYMPHONY_IF_INFO
+                    WHERE  DISUSE_FLAG = '0' ";
+
+        $in_dbobj->ClearLastErrorMsg();
+        $arrayBind = array();
+        $objQuery  = "";
+        $ret = $in_dbobj->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
+        if($ret === false) {
+            // DB Access Error
+            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50076");
+            require ($root_dir_path . $log_output_php );
+            $in_ErrorMsg = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50051",
+                                                                     array($in_execution_no,
+                                                                     basename(__FILE__),__LINE__)),
+                                                                     $in_dbobj->getLastErrorMsg());
+            return false;
+        }
+
+        // FETCH行数を取得
+        $num_of_rows = $objQuery->effectedRowCount();
+
+        if( $num_of_rows === 0 ){
+            // Symphonyインタフェース情報レコード無し
+            $in_ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50077",$in_execution_no);
+            return false;
+        } else if( $num_of_rows > 1 ){
+            // Symphonyインタフェース情報レコードが単一行でない
+            $in_ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50078",$in_execution_no);
+            return false;
+        }
+        while ( $row = $objQuery->resultFetch() ){
+            $in_if_info = $row;
+        }
+
+        unset($objQuery);
+        
+        return true;
+    }
+    function cm_getConductorInterfaceInfo($in_dbobj,$in_execution_no,&$in_if_info,&$in_ErrorMsg) {
+        global $objDBCA;
+        global $objMTS;
+        global $db_model_ch;
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+
+        $in_if_info = array();
+        $in_ErrorMsg     = "";
+            
+        ////////////////////////////////////////////////////////////////
+        // Conductorインタフェース情報を取得                          //
+        ////////////////////////////////////////////////////////////////
+        // SQL作成
+        $sqlBody = "SELECT *
+                    FROM   C_CONDUCTOR_IF_INFO
+                    WHERE  DISUSE_FLAG = '0' ";
+
+        $in_dbobj->ClearLastErrorMsg();
+        $arrayBind = array();
+        $objQuery  = "";
+        $ret = $in_dbobj->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
+        if($ret === false) {
+            // DB Access Error
+            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50079");
+            require ($root_dir_path . $log_output_php );
+            $in_ErrorMsg = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50051",
+                                                                     array($in_execution_no,
+                                                                     basename(__FILE__),__LINE__)),
+                                                                     $in_dbobj->getLastErrorMsg());
+            return false;
+        }
+
+        // FETCH行数を取得
+        $num_of_rows = $objQuery->effectedRowCount();
+
+        if( $num_of_rows === 0 ){
+            // Conductorインタフェース情報レコード無し
+            $in_ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50080",$in_execution_no);
+            return false;
+        } else if( $num_of_rows > 1 ){
+            // Conductorインタフェース情報レコードが単一行でない
+            $in_ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50081",$in_execution_no);
+            return false;
+        }
+        while ( $row = $objQuery->resultFetch() ){
+            $in_if_info = $row;
+        }
+
+        unset($objQuery);
+        
+        return true;
+    }
+    function cm_getMovementInfo($in_dbobj,$in_MovementID,&$in_Movement_info,&$in_ErrorMsg) {
+        global $objDBCA;
+        global $objMTS;
+        global $db_model_ch;
+        global $root_dir_path;
+        global $log_output_php;
+        global $log_output_dir;
+        global $log_file_prefix;
+        global $log_level;
+
+        $in_Movement_info = array();
+        $in_ErrorMsg     = "";
+            
+        ////////////////////////////////////////////////////////////////
+        // Movement情報を取得                                         //
+        ////////////////////////////////////////////////////////////////
+        // SQL作成
+        $sqlBody = "SELECT *
+                    FROM   C_PATTERN_PER_ORCH
+                    WHERE  PATTERN_ID = :PATTERN_ID AND DISUSE_FLAG = '0' ";
+
+        $in_dbobj->ClearLastErrorMsg();
+        $arrayBind = array();
+        $arrayBind = array("PATTERN_ID"=>$in_MovementID);
+        $objQuery  = "";
+        $ret = $in_dbobj->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
+        if($ret === false) {
+            // DB Access Error
+            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50079");
+            require ($root_dir_path . $log_output_php );
+            $in_ErrorMsg = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50051",
+                                                                     array($in_execution_no,
+                                                                     basename(__FILE__),__LINE__)),
+                                                                     $in_dbobj->getLastErrorMsg());
+            return false;
+        }
+
+        // FETCH行数を取得
+        $num_of_rows = $objQuery->effectedRowCount();
+
+        if( $num_of_rows === 0 ){
+            // レコード無し
+            $in_ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50083",$in_MovementID);
+            return false;
+        }
+        while ( $row = $objQuery->resultFetch() ){
+            $in_Movement_info = $row;
+        }
+
+        unset($objQuery);
+        
+        return true;
+    }
 
     // トランザクション開始
     function cm_transactionStart($execution_no,&$FREE_LOG) {

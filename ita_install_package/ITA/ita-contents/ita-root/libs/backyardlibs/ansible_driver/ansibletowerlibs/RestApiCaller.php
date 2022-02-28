@@ -197,50 +197,60 @@ class RestApiCaller {
 
         $print_HttpResponsHeader =  sprintf("http response header\n%s",print_r($http_response_header,true));
 
-        // 通信結果を判定
-        if(count($http_response_header) > 0) {
-
-            // HTTPレスポンスコード取得
-            preg_match('/HTTP\/1\.[0|1|x] ([0-9]{3})/', $http_response_header[0], $matches);
-            $status_code = $matches[1];
-
-            // 返却用のArrayを編集
-            $response_array['statusCode'] = (int) $status_code;
-            if($status_code < 200 || 400 <= $status_code) {
-                $response_array['responseHeaders']  = $http_response_header;
-                $response_array['responseContents'] = array("errorMessage" => $responseContents);
-
-                $this->logger->error($print_backtrace);
-                $this->logger->error($print_url);
-                $this->logger->error($print_HttpContext);
-                $this->logger->error($print_HttpResponsHeader);
-                $this->logger->error('http response content\n%s' . print_r($response_array['responseContents'],true));
-            } else {
-                $response_array['responseHeaders']  = $http_response_header;
-                $response_array['responseContents'] = $responseContents;
-                foreach($response_array['responseHeaders'] as $arrHeader) {
-                    if( preg_match("/^(\s)*Content-Type:/",$arrHeader) == 1) {
-                        if( preg_match("/(\s)*application\/json/",$arrHeader) == 1) {
-                            $response_array['responseContents'] = json_decode($responseContents, true);
-                        }
-                    }
-                }
-
-                $this->logger->debug($print_backtrace);
-                $this->logger->debug($print_url);
-                $this->logger->debug($print_HttpContext);
-                $this->logger->debug($print_HttpResponsHeader);
-                $this->logger->debug('http response content\n%s' . print_r($response_array['responseContents'],true));
-            }
-        } else {
-
+        if( ! is_array($http_response_header)) {
             // 返却用のArrayを編集
             $response_array['statusCode'] = (int) -2;
-            $response_array['responseContents'] = array("errorMessage" => "HTTP Socket Timeout");
+            $response_array['responseContents'] = array("errorMessage" => "HTTP access error ");
 
             $this->logger->error($print_backtrace);
             $this->logger->error($print_url);
             $this->logger->error($print_HttpContext);
+        } else {
+            // 通信結果を判定
+            if(count($http_response_header) > 0) {
+
+                // HTTPレスポンスコード取得
+                preg_match('/HTTP\/1\.[0|1|x] ([0-9]{3})/', $http_response_header[0], $matches);
+                $status_code = $matches[1];
+
+                // 返却用のArrayを編集
+                $response_array['statusCode'] = (int) $status_code;
+                if($status_code < 200 || 400 <= $status_code) {
+                    $response_array['responseHeaders']  = $http_response_header;
+                    $response_array['responseContents'] = array("errorMessage" => $responseContents);
+
+                    $this->logger->error($print_backtrace);
+                    $this->logger->error($print_url);
+                    $this->logger->error($print_HttpContext);
+                    $this->logger->error($print_HttpResponsHeader);
+                    $this->logger->error('http response content\n' . print_r($response_array['responseContents'],true));
+                } else {
+                    $response_array['responseHeaders']  = $http_response_header;
+                    $response_array['responseContents'] = $responseContents;
+                    foreach($response_array['responseHeaders'] as $arrHeader) {
+                        if( preg_match("/^(\s)*Content-Type:/",$arrHeader) == 1) {
+                            if( preg_match("/(\s)*application\/json/",$arrHeader) == 1) {
+                                $response_array['responseContents'] = json_decode($responseContents, true);
+                            }
+                        }
+                    }
+
+                    $this->logger->debug($print_backtrace);
+                    $this->logger->debug($print_url);
+                    $this->logger->debug($print_HttpContext);
+                    $this->logger->debug($print_HttpResponsHeader);
+                    $this->logger->debug('http response content\n%s' . print_r($response_array['responseContents'],true));
+                }
+            } else {
+
+                // 返却用のArrayを編集
+                $response_array['statusCode'] = (int) -2;
+                $response_array['responseContents'] = array("errorMessage" => "HTTP Socket Timeout");
+    
+                $this->logger->error($print_backtrace);
+                $this->logger->error($print_url);
+                $this->logger->error($print_HttpContext);
+            }
         }
         
         $this->UIErrorMsg = array();
