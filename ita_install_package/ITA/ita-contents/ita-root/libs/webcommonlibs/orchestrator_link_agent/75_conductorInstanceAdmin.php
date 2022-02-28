@@ -2111,6 +2111,25 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
               $arySymphonySource['PAUSE_STATUS'] = $objMTS->getSomeMessage("ITABASEH-MNU-203094");
             }
             
+            //CONDUCTOR_CALLで呼び出しているConductorが一時停止の場合
+            if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" ){
+              $currentPauseStatusId = "";
+              $sql = "SELECT PAUSE_STATUS_ID
+                      FROM   C_CONDUCTOR_INSTANCE_MNG
+                      WHERE  CONDUCTOR_INSTANCE_NO = {$row["CONDUCTOR_INSTANCE_CALL_NO"]}";
+
+              //SQL準備
+              $objQuery = $objDBCA->sqlPrepare($sql);
+              $r = $objQuery->sqlExecute();
+              while ( $row = $objQuery->resultFetch() ){
+                  $currentPauseStatusId = $row['PAUSE_STATUS_ID'];
+              }
+              
+              if($currentPauseStatusId == '1'){
+                $arySymphonySource['PAUSE_STATUS'] = $objMTS->getSomeMessage("ITABASEH-MNU-203094");
+              }
+            }
+            
             $aryMovementInsData[$aryClassItems['NODE_NAME']] = $aryInstanceItems;
 
             unset($aryInstanceItems);
