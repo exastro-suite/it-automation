@@ -75,7 +75,7 @@ global $objDBCA;
         // 接続トークン取得
         ////////////////////////////////
         // トレースメッセージ
-        $logger->debug("Authorize Ansible Tower(Ansible Automation Controller).");
+        $logger->debug("Authorize Ansible Automation Controller.");
 
         $proxySetting              = array();
         $proxySetting['address']   = $ansibleTowerIfInfo["ANSIBLE_PROXY_ADDRESS"];
@@ -96,7 +96,7 @@ global $objDBCA;
                                   . $ansibleTowerIfInfo['ANSTWR_PORT'] . "\n"
                                   . "TOKEN: " . $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN'] . "\n");
   
-            $logger->error("Faild to authorize to Ansible Tower(Ansible Automation Controller). " . $response_array['responseContents']['errorMessage']);
+            $logger->error("Faild to authorize to Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
         }
 
         $workflowTplId = -1;
@@ -176,7 +176,7 @@ global $objDBCA;
                 // メイン処理での異常フラグをON
                 $process_has_error = true;
                 $error_flag = 1;
-                $logger->error("Faild to create Ansible Tower(Ansible Automation Controller) environment. (exec_no: $tgt_execution_no)");
+                $logger->error("Faild to create Ansible Automation Controller environment. (exec_no: $tgt_execution_no)");
             }
             // マルチログかを取得する。
             $MultipleLogMark = $director->getMultipleLogMark();
@@ -230,9 +230,9 @@ global $objDBCA;
                  $ret = $director->delete($tgt_execution_no,$TowerHostList);
                  if($ret == false) {
                      $warning_flag = 1;
-                 $logger->error("Faild to cleanup Ansible Tower(Ansible Automation Controller) environment. (exec_no: $tgt_execution_no)");
+                 $logger->error("Faild to cleanup Ansible Automation Controller environment. (exec_no: $tgt_execution_no)");
                  } else {
-                     $logger->debug("Cleanup Ansible Tower(Ansible Automation Controller) environment SUCCEEDED. (exec_no: $tgt_execution_no)");
+                     $logger->debug("Cleanup Ansible Automation Controller environment SUCCEEDED. (exec_no: $tgt_execution_no)");
                  }
             }
             break;
@@ -305,9 +305,9 @@ global $objDBCA;
                 $ret = $director->transfer($tgt_execution_no,$TowerHostList);
                 if($ret == false) {
                     $warning_flag = 1;
-                    $logger->error("Faild to transfer the execution result file from Ansible Tower(Ansible Automation Controller). (exec_no: $tgt_execution_no)");
+                    $logger->error("Faild to transfer the execution result file from Ansible Automation Controller. (exec_no: $tgt_execution_no)");
                 } else {
-                    $logger->debug("transfer the execution result file from Ansible Tower(Ansible Automation Controller) environment SUCCEEDED. (exec_no: $tgt_execution_no)");
+                    $logger->debug("transfer the execution result file from Ansible Automation Controller environment SUCCEEDED. (exec_no: $tgt_execution_no)");
                 }
             }
             break;
@@ -324,9 +324,9 @@ global $objDBCA;
                 $ret = $director->delete($tgt_execution_no,$TowerHostList);
                 if($ret == false) {
                     $warning_flag = 1;
-                    $logger->error("Faild to clean up Ansible Tower(Ansible Automation Controller) environment. (exec_no: $tgt_execution_no)");
+                    $logger->error("Faild to clean up Ansible Automation Controller environment. (exec_no: $tgt_execution_no)");
                 } else {
-                    $logger->debug("Clean up Ansible Tower(Ansible Automation Controller) environment SUCCEEDED. (exec_no: $tgt_execution_no)");
+                    $logger->debug("Clean up Ansible Automation Controller environment SUCCEEDED. (exec_no: $tgt_execution_no)");
                 }
             }
             break;
