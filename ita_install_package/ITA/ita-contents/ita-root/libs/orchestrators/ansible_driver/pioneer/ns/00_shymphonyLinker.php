@@ -1106,7 +1106,7 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
             $response_array = $restApiCaller->authorize();
             if($response_array['success'] != true) {
                 // TODO
-                throw new Exception("Faild to authorize to Ansible Tower(Ansible Automation Controller). " . $response_array['responseContents']['errorMessage']);
+                throw new Exception("Faild to authorize to Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
             }
 
             global $g;

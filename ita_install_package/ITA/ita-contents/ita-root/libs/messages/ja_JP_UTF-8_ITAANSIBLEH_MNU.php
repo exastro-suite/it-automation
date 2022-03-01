@@ -624,14 +624,14 @@ $ary["ITAANSIBLEH-MNU-1203021"]     = "http/httpsのいずれかです。
 $ary["ITAANSIBLEH-MNU-1203030"]     = "ホスト";
 $ary["ITAANSIBLEH-MNU-1203040"]     = "Ansibleサーバのホスト名(またはIPアドレス)です。\n基本的にホスト名が推奨。";
 $ary["ITAANSIBLEH-MNU-1203041"]     = "代表ホスト";
-$ary["ITAANSIBLEH-MNU-1203042"]     = "ITAと接続するAnsible Tower(Ansible Automation Controller)のホスト名です。\nAnsible Tower(Ansible Automation Controller)ホスト一覧に登録されているAnsible Tower(Ansible Automation Controller)のホストより選択します。";
+$ary["ITAANSIBLEH-MNU-1203042"]     = "ITAと接続するAnsible Automation Controllerのホスト名です。\nAnsible Automation Controllerホスト一覧に登録されているAnsible Automation Controllerのホストより選択します。";
 $ary["ITAANSIBLEH-MNU-1203050"]     = "ポート";
 $ary["ITAANSIBLEH-MNU-1203060"]     = "Ansibleサーバの接続ポートです。
 通常は
 httpの場合:80
 httpsの場合443
 です。";
-$ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Tower(Ansible Automation Controller)サーバの接続ポートです。
+$ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Automation Controllerサーバの接続ポートです。
 通常は443です。";
 $ary["ITAANSIBLEH-MNU-1203065"]     = "実行エンジン";
 $ary["ITAANSIBLEH-MNU-1203066"]     = "実行するエンジンを3種類から選択します。
@@ -651,7 +651,7 @@ Ansible:
   ansible-playbookコマンドのパラメータを設定します。
 　-i オプションはITAが設定します。
 
-Ansible Tower(Ansible Automation Controller):
+Ansible Automation Controller:
 　以下のパラメータが設定できます。
 　　-verbosity
 　　-f FORKS,--forks=FORKS
@@ -663,7 +663,7 @@ Ansible Tower(Ansible Automation Controller):
 　　-D,--diff
 　　--skip-tags=SKIP_TAGS
 　　--start-at-task=START_AT_TASK
-　以下はAnsible Tower(Ansible Automation Controller)独自のパラメータです。
+　以下はAnsible Automation Controller独自のパラメータです。
 　　-ufc,--use_fact_cache　　　ファクトのキャッシュの使用
 　　-as,--allow_simultaneous　 同時実行ジョブの有効化
 　　-jsc,--job_slice_count=　　JOB SLICING
@@ -1220,7 +1220,7 @@ $ary["ITAANSIBLEH-MNU-6000000"]     = "NULL連携";
 $ary["ITAANSIBLEH-MNU-6000001"]     = "パラメータシートの具体値がNULL(空白)の場合、代入値管理への登録を有効にするかを設定します。\n空白:Ansible共通インターフェース情報のNULL連携に従う。\n有効:NULLデータを登録する。\n無効:NULLデータは登録しない。";
 $ary["ITAANSIBLEH-MNU-6000002"]     = "代入値自動登録設定でパラメータシートの具体値がNULL(空白)の場合に、代入値管理への登録を有効にするかのデフォルトを設定します。\n有効:NULLデータを登録する。\n無効:NULLデータは登録しない。";
 $ary["ITAANSIBLEH-MNU-907342701"]   = "未使用";
-$ary["ITAANSIBLEH-MNU-907350509"]   = "Ansible Tower(Ansible Automation Controller)に作成される一時オブジェクトを削除するかを選択します。";
+$ary["ITAANSIBLEH-MNU-907350509"]   = "Ansible Automation Controllerに作成される一時オブジェクトを削除するかを選択します。";
 $ary["ITAANSIBLEH-MNU-907352702"]   = "未使用";
 $ary["ITAANSIBLEH-MNU-907352703"]   = "未使用";
 $ary["ITAANSIBLEH-MNU-907362701"]   = "未使用";
@@ -1229,11 +1229,11 @@ $ary["ITAANSIBLEH-MNU-907392701"]   = "項番";
 $ary["ITAANSIBLEH-MNU-907392702"]   = "インスタンスグループ名";
 $ary["ITAANSIBLEH-MNU-907392703"]   = "インスタンスグループID";
 $ary["ITAANSIBLEH-MNU-9010000000"]  = "認証トークン";
-$ary["ITAANSIBLEH-MNU-9010000001"]  = "ITAからRestAPIでAnsible Tower(Ansible Automation Controller)に接続するユーザーの認証トークンです。";
+$ary["ITAANSIBLEH-MNU-9010000001"]  = "ITAからRestAPIでAnsible Automation Controllerに接続するユーザーの認証トークンです。";
 $ary["ITAANSIBLEH-MNU-9010000002"]  = "組織名";
-$ary["ITAANSIBLEH-MNU-9010000003"]  = "Ansible Tower(Ansible Automation Controller)に登録されている組織名を入力します。";
+$ary["ITAANSIBLEH-MNU-9010000003"]  = "Ansible Automation Controllerに登録されている組織名を入力します。";
 $ary["ITAANSIBLEH-MNU-9010000004"]  = "Ansible-Core インターフェース";
-$ary["ITAANSIBLEH-MNU-9010000005"]  = "Ansible Tower(Ansible Automation Controller) インターフェース";
+$ary["ITAANSIBLEH-MNU-9010000005"]  = "Ansible Automation Controller インターフェース";
 $ary["ITAANSIBLEH-MNU-9010000006"]  = "Legacy";
 $ary["ITAANSIBLEH-MNU-9010000007"]  = "Legacy Role";
 $ary["ITAANSIBLEH-MNU-9010000008"]  = "ヘッダーセクション";
@@ -1245,7 +1245,7 @@ Ansible:
     gather_facts: no
     become: yes
 
-Ansible Tower(Ansible Automation Controller):
+Ansible Automation Controller:
   - hosts: all
     gather_facts: no
     become: yes
@@ -1257,7 +1257,7 @@ Ansible:
   ansible-playbookコマンドのパラメータを設定します。
 　-i オプションはITAが設定します。
 
-Ansible Tower(Ansible Automation Controller):
+Ansible Automation Controller:
 　以下のパラメータが設定できます。
 　　-verbosity
 　　-f FORKS,--forks=FORKS
@@ -1269,7 +1269,7 @@ Ansible Tower(Ansible Automation Controller):
 　　-D,--diff
 　　--skip-tags=SKIP_TAGS
 　　--start-at-task=START_AT_TASK
-　以下はAnsible Tower(Ansible Automation Controller)独自のパラメータです。
+　以下はAnsible Automation Controller独自のパラメータです。
 　　-ufc,--use_fact_cache　　　ファクトのキャッシュの使用
 　　-as,--allow_simultaneous　 同時実行ジョブの有効化
 　　-jsc,--job_slice_count=　　JOB SLICING
@@ -1282,19 +1282,19 @@ Ansible:
     gather_facts: no
     become: yes
 
-Ansible Tower(Ansible Automation Controller):
+Ansible Automation Controller:
   - hosts: all
     gather_facts: no
     become: yes
 winrm接続の場合は「become: yes」は省略されます。";
 $ary["ITAANSIBLEH-MNU-9010000013"]  = "Ansible Tower利用情報";
 $ary["ITAANSIBLEH-MNU-9010000014"]  = "virtualenv";
-$ary["ITAANSIBLEH-MNU-9010000015"]  = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。\n実行したいansible実行環境を選択します。\n未選択の場合はAnsible Tower(Ansible Automation Controller)インストール時にインストールされたansible実行環境を使用します。";
+$ary["ITAANSIBLEH-MNU-9010000015"]  = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。\n実行したいansible実行環境を選択します。\n未選択の場合はAnsible Automation Controllerインストール時にインストールされたansible実行環境を使用します。";
 $ary["ITAANSIBLEH-MNU-9010000016"]  = "virtualenv";
 $ary["ITAANSIBLEH-MNU-9010000017"]  = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。";
 $ary["ITAANSIBLEH-MNU-9010000018"]  = "必須項目です。(項目:{})";
 $ary["ITAANSIBLEH-MNU-9010000019"]  = "ホスト一覧";
-$ary["ITAANSIBLEH-MNU-9010000020"]  = "Ansible Tower(Ansible Automation Controller)のホスト一覧です。\nクラスタ構成の場合、クラスタを構成しているAnsible Tower(Ansible Automation Controller)のホスト情報を登録します。";
+$ary["ITAANSIBLEH-MNU-9010000020"]  = "Ansible Automation Controllerのホスト一覧です。\nクラスタ構成の場合、クラスタを構成しているAnsible Automation Controllerのホスト情報を登録します。";
 $ary["ITAANSIBLEH-MNU-9010000021"]  = "Proxy";
 $ary["ITAANSIBLEH-MNU-9010000022"]  = "Address";
 $ary["ITAANSIBLEH-MNU-9010000023"]  = "Proxyサーバのアドレス";
@@ -1307,13 +1307,13 @@ virtualenv環境が存在しなかったりvirtualenv環境内にansibleがイ�
 未入力の場合はansibleサーバーにインストールされているansibleで作業実行を行います。
 [最大長 512バイト]";
 $ary["ITAANSIBLEH-MNU-9010000029"]  = "virtualenv";
-$ary["ITAANSIBLEH-MNU-9010000030"]  = "Ansible Tower(Ansible Automation Controller)サーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。
+$ary["ITAANSIBLEH-MNU-9010000030"]  = "Ansible Automation Controllerサーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。
 virtualenvで構築したansible実行環境で作業実行したい場合に、virtualenvのフルパスを選択して下さい。
-未選択の場合はAnsible Tower(Ansible Automation Controller)インストール時にインストールされたansible環境で作業実行を行います。";
+未選択の場合はAnsible Automation Controllerインストール時にインストールされたansible環境で作業実行を行います。";
 $ary["ITAANSIBLEH-MNU-9010000031"]  = "Ansible engin virtualenv パス";
-$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible Tower(Ansible Automation Controller) virtualenv パス";
+$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible Automation Controller virtualenv パス";
 $ary["ITAANSIBLEH-MNU-9010000033"]  = "Ansibleサーバ内にvirtualenvで構築したansible実行環境のフルパスが表示されています。";
-$ary["ITAANSIBLEH-MNU-9010000034"]  = "Ansible Tower(Ansible Automation Controller)サーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。";
+$ary["ITAANSIBLEH-MNU-9010000034"]  = "Ansible Automation Controllerサーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。";
 $ary["ITAANSIBLEH-MNU-9010000035"]  = "Ansible Automation Controller利用情報";
 $ary["ITAANSIBLEH-MNU-9010000036"]  = "実行環境";
 $ary["ITAANSIBLEH-MNU-9010000037"]  = "Ansible Automation Controllerサーバに構築されている実行環境が表示されています。
@@ -1324,15 +1324,15 @@ $ary["ITAANSIBLEH-MNU-9010000039"]  = "作業実行時に使用するansible.cfg
 未アップロードの場合は、デフォルトが使用されます。
 また、ロールパッケージ管理でアップロードされているzipファイルにansible.cfgが含まれている場合は、アップロードしたansible.cfgで上書きされます。";
 $ary["ITAANSIBLEH-MNU-9010000040"]  = "Ansible-Core利用情報";
-$ary["ITAANSIBLEH-MNU-9010001000"]  = "Ansible Tower(Ansible Automation Controller)のホスト情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>クラスター構成で構築されている場合、クラスター内のホップノードを除いたノード情報を登録して下さい。
+$ary["ITAANSIBLEH-MNU-9010001000"]  = "Ansible Automation Controllerのホスト情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>クラスター構成で構築されている場合、クラスター内のホップノードを除いたノード情報を登録して下さい。
 クラスター構成でない場合は、対象ノード(1台)の情報を登録して下さい。";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "項番";
 $ary["ITAANSIBLEH-MNU-9010001002"]  = "Ansible Tower(AAC)ホスト一覧";
 $ary["ITAANSIBLEH-MNU-9010001003"]  = "Ansible Tower(AAC)ホスト一覧";
 $ary["ITAANSIBLEH-MNU-9010001010"]  = "ホスト";
-$ary["ITAANSIBLEH-MNU-9010001011"]  = "Ansible Tower(Ansible Automation Controller)のホスト名(またはIPアドレス)です。";
+$ary["ITAANSIBLEH-MNU-9010001011"]  = "Ansible Automation Controllerのホスト名(またはIPアドレス)です。";
 $ary["ITAANSIBLEH-MNU-9010001020"]  = "認証方式";
-$ary["ITAANSIBLEH-MNU-9010001021"]  = "sshでAnsible Tower(Ansible Automation Controller)に接続する場合の認証方式を選択します。
+$ary["ITAANSIBLEH-MNU-9010001021"]  = "sshでAnsible Automation Controllerに接続する場合の認証方式を選択します。
 ・パスワード認証
 　ユーザーとパスワードの入力が必須です。
 ・鍵認証（パスフレーズなし）
@@ -1342,7 +1342,7 @@ $ary["ITAANSIBLEH-MNU-9010001021"]  = "sshでAnsible Tower(Ansible Automation Co
 ・鍵認証（鍵交換済み）
 　ssh秘密鍵ファイルのアップロードは必要ありません。";
 $ary["ITAANSIBLEH-MNU-9010001030"]  = "ユーザー";
-$ary["ITAANSIBLEH-MNU-9010001031"]  = "sshでAnsible Tower(Ansible Automation Controller)に接続する場合のユーザー名です。プロジェクトパス(/var/lib/awx/projects)への書込み権限が必要です。";
+$ary["ITAANSIBLEH-MNU-9010001031"]  = "sshでAnsible Automation Controllerに接続する場合のユーザー名です。プロジェクトパス(/var/lib/awx/projects)への書込み権限が必要です。";
 $ary["ITAANSIBLEH-MNU-9010001040"]  = "パスワード";
 $ary["ITAANSIBLEH-MNU-9010001041"]  = "パスワード認証する場合のパスワードです。";
 $ary["ITAANSIBLEH-MNU-9010001050"]  = "ssh秘密鍵ファイル";

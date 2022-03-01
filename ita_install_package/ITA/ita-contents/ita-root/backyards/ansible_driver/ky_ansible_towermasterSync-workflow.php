@@ -148,7 +148,7 @@ try {
     // RESTの認証
     ////////////////////////////////
     // トレースメッセージ
-    $logger->debug("Authorize Ansible Tower(Ansible Automation Controller).");
+    $logger->debug("Authorize Ansible Automation Controller.");
 
     $restApiCaller = new RestApiCaller($ansibleTowerIfInfo['ANSTWR_PROTOCOL'],    
                                         $ansibleTowerIfInfo['ANSTWR_HOSTNAME'],
@@ -162,7 +162,7 @@ try {
                                 . $ansibleTowerIfInfo['ANSTWR_HOSTNAME'] . ":"
                                 . $ansibleTowerIfInfo['ANSTWR_PORT'] . "\n"
                                 . "TOKEN: " . $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN'] . "\n");
-        throw new Exception("Faild to authorize to Ansible Tower(Ansible Automation Controller). " . $response_array['responseContents']['errorMessage']);
+        throw new Exception("Faild to authorize to Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
     }
 
     //==========================================================
@@ -174,7 +174,7 @@ try {
         ////////////////////////////////////////////////////////////
         $response_array = AnsibleTowerRestApiInstanceGroups::getAll($restApiCaller);
         if($response_array['success'] == false) {
-            throw new Exception("Faild to get instance groups data from Ansible Tower(Ansible Automation Controller). " . $response_array['responseContents']['errorMessage']);
+            throw new Exception("Faild to get instance groups data from Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
         }
 
         ////////////////////////////////////////////////////////////
@@ -223,7 +223,7 @@ try {
         ////////////////////////////////////////////////////////////
         $response_array = AnsibleTowerRestApiOrganizations::getAll($restApiCaller);
         if($response_array['success'] == false) {
-            throw new Exception("Faild to get organizations data from Ansible Tower(Ansible Automation Controller). " . $response_array['responseContents']['errorMessage']);
+            throw new Exception("Faild to get organizations data from Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
         }
     
         ////////////////////////////////////////////////////////////
@@ -272,7 +272,7 @@ try {
             ////////////////////////////////////////////////////////////
             $response_array = AnsibleTowerRestApiConfig::get($restApiCaller);
             if($response_array['success'] == false) {
-                throw new Exception("Faild to get virtualenv data from Ansible Tower(Ansible Automation Controller). " . $response_array['responseContents']['errorMessage']);
+                throw new Exception("Faild to get virtualenv data from Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
             }
         
             ////////////////////////////////////////////////////////////
@@ -325,15 +325,15 @@ try {
             $response_array = AnsibleTowerRestApiExecutionEnvironment::get($restApiCaller);
 
             if($response_array['success'] == false) {
-                throw new Exception("Faild to get Execution Environment data from Ansible Tower(Ansible Automation Controller). " . $response_array['responseContents']['errorMessage']);
+                throw new Exception("Faild to get Execution Environment data from Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
             }
 
             if( ! array_key_exists('responseContents',$response_array)) {
-                throw new Exception("responseContents tag is not found in Ansible Tower(Ansible Automation Controller). " . var_export($response_array,true));
+                throw new Exception("responseContents tag is not found in Ansible Automation Controller. " . var_export($response_array,true));
             }
 
             if( ! array_key_exists('results',$response_array['responseContents'] )) {
-                throw new Exception("responseContents->results tag not found in Ansible Tower(Ansible Automation Controller). " . var_export($response_array,true));
+                throw new Exception("responseContents->results tag not found in Ansible Automation Controller. " . var_export($response_array,true));
             }
         
             ////////////////////////////////////////////////////////////
