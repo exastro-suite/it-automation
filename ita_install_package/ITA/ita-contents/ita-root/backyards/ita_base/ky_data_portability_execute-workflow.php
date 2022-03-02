@@ -777,7 +777,7 @@ function updateSequence($paramAry){
                                                       array(basename(__FILE__), __LINE__)));
     }
 
-    $sql  = 'SELECT NAME,VALUE FROM A_SEQUENCE';
+    $sql  = 'SELECT NAME,VALUE,MENU_ID,DISP_SEQ,NOTE,LAST_UPDATE_TIMESTAMP FROM A_SEQUENCE';
     $sql .= ' WHERE NAME = :name';
 
     if (LOG_LEVEL === 'DEBUG') {
@@ -801,8 +801,9 @@ function updateSequence($paramAry){
     }
 
     $count = 0;
-    while ($row = $objQuery->resultFetch()) {
+    while ($tmpRow = $objQuery->resultFetch()) {
         $count++;
+        $row = $tmpRow;
     }
 
     if(1 === $count){
