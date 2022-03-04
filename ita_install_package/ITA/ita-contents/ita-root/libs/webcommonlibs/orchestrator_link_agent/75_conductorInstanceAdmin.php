@@ -1927,6 +1927,16 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
     
         $tmpNoticeInfo = json_decode($aryRowOfSymInstanceTable['I_NOTICE_INFO'],true);
         $arrNoticeInfo = $tmpNoticeInfo['NOTICE_INFO'];
+        
+        //緊急停止フラグを画面表示用に変換
+        $strAbortExecuteFlag = '';
+        if ($aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG'] == '1') {
+          $strAbortExecuteFlag = $objMTS->getSomeMessage("ITABASEH-MNU-203095");
+        }
+        else if ($aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG'] == '2') {
+          $strAbortExecuteFlag = $objMTS->getSomeMessage("ITABASEH-MNU-203096");
+        }
+
 
         //----Conductor(インスタンス)情報を固める
         $arySymphonySource = array('CONDUCTOR_INSTANCE_ID'=>$intSymphonyInstanceId
@@ -1934,7 +1944,7 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
                                   ,'STATUS_ID'=>$aryRowOfSymInstanceTable['STATUS_ID']
                                   ,'PAUSE_STATUS'=>''
                                   ,'EXECUTION_USER'=>$aryRowOfSymInstanceTable['EXECUTION_USER']
-                                  ,'ABORT_EXECUTE_FLAG'=>$aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG']
+                                  ,'ABORT_EXECUTE_FLAG'=>$strAbortExecuteFlag
                                   ,'OPERATION_NO_IDBH'=>$aryRowOfSymInstanceTable['OPERATION_NO_UAPK']
                                   ,'OPERATION_NAME'=>$aryRowOfSymInstanceTable['I_OPERATION_NAME']
                                   ,'TIME_BOOK'=>$aryRowOfSymInstanceTable['TIME_BOOK']
