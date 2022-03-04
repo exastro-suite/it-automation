@@ -1061,6 +1061,14 @@ if [ "$BASE_FLG" -eq 1 ]; then
     if [ $? -ne 0 ]; then
         log "WARNING : Failed to restart Apache(httpd) service."
     fi
+
+    if [ ${LINUX_OS} = 'RHEL8' -o ${LINUX_OS} = 'CentOS8' ]; then
+        systemctl restart php-fpm 2>> "$LOG_FILE" | tee -a "$LOG_FILE"
+        systemctl status php-fpm 2>&1 >> "$LOG_FILE"
+        if [ $? -ne 0 ]; then
+            log "WARNING : Failed to restart php-fpm service."
+        fi
+    fi
 fi
 
 log 'INFO : Installation complete!'
