@@ -5029,6 +5029,7 @@ const conductorStatusUpdate = function( exeNumber ) {
     ['#conductor-instance-end', conductorInfo.TIME_END ],
     ['#conductor-instance-user', conductorInfo.EXECUTION_USER ],
     ['#conductor-instance-reservation', conductorInfo.TIME_BOOK ],
+    ['#conductor-instance-emergency', conductorInfo.ABORT_EXECUTE_FLAG ],
     ['#select-operation-id', conductorInfo.OPERATION_NO_IDBH ],
     ['#select-operation-name', conductorInfo.OPERATION_NAME ]
   ];
