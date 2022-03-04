@@ -304,6 +304,8 @@ $ary["ITABASEH-MNU-203092"]         = "ログファイルを出力します。";
 $ary["ITABASEH-MNU-203093"]         = "保留ステータスには以下の状態が存在します。\n
 ・一時停止中";
 $ary["ITABASEH-MNU-203094"]         = "一時停止中";
+$ary["ITABASEH-MNU-203095"]         = "未発令";
+$ary["ITABASEH-MNU-203096"]         = "発令済";
 $ary["ITABASEH-MNU-204010"]         = "表示順序";
 $ary["ITABASEH-MNU-204020"]         = "表示順序の制御用";
 $ary["ITABASEH-MNU-204030"]         = "選択";

@@ -245,11 +245,10 @@ function conductorResultMessage( type, result ) {
       message = '',
       trigger = '';
 
-  // セッション切れのチェック
   var ary_result = getArrayBySafeSeparator(result);
   var conductorClassId = location.search.split('&');
-  //conductorClassIdがある
-  if( conductorClassId[1] != 'undefined'){
+  //セッションが切れた際、url上にコンダクタークラスidがある場合取得。
+  if( conductorClassId.length == 2 && ary_result[0] == "redirectOrderForHADACClient"){
     ary_result[2] = ary_result[2] + '&' + conductorClassId[1]
   }
   checkTypicalFlagInHADACResult(ary_result);

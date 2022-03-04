@@ -301,6 +301,8 @@ $ary["ITABASEH-MNU-203092"]         = "Output log file.";
 $ary["ITABASEH-MNU-203093"]         = "The following status states exist。\n
 ・Paused";
 $ary["ITABASEH-MNU-203094"]         = "Paused";
+$ary["ITABASEH-MNU-203095"]         = "Not issued";
+$ary["ITABASEH-MNU-203096"]         = "Issued";
 $ary["ITABASEH-MNU-204010"]         = "Display order";
 $ary["ITABASEH-MNU-204020"]         = "To control display order";
 $ary["ITABASEH-MNU-204030"]         = "Select";
