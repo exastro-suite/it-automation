@@ -89,7 +89,8 @@ func_compare_version() {
 ############################################################
 func_start_service() {
     #Apacheを起動する
-    systemctl start httpd
+    systemctl start httpd >> "$LOG_FILE" 2>&1
+    systemctl start php-fpm >> "$LOG_FILE" 2>&1
 
     #ITAのサービス起動する
     cd /usr/lib/systemd/system
@@ -444,7 +445,9 @@ fi
 log 'INFO : Stopping Apache.'
 ############################################################
 #Apacheを停止する
-systemctl stop httpd
+systemctl stop httpd >> "$LOG_FILE" 2>&1
+systemctl stop php-fpm >> "$LOG_FILE" 2>&1
+
 
 ############################################################
 log 'INFO : Stopping ITA services.'
