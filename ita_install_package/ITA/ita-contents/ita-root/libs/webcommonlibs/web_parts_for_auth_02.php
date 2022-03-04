@@ -62,7 +62,7 @@
                 // ----ログイン中の場合
                 global $p_login_name;
                 $p_login_name = $auth->getUsername();
-                web_log("LOGOUT-USER");
+                web_log("LOGOUT");
                 $auth->logout();
                 $scriptName = htmlspecialchars($_SERVER['SCRIPT_NAME'], ENT_QUOTES, "UTF-8");
                 $tmpStrArticleBody .= "<p>{$objMTS->getSomeMessage("ITAWDCH-STD-1102")}</p>\n";
