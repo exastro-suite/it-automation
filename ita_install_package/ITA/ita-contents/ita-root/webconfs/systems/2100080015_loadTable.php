@@ -621,6 +621,8 @@ Terrraform 代入値自動登録設定
         $c->setEvent('update_table', 'onchange', 'pattern_upd');
         $c->setEvent('register_table', 'onchange', 'pattern_reg');
 
+        unset($tmpObjFunction);
+
         $cgg->addColumn($c);
 
         //////////////////////////////////////////////////
@@ -857,6 +859,7 @@ Terrraform 代入値自動登録設定
             //$strSetInnerText = '作業パターンを選択して下さい'
             $strSetInnerText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105110");
             $objVarBFmtUpd = new SelectTabBFmt();
+            $objVarBFmtUpd->setFADJsEvent('onChange','key_module_vars_upd');
 
             // フォームの表示直後、変更反映カラムの既存値が、選べる選択肢の中になかった場合のメッセージ
             $objVarBFmtUpd->setNoOptionMessageText($strSetInnerText);
@@ -868,11 +871,13 @@ Terrraform 代入値自動登録設定
             $objVarBFmtUpd->setFunctionForGetSelectList($objFunction03);
 
             $objOTForUpd = new OutputType(new ReqTabHFmt(), $objVarBFmtUpd);
+            $objOTForUpd->setJsEvent('onChange','key_module_vars_upd');
 
             // フォームの表示後、ユーザによりトリガーカラムが選ばれたとき、選べる選択肢リストを作成する関数を指定
             $objOTForUpd->setFunctionForGetFADSelectList($objFunction01);
 
             $objVarBFmtReg = new SelectTabBFmt();
+            $objVarBFmtReg->setFADJsEvent('onChange','key_module_vars_reg');
 
             // フォームの表示直後、トリガーカラムが選ばれていない場合のメッセージ
             $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
@@ -883,6 +888,7 @@ Terrraform 代入値自動登録設定
             $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
 
             $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+            $objOTForReg->setJsEvent('onChange','key_module_vars_reg');
 
             // フォームの表示後、ユーザによりトリガーカラムが選ばれたとき、選べる選択肢リストを作成する関数を指定
             $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
@@ -982,6 +988,816 @@ Terrraform 代入値自動登録設定
 
             $cg->addColumn($c);
 
+            //---Keyメンバー変数
+            $objFunction01 = function($objOutputType, $aryVariant, $arySetting, $aryOverride, $objColumn){
+                global $g;
+                $retBool = false;
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+                $aryDataSet = array();
+                $aryTypeSet = array();
+                $aryTypeMaster = array();
+                $aryAddResultData = array();    
+                $aryAddResultData[0] = ""; //表示フラグタイプ格納
+                $aryAddResultData[1] = ""; //デフォルト値格納
+                $strFxName = "";
+                $strModuleVarsLinkId = $aryVariant['KEY_VARS_LINK_ID']; //選択されている変数名のID
+                $strMemberVarsId = $aryVariant['KEY_MEMBER_VARS']; //選択されているメンバ変数のID
+
+                if( 0 < strlen($strModuleVarsLinkId) ){
+                    if(0 < strlen($strMemberVarsId)){
+                        //選択されているメンバ変数のタイプを取得
+                        $strQuery = "SELECT "
+                                ." TAB_A.CHILD_VARS_TYPE_ID TYPE_ID "
+                                .",TAB_A.CHILD_MEMBER_VARS_VALUE DEFAULT_VALUE "
+                                .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                ."FROM "
+                                ." D_TERRAFORM_VAR_MEMBER TAB_A "
+                                ."WHERE "
+                                ." TAB_A.DISUSE_FLAG = ('0') "
+                                ." AND TAB_A.VARS_ASSIGN_FLAG = ('1') "
+                                ." AND TAB_A.CHILD_MEMBER_VARS_ID = :CHILD_MEMBER_VARS_ID ";
+                        $aryForBind['CHILD_MEMBER_VARS_ID'] = $strMemberVarsId;
+                    }else{
+                        //選択されている変数名のタイプを取得
+                        $strQuery = "SELECT "
+                                ." TAB_A.TYPE_ID TYPE_ID "
+                                .",TAB_A.VARS_VALUE DEFAULT_VALUE "
+                                .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                ."FROM "
+                                ." B_TERRAFORM_MODULE_VARS_LINK TAB_A "
+                                ."WHERE "
+                                ." TAB_A.DISUSE_FLAG = ('0') "
+                                ." AND TAB_A.MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+                        $aryForBind['MODULE_VARS_LINK_ID'] = $strModuleVarsLinkId;
+                    }
+        
+        
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
+        
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                    if( $aryRetBody[0] === true ){
+                        $objQuery = $aryRetBody[1];
+                        while($row = $objQuery->resultFetch() ){
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                            }else{
+                                if($permission === true){
+                                    $aryTypeSet[]= $row;
+                                }
+                            }
+                        }
+                        unset($aryForBind);
+                        unset($objQuery);
+                        $retBool = true;
+                    }else{
+                        $intErrorType = 500;
+                        $intRowLength = -1;
+                    }
+        
+                    if(count($aryTypeSet) == 1){
+                        //表示用デフォルト値をセット
+                        $aryAddResultData[1] = $aryTypeSet[0]['DEFAULT_VALUE'];
+        
+                        //タイプIDをセット
+                        $typeId = $aryTypeSet[0]['TYPE_ID'];
+                        if($typeId == ""){
+                            //TYPE_IDが空の場合$arydataSetを空のままreturn
+                            $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet,$aryAddResultData);
+                            return $retArray;
+                        }
+        
+                        //タイプ管理テーブルから、MEMBER_VARS_FLAGとASSIGN_SEQ_FLAGを取得
+                        $strQuery = "SELECT "
+                                    ." TAB_A.MEMBER_VARS_FLAG MEMBER_VARS_FLAG"
+                                    .",TAB_A.ASSIGN_SEQ_FLAG ASSIGN_SEQ_FLAG "
+                                    ."FROM "
+                                    ." B_TERRAFORM_TYPES_MASTER TAB_A "
+                                    ."WHERE "
+                                    ." TAB_A.DISUSE_FLAG = ('0') "
+                                    ." AND TAB_A.TYPE_ID = :TYPE_ID ";
+                        $aryForBind['TYPE_ID'] = $typeId;
+        
+                        $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+        
+                        if( $aryRetBody[0] === true ){
+                            $objQuery = $aryRetBody[1];
+        
+                            while($row = $objQuery->resultFetch()){
+                                $aryTypeMaster[] = $row;
+                            }
+                            unset($objQuery);
+                            $retBool = true;
+                        }else{
+                            $intErrorType = 500;
+                            $intRowLength = -1;
+                        }
+        
+                        //各フラグをセット
+                        $memberVarsFlg = $aryTypeMaster[0]['MEMBER_VARS_FLAG'];
+                        $assignSeqFlg  = $aryTypeMaster[0]['ASSIGN_SEQ_FLAG'];
+                        if(0 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                            $aryAddResultData[0] = "NO_FLAG_VAL";
+                        }
+                        elseif(1 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                            $aryAddResultData[0]  = "MEMBER_FLAG_VAL";
+                        }
+                        elseif(0 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                            $aryAddResultData[0] = "ASSIGN_FLAG_VAL";
+                        }
+                        elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                            $aryAddResultData[0]  = "FLAG_VAL";
+                        }
+                        else{
+                            $intErrorType = 501;
+                        }
+                    }else{
+                        $intErrrorType = 502;
+                    }
+        
+                    unset($aryRetBody);
+                    unset($strQuery);
+                    unset($aryForBind);
+        
+                    //メンバ変数テーブルから選択した変数名のIDと一致するレコードをSELECT
+                    $strQuery = "SELECT "
+                            ." TAB_1.CHILD_MEMBER_VARS_ID KEY_COLUMN "
+                            .",TAB_1.CHILD_MEMBER_VARS_NEST DISP_COLUMN "
+                            .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                            ."FROM "
+                            ." D_TERRAFORM_VAR_MEMBER TAB_1 "
+                            ."WHERE "
+                            ." TAB_1.DISUSE_FLAG = ('0') "
+                            ." AND TAB_1.VARS_ASSIGN_FLAG = ('1') "
+                            ." AND TAB_1.PARENT_VARS_ID = :PARENT_VARS_ID "
+                            ."ORDER BY DISP_COLUMN ASC ";
+                
+                    $aryForBind['PARENT_VARS_ID']        = $strModuleVarsLinkId;
+        
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
+            
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                    if( $aryRetBody[0] === true ){
+                        $objQuery = $aryRetBody[1];
+                        while($row = $objQuery->resultFetch() ){
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                            }else{
+                                if($permission === true){
+                                    $aryDataSet[]= $row;
+                                }
+                            }
+                        }
+                        unset($objQuery);
+                        $retBool = true;
+                    }else{
+                        $intErrorType = 500;
+                        $intRowLength = -1;
+                    }
+        
+                }else{
+                    $aryAddResultData[0] = "NO_SELECT_VARS";
+                }
+        
+        
+                $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet,$aryAddResultData);
+                return $retArray;
+            };
+            $objFunction02 = $objFunction01;
+
+            $objFunction03 = function($objCellFormatter, $rowData, $aryVariant){
+                global $g;
+                $retBool = false;
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+                $aryDataSet = array();
+            
+                $strFxName = "";
+        
+                $strModuleVarsLinkId = null;
+                if(is_array($rowData) && array_key_exists('KEY_VARS_LINK_ID', $rowData)){
+                    $strModuleVarsLinkId = $rowData['KEY_VARS_LINK_ID'];
+                }
+        
+                $strQuery = "SELECT "
+                           ." TAB_1.CHILD_MEMBER_VARS_ID KEY_COLUMN "
+                           .",TAB_1.CHILD_MEMBER_VARS_NEST DISP_COLUMN "
+                           .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                           ."FROM "
+                           ." D_TERRAFORM_VAR_MEMBER TAB_1 "
+                           ."WHERE "
+                           ." TAB_1.DISUSE_FLAG = ('0') "
+                           ." AND TAB_1.PARENT_VARS_ID = :PARENT_VARS_ID "
+                           ."ORDER BY KEY_COLUMN ASC ";
+            
+                $aryForBind['PARENT_VARS_ID']        = $strModuleVarsLinkId;
+            
+                if( 0 < strlen($strModuleVarsLinkId) ){
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
+            
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                    if( $aryRetBody[0] === true ){
+                        $objQuery = $aryRetBody[1];
+                        while($row = $objQuery->resultFetch() ){
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                            }else{
+                                if($permission === true){
+                                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                                }
+                            }
+                        }
+                        unset($objQuery);
+                        $retBool = true;
+                    }else{
+                        $intErrorType = 500;
+                        $intRowLength = -1;
+                    }
+                }
+                $aryRetBody = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
+                return $aryRetBody;
+            };
+            $objFunction04 = function($objCellFormatter, $arraySelectElement,$data,$boolWhiteKeyAdd,$varAddResultData,&$aryVariant,&$arySetting,&$aryOverride){
+                global $g;
+                $aryRetBody = array();
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+        
+                //入力不要
+                $strMsgBody01 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109400");
+                $strMsgBody02 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109401");
+                $strMsgBody03 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109402");
+        
+                $strOptionBodies = "";
+                $strNoOptionMessageText = "";
+        
+                $strHiddenInputBody = "<input type=\"hidden\" name=\"".$objCellFormatter->getFSTNameForIdentify()."\" value=\"\"/>";
+        
+                $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
+        
+                if( is_array($varAddResultData) === true ){
+                    if( array_key_exists(0,$varAddResultData) === true ){
+                        if(in_array($varAddResultData[0], array("MEMBER_FLAG_VAL", "FLAG_VAL"))){
+                            //セレクトボックスを生成
+                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, true, "", true);
+                        }else if(in_array($varAddResultData[0], array("NO_FLAG_VAL", "ASSIGN_FLAG_VAL"))){
+                            //入力不要
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
+                        }else if(in_array($varAddResultData[0], array("NO_SELECT_VARS"))){
+                            //変数名を選択してください
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
+                        }else if(in_array($varAddResultData[0], array("NONE_VAL"))){
+                            //入力不要※HCLがONの場合
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody03;
+                        }else{
+                            //入力不要
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
+                        }
+                    }else{
+                        //入力不要
+                        $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
+                    }
+                }
+                $aryRetBody['optionBodies'] = $strOptionBodies;
+                $aryRetBody['NoOptionMessageText'] = $strNoOptionMessageText;
+                $retArray = array($aryRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+                return $retArray;
+            };
+
+            $objFunction05 = function($objCellFormatter, $arraySelectElement,$data,$boolWhiteKeyAdd,$rowData,$aryVariant){
+                global $g;
+                $aryRetBody = array();
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+                $aryDataSet = array();
+                $type_Flg = "";
+
+                //入力不要
+                $strMsgBody01 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109403");
+                $strMsgBody02 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109404");
+                // $strMsgBody03 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109405");
+                
+                $strModuleVarsLinkId = null; //選択されている変数名のID
+                if(is_array($rowData) && array_key_exists('KEY_VARS_LINK_ID', $rowData)){
+                    $strModuleVarsLinkId = $rowData['KEY_VARS_LINK_ID'];
+                }
+        
+                $strMemberVarsId = null; //選択されているメンバ変数のID
+                if(is_array($rowData) && array_key_exists('KEY_MEMBER_VARS', $rowData)){
+                    $strMemberVarsId = $rowData['KEY_MEMBER_VARS'];
+                }
+        
+                $colTypeId = null;
+                if(is_array($rowData) && array_key_exists('COL_TYPE', $rowData)){
+                    $colTypeId = $rowData['COL_TYPE'];
+                }
+        
+                $strOptionBodies = "";
+                $strNoOptionMessageText = "";
+        
+                $strHiddenInputBody = "<input type=\"hidden\" name=\"".$objCellFormatter->getFSTNameForIdentify()."\" value=\"\"/>";
+        
+                $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
+        
+                //条件付き必須なので、出現するときは、空白選択させない
+                $tmpBoolWhiteKeyAdd = false;
+                $strFxName = "";
+                $aryAddResultData = array();
+
+                if(!strlen($strModuleVarsLinkId)){
+                    $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
+                }
+                if(0 < strlen($strModuleVarsLinkId)){
+                    $strQuery = "SELECT "
+                                ." TAB_A.TYPE_ID TYPE_ID "
+                                .",TAB_A.VARS_VALUE DEFAULT_VALUE "
+                                .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                ."FROM "
+                                ." B_TERRAFORM_MODULE_VARS_LINK TAB_A "
+                                ."WHERE "
+                                ." TAB_A.DISUSE_FLAG = ('0') "
+                                ." AND TAB_A.MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+                    $aryForBind['MODULE_VARS_LINK_ID'] = $strModuleVarsLinkId;
+                        // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                        $ret  = $obj->getAccountInfo($g['login_id']);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                        }
+            
+                        $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                        if( $aryRetBody[0] === true ){
+                            $objQuery = $aryRetBody[1];
+                            while($row = $objQuery->resultFetch() ){
+                                // レコード毎のアクセス権を判定
+                                list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                                if($ret === false) {
+                                    $intErrorType = 500;
+                                    $retBool = false;
+                                }else{
+                                    if($permission === true){
+                                        $aryTypeSet[]= $row;
+                                    }
+                                }
+                            }
+                            unset($aryForBind);
+                            unset($objQuery);
+                            $retBool = true;
+                        }else{
+                            $intErrorType = 500;
+                            $intRowLength = -1;
+                        }
+            
+                        if(count($aryTypeSet) == 1){
+                            //表示用デフォルト値をセット
+                            $aryAddResultData[1] = $aryTypeSet[0]['DEFAULT_VALUE'];
+            
+                            //タイプIDをセット
+                            $typeId = $aryTypeSet[0]['TYPE_ID'];
+                            if($typeId == ""){
+                                //TYPE_IDが空の場合$arydataSetを空のままreturn
+                                $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet,$aryAddResultData);
+                                return $retArray;
+                            }
+            
+                            //タイプ管理テーブルから、MEMBER_VARS_FLAGとASSIGN_SEQ_FLAGを取得
+                            $strQuery = "SELECT "
+                                        ." TAB_A.MEMBER_VARS_FLAG MEMBER_VARS_FLAG"
+                                        .",TAB_A.ASSIGN_SEQ_FLAG ASSIGN_SEQ_FLAG "
+                                        ."FROM "
+                                        ." B_TERRAFORM_TYPES_MASTER TAB_A "
+                                        ."WHERE "
+                                        ." TAB_A.DISUSE_FLAG = ('0') "
+                                        ." AND TAB_A.TYPE_ID = :TYPE_ID ";
+                            $aryForBind['TYPE_ID'] = $typeId;
+            
+                            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+            
+                            if( $aryRetBody[0] === true ){
+                                $objQuery = $aryRetBody[1];
+            
+                                while($row = $objQuery->resultFetch()){
+                                    $aryTypeMaster[] = $row;
+                                }
+                                unset($objQuery);
+                                $retBool = true;
+                            }else{
+                                $intErrorType = 500;
+                                $intRowLength = -1;
+                            }
+            
+                            //各フラグをセット
+                            $memberVarsFlg = $aryTypeMaster[0]['MEMBER_VARS_FLAG'];
+                            $assignSeqFlg  = $aryTypeMaster[0]['ASSIGN_SEQ_FLAG'];
+                            if(0 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                                $aryAddResultData[0] = "NO_FLAG_VAL";
+                            }
+                            elseif(1 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                                $aryAddResultData[0]  = "MEMBER_FLAG_VAL";
+                            }
+                            elseif(0 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                                $aryAddResultData[0] = "ASSIGN_FLAG_VAL";
+                            }
+                            elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                                $aryAddResultData[0]  = "FLAG_VAL";
+                            }
+                            else{
+                                $intErrorType = 501;
+                            }
+                        }else{
+                            $intErrrorType = 502;
+                        }
+                        $type_Flg = $aryAddResultData[0];
+                }
+        
+        
+                unset($aryRetBody);
+                unset($strQuery);
+                unset($aryForBind);
+        
+                if($colTypeId == 2 || $colTypeId ==3){
+                    if( !strlen($strMemberVarsId) ){
+                        $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
+                    }else{
+                        if($type_Flg == "MEMBER_FLAG_VAL" ||  $type_Flg == "FLAG_VAL"){
+                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
+                        }else{
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
+                        }
+                    }
+                }
+        
+                $aryRetBody['optionBodies'] = $strOptionBodies;
+                $aryRetBody['NoOptionMessageText'] = $strNoOptionMessageText;
+                $retArray = array($aryRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+                return $retArray;
+            };
+
+            // RestAPI/Excel/CSVからの登録の場合に組み合わせバリデータで退避したKEY_MEMBER_VARSを設定する。
+            $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+                global    $g;
+                $boolRet = true;
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+                $strErrorBuf = "";
+
+                $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+                if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+                    if(strlen($g['KEY_MEMBER_VARS_UPDATE_VALUE']) !== 0){
+                        $exeQueryData[$objColumn->getID()] = $g['KEY_MEMBER_VARS_UPDATE_VALUE'];
+                    }
+                }else if( $modeValue=="DTUP_singleRecDelete" ){
+                }
+                $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+                return $retArray;
+            };
+
+            $c = new IDColumn('KEY_MEMBER_VARS',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109407"),'D_TERRAFORM_VAR_MEMBER','CHILD_MEMBER_VARS_ID','CHILD_MEMBER_VARS_NEST');
+            $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109408"));//エクセル・ヘッダでの説明
+            //コンテンツのソースがヴューの場合、登録/更新の対象とする
+            $c->setHiddenMainTableColumn(true);
+
+            $c->setJournalTableOfMaster('D_TERRAFORM_VAR_MEMBER_JNL');
+            $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
+            $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
+            $c->setJournalKeyIDOfMaster('CHILD_MEMBER_VARS_ID');
+            $c->setJournalDispIDOfMaster('CHILD_MEMBER_VARS_NEST');
+
+
+            $strSetInnerText= $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109406");
+            $objVarBFmtUpd = new SelectTabBFmt();
+            $objVarBFmtUpd->setFADJsEvent('onChange','key_member_vars_upd');   // 更新時のonChange設定
+            $objVarBFmtUpd->setNoOptionMessageText($strSetInnerText);
+            $objVarBFmtUpd->setFADNoOptionMessageText($strSetInnerText);
+            $objVarBFmtUpd->setFunctionForGetSelectList($objFunction03);
+            $objVarBFmtUpd->setFunctionForGetFADMainDataOverride($objFunction04);
+            $objVarBFmtUpd->setFunctionForGetMainDataOverride($objFunction05);
+            $objOTForUpd = new OutputType(new ReqTabHFmt(), $objVarBFmtUpd);
+            $objOTForUpd->setJsEvent('onChange','key_member_vars_upd');
+            $objOTForUpd->setFunctionForGetFADSelectList($objFunction01);
+        
+            $objVarBFmtReg = new SelectTabBFmt();
+            $objVarBFmtReg->setFADJsEvent('onChange','key_member_vars_reg'); // 登録時のonChange設定
+            $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
+            $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+            $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
+            $objVarBFmtReg->setFunctionForGetFADMainDataOverride($objFunction04);
+            $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+            $objOTForReg->setJsEvent('onChange','key_member_vars_reg');
+            $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
+            $c->setEvent('update_table', 'onchange', 'key_member_vars_upd');
+            $c->setEvent('register_table', 'onchange', 'key_member_vars_reg');
+
+            $c->setOutputType('update_table',$objOTForUpd);
+            $c->setOutputType('register_table',$objOTForReg);
+
+            // REST/excel/csvで項目無効
+            $c->getOutputType('excel')->setVisible(false);
+            $c->getOutputType('csv')->setVisible(false);
+            $c->getOutputType('json')->setVisible(false);
+
+            // データベース更新前のファンクション登録
+            $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
+            
+
+            $cg->addColumn($c);
+
+            unset($tmpObjFunction);
+
+            unset($objFunction01);
+            unset($objFunction02);
+            unset($objFunction03);
+            unset($objFunction04);
+            unset($objFunction05);
+
+            ////////////////////////////////////////////////////////
+            //REST/excel/csv入力用 Keyメンバー変数　変数名+メンバー変数
+            ////////////////////////////////////////////////////////
+            $c = new IDColumn('REST_KEY_MEMBER_VARS',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109407"),'E_TERRAFORM_VAR_MEMBER_LIST','CHILD_MEMBER_VARS_ID','VAR_MEMBER_PULLDOWN','',array('OrderByThirdColumn'=>'CHILD_MEMBER_VARS_ID'));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109408"));
+
+            $c->setJournalTableOfMaster('E_TERRAFORM_VAR_MEMBER_LIST_JNL');
+            $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
+            $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
+            $c->setJournalKeyIDOfMaster('CHILD_MEMBER_VARS_ID');
+            $c->setJournalDispIDOfMaster('VAR_MEMBER_PULLDOWN');
+
+            //REST/excel/csv以外は非表示
+            $c->getOutputType('filter_table')->setVisible(false);
+            $c->getOutputType('print_table')->setVisible(false);
+            $c->getOutputType('update_table')->setVisible(false);
+            $c->getOutputType('register_table')->setVisible(false);
+            $c->getOutputType('delete_table')->setVisible(false);
+            $c->getOutputType('print_journal_table')->setVisible(false);
+            $c->getOutputType('excel')->setVisible(true);
+            $c->getOutputType('csv')->setVisible(true);
+            $c->getOutputType('json')->setVisible(true);
+
+            //コンテンツのソースがヴューの場合、登録/更新の対象外
+            $c->setHiddenMainTableColumn(false);
+
+            //エクセル/CSVからのアップロード対象
+            $c->setAllowSendFromFile(true);
+
+            //登録/更新時には、必須でない
+            $c->setRequired(false);
+
+            $cg->addColumn($c);
+
+
+            //メンバー変数---
+
+            //---代入順序 
+            $objFunction01 = function($strTagInnerBody,$objCellFormatter,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite){
+                global $g;
+
+                //メッセージ
+                $strMsgBody01 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109409");
+                $strMsgBody02 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109410");
+                $strMsgBody03 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109411");
+        
+                $assignSeq = null; //入力されている代入順序の値
+                if(is_array($rowData) && array_key_exists('KEY_ASSIGN_SEQ', $rowData)){
+                    $assignSeq = $rowData['KEY_ASSIGN_SEQ'];
+                }
+        
+                $strModuleVarsLinkId = null; //選択されている変数名のID
+                if(is_array($rowData) && array_key_exists('KEY_VARS_LINK_ID', $rowData)){
+                    $strModuleVarsLinkId = $rowData['KEY_VARS_LINK_ID'];
+                }
+        
+                $strMemberVarsId = null; //選択されているメンバ変数のID
+                if(is_array($rowData) && array_key_exists('KEY_MEMBER_VARS', $rowData)){
+                    $strMemberVarsId = $rowData['KEY_MEMBER_VARS'];
+                }
+        
+                $pattern = "input"; //デフォルトのパターン
+        
+                if(!$assignSeq){
+                    //ASSIGN_SEQがセットされていない場合、「変数名」「メンバ変数名」のタイプから表示状態を決める
+                    if( 0 < strlen($strModuleVarsLinkId) ){
+                        $aryTypeSet = array();
+                        $strFxName = "";
+                        if(0 < strlen($strMemberVarsId)){
+                            //選択されているメンバ変数のタイプを取得
+                            $strQuery = "SELECT "
+                                    ." TAB_A.CHILD_VARS_TYPE_ID TYPE_ID "
+                                    .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                    ."FROM "
+                                    ." D_TERRAFORM_VAR_MEMBER TAB_A "
+                                    ."WHERE "
+                                    ." TAB_A.DISUSE_FLAG = ('0') "
+                                    ." AND TAB_A.VARS_ASSIGN_FLAG = ('1') "
+                                    ." AND TAB_A.CHILD_MEMBER_VARS_ID = :CHILD_MEMBER_VARS_ID ";
+                            $aryForBind['CHILD_MEMBER_VARS_ID'] = $strMemberVarsId;
+                        }else{
+                            //選択されている変数名のタイプを取得
+                            $strQuery = "SELECT "
+                                    ." TAB_A.TYPE_ID TYPE_ID "
+                                    .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                    ."FROM "
+                                    ." B_TERRAFORM_MODULE_VARS_LINK TAB_A "
+                                    ."WHERE "
+                                    ." TAB_A.DISUSE_FLAG = ('0') "
+                                    ." AND TAB_A.MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+                            $aryForBind['MODULE_VARS_LINK_ID'] = $strModuleVarsLinkId;
+                        }
+        
+                        // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                        $ret  = $obj->getAccountInfo($g['login_id']);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                        }
+        
+                        $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                        if( $aryRetBody[0] === true ){
+                            $objQuery = $aryRetBody[1];
+                            while($row = $objQuery->resultFetch() ){
+                                // レコード毎のアクセス権を判定
+                                list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                                if($ret === false) {
+                                    $intErrorType = 500;
+                                    $retBool = false;
+                                }else{
+                                    if($permission === true){
+                                        $aryTypeSet[]= $row;
+                                    }
+                                }
+                            }
+                            unset($aryForBind);
+                            unset($objQuery);
+                            $retBool = true;
+                        }else{
+                            $intErrorType = 500;
+                            $intRowLength = -1;
+                        }
+        
+                        if(count($aryTypeSet) == 1){
+                            //タイプIDをセット
+                            $typeId = $aryTypeSet[0]['TYPE_ID'];
+                            if($typeId != ""){
+                                $aryTypeMaster = array();
+                                //タイプ管理テーブルから、MEMBER_VARS_FLAGとASSIGN_SEQ_FLAGを取得
+                                $strQuery = "SELECT "
+                                            ."TAB_A.ASSIGN_SEQ_FLAG ASSIGN_SEQ_FLAG "
+                                            ."FROM "
+                                            ." B_TERRAFORM_TYPES_MASTER TAB_A "
+                                            ."WHERE "
+                                            ." TAB_A.DISUSE_FLAG = ('0') "
+                                            ." AND TAB_A.TYPE_ID = :TYPE_ID ";
+                                $aryForBind['TYPE_ID'] = $typeId;
+                
+                                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                
+                                if( $aryRetBody[0] === true ){
+                                    $objQuery = $aryRetBody[1];
+                
+                                    while($row = $objQuery->resultFetch()){
+                                        $aryTypeMaster[] = $row;
+                                    }
+                                    unset($objQuery);
+                                    $retBool = true;
+                                }else{
+                                    $intErrorType = 500;
+                                    $intRowLength = -1;
+                                }
+        
+                                $assignSeqFlg  = $aryTypeMaster[0]['ASSIGN_SEQ_FLAG'];
+                                if($assignSeqFlg == 1){
+                                    //代入順序の入力フラグが1の場合、入力欄を表示
+                                    $pattern = "input";
+                                }else{
+                                    //フラグが1ではない(0)の場合「入力不要」メッセージ
+                                    $pattern = "noRequired";
+                                }
+        
+                            }else{
+                                //TYPE_IDが空の場合「入力不要」メッセージ
+                                $pattern = "noRequired";
+                            }
+                        }else{
+                            //レコードが無い場合「変数名を選択してください」メッセージ
+                            $pattern = "noSelectVars";
+                        }
+                    }else{
+                        //「変数名を選択してください」メッセージ
+                        $pattern = "noSelectVars";
+                    }
+                }else{
+                    //ASSIGN_SEQがセットされている場合、入力欄を表示
+                    $pattern = "input";
+                }
+        
+        
+                //$patternを元にBodyを生成
+                switch($pattern){
+                    case "input":
+                        $retBody = "<input style=\"\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+                        break;
+        
+                    case "noSelectVars":
+                        $retBody = "<input style=\"display:none\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                        $retBody = $retBody."<div style=\"\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+                        break;
+        
+                    case "noRequired":
+                        $retBody = "<input style=\"display:none\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                        $retBody = $retBody."<div style=\"\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+                        break;
+        
+                    case "noneVars":
+                        $retBody = "<input style=\"display:none\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                        $retBody = $retBody."<div style=\"\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+                        break;
+                }
+                return $retBody;
+            };
+            $objFunction02 = function($strTagInnerBody,$objCellFormatter,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite){
+                global $g;
+        
+                //メッセージ
+                $strMsgBody01 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109412");
+                $strMsgBody02 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109413");
+                $strMsgBody03 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109414");
+        
+                //「登録」パターン
+                $retBody = "<input style=\"display:none\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                $retBody = $retBody."<div style=\"display:none\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                $retBody = $retBody."<div style=\"\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                $retBody = $retBody."<div style=\"display:none\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+        
+                return $retBody;
+            };
+        
+            $objVarBFmtUpd = new NumInputTabBFmt(0,false);
+            $objVarBFmtUpd->setFunctionForReturnOverrideGetData($objFunction01);
+            $objVarBFmtReg = new NumInputTabBFmt(0,false);
+            $objVarBFmtReg->setFunctionForReturnOverrideGetData($objFunction02);
+            
+
+            
+            $objOTForUpd = new OutputType(new ReqTabHFmt(), $objVarBFmtUpd);
+            $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+
+            $c = new NumColumn('KEY_ASSIGN_SEQ',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109415"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109416"));//エクセル・ヘッダでの説明
+            //コンテンツのソースがヴューの場合、登録/更新の対象とする
+            $c->setHiddenMainTableColumn(true);
+
+            $c->setSubtotalFlag(false);
+            $c->setOutputType('update_table',$objOTForUpd);
+            $c->setOutputType('register_table',$objOTForReg); 
+            $c->setValidator(new IntNumValidator(1,null));
+
+            $cg->addColumn($c);
+            //代入順序---
+            
+            unset($objFunction01);
+            unset($objFunction02);
 
         //////////////////////////////////////////////////
         // ColumnGroup:Key変数 終了                     //
@@ -1160,6 +1976,7 @@ Terrraform 代入値自動登録設定
 
             $strSetInnerText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105170");
             $objVarBFmtUpd = new SelectTabBFmt();
+            $objVarBFmtUpd->setFADJsEvent('onChange','val_module_vars_upd');
 
             // フォームの表示直後、変更反映カラムの既存値が、選べる選択肢の中になかった場合のメッセージ
             $objVarBFmtUpd->setNoOptionMessageText($strSetInnerText);
@@ -1171,11 +1988,13 @@ Terrraform 代入値自動登録設定
             $objVarBFmtUpd->setFunctionForGetSelectList($objFunction03);
 
             $objOTForUpd = new OutputType(new ReqTabHFmt(), $objVarBFmtUpd);
+            $objOTForUpd->setJsEvent('onChange','val_module_vars_upd');
 
             // フォームの表示後、ユーザによりトリガーカラムが選ばれたとき、選べる選択肢リストを作成する関数を指定
             $objOTForUpd->setFunctionForGetFADSelectList($objFunction01);
 
             $objVarBFmtReg = new SelectTabBFmt();
+            $objVarBFmtReg->setFADJsEvent('onChange','val_module_vars_reg');
 
             // フォームの表示直後、トリガーカラムが選ばれていない場合のメッセージ
             $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
@@ -1186,6 +2005,7 @@ Terrraform 代入値自動登録設定
             $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
 
             $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+            $objOTForReg->setJsEvent('onChange','val_module_vars_reg');
 
             // フォームの表示後、ユーザによりトリガーカラムが選ばれたとき、選べる選択肢リストを作成する関数を指定
             $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
@@ -1216,6 +2036,8 @@ Terrraform 代入値自動登録設定
             $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
             $cg->addColumn($c);
+
+            unset($tmpObjFunction);
 
             unset($objFunction01);
             unset($objFunction02);
@@ -1284,6 +2106,867 @@ Terrraform 代入値自動登録設定
 
             $cg->addColumn($c);
 
+            //valHCL設定----
+            $c = new IDColumn('HCL_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105240"), 'B_TERRAFORM_HCL_FLAG', 'HCL_FLAG', 'HCL_FLAG_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('HCL_FLAG'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105250")); //エクセル・ヘッダでの説明
+            $c->setJournalTableOfMaster('B_TERRAFORM_HCL_FLAG_JNL');
+            $c->setDefaultValue("register_table", 1); //デフォルト値で1(OFF)
+            $c->setRequired(true); //登録/更新時には、入力必須
+            //コンテンツのソースがヴューの場合、登録/更新の対象とする
+            $c->setHiddenMainTableColumn(true);
+            $c->setEvent('update_table', 'onchange', 'val_hcl_upd');
+            $c->setEvent('register_table', 'onchange', 'val_hcl_reg');
+    
+            $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+            $objOT->setFirstSearchValueOwnerColumnID('HCL_FLAG');
+            $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_TERRAFORM_HCL_FLAG_JNL',
+                'TTT_SEARCH_KEY_COLUMN_ID'=>'HCL_FLAG',
+                'TTT_GET_TARGET_COLUMN_ID'=>'HCL_FLAG_SELECT',
+                'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+                'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+                'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+                )
+            );
+            $objOT->setTraceQuery($aryTraceQuery);
+            $c->setOutputType('print_journal_table',$objOT);
+    
+            $cg->addColumn($c);
+        
+            //---valHCL設定
+            
+
+            //---メンバー変数
+            //----OutputType向け関数
+            $objFunction01 = function($objOutputType, $aryVariant, $arySetting, $aryOverride, $objColumn){
+                global $g;
+                $retBool = false;
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+                $aryDataSet = array();
+                $aryTypeSet = array();
+                $aryTypeMaster = array();
+                $aryAddResultData = array();    
+                $aryAddResultData[0] = ""; //表示フラグタイプ格納
+                $aryAddResultData[1] = ""; //デフォルト値格納
+                $strFxName = "";
+                $strModuleVarsLinkId = $aryVariant['VAL_VARS_LINK_ID']; //選択されている変数名のID
+                $strMemberVarsId = $aryVariant['VAL_MEMBER_VARS']; //選択されているメンバ変数のID
+                $strhclId = $aryVariant['HCL_FLAG']; //選択されているHCLのID
+
+                if( 0 < strlen($strModuleVarsLinkId) ){
+                    if(0 < strlen($strMemberVarsId)){
+                        //選択されているメンバ変数のタイプを取得
+                        $strQuery = "SELECT "
+                                ." TAB_A.CHILD_VARS_TYPE_ID TYPE_ID "
+                                .",TAB_A.CHILD_MEMBER_VARS_VALUE DEFAULT_VALUE "
+                                .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                ."FROM "
+                                ." D_TERRAFORM_VAR_MEMBER TAB_A "
+                                ."WHERE "
+                                ." TAB_A.DISUSE_FLAG = ('0') "
+                                ." AND TAB_A.VARS_ASSIGN_FLAG = ('1') "
+                                ." AND TAB_A.CHILD_MEMBER_VARS_ID = :CHILD_MEMBER_VARS_ID ";
+                        $aryForBind['CHILD_MEMBER_VARS_ID'] = $strMemberVarsId;
+                    }else{
+                        //選択されている変数名のタイプを取得
+                        $strQuery = "SELECT "
+                                ." TAB_A.TYPE_ID TYPE_ID "
+                                .",TAB_A.VARS_VALUE DEFAULT_VALUE "
+                                .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                ."FROM "
+                                ." B_TERRAFORM_MODULE_VARS_LINK TAB_A "
+                                ."WHERE "
+                                ." TAB_A.DISUSE_FLAG = ('0') "
+                                ." AND TAB_A.MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+                        $aryForBind['MODULE_VARS_LINK_ID'] = $strModuleVarsLinkId;
+                    }
+        
+        
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
+        
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                    if( $aryRetBody[0] === true ){
+                        $objQuery = $aryRetBody[1];
+                        while($row = $objQuery->resultFetch() ){
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                            }else{
+                                if($permission === true){
+                                    $aryTypeSet[]= $row;
+                                }
+                            }
+                        }
+                        unset($aryForBind);
+                        unset($objQuery);
+                        $retBool = true;
+                    }else{
+                        $intErrorType = 500;
+                        $intRowLength = -1;
+                    }
+        
+                    if(count($aryTypeSet) == 1){
+                        //表示用デフォルト値をセット
+                        $aryAddResultData[1] = $aryTypeSet[0]['DEFAULT_VALUE'];
+        
+                        //タイプIDをセット
+                        $typeId = $aryTypeSet[0]['TYPE_ID'];
+                        if($typeId == ""){
+                            //TYPE_IDが空の場合$arydataSetを空のままreturn
+                            $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet,$aryAddResultData);
+                            return $retArray;
+                        }
+        
+                        //タイプ管理テーブルから、MEMBER_VARS_FLAGとASSIGN_SEQ_FLAGを取得
+                        $strQuery = "SELECT "
+                                    ." TAB_A.MEMBER_VARS_FLAG MEMBER_VARS_FLAG"
+                                    .",TAB_A.ASSIGN_SEQ_FLAG ASSIGN_SEQ_FLAG "
+                                    ."FROM "
+                                    ." B_TERRAFORM_TYPES_MASTER TAB_A "
+                                    ."WHERE "
+                                    ." TAB_A.DISUSE_FLAG = ('0') "
+                                    ." AND TAB_A.TYPE_ID = :TYPE_ID ";
+                        $aryForBind['TYPE_ID'] = $typeId;
+        
+                        $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+        
+                        if( $aryRetBody[0] === true ){
+                            $objQuery = $aryRetBody[1];
+        
+                            while($row = $objQuery->resultFetch()){
+                                $aryTypeMaster[] = $row;
+                            }
+                            unset($objQuery);
+                            $retBool = true;
+                        }else{
+                            $intErrorType = 500;
+                            $intRowLength = -1;
+                        }
+        
+                        //各フラグをセット
+                        $memberVarsFlg = $aryTypeMaster[0]['MEMBER_VARS_FLAG'];
+                        $assignSeqFlg  = $aryTypeMaster[0]['ASSIGN_SEQ_FLAG'];
+                        if(0 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                            $aryAddResultData[0] = "NO_FLAG_VAL";
+                        }
+                        elseif(1 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                            $aryAddResultData[0]  = "MEMBER_FLAG_VAL";
+                        }
+                        elseif(0 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                            $aryAddResultData[0] = "ASSIGN_FLAG_VAL";
+                        }
+                        elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                            $aryAddResultData[0]  = "FLAG_VAL";
+                        }
+                        else{
+                            $intErrorType = 501;
+                        }
+                    }else{
+                        $intErrrorType = 502;
+                    }
+        
+                    unset($aryRetBody);
+                    unset($strQuery);
+                    unset($aryForBind);
+        
+                    //メンバ変数テーブルから選択した変数名のIDと一致するレコードをSELECT
+                    $strQuery = "SELECT "
+                            ." TAB_1.CHILD_MEMBER_VARS_ID KEY_COLUMN "
+                            .",TAB_1.CHILD_MEMBER_VARS_NEST DISP_COLUMN "
+                            .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                            ."FROM "
+                            ." D_TERRAFORM_VAR_MEMBER TAB_1 "
+                            ."WHERE "
+                            ." TAB_1.DISUSE_FLAG = ('0') "
+                            ." AND TAB_1.VARS_ASSIGN_FLAG = ('1') "
+                            ." AND TAB_1.PARENT_VARS_ID = :PARENT_VARS_ID "
+                            ."ORDER BY DISP_COLUMN ASC ";
+                
+                    $aryForBind['PARENT_VARS_ID']        = $strModuleVarsLinkId;
+        
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
+            
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                    if( $aryRetBody[0] === true ){
+                        $objQuery = $aryRetBody[1];
+                        while($row = $objQuery->resultFetch() ){
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                            }else{
+                                if($permission === true){
+                                    $aryDataSet[]= $row;
+                                }
+                            }
+                        }
+                        unset($objQuery);
+                        $retBool = true;
+                    }else{
+                        $intErrorType = 500;
+                        $intRowLength = -1;
+                    }
+        
+                }else{
+                    $aryAddResultData[0] = "NO_SELECT_VARS";
+                }
+        
+                if($strhclId == 2){
+                    $aryAddResultData[0] = "NONE_VAL";
+                }
+        
+                $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet,$aryAddResultData);
+                return $retArray;
+            };
+            $objFunction02 = $objFunction01;
+
+            $objFunction03 = function($objCellFormatter, $rowData, $aryVariant){
+                global $g;
+                $retBool = false;
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+                $aryDataSet = array();
+            
+                $strFxName = "";
+        
+                $strModuleVarsLinkId = null;
+                if(is_array($rowData) && array_key_exists('VAL_VARS_LINK_ID', $rowData)){
+                    $strModuleVarsLinkId = $rowData['VAL_VARS_LINK_ID'];
+                }
+                $strQuery = "SELECT "
+                           ." TAB_1.CHILD_MEMBER_VARS_ID KEY_COLUMN "
+                           .",TAB_1.CHILD_MEMBER_VARS_NEST DISP_COLUMN "
+                           .",TAB_1.ACCESS_AUTH ACCESS_AUTH "
+                           ."FROM "
+                           ." D_TERRAFORM_VAR_MEMBER TAB_1 "
+                           ."WHERE "
+                           ." TAB_1.DISUSE_FLAG = ('0') "
+                           ." AND TAB_1.VARS_ASSIGN_FLAG = ('1') "
+                           ." AND TAB_1.PARENT_VARS_ID = :PARENT_VARS_ID "
+                           ."ORDER BY KEY_COLUMN ASC ";
+            
+                $aryForBind['PARENT_VARS_ID']        = $strModuleVarsLinkId;
+            
+                if( 0 < strlen($strModuleVarsLinkId) ){
+                    // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                    $obj = new RoleBasedAccessControl($g['objDBCA']);
+                    $ret  = $obj->getAccountInfo($g['login_id']);
+                    if($ret === false) {
+                        $intErrorType = 500;
+                        $retBool = false;
+                    }
+            
+                    $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                    if( $aryRetBody[0] === true ){
+                        $objQuery = $aryRetBody[1];
+                        while($row = $objQuery->resultFetch() ){
+                            // レコード毎のアクセス権を判定
+                            list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                            if($ret === false) {
+                                $intErrorType = 500;
+                                $retBool = false;
+                            }else{
+                                if($permission === true){
+                                    $aryDataSet[$row['KEY_COLUMN']]= $row['DISP_COLUMN'];
+                                }
+                            }
+                        }
+                        unset($objQuery);
+                        $retBool = true;
+                    }else{
+                        $intErrorType = 500;
+                        $intRowLength = -1;
+                    }
+                }
+                $aryRetBody = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet);
+                return $aryRetBody;
+            };
+            $objFunction04 = function($objCellFormatter, $arraySelectElement,$data,$boolWhiteKeyAdd,$varAddResultData,&$aryVariant,&$arySetting,&$aryOverride){
+                global $g;
+                $aryRetBody = array();
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+        
+                //入力不要
+                $strMsgBody01 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109417");
+                $strMsgBody02 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109418");
+                $strMsgBody03 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109419");
+        
+                $strOptionBodies = "";
+                $strNoOptionMessageText = "";
+        
+                $strHiddenInputBody = "<input type=\"hidden\" name=\"".$objCellFormatter->getFSTNameForIdentify()."\" value=\"\"/>";
+        
+                $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
+        
+                if( is_array($varAddResultData) === true ){
+                    if( array_key_exists(0,$varAddResultData) === true ){
+                        if(in_array($varAddResultData[0], array("MEMBER_FLAG_VAL", "FLAG_VAL"))){
+                            //セレクトボックスを生成
+                            $strOptionBodies = makeSelectOption($arraySelectElement, $data, true, "", true);
+                        }else if(in_array($varAddResultData[0], array("NO_FLAG_VAL", "ASSIGN_FLAG_VAL"))){
+                            //入力不要
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
+                        }else if(in_array($varAddResultData[0], array("NO_SELECT_VARS"))){
+                            //変数名を選択してください
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
+                        }else if(in_array($varAddResultData[0], array("NONE_VAL"))){
+                            //入力不要※HCLがONの場合
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody03;
+                        }else{
+                            //入力不要
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
+                        }
+                    }else{
+                        //入力不要
+                        $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
+                    }
+                }
+                $aryRetBody['optionBodies'] = $strOptionBodies;
+                $aryRetBody['NoOptionMessageText'] = $strNoOptionMessageText;
+                $retArray = array($aryRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+                return $retArray;
+            };
+
+            $objFunction05 = function($objCellFormatter, $arraySelectElement,$data,$boolWhiteKeyAdd,$rowData,$aryVariant){
+                global $g;
+                $aryRetBody = array();
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+                $aryDataSet = array();
+                $type_Flg = "";
+
+
+                //入力不要
+                $strMsgBody01 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109420");
+                $strMsgBody02 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109421");
+                $strMsgBody03 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109422");
+                
+                $strModuleVarsLinkId = null; //選択されている変数名のID
+                if(is_array($rowData) && array_key_exists('VAL_VARS_LINK_ID', $rowData)){
+                    $strModuleVarsLinkId = $rowData['VAL_VARS_LINK_ID'];
+                }
+                $strMemberVarsId = null; //選択されているメンバ変数のID
+                if(is_array($rowData) && array_key_exists('VAL_MEMBER_VARS', $rowData)){
+                    $strMemberVarsId = $rowData['VAL_MEMBER_VARS'];
+                }
+                $strhclId = null;
+                if(is_array($rowData) && array_key_exists('HCL_FLAG', $rowData)){
+                    $strhclId = $rowData['HCL_FLAG'];
+                }
+                $colTypeId = null;
+                if(is_array($rowData) && array_key_exists('COL_TYPE', $rowData)){
+                    $colTypeId = $rowData['COL_TYPE'];
+                }
+
+                $strOptionBodies = "";
+                $strNoOptionMessageText = "";
+        
+                $strHiddenInputBody = "<input type=\"hidden\" name=\"".$objCellFormatter->getFSTNameForIdentify()."\" value=\"\"/>";
+        
+                $strNoOptionMessageText = $strHiddenInputBody.$objCellFormatter->getFADNoOptionMessageText();
+        
+                //条件付き必須なので、出現するときは、空白選択させない
+                $tmpBoolWhiteKeyAdd = false;
+                $strFxName = "";
+                $aryAddResultData = array();
+
+                if(!strlen($strModuleVarsLinkId)){
+                    $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
+                }
+        
+                if(0 < strlen($strModuleVarsLinkId)){
+                    $strQuery = "SELECT "
+                                ." TAB_A.TYPE_ID TYPE_ID "
+                                .",TAB_A.VARS_VALUE DEFAULT_VALUE "
+                                .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                ."FROM "
+                                ." B_TERRAFORM_MODULE_VARS_LINK TAB_A "
+                                ."WHERE "
+                                ." TAB_A.DISUSE_FLAG = ('0') "
+                                ." AND TAB_A.MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+                    $aryForBind['MODULE_VARS_LINK_ID'] = $strModuleVarsLinkId;
+                        // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                        $ret  = $obj->getAccountInfo($g['login_id']);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                        }
+            
+                        $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                        if( $aryRetBody[0] === true ){
+                            $objQuery = $aryRetBody[1];
+                            while($row = $objQuery->resultFetch() ){
+                                // レコード毎のアクセス権を判定
+                                list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                                if($ret === false) {
+                                    $intErrorType = 500;
+                                    $retBool = false;
+                                }else{
+                                    if($permission === true){
+                                        $aryTypeSet[]= $row;
+                                    }
+                                }
+                            }
+                            unset($aryForBind);
+                            unset($objQuery);
+                            $retBool = true;
+                        }else{
+                            $intErrorType = 500;
+                            $intRowLength = -1;
+                        }
+            
+                        if(count($aryTypeSet) == 1){
+                            //表示用デフォルト値をセット
+                            $aryAddResultData[1] = $aryTypeSet[0]['DEFAULT_VALUE'];
+            
+                            //タイプIDをセット
+                            $typeId = $aryTypeSet[0]['TYPE_ID'];
+                            if($typeId == ""){
+                                //TYPE_IDが空の場合$arydataSetを空のままreturn
+                                $retArray = array($retBool,$intErrorType,$aryErrMsgBody,$strErrMsg,$aryDataSet,$aryAddResultData);
+                                return $retArray;
+                            }
+            
+                            //タイプ管理テーブルから、MEMBER_VARS_FLAGとASSIGN_SEQ_FLAGを取得
+                            $strQuery = "SELECT "
+                                        ." TAB_A.MEMBER_VARS_FLAG MEMBER_VARS_FLAG"
+                                        .",TAB_A.ASSIGN_SEQ_FLAG ASSIGN_SEQ_FLAG "
+                                        ."FROM "
+                                        ." B_TERRAFORM_TYPES_MASTER TAB_A "
+                                        ."WHERE "
+                                        ." TAB_A.DISUSE_FLAG = ('0') "
+                                        ." AND TAB_A.TYPE_ID = :TYPE_ID ";
+                            $aryForBind['TYPE_ID'] = $typeId;
+            
+                            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+            
+                            if( $aryRetBody[0] === true ){
+                                $objQuery = $aryRetBody[1];
+            
+                                while($row = $objQuery->resultFetch()){
+                                    $aryTypeMaster[] = $row;
+                                }
+                                unset($objQuery);
+                                $retBool = true;
+                            }else{
+                                $intErrorType = 500;
+                                $intRowLength = -1;
+                            }
+            
+                            //各フラグをセット
+                            $memberVarsFlg = $aryTypeMaster[0]['MEMBER_VARS_FLAG'];
+                            $assignSeqFlg  = $aryTypeMaster[0]['ASSIGN_SEQ_FLAG'];
+                            if(0 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                                $aryAddResultData[0] = "NO_FLAG_VAL";
+                            }
+                            elseif(1 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                                $aryAddResultData[0]  = "MEMBER_FLAG_VAL";
+                            }
+                            elseif(0 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                                $aryAddResultData[0] = "ASSIGN_FLAG_VAL";
+                            }
+                            elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                                $aryAddResultData[0]  = "FLAG_VAL";
+                            }
+                            else{
+                                $intErrorType = 501;
+                            }
+                        }else{
+                            $intErrrorType = 502;
+                        }
+                        $type_Flg = $aryAddResultData[0];
+                }
+                
+                unset($aryRetBody);
+                unset($strQuery);
+                unset($aryForBind);
+        
+                if($colTypeId == 1 || $colTypeId ==3){
+                    if( !strlen($strMemberVarsId) ){
+                        if($strhclId == 2){
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody03;
+                        }else{
+                            if($type_Flg == "MEMBER_FLAG_VAL" ||  $type_Flg == "FLAG_VAL"){
+                                $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
+                            }else{
+                                $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
+                            }
+                        }      
+                    }else{
+                        $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
+                    }
+                }
+                $aryRetBody['optionBodies'] = $strOptionBodies;
+                $aryRetBody['NoOptionMessageText'] = $strNoOptionMessageText;
+                $retArray = array($aryRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
+                return $retArray;
+        
+            };
+            // RestAPI/Excel/CSVからの登録の場合に組み合わせバリデータで退避したMEMBER_VARSを設定する。
+            $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
+                global    $g;
+                $boolRet = true;
+                $intErrorType = null;
+                $aryErrMsgBody = array();
+                $strErrMsg = "";
+                $strErrorBuf = "";
+
+                $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+                if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
+                    if(strlen($g['VAL_MEMBER_VARS_UPDATE_VALUE']) !== 0){
+                        $exeQueryData[$objColumn->getID()] = $g['VAL_MEMBER_VARS_UPDATE_VALUE'];
+                    }
+                }else if( $modeValue=="DTUP_singleRecDelete" ){
+                }
+                $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
+                return $retArray;
+            };
+
+            
+            $c = new IDColumn('VAL_MEMBER_VARS',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109423"),'D_TERRAFORM_VAR_MEMBER','CHILD_MEMBER_VARS_ID','CHILD_MEMBER_VARS_NEST');
+            $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109424"));//エクセル・ヘッダでの説明
+            //コンテンツのソースがヴューの場合、登録/更新の対象とする
+            $c->setHiddenMainTableColumn(true);
+
+            $c->setJournalTableOfMaster('D_TERRAFORM_VAR_MEMBER_JNL');
+            $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
+            $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
+            $c->setJournalKeyIDOfMaster('CHILD_MEMBER_VARS_ID');
+            $c->setJournalDispIDOfMaster('CHILD_MEMBER_VARS_NEST');
+
+            $strSetInnerText = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109425");
+            $objVarBFmtUpd = new SelectTabBFmt();
+            $objVarBFmtUpd->setFADJsEvent('onChange','val_member_vars_upd');   // 更新時のonChange設定
+            $objVarBFmtUpd->setNoOptionMessageText($strSetInnerText);
+            $objVarBFmtUpd->setFADNoOptionMessageText($strSetInnerText);
+            $objVarBFmtUpd->setFunctionForGetSelectList($objFunction03);
+            $objVarBFmtUpd->setFunctionForGetFADMainDataOverride($objFunction04);
+            $objVarBFmtUpd->setFunctionForGetMainDataOverride($objFunction05);
+            $objOTForUpd = new OutputType(new ReqTabHFmt(), $objVarBFmtUpd);
+            $objOTForUpd->setJsEvent('onChange','val_member_vars_upd');
+            $objOTForUpd->setFunctionForGetFADSelectList($objFunction01);
+        
+            $objVarBFmtReg = new SelectTabBFmt();
+            $objVarBFmtReg->setFADJsEvent('onChange','val_member_vars_reg'); // 登録時のonChange設定
+            $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
+            $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
+            $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
+            $objVarBFmtReg->setFunctionForGetFADMainDataOverride($objFunction04);
+            $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+            $objOTForReg->setJsEvent('onChange','val_member_vars_reg');
+            $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
+        
+            $c->setEvent('update_table', 'onchange', 'val_member_vars_upd');
+            $c->setEvent('register_table', 'onchange', 'val_member_vars_reg');
+
+            $c->setOutputType('update_table',$objOTForUpd);
+            $c->setOutputType('register_table',$objOTForReg);
+
+            $c->getOutputType('excel')->setVisible(false);
+            $c->getOutputType('csv')->setVisible(false);
+            $c->getOutputType('json')->setVisible(false);
+        
+            // データベース更新前のファンクション登録
+            $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);        
+    
+            $cg->addColumn($c);
+
+            unset($tmpObjFunction);
+
+            unset($objFunction01);
+            unset($objFunction02);
+            unset($objFunction03);
+            unset($objFunction04);
+            unset($objFunction05);
+
+            ////////////////////////////////////////////////////////
+            //REST/excel/csv入力用 Valメンバー変数　変数名+メンバー変数
+            ////////////////////////////////////////////////////////
+            $c = new IDColumn('REST_VAL_MEMBER_VARS',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109423"),'E_TERRAFORM_VAR_MEMBER_LIST','CHILD_MEMBER_VARS_ID','VAR_MEMBER_PULLDOWN','',array('OrderByThirdColumn'=>'CHILD_MEMBER_VARS_ID'));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109424"));
+
+            $c->setJournalTableOfMaster('E_TERRAFORM_VAR_MEMBER_LIST_JNL');
+            $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
+            $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
+            $c->setJournalKeyIDOfMaster('CHILD_MEMBER_VARS_ID');
+            $c->setJournalDispIDOfMaster('VAR_MEMBER_PULLDOWN');
+
+            //REST/excel/csv以外は非表示
+            $c->getOutputType('filter_table')->setVisible(false);
+            $c->getOutputType('print_table')->setVisible(false);
+            $c->getOutputType('update_table')->setVisible(false);
+            $c->getOutputType('register_table')->setVisible(false);
+            $c->getOutputType('delete_table')->setVisible(false);
+            $c->getOutputType('print_journal_table')->setVisible(false);
+            $c->getOutputType('excel')->setVisible(true);
+            $c->getOutputType('csv')->setVisible(true);
+            $c->getOutputType('json')->setVisible(true);
+
+            //コンテンツのソースがヴューの場合、登録/更新の対象外
+            $c->setHiddenMainTableColumn(false);
+
+            //エクセル/CSVからのアップロード対象
+            $c->setAllowSendFromFile(true);
+
+            //登録/更新時には、必須でない
+            $c->setRequired(false);
+
+            $cg->addColumn($c);
+
+
+
+            //メンバー変数---
+
+            //---代入順序 
+            $objFunction01 = function($strTagInnerBody,$objCellFormatter,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite){
+                global $g;
+
+                //メッセージ
+                $strMsgBody01 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109426");
+                $strMsgBody02 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109427");
+                $strMsgBody03 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109428");
+        
+                $assignSeq = null; //入力されている代入順序の値
+                if(is_array($rowData) && array_key_exists('VAL_ASSIGN_SEQ', $rowData)){
+                    $assignSeq = $rowData['VAL_ASSIGN_SEQ'];
+                }
+                $strModuleVarsLinkId = null; //選択されている変数名のID
+                if(is_array($rowData) && array_key_exists('VAL_VARS_LINK_ID', $rowData)){
+                    $strModuleVarsLinkId = $rowData['VAL_VARS_LINK_ID'];
+                }
+                $strMemberVarsId = null; //選択されているメンバ変数のID
+                if(is_array($rowData) && array_key_exists('VAL_MEMBER_VARS', $rowData)){
+                    $strMemberVarsId = $rowData['VAL_MEMBER_VARS'];
+                }
+                $strHclID = null;
+                if(is_array($rowData) && array_key_exists('HCL_FLAG', $rowData)){
+                    $strHclID = $rowData['HCL_FLAG'];
+                }
+                $pattern = "input"; //デフォルトのパターン
+        
+                if(!$assignSeq){
+                    //ASSIGN_SEQがセットされていない場合、「変数名」「メンバ変数名」のタイプから表示状態を決める
+                    if( 0 < strlen($strModuleVarsLinkId) ){
+                        $aryTypeSet = array();
+                        $strFxName = "";
+                        if(0 < strlen($strMemberVarsId)){
+                            //選択されているメンバ変数のタイプを取得
+                            $strQuery = "SELECT "
+                                    ." TAB_A.CHILD_VARS_TYPE_ID TYPE_ID "
+                                    .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                    ."FROM "
+                                    ." D_TERRAFORM_VAR_MEMBER TAB_A "
+                                    ."WHERE "
+                                    ." TAB_A.DISUSE_FLAG = ('0') "
+                                    ." AND TAB_A.VARS_ASSIGN_FLAG = ('1') "
+                                    ." AND TAB_A.CHILD_MEMBER_VARS_ID = :CHILD_MEMBER_VARS_ID ";
+                            $aryForBind['CHILD_MEMBER_VARS_ID'] = $strMemberVarsId;
+                        }else{
+                            //選択されている変数名のタイプを取得
+                            $strQuery = "SELECT "
+                                    ." TAB_A.TYPE_ID TYPE_ID "
+                                    .",TAB_A.ACCESS_AUTH ACCESS_AUTH "
+                                    ."FROM "
+                                    ." B_TERRAFORM_MODULE_VARS_LINK TAB_A "
+                                    ."WHERE "
+                                    ." TAB_A.DISUSE_FLAG = ('0') "
+                                    ." AND TAB_A.MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+                            $aryForBind['MODULE_VARS_LINK_ID'] = $strModuleVarsLinkId;
+                        }
+        
+                        // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
+                        $obj = new RoleBasedAccessControl($g['objDBCA']);
+                        $ret  = $obj->getAccountInfo($g['login_id']);
+                        if($ret === false) {
+                            $intErrorType = 500;
+                            $retBool = false;
+                        }
+        
+                        $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                        if( $aryRetBody[0] === true ){
+                            $objQuery = $aryRetBody[1];
+                            while($row = $objQuery->resultFetch() ){
+                                // レコード毎のアクセス権を判定
+                                list($ret,$permission) = $obj->chkOneRecodeMultiAccessPermission($row);
+                                if($ret === false) {
+                                    $intErrorType = 500;
+                                    $retBool = false;
+                                }else{
+                                    if($permission === true){
+                                        $aryTypeSet[]= $row;
+                                    }
+                                }
+                            }
+                            unset($aryForBind);
+                            unset($objQuery);
+                            $retBool = true;
+                        }else{
+                            $intErrorType = 500;
+                            $intRowLength = -1;
+                        }
+        
+                        if(count($aryTypeSet) == 1){
+                            //タイプIDをセット
+                            $typeId = $aryTypeSet[0]['TYPE_ID'];
+                            if($typeId != ""){
+                                $aryTypeMaster = array();
+                                //タイプ管理テーブルから、MEMBER_VARS_FLAGとASSIGN_SEQ_FLAGを取得
+                                $strQuery = "SELECT "
+                                            ."TAB_A.ASSIGN_SEQ_FLAG ASSIGN_SEQ_FLAG "
+                                            ."FROM "
+                                            ." B_TERRAFORM_TYPES_MASTER TAB_A "
+                                            ."WHERE "
+                                            ." TAB_A.DISUSE_FLAG = ('0') "
+                                            ." AND TAB_A.TYPE_ID = :TYPE_ID ";
+                                $aryForBind['TYPE_ID'] = $typeId;
+                
+                                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+                
+                                if( $aryRetBody[0] === true ){
+                                    $objQuery = $aryRetBody[1];
+                
+                                    while($row = $objQuery->resultFetch()){
+                                        $aryTypeMaster[] = $row;
+                                    }
+                                    unset($objQuery);
+                                    $retBool = true;
+                                }else{
+                                    $intErrorType = 500;
+                                    $intRowLength = -1;
+                                }
+        
+                                $assignSeqFlg  = $aryTypeMaster[0]['ASSIGN_SEQ_FLAG'];
+                                if($assignSeqFlg == 1){
+                                    //代入順序の入力フラグが1の場合、入力欄を表示
+                                    $pattern = "input";
+                                }else{
+                                    //フラグが1ではない(0)の場合「入力不要」メッセージ
+                                    $pattern = "noRequired";
+                                }
+        
+                            }else{
+                                //TYPE_IDが空の場合「入力不要」メッセージ
+                                $pattern = "noRequired";
+                            }
+                        }else{
+                            //レコードが無い場合「変数名を選択してください」メッセージ
+                            $pattern = "noSelectVars";
+                        }
+                    }else{
+                        //「変数名を選択してください」メッセージ
+                        $pattern = "noSelectVars";
+                    }
+                }else{
+                    //ASSIGN_SEQがセットされている場合、入力欄を表示
+                    $pattern = "input";
+                }
+        
+                if($strHclID == 2){
+                    $pattern = "noneVars";
+                };
+        
+                //$patternを元にBodyを生成
+                switch($pattern){
+                    case "input":
+                        $retBody = "<input style=\"\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+                        break;
+        
+                    case "noSelectVars":
+                        $retBody = "<input style=\"display:none\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                        $retBody = $retBody."<div style=\"\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+                        break;
+        
+                    case "noRequired":
+                        $retBody = "<input style=\"display:none\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                        $retBody = $retBody."<div style=\"\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+                        break;
+        
+                    case "noneVars":
+                        $retBody = "<input style=\"display:none\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                        $retBody = $retBody."<div style=\"display:none\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                        $retBody = $retBody."<div style=\"\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+                        break;
+                }
+                return $retBody;
+            };
+            $objFunction02 = function($strTagInnerBody,$objCellFormatter,$rowData,$aryVariant,$aryAddOnDefault,$aryOverWrite){
+                global $g;
+        
+                //メッセージ
+                $strMsgBody01 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109429");
+                $strMsgBody02 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109430");
+                $strMsgBody03 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109431");
+        
+                //「登録」パターン
+                $retBody = "<input style=\"display:none\" {$objCellFormatter->printAttrs($aryAddOnDefault,$aryOverWrite)} {$objCellFormatter->printJsAttrs($rowData)} {$objCellFormatter->getTextTagLastAttr()}>";
+                $retBody = $retBody."<div style=\"display:none\" id=\"msg1_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody01."</div>";
+                $retBody = $retBody."<div style=\"\" id=\"msg2_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody02."</div>";
+                $retBody = $retBody."<div style=\"display:none\" id=\"msg3_".$objCellFormatter->getFSTIDForIdentify()."\">".$strMsgBody03."</div>";
+        
+                return $retBody;
+            };
+
+            $objVarBFmtUpd = new NumInputTabBFmt(0,false);
+            $objVarBFmtUpd->setFunctionForReturnOverrideGetData($objFunction01);
+            $objVarBFmtReg = new NumInputTabBFmt(0,false);
+            $objVarBFmtReg->setFunctionForReturnOverrideGetData($objFunction02);
+            
+
+            
+            $objOTForUpd = new OutputType(new ReqTabHFmt(), $objVarBFmtUpd);
+            $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
+            
+            
+            $c = new NumColumn('VAL_ASSIGN_SEQ',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109432"));    
+            $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109433"));//エクセル・ヘッダでの説明
+            //コンテンツのソースがヴューの場合、登録/更新の対象とする
+            $c->setHiddenMainTableColumn(true);
+
+            $c->setSubtotalFlag(false);
+            $c->setOutputType('update_table',$objOTForUpd);
+            $c->setOutputType('register_table',$objOTForReg); 
+            $c->setValidator(new IntNumValidator(1,null));
+
+            
+            $cg->addColumn($c);
+
+            unset($objFunction01);
+            unset($objFunction02);
+
+            //代入順序---
+            
+            
+
+
         //////////////////////////////////////////////////
         // ColumnGroup:Value変数 終了                   //
         //////////////////////////////////////////////////
@@ -1293,32 +2976,6 @@ Terrraform 代入値自動登録設定
     // ColumnGroup:IaC変数 終了                     //
     //////////////////////////////////////////////////
     $table->addColumn($cgg);
-
-    ////////////////////////////////////////////////////////////////////
-    // Sensitive設定
-    ////////////////////////////////////////////////////////////////////
-    $c = new IDColumn('HCL_FLAG',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105240"), 'B_TERRAFORM_HCL_FLAG', 'HCL_FLAG', 'HCL_FLAG_SELECT', '', array('SELECT_ADD_FOR_ORDER'=>array('HCL_FLAG'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-105250")); //エクセル・ヘッダでの説明
-    $c->setJournalTableOfMaster('B_TERRAFORM_HCL_FLAG_JNL');
-    $c->setDefaultValue("register_table", 1); //デフォルト値で1(OFF)
-    $c->setRequired(true); //登録/更新時には、入力必須
-    //コンテンツのソースがヴューの場合、登録/更新の対象とする
-    $c->setHiddenMainTableColumn(true);
-
-    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
-    $objOT->setFirstSearchValueOwnerColumnID('HCL_FLAG');
-    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_TERRAFORM_HCL_FLAG_JNL',
-        'TTT_SEARCH_KEY_COLUMN_ID'=>'HCL_FLAG',
-        'TTT_GET_TARGET_COLUMN_ID'=>'HCL_FLAG_SELECT',
-        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
-        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
-        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
-        )
-    );
-    $objOT->setTraceQuery($aryTraceQuery);
-    $c->setOutputType('print_journal_table',$objOT);
-
-    $table->addColumn($c);
 
     ////////////////////////////////////////////////////////////////////
     // パラメータシートの具体値がNULLでも代入値管理に登録するかのフラグ
@@ -1428,6 +3085,20 @@ Terrraform 代入値自動登録設定
                                                $arrayVariant['edit_target_row']['REST_VAL_VARS_LINK_ID']:null;
             $rg_rest_key_vars_link_id  = isset($arrayVariant['edit_target_row']['REST_KEY_VARS_LINK_ID'])?
                                                $arrayVariant['edit_target_row']['REST_KEY_VARS_LINK_ID']:null;
+            $rg_key_member_vars_id     = isset($arrayVariant['edit_target_row']['KEY_MEMBER_VARS'])?
+                                               $arrayVariant['edit_target_row']['KEY_MEMBER_VARS']:null;
+            $rg_val_member_vars_id     = isset($arrayVariant['edit_target_row']['VAL_MEMBER_VARS'])?
+                                               $arrayVariant['edit_target_row']['VAL_MEMBER_VARS']:null;
+            $rg_key_assign_seq_id      = isset($arrayVariant['edit_target_row']['KEY_ASSIGN_SEQ'])?
+                                               $arrayVariant['edit_target_row']['KEY_ASSIGN_SEQ']:null;
+            $rg_val_assign_seq_id      = isset($arrayVariant['edit_target_row']['VAL_ASSIGN_SEQ'])?
+                                               $arrayVariant['edit_target_row']['VAL_ASSIGN_SEQ']:null;
+            $rg_hcl_id                 = isset($arrayVariant['edit_target_row']['HCL_FLAG'])?
+                                               $arrayVariant['edit_target_row']['HCL_FLAG']:null;
+            $rg_rest_key_member_vars_id = isset($arrayVariant['edit_target_row']['REST_KEY_MEMBER_VARS'])?
+                                               $arrayVariant['edit_target_row']['REST_KEY_MEMBER_VARS']:null;
+            $rg_rest_val_member_vars_id = isset($arrayVariant['edit_target_row']['REST_VAL_MEMBER_VARS'])?
+                                               $arrayVariant['edit_target_row']['REST_VAL_MEMBER_VARS']:null;
 
             $modeValue_sub = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_SUB_MODE"];//['mode_sub'];("on"/"off")
             if( $modeValue_sub == "on" ){
@@ -1463,6 +3134,20 @@ Terrraform 代入値自動登録設定
                                             $arrayRegData['REST_VAL_VARS_LINK_ID']:null;
             $rg_rest_key_vars_link_id  = array_key_exists('REST_KEY_VARS_LINK_ID',$arrayRegData) ?
                                             $arrayRegData['REST_KEY_VARS_LINK_ID']:null;
+            $rg_key_member_vars_id     = array_key_exists('KEY_MEMBER_VARS',$arrayRegData) ?
+                                            $arrayRegData['KEY_MEMBER_VARS']:null;
+            $rg_val_member_vars_id     = array_key_exists('VAL_MEMBER_VARS',$arrayRegData) ?
+                                            $arrayRegData['VAL_MEMBER_VARS']:null;
+            $rg_key_assign_seq_id      = array_key_exists('KEY_ASSIGN_SEQ',$arrayRegData) ?
+                                            $arrayRegData['KEY_ASSIGN_SEQ']:null;
+            $rg_val_assign_seq_id      = array_key_exists('VAL_ASSIGN_SEQ',$arrayRegData) ?
+                                            $arrayRegData['VAL_ASSIGN_SEQ']:null;
+            $rg_hcl_id                 = array_key_exists('HCL_FLAG',$arrayRegData) ?
+                                            $arrayRegData['HCL_FLAG']:null;
+            $rg_rest_key_member_vars_id  = array_key_exists('REST_KEY_MEMBER_VARS',$arrayRegData) ?
+                                            $arrayRegData['REST_KEY_MEMBER_VARS']:null;
+            $rg_rest_val_member_vars_id  = array_key_exists('REST_VAL_MEMBER_VARS',$arrayRegData) ?
+                                            $arrayRegData['REST_VAL_MEMBER_VARS']:null;
 
             // 主キーの値を取得する。
             if( $strModeId == "DTUP_singleRecUpdate" ){
@@ -1568,6 +3253,10 @@ Terrraform 代入値自動登録設定
         $g['PATTERN_ID_UPDATE_VALUE']        = "";
         $g['KEY_VARS_LINK_ID_UPDATE_VALUE']  = "";
         $g['VAL_VARS_LINK_ID_UPDATE_VALUE']  = "";
+        $g['KEY_MEMBER_VARS_UPDATE_VALUE']   = "";
+        $g['VAL_MEMBER_VARS_UPDATE_VALUE']   = "";
+        $key_rest_call = false;
+        $val_rest_call = false;
         //----呼出元がUIがRestAPI/Excel/CSVかを判定
         // PATTERN_ID;未設定 KEY_VARS_LINK_ID:未設定 REST_KEY_VARS_LINK_ID:設定 => RestAPI/Excel/CSV
         // その他はUI
@@ -1577,6 +3266,7 @@ Terrraform 代入値自動登録設定
                (strlen($rg_key_vars_link_id)         === 0) &&
                (($rg_col_type == '2') || ($rg_col_type == '3')) &&
                (strlen($rg_rest_key_vars_link_id)    !== 0)){
+                $key_rest_call = true;
                 $query =  "SELECT                                             "
                          ."  TBL_A.MODULE_PTN_LINK_ID,                        "
                          ."  TBL_A.MODULE_VARS_LINK_ID,                              "
@@ -1621,6 +3311,7 @@ Terrraform 代入値自動登録設定
                (strlen($rg_val_vars_link_id)         === 0) &&
                (($rg_col_type == '1') || ($rg_col_type == '3')) &&
                (strlen($rg_rest_val_vars_link_id)    !== 0)){
+                $val_rest_call = true;
                 $query =  "SELECT                                             "
                          ."  TBL_A.MODULE_PTN_LINK_ID,                        "
                          ."  TBL_A.MODULE_VARS_LINK_ID,                              "
@@ -1676,6 +3367,16 @@ Terrraform 代入値自動登録設定
             }
         }
 
+        if($key_rest_call === true){
+            $rg_key_member_vars_id  = $rg_rest_key_member_vars_id;
+            $g['KEY_MEMBER_VARS_UPDATE_VALUE'] = $rg_key_member_vars_id;
+        }
+        if($val_rest_call === true){
+            $rg_val_member_vars_id  = $rg_rest_val_member_vars_id;
+            $g['VAL_MEMBER_VARS_UPDATE_VALUE'] = $rg_val_member_vars_id;
+        }
+
+
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             if( strlen($rg_menu_id) === 0 || strlen($rg_column_list_id) === 0 ) {
                 $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211370");
@@ -1698,15 +3399,24 @@ Terrraform 代入値自動登録設定
             $chk_value_key_flag = true;
             switch($rg_col_type){
             case '1':   // Value
-                if((strlen($rg_key_vars_link_id) != 0)) {
+                if((strlen($rg_key_vars_link_id) != 0) ||
+                    (strlen($rg_key_member_vars_id) != 0) || 
+                    (strlen($rg_key_assign_seq_id) != 0)) {
                     $chk_value_key_flag = false;
                     $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211390",array("Value","Key"));
                 }
                 break;
             case '2':   // Key
-                if((strlen($rg_val_vars_link_id) != 0)) {
+                if((strlen($rg_val_vars_link_id) != 0) ||
+                    ($rg_hcl_id == 2) || 
+                    (strlen($rg_val_member_vars_id) != 0) ||
+                    (strlen($rg_val_assign_seq_id) != 0)) {
                     $chk_value_key_flag = false;
-                    $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211390",array("Key","Value"));
+                    if($rg_hcl_id == 2){
+                        $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211480");
+                    }else{
+                        $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211390",array("Key","Value"));
+                    }
                 }
                 break;
             }
@@ -1714,6 +3424,26 @@ Terrraform 代入値自動登録設定
             if($chk_value_key_flag !== true) {
                 $boolExecuteContinue = false;
                 $retBool = false;
+            }
+        }
+
+        //HCL設定がONの場合の処理 メンバー変数と代入順序は入力不可
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            $retBool = false;
+            $boolExecuteContinue = false;
+            if($rg_hcl_id == 1){
+                $retBool = true;
+                $boolExecuteContinue = true;
+            }elseif($rg_hcl_id == 2){
+                if(!strlen($rg_val_member_vars_id) && !strlen($rg_val_assign_seq_id) ){
+                    $retBool = true;
+                    $boolExecuteContinue = true;
+                }elseif(strlen($rg_val_member_vars_id) || strlen($rg_val_assign_seq_id) ){
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211490");
+                }
+            }else{
+                web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                $boolSystemErrorFlag = true;
             }
         }
 
@@ -1810,6 +3540,502 @@ Terrraform 代入値自動登録設定
         }
         //作業パターンのチェック----
 
+
+        //HCLがONとOFFの重複チェック
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            $strQuery =   "SELECT "
+                        . "  HCL_FLAG "
+                        . " ,COLUMN_ID "
+                        . "FROM "
+                        . " B_TERRAFORM_VAL_ASSIGN "
+                        . "WHERE  "
+                        . " COLUMN_ID   <> :COLUMN_ID AND "
+                        . " PATTERN_ID  =  :PATTERN_ID  AND "
+                        . " DISUSE_FLAG =  '0'"
+                        . " AND (";
+
+            $aryForBind = array();
+            $aryForBind['COLUMN_ID']    = $columnId;
+            $aryForBind['PATTERN_ID']   = $rg_pattern_id;
+
+            // Key変数が必須の場合
+            if(in_array($rg_col_type, array(2, 3))){
+                $strQuery .= " ( ";
+                $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_1 ";
+                $strQuery .= " ) OR (";
+                $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_1 ";
+                $strQuery .= " ) ";
+                $aryForBind['KEY_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+                $aryForBind['VAL_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+            }
+
+            if(in_array($rg_col_type, array(3))){
+                $strQuery .= " OR ";
+            }
+
+            // Value変数が必須の場合
+            if(in_array($rg_col_type, array(1, 3))){
+                $strQuery .= " ( ";
+                $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_2 ";
+                $strQuery .= " ) OR (";
+                $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_2 ";
+                $strQuery .= " ) ";
+                $aryForBind['KEY_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+                $aryForBind['VAL_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+            }
+            $strQuery .= " ) ";
+            $retArray = singleSQLExecuteAgent($strQuery, $aryForBind, "NONAME_FUNC(VALASSIGN_DUP_CHECK)");
+
+            if( $retArray[0] === true ){
+                $objQuery = $retArray[1];
+                $dupnostr = "";
+                $hcltypearray = [];
+                while($row = $objQuery->resultFetch() ){    
+                    $hcltypearray[] = $row['HCL_FLAG'];
+                    $dupnostr = $dupnostr . "[" . $row['COLUMN_ID'] . "]";
+                }
+                if(($rg_hcl_id == 1 && in_array(2, $hcltypearray)) || ($rg_hcl_id == 2 && in_array(1, $hcltypearray))){
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211500");
+                    $boolExecuteContinue = false;
+                    $retBool = false;
+                }elseif($rg_hcl_id == 2 && in_array(2, $hcltypearray)){
+                    if( strlen($dupnostr) != 0 ){
+                        $retBool = false;
+                        $boolExecuteContinue = false;
+                        // $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211450",array($dupnostr));
+                        $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211510");
+                    }
+                }
+                unset($objQuery);
+            }else{
+                $boolSystemErrorFlag = true;
+            }
+
+        }
+
+        //Key変数のタイプごとのフラグ取得
+        $key_flag_type ="DEFAULT";
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            switch($rg_col_type){
+            case '2':   // Key
+            case '3':   // Key-Value
+                $vars_link_id = $rg_key_vars_link_id;
+                // Key変数入力チェック
+                if(strlen($vars_link_id) == 0){
+                    // --UPD--
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211410");
+                    $retBool = false;
+                    $boolExecuteContinue = false;
+                    break;
+                }
+                $query = "SELECT "
+                        ."TYPE_ID "
+                        ."FROM "
+                        ."B_TERRAFORM_MODULE_VARS_LINK  "
+                        ."WHERE "
+                        ."DISUSE_FLAG = '0' "
+                        ."AND MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+
+                $aryForBind = array();
+                $aryForBind['MODULE_VARS_LINK_ID'] = $vars_link_id;
+
+                $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+
+                if( $retArray[0] === true ){
+                    $objQuery =& $retArray[1];
+                    $intCount = 0;
+                    $aryDiscover = array();
+                    $row = $objQuery->resultFetch();
+                    unset($objQuery);
+                    $typeId = $row['TYPE_ID'];
+    
+                    if(0 < strlen($typeId)){
+                        $query = "SELECT "
+                        ."MEMBER_VARS_FLAG  "
+                        .",ASSIGN_SEQ_FLAG  "
+                        ."FROM "
+                        ."B_TERRAFORM_TYPES_MASTER  "
+                        ."WHERE "
+                        ."DISUSE_FLAG = '0' "
+                        ."AND TYPE_ID = :TYPE_ID ";
+    
+                        $aryForBind = array();
+                        $aryForBind['TYPE_ID'] = $typeId;
+                        $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+    
+                        if( $retArray[0] === true ){
+                            $objQuery =& $retArray[1];
+                            $typeRow = $objQuery->resultFetch();
+    
+                            $memberVarsFlg = $typeRow['MEMBER_VARS_FLAG'];
+                            $assignSeqFlg = $typeRow['ASSIGN_SEQ_FLAG'];
+                            if(0 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                                if($typeId == 7){
+                                    $key_flag_type = "MAP_FLAG_VAL";
+                                }else{
+                                    $key_flag_type = "NO_FLAG_VAL";
+                                }
+                            }
+                            elseif(1 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                                $key_flag_type = "MEMBER_FLAG_VAL";
+                            }
+                            elseif(0 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                                $key_flag_type = "ASSIGN_FLAG_VAL";
+                            }
+                            elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                                $key_flag_type = "FLAG_VAL";
+                            }
+                        }
+                    }else{
+                        $key_flag_type = "NO_FLAG_VAL";
+                    }
+                }
+                break;
+            }
+        }
+
+        //Keyメンバー変数のタイプごとのフラグ取得
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            switch($rg_col_type){
+            case '2':   // Key
+            case '3':   // Key-Value 
+                if(strlen($rg_key_member_vars_id) && ($key_flag_type == "MEMBER_FLAG_VAL" || $key_flag_type == "FLAG_VAL")) {
+                    $query = "SELECT "
+                            ."CHILD_VARS_TYPE_ID "
+                            ."FROM "
+                            ."D_TERRAFORM_VAR_MEMBER  "
+                            ."WHERE "
+                            ."DISUSE_FLAG = '0' "
+                            ."AND VARS_ASSIGN_FLAG = '1' "
+                            ."AND CHILD_MEMBER_VARS_ID = :CHILD_MEMBER_VARS_ID ";
+        
+                    $aryForBind = array();
+                    $aryForBind['CHILD_MEMBER_VARS_ID'] = $rg_key_member_vars_id;
+    
+                    $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+                    if( $retArray[0] === true ){
+                        $objQuery =& $retArray[1];
+                        $row = $objQuery->resultFetch();
+    
+                        unset($objQuery);
+                        unset($aryForBind);
+                        unset($retArray);
+    
+                        if( 0 < strlen($row['CHILD_VARS_TYPE_ID'])){
+                            $childTypeID = $row['CHILD_VARS_TYPE_ID'];
+                            $query = "SELECT "
+                                    ."ASSIGN_SEQ_FLAG  "
+                                    ."FROM "
+                                    ."B_TERRAFORM_TYPES_MASTER  "
+                                    ."WHERE "
+                                    ."DISUSE_FLAG = '0' "
+                                    ."AND TYPE_ID = :TYPE_ID ";
+        
+                            $aryForBind = array();
+                            $aryForBind['TYPE_ID'] = $childTypeID;
+                            $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+                            if( $retArray[0] === true ){
+                                $objQuery =& $retArray[1];
+                                $intCount = 0;
+                                $aryDiscover = array();
+                                $typeRow = $objQuery->resultFetch();
+    
+                                $type_Flg = $typeRow['ASSIGN_SEQ_FLAG'];
+                                if($type_Flg == 0 ){
+                                    $key_flag_type = "MEMBER_FLAG_VAL";
+                                }elseif($type_Flg == 1){
+                                    $key_flag_type = "FLAG_VAL";
+                                }else{
+                                    web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                                    $boolSystemErrorFlag = true;
+                                }
+                            }else{
+                                web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                                $boolSystemErrorFlag = true;
+                            }
+                        }else{
+                            web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                            $boolSystemErrorFlag = true;
+                        }
+                    }else{
+                        web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                        $boolSystemErrorFlag = true;
+                    }
+                }
+            }   
+        }
+
+        //value変数のタイプごとのフラグ取得
+        $val_flag_type ="DEFAULT";
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            switch($rg_col_type){
+            case '1':   // value
+            case '3':   // Key-Value
+                $vars_link_id = $rg_val_vars_link_id;
+
+                // Value変数入力チェック
+                if(strlen($vars_link_id) == 0){
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211430");
+                    $retBool = false;
+                    $boolExecuteContinue = false;
+                    break;
+                }
+
+                $query = "SELECT "
+                        ."TYPE_ID "
+                        ."FROM "
+                        ."B_TERRAFORM_MODULE_VARS_LINK  "
+                        ."WHERE "
+                        ."DISUSE_FLAG = '0' "
+                        ."AND MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
+
+                $aryForBind = array();
+                $aryForBind['MODULE_VARS_LINK_ID'] = $vars_link_id;
+
+                $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+
+                if( $retArray[0] === true ){
+                    $objQuery =& $retArray[1];
+                    $intCount = 0;
+                    $aryDiscover = array();
+                    $row = $objQuery->resultFetch();
+                    unset($objQuery);
+                    $typeId = $row['TYPE_ID'];
+    
+                    if(0 < strlen($typeId)){
+                        $query = "SELECT "
+                        ."MEMBER_VARS_FLAG  "
+                        .",ASSIGN_SEQ_FLAG  "
+                        ."FROM "
+                        ."B_TERRAFORM_TYPES_MASTER  "
+                        ."WHERE "
+                        ."DISUSE_FLAG = '0' "
+                        ."AND TYPE_ID = :TYPE_ID ";
+    
+                        $aryForBind = array();
+                        $aryForBind['TYPE_ID'] = $typeId;
+                        $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+    
+                        if( $retArray[0] === true ){
+                            $objQuery =& $retArray[1];
+                            $typeRow = $objQuery->resultFetch();
+    
+                            $memberVarsFlg = $typeRow['MEMBER_VARS_FLAG'];
+                            $assignSeqFlg = $typeRow['ASSIGN_SEQ_FLAG'];
+                            if(0 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                                if($typeId == 7 && $rg_hcl_id == 1){
+                                    $val_flag_type = "MAP_FLAG_VAL";
+                                }else{
+                                    $val_flag_type = "NO_FLAG_VAL";
+                                }
+                            }
+                            elseif(1 == $memberVarsFlg &&  0 == $assignSeqFlg){
+                                $val_flag_type = "MEMBER_FLAG_VAL";
+                            }
+                            elseif(0 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                                $val_flag_type = "ASSIGN_FLAG_VAL";
+                            }
+                            elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
+                                $val_flag_type = "FLAG_VAL";
+                            }
+                        }
+                    }else{
+                        $val_flag_type = "NO_FLAG_VAL";
+                    }
+                }
+                break;
+            }
+        }
+
+
+        //Valueメンバー変数のタイプごとのフラグ取得
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
+            switch($rg_col_type){
+            case '1':   // Value
+            case '3':   // Key-Value 
+                if(strlen($rg_val_member_vars_id) && ($val_flag_type == "MEMBER_FLAG_VAL" || $val_flag_type == "FLAG_VAL")) {
+                    $query = "SELECT "
+                            ."CHILD_VARS_TYPE_ID "
+                            ."FROM "
+                            ."D_TERRAFORM_VAR_MEMBER  "
+                            ."WHERE "
+                            ."DISUSE_FLAG = '0' "
+                            ."AND VARS_ASSIGN_FLAG = '1' "
+                            ."AND CHILD_MEMBER_VARS_ID = :CHILD_MEMBER_VARS_ID ";
+        
+                    $aryForBind = array();
+                    $aryForBind['CHILD_MEMBER_VARS_ID'] = $rg_val_member_vars_id;
+    
+                    $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+                    if( $retArray[0] === true ){
+                        $objQuery =& $retArray[1];
+                        $row = $objQuery->resultFetch();
+    
+                        unset($objQuery);
+                        unset($aryForBind);
+                        unset($retArray);
+    
+                        if( 0 < strlen($row['CHILD_VARS_TYPE_ID'])){
+                            $childTypeID = $row['CHILD_VARS_TYPE_ID'];
+                            $query = "SELECT "
+                                    ."ASSIGN_SEQ_FLAG  "
+                                    ."FROM "
+                                    ."B_TERRAFORM_TYPES_MASTER  "
+                                    ."WHERE "
+                                    ."DISUSE_FLAG = '0' "
+                                    ."AND TYPE_ID = :TYPE_ID ";
+        
+                            $aryForBind = array();
+                            $aryForBind['TYPE_ID'] = $childTypeID;
+                            $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+                            if( $retArray[0] === true ){
+                                $objQuery =& $retArray[1];
+                                $typeRow = $objQuery->resultFetch();
+    
+                                $type_Flg = $typeRow['ASSIGN_SEQ_FLAG'];                    
+                                if($type_Flg == 0 ){
+                                    $val_flag_type = "MEMBER_FLAG_VAL";
+                                }elseif($type_Flg == 1){
+                                    $val_flag_type = "FLAG_VAL";
+                                }else{
+                                    web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                                    $boolSystemErrorFlag = true;
+                                }
+                            }else{
+                                web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                                $boolSystemErrorFlag = true;
+                            }
+                        }else{
+                            web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                            $boolSystemErrorFlag = true;
+                        }
+                    }else{
+                        web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                        $boolSystemErrorFlag = true;
+                    }
+                }
+            }
+        }
+        //Key変数タイプごとのメンバー変数、代入順序表示可否
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false ){
+            switch($rg_col_type){
+            case '2':   // Key
+            case '3':   // Key-Value 
+
+                if(strlen($key_flag_type)){
+                    $retBool = false;
+                    $boolExecuteContinue  = false;
+                    $member_vars_id       = $rg_key_member_vars_id;
+                    $assign_seq_id        = $rg_key_assign_seq_id;
+    
+                    switch($key_flag_type){
+                    case 'NO_FLAG_VAL':
+                        if(!strlen($member_vars_id) && !strlen($assign_seq_id)){
+                            $retBool = true;
+                            $boolExecuteContinue = true;
+                        }else{
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211520");
+                        }
+                        break;
+                    case 'MAP_FLAG_VAL' :
+                        $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211530");
+                        break;
+                    case 'MEMBER_FLAG_VAL':
+                        if(strlen($member_vars_id) && !strlen($assign_seq_id)){
+                            $retBool = true;
+                            $boolExecuteContinue = true;
+                        }elseif(!strlen($member_vars_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211540");
+                        }elseif(strlen($assign_seq_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211550");
+                        }
+                        break;
+                    case 'ASSIGN_FLAG_VAL':
+                        if(!strlen($member_vars_id) && strlen($assign_seq_id)){
+                            $retBool = true;
+                            $boolExecuteContinue = true;
+                        }elseif(strlen($member_vars_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211560");
+                        }elseif(!strlen($assign_seq_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211570");
+                        }
+                        break;
+                    case 'FLAG_VAL':
+                        if(strlen($member_vars_id) && strlen($assign_seq_id)){
+                            $retBool = true;
+                            $boolExecuteContinue = true;
+                        }elseif(!strlen($member_vars_id) && strlen($assign_seq_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211580");
+                        }elseif(strlen($member_vars_id) && !strlen($assign_seq_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211590");
+                        }else{
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211600");
+                        }
+                    }
+                }
+            }
+        }
+
+        //Value変数タイプごとのメンバー変数、代入順序表示可否 HCL設定ONは通らない
+        if( $boolExecuteContinue === true && $boolSystemErrorFlag === false && $rg_hcl_id == 1){
+            switch($rg_col_type){
+            case '1':   // value
+            case '3':   // Key-Value 
+                if(strlen($val_flag_type)){
+                    $retBool = false;
+                    $boolExecuteContinue = false;
+                    $member_vars_id      = $rg_val_member_vars_id;
+                    $assign_seq_id       = $rg_val_assign_seq_id;
+    
+                    switch($val_flag_type){
+                    case 'NO_FLAG_VAL':
+                        if(!strlen($member_vars_id) && !strlen($assign_seq_id)){
+                            $retBool = true;
+                            $boolExecuteContinue = true;
+                        }else{
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211610");
+                        }
+                        break;
+                    case 'MAP_FLAG_VAL' :
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211620");
+                        break;    
+                    case 'MEMBER_FLAG_VAL':
+                        if(strlen($member_vars_id) && !strlen($assign_seq_id)){
+                            $retBool = true;
+                            $boolExecuteContinue = true;
+                        }elseif(!strlen($member_vars_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211630");
+                        }elseif(strlen($assign_seq_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211640");
+                        }
+                        break;
+                    case 'ASSIGN_FLAG_VAL':
+                        if(!strlen($member_vars_id) && strlen($assign_seq_id)){
+                            $retBool = true;
+                            $boolExecuteContinue = true;
+                        }elseif(strlen($member_vars_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211650");
+                        }elseif(!strlen($assign_seq_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211660");
+                        }
+                        break;
+                    case 'FLAG_VAL':
+                        if(strlen($member_vars_id) && strlen($assign_seq_id)){
+                            $retBool = true;
+                            $boolExecuteContinue = true;
+                        }elseif(!strlen($member_vars_id) && strlen($assign_seq_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211670");
+                        }elseif(strlen($member_vars_id) && !strlen($assign_seq_id)){
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211680");
+                        }else{
+                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211690");
+                        }
+                    }
+                }
+            }
+        }
+        
+
         //----Key変数の種類ごとに、バリデーションチェック
         if( $boolExecuteContinue === true && $boolSystemErrorFlag === false){
             switch($rg_col_type){
@@ -1891,6 +4117,50 @@ Terrraform 代入値自動登録設定
                         $boolSystemErrorFlag = true;
                     }
                     unset($retArray);
+                }
+                //変数とメンバー変数の組み合わせ
+                if(0 < strlen($rg_key_member_vars_id)){
+                    if( $boolExecuteContinue === true ){
+                        $retBool = false;
+                        $boolExecuteContinue = false;
+                        $query = "SELECT "
+                                ." COUNT(*) REC_COUNT "
+                                ."FROM "
+                                ." D_TERRAFORM_VAR_MEMBER  "
+                                ."WHERE "
+                                ." DISUSE_FLAG = '0' "
+                                ."AND VARS_ASSIGN_FLAG = '1' "
+                                ."AND PARENT_VARS_ID = :PARENT_VARS_ID "
+                                ."AND CHILD_MEMBER_VARS_ID = :CHILD_MEMBER_VARS_ID ";
+            
+                        $aryForBind = array();
+                        $aryForBind['PARENT_VARS_ID'] = $rg_key_vars_link_id;
+                        $aryForBind['CHILD_MEMBER_VARS_ID'] = $rg_key_member_vars_id;        
+                        $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+        
+            
+                
+                        if( $retArray[0] === true ){
+                            $objQuery =& $retArray[1];
+                            $intCount = 0;
+                            $aryDiscover = array();
+                            $row = $objQuery->resultFetch();
+                            unset($objQuery);    
+                            if( $row['REC_COUNT'] == '1' ){
+                                $retBool = true;
+                                $boolExecuteContinue = true;
+                            }else if( $row['REC_COUNT'] == '0' ){
+                                // $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-201070");
+                                $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211700");
+                            }else{
+                                web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                                $boolSystemErrorFlag = true;
+                            }
+                        }else{
+                            web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                            $boolSystemErrorFlag = true;
+                        }
+                    }
                 }
                 break;
             }
@@ -1978,6 +4248,49 @@ Terrraform 代入値自動登録設定
                     }
                     unset($retArray);
                 }
+
+                //Value変数　変数とメンバー変数の組み合わせバリデーション
+                if(0 < strlen($rg_val_member_vars_id)){
+                    if( $boolExecuteContinue === true ){
+                        $retBool = false;
+                        $boolExecuteContinue = false;
+                        $query = "SELECT "
+                                ." COUNT(*) REC_COUNT "
+                                ."FROM "
+                                ." D_TERRAFORM_VAR_MEMBER  "
+                                ."WHERE "
+                                ." DISUSE_FLAG = '0' "
+                                ." AND VARS_ASSIGN_FLAG = '1' "
+                                ."AND PARENT_VARS_ID = :PARENT_VARS_ID "
+                                ."AND CHILD_MEMBER_VARS_ID = :CHILD_MEMBER_VARS_ID ";
+            
+                        $aryForBind = array();
+                        $aryForBind['PARENT_VARS_ID'] = $rg_val_vars_link_id;
+                        $aryForBind['CHILD_MEMBER_VARS_ID'] = $rg_val_member_vars_id;
+            
+                        $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
+                
+                        if( $retArray[0] === true ){
+                            $objQuery =& $retArray[1];
+                            $intCount = 0;
+                            $aryDiscover = array();
+                            $row = $objQuery->resultFetch();
+                            unset($objQuery);
+                            if( $row['REC_COUNT'] == '1' ){
+                                $retBool = true;
+                                $boolExecuteContinue = true;
+                            }else if( $row['REC_COUNT'] == '0' ){
+                                $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211710");
+                            }else{
+                                web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                                $boolSystemErrorFlag = true;
+                            }
+                        }else{
+                            web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
+                            $boolSystemErrorFlag = true;
+                        }
+                    }
+                }
                 break;
             }
         }
@@ -2000,14 +4313,61 @@ Terrraform 代入値自動登録設定
             $aryForBind['PATTERN_ID']   = $rg_pattern_id;
 
             // Key変数が必須の場合
-            if(in_array($rg_col_type, array(2, 3))){
-                $strQuery .= " ( ";
-                $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_1 ";
-                $strQuery .= " ) OR (";
-                $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_1 ";
-                $strQuery .= " ) ";
-                $aryForBind['KEY_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
-                $aryForBind['VAL_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+            if(in_array($rg_col_type, array(2, 3))){            
+                switch($key_flag_type){
+                case 'NO_FLAG_VAL':
+                    $strQuery .= " ( ";
+                    $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_1 ";
+                    $strQuery .= " ) OR (";
+                    $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_1 ";
+                    $strQuery .= " ) ";
+                    $aryForBind['KEY_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+                    $aryForBind['VAL_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+                    break;
+                case 'MEMBER_FLAG_VAL':
+                    $strQuery .= " ( ";
+                    $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_1 ";
+                    $strQuery .= "AND KEY_MEMBER_VARS = :KEY_MEMBER_VARS_1 ";
+                    $strQuery .= " ) OR (";
+                    $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_1 ";
+                    $strQuery .= "AND VAL_MEMBER_VARS = :VAL_MEMBER_VARS_1 ";
+                    $strQuery .= " ) ";
+                    $aryForBind['KEY_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+                    $aryForBind['VAL_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+                    $aryForBind['KEY_MEMBER_VARS_1']            = $rg_key_member_vars_id;
+                    $aryForBind['VAL_MEMBER_VARS_1']            = $rg_key_member_vars_id;
+                    break;
+                case 'ASSIGN_FLAG_VAL':
+                    $strQuery .= " ( ";
+                    $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_1 ";
+                    $strQuery .= "AND KEY_ASSIGN_SEQ = :KEY_ASSIGN_SEQ_1 ";
+                    $strQuery .= " ) OR (";
+                    $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_1 ";
+                    $strQuery .= "AND VAL_ASSIGN_SEQ = :VAL_ASSIGN_SEQ_1 ";
+                    $strQuery .= " ) ";
+                    $aryForBind['KEY_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+                    $aryForBind['VAL_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+                    $aryForBind['KEY_ASSIGN_SEQ_1']             = $rg_key_assign_seq_id;
+                    $aryForBind['VAL_ASSIGN_SEQ_1']             = $rg_key_assign_seq_id;
+                    break;
+                case 'FLAG_VAL':
+                    $strQuery .= " ( ";
+                    $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_1 ";
+                    $strQuery .= "AND KEY_MEMBER_VARS = :KEY_MEMBER_VARS_1 ";
+                    $strQuery .= "AND KEY_ASSIGN_SEQ = :KEY_ASSIGN_SEQ_1 ";
+                    $strQuery .= " ) OR (";
+                    $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_1 ";
+                    $strQuery .= "AND VAL_MEMBER_VARS = :VAL_MEMBER_VARS_1 ";
+                    $strQuery .= "AND VAL_ASSIGN_SEQ = :VAL_ASSIGN_SEQ_1 ";
+                    $strQuery .= " ) ";
+                    $aryForBind['KEY_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+                    $aryForBind['VAL_VARS_LINK_ID_1']           = $rg_key_vars_link_id;
+                    $aryForBind['KEY_MEMBER_VARS_1']            = $rg_key_member_vars_id;
+                    $aryForBind['VAL_MEMBER_VARS_1']            = $rg_key_member_vars_id;
+                    $aryForBind['KEY_ASSIGN_SEQ_1']             = $rg_key_assign_seq_id;
+                    $aryForBind['VAL_ASSIGN_SEQ_1']             = $rg_key_assign_seq_id;
+                    break;
+                }
             }
 
             if(in_array($rg_col_type, array(3))){
@@ -2016,20 +4376,69 @@ Terrraform 代入値自動登録設定
 
             // Value変数が必須の場合
             if(in_array($rg_col_type, array(1, 3))){
-                $strQuery .= " ( ";
-                $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_2 ";
-                $strQuery .= " ) OR (";
-                $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_2 ";
-                $strQuery .= " ) ";
-                $aryForBind['KEY_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
-                $aryForBind['VAL_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
-            }
+                switch($val_flag_type){
+                    case 'NO_FLAG_VAL':
+                        $strQuery .= " ( ";
+                        $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_2 ";
+                        $strQuery .= " ) OR (";
+                        $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_2 ";
+                        $strQuery .= " ) ";
+                        $aryForBind['KEY_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+                        $aryForBind['VAL_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+                        break;
+                    case 'MEMBER_FLAG_VAL':
+                        $strQuery .= " ( ";
+                        $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_2 ";
+                        $strQuery .= "AND KEY_MEMBER_VARS = :KEY_MEMBER_VARS_2 ";
+                        $strQuery .= " ) OR (";
+                        $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_2 ";
+                        $strQuery .= "AND VAL_MEMBER_VARS = :VAL_MEMBER_VARS_2 ";
+                        $strQuery .= " ) ";
+                        $aryForBind['KEY_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+                        $aryForBind['VAL_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+                        $aryForBind['KEY_MEMBER_VARS_2']            = $rg_val_member_vars_id;
+                        $aryForBind['VAL_MEMBER_VARS_2']            = $rg_val_member_vars_id;
+                        break;
+                    case 'ASSIGN_FLAG_VAL':
+                        $strQuery .= " ( ";
+                        $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_2 ";
+                        $strQuery .= "AND KEY_ASSIGN_SEQ = :KEY_ASSIGN_SEQ_2 ";
+                        $strQuery .= " ) OR (";
+                        $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_2 ";
+                        $strQuery .= "AND VAL_ASSIGN_SEQ = :VAL_ASSIGN_SEQ_2 ";
+                        $strQuery .= " ) ";
+                        $aryForBind['KEY_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+                        $aryForBind['VAL_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+                        $aryForBind['KEY_ASSIGN_SEQ_2']             = $rg_val_assign_seq_id;
+                        $aryForBind['VAL_ASSIGN_SEQ_2']             = $rg_val_assign_seq_id;
+                        break;
+                    case 'FLAG_VAL':
+                        $strQuery .= " ( ";
+                        $strQuery .= "COL_TYPE in (2, 3) AND KEY_VARS_LINK_ID = :KEY_VARS_LINK_ID_2 ";
+                        $strQuery .= "AND KEY_MEMBER_VARS = :KEY_MEMBER_VARS_2 ";
+                        $strQuery .= "AND KEY_ASSIGN_SEQ = :KEY_ASSIGN_SEQ_2 ";
+                        $strQuery .= " ) OR (";
+                        $strQuery .= "COL_TYPE in (1, 3) AND VAL_VARS_LINK_ID = :VAL_VARS_LINK_ID_2 ";
+                        $strQuery .= "AND VAL_MEMBER_VARS = :VAL_MEMBER_VARS_2 ";
+                        $strQuery .= "AND VAL_ASSIGN_SEQ = :VAL_ASSIGN_SEQ_2 ";
+                        $strQuery .= " ) ";
+                        $aryForBind['KEY_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+                        $aryForBind['VAL_VARS_LINK_ID_2']           = $rg_val_vars_link_id;
+                        $aryForBind['KEY_MEMBER_VARS_2']            = $rg_val_member_vars_id;
+                        $aryForBind['VAL_MEMBER_VARS_2']            = $rg_val_member_vars_id;
+                        $aryForBind['KEY_ASSIGN_SEQ_2']             = $rg_val_assign_seq_id;
+                        $aryForBind['VAL_ASSIGN_SEQ_2']             = $rg_val_assign_seq_id;
+                        break;
+                    }
+                }
+
             $strQuery .= " ) ";
             $retArray = singleSQLExecuteAgent($strQuery, $aryForBind, "NONAME_FUNC(VALASSIGN_DUP_CHECK)");
             if( $retArray[0] === true ){
                 $objQuery = $retArray[1];
                 $dupnostr = "";
-                while($row = $objQuery->resultFetch() ){
+    
+                while($row = $objQuery->resultFetch() ){    
                     $dupnostr = $dupnostr . "[" . $row['COLUMN_ID'] . "]";
                 }
                 if( strlen($dupnostr) != 0 ){
@@ -2042,7 +4451,9 @@ Terrraform 代入値自動登録設定
                 // key-Value型で各変数が同一か判定
                 if($retBool === true) {
                     if(in_array($rg_col_type, array(3))){
-                        if($rg_key_vars_link_id === $rg_val_vars_link_id) {
+                        if(($rg_key_vars_link_id === $rg_val_vars_link_id) &&
+                           ($rg_key_member_vars_id === $rg_val_member_vars_id) &&
+                           ($rg_key_assign_seq_id === $rg_val_assign_seq_id)) {
                             $retBool = false;
                             $boolExecuteContinue = false;
                             $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211460");
