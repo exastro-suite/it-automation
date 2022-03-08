@@ -1051,9 +1051,7 @@
                                           "VAL_VARS_LINK_ID",
                                           "VAL_VARS_NAME",
                                           "VAL_PTN_VARS_LINK_CNT",
-                                          "UNIQUE_VAL_PTN_VARS_LINK_CNT",
-                                          "VAL_ASSIGN_SEQ",
-                                          "VAL_MEMBER_VARS"
+                                          "UNIQUE_VAL_PTN_VARS_LINK_CNT"
                                           );
                 if($ret === false){
                     // 次のカラムへ
@@ -1071,9 +1069,7 @@
                                           "KEY_VARS_LINK_ID",
                                           "KEY_VARS_NAME",
                                           "KEY_PTN_VARS_LINK_CNT",
-                                          "UNIQUE_KEY_PTN_VARS_LINK_CNT",
-                                          "KEY_ASSIGN_SEQ",
-                                          "KEY_MEMBER_VARS"
+                                          "UNIQUE_KEY_PTN_VARS_LINK_CNT"
                                           );
                 if($ret === false){
                     // 次のカラムへ
