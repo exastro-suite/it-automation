@@ -120,21 +120,23 @@ class CommonTerraformHCL2JSONParse{
                         // ２．list(list(string)) => ${list(list)} + ${list(string)}
                         $pattern = '/\"\$\{([a-z]+?)\(([a-z]+?)\((.*?)\)\)\}\"/';
                         $replacement = '{"${${1}(${2})}": ["${${2}(${3})}"]}';
-                        // $replacement = '{"${${1}(${2})}": "${${2}(${3})}"}';
-                        $typestr = preg_replace($pattern, $replacement, $typestr);
-                        // $typestr = preg_replace($pattern, $replacement, $typestr);
+                        while (preg_match($pattern, $typestr)) {
+                            $typestr = preg_replace($pattern, $replacement, $typestr);
+                        }
 
                         // ３．tuple
                         $pattern = '/\"\$\{([a-z]+?)\(([a-z]+?)\(\[(.*)\]\)\)\}\"/';
                         $replacement = '{"${${1}}": ["${${2}([${3}])}"]}';
-                        // $replacement = '{"${${1}}": "${${2}([${3}])}"}';
-                        $typestr = preg_replace($pattern, $replacement, $typestr);
+                        while (preg_match($pattern, $typestr)) {
+                            $typestr = preg_replace($pattern, $replacement, $typestr);
+                        }
 
                         // ４．object
                         $pattern = '/\"\$\{([a-z]+?)\(([a-z]+?)\(\{(.*)\}\)\)\}\"/';
                         $replacement = '{"${${1}}": ["${${2}({${3}})}"]}';
-                        // $replacement = '{"${${1}}": "${${2}({${3}})}"}';
-                        $typestr = preg_replace($pattern, $replacement, $typestr);
+                        while (preg_match($pattern, $typestr)) {
+                            $typestr = preg_replace($pattern, $replacement, $typestr);
+                        }
                         // --------------------------------------------------
 
                         // tuple
