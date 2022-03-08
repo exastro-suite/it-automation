@@ -21,7 +21,7 @@
 
 //////// ----コールバックファンクション ////////
 function callback() {}
-callback.prototype = {  
+callback.prototype = {
     Filter1Tbl_add_selectbox : function( result ){
         var filterAreaWrap = 'Filter1_Nakami';
         var strFilterPrintId = 'Filter1Tbl';
@@ -220,7 +220,7 @@ callback.prototype = {
                                     "fakeContainer_Update1",
                                     webStdTableHeight,
                                     webStdTableWidth );
-                    
+
                     linkDateInputHelper(strMixOuterFrameName);
 
                     //デフォルト値の初期表示
@@ -314,12 +314,12 @@ callback.prototype = {
                     break;
                 case "201":
                     // エラーなく登録完了
-                default:                
+                default:
                     objRegiterArea.innerHTML="";
                     $(objRegiterArea).html(resultContentTag);
 
                     objAlertArea.style.display = "none";
-                    
+
                     adjustTableAuto (strMixInnerFramePrefix+'1',
                                     "sDefault",
                                     "fakeContainer_Register2",
@@ -395,14 +395,14 @@ callback.prototype = {
 
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
-            
+
             var resultSetTargetSeq = ary_result01[0];
             var resultContentTag = ary_result01[1];
-            
+
             var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
-            
+
             $(objHtmlSetArea).html(resultContentTag);
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
         }else{
@@ -426,14 +426,14 @@ callback.prototype = {
 
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
-            
+
             var resultSetTargetSeq = ary_result01[0];
             var resultContentTag = ary_result01[1];
-            
+
             var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
-            
+
             $(objHtmlSetArea).html(resultContentTag);
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
         }else{
@@ -441,7 +441,7 @@ callback.prototype = {
         }
         showForDeveloper(result);
     },
-    ////メモ：「変数名」を選択した際のイベント（更新用）
+    // 「変数名」を選択した際のイベント（更新用）
     Mix1_1_module_vars_upd : function( result ){
         var tableTagAreaWrap = 'Mix1_Nakami';
         var strTableTagPrintId = 'Mix1_1';
@@ -457,16 +457,16 @@ callback.prototype = {
         checkTypicalFlagInHADACResult(ary_result);
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
 
             var resultSetTargetSeq = ary_result01[0];
             var resultContentTag = ary_result01[1];
             var flagType = ary_result01[2];
             var defaultValue = ary_result01[3];
-            
+
             var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
-            
+
             $(objHtmlSetArea).html(resultContentTag);
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
 
@@ -495,7 +495,7 @@ callback.prototype = {
         }
         showForDeveloper(result);
     },
-    ////メモ：「変数名」を選択した際のイベント（登録用）
+    // 「変数名」を選択した際のイベント（登録用）
     Mix2_1_module_vars_reg : function( result ){
         var tableTagAreaWrap = 'Mix2_Nakami';
         var strTableTagPrintId = 'Mix2_1';
@@ -511,7 +511,7 @@ callback.prototype = {
         checkTypicalFlagInHADACResult(ary_result);
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
 
             var resultSetTargetSeq = ary_result01[0];
@@ -520,7 +520,7 @@ callback.prototype = {
             var defaultValue = ary_result01[3];
 
             var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
-            
+
             $(objHtmlSetArea).html(resultContentTag);
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
 
@@ -549,7 +549,7 @@ callback.prototype = {
         }
         showForDeveloper(result);
     },
-    ////メモ：「メンバ変数名」を選択した際のイベント（更新用）
+    // 「メンバ変数名」を選択した際のイベント（更新用）
     Mix1_1_member_vars_upd : function( result ){
         var tableTagAreaWrap = 'Mix1_Nakami';
         var strTableTagPrintId = 'Mix1_1';
@@ -564,7 +564,7 @@ callback.prototype = {
 
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
 
             var resultSetTargetSeq = ary_result01[0];
@@ -597,7 +597,7 @@ callback.prototype = {
         }
         showForDeveloper(result);
     },
-    ////メモ：「メンバ変数名」を選択した際のイベント（登録用）
+    // 「メンバ変数名」を選択した際のイベント（登録用）
     Mix2_1_member_vars_reg : function( result ){
         var tableTagAreaWrap = 'Mix2_Nakami';
         var strTableTagPrintId = 'Mix2_1';
@@ -612,7 +612,7 @@ callback.prototype = {
 
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
 
             var resultSetTargetSeq = ary_result01[0];
@@ -667,18 +667,18 @@ callback.prototype = {
     Mix1_1_duplicate : function( result ){
         var strMixOuterFrameName = 'Mix2_Nakami';
         var strMixInnerFramePrefix = 'Mix2_';
-  
+
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-  
+
         var resultContentTag = ary_result[2];
-  
+
         var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
-  
+
         if( ary_result[0] == "000" ){
-  
+
             var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
-  
+
             switch( ary_result[1] ){
                 case "100":
                     window.alert(resultContentTag);
@@ -687,12 +687,12 @@ callback.prototype = {
                     break;
                 case "201":
                     // エラーなく登録完了
-                default:                
+                default:
                     objRegiterArea.innerHTML="";
                     $(objRegiterArea).html(resultContentTag);
-  
+
                     objAlertArea.style.display = "none";
-                    
+
                     adjustTableAuto (strMixInnerFramePrefix+'1',
                                     "sDefault",
                                     "fakeContainer_Register2",
@@ -713,10 +713,10 @@ callback.prototype = {
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
-  
+
         showForDeveloper(result);
     },
-    //メモ：HCL更新時
+    // HCL更新時
     Mix1_1_hcl_upd : function( result ){
         var tableTagAreaWrap = 'Mix1_Nakami';
         var strTableTagPrintId = 'Mix1_1';
@@ -731,7 +731,7 @@ callback.prototype = {
         checkTypicalFlagInHADACResult(ary_result);
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
 
             var resultSetTargetSeq = ary_result01[0];
@@ -740,7 +740,7 @@ callback.prototype = {
             var defaultValue = ary_result01[3];
 
             var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
-            
+
             $(objHtmlSetArea).html(resultContentTag);
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
 
@@ -784,7 +784,7 @@ callback.prototype = {
         checkTypicalFlagInHADACResult(ary_result);
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
 
             var resultSetTargetSeq = ary_result01[0];
@@ -792,7 +792,7 @@ callback.prototype = {
             var flagType = ary_result01[2];
             var defaultValue = ary_result01[3];
             var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
-            
+
             $(objHtmlSetArea).html(resultContentTag);
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
 
@@ -821,7 +821,7 @@ callback.prototype = {
         showForDeveloper(result);
     }
     //作業パターン----
-    
+
     // ここまでカスタマイズした場合の[callback]メソッド配置域----
 }
 
@@ -1278,7 +1278,7 @@ function Journal1Tbl_pre_search_async(inputedCode){
 function Journal1Tbl_search_async(){
     // 履歴検索実施フラグを初期化
     var journal1AreaWrap = 'Journal1_Nakami';
-    
+
     var exec_flag = true;
 
     // 検索実施フラグがtrueの場合は検索実施
@@ -1307,26 +1307,26 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 function Mix1_1_pattern_upd(){
     // すべての後選択関連カラムを消す
     var rangeId = 'Mix1_1';
-    
+
     var objPattern = document.getElementById('Mix1_1_2');
     proxy.Mix1_1_pattern_upd(objPattern.value);
 
     var objHclVars = document.getElementById('Mix1_1_4');
-    proxy.Mix1_1_module_vars_upd("",objHclVars.value); ////メモ：変数名に空が選択されたときの処理を実行
-    
+    proxy.Mix1_1_module_vars_upd("",objHclVars.value); // 変数名に空が選択されたときの処理を実行
+
 }
 function Mix2_1_pattern_reg(){
     // すべての後選択関連カラムを消す
     var rangeId = 'Mix2_1';
-    
+
     var objPattern = document.getElementById('Mix2_1_2');
     proxy.Mix2_1_pattern_reg(objPattern.value);
 
     var objHclVars = document.getElementById('Mix2_1_4');
-    proxy.Mix2_1_module_vars_reg("",objHclVars.value); ////メモ：変数名に空が選択されたときの処理を実行
+    proxy.Mix2_1_module_vars_reg("",objHclVars.value); // 変数名に空が選択されたときの処理を実行
 }
 
-////メモ：「変数名」選択時のイベント
+// 「変数名」選択時のイベント
 function Mix1_1_module_vars_upd(){
     // すべての後選択関連カラムを消す
     var rangeId = 'Mix1_1';
@@ -1344,7 +1344,7 @@ function Mix2_1_module_vars_reg(){
     proxy.Mix2_1_module_vars_reg(objModuleVars.value, objHclVars.value);
 }
 
-////メモ：「メンバ変数名」選択時のイベント
+// 「メンバ変数名」選択時のイベント
 function Mix1_1_member_vars_upd(){
     // すべての後選択関連カラムを消す
     var rangeId = 'Mix1_1';
@@ -1373,7 +1373,7 @@ function Mix1_1_default_value_initdisp(){
     }
 }
 
-//メモ：HCL選択時
+// HCL選択時
 function Mix1_1_hcl_upd(){
     // すべての後選択関連カラムを消す
     var rangeId = 'Mix1_1';
@@ -1461,9 +1461,9 @@ function textPrintToBoxes(mode,strObjIdOfSw1,defaultValue=""){
                 var objVarsMgs03 = document.getElementById('msg3_'+strObjIdOfSw1); //入力不可
                 objVarsMgs03.style.display = "block";
                 break;
-    
-    
-            
+
+
+
             case "11":
                 //デフォルト値をセット
                 var objDefaultValue = document.getElementById(strObjIdOfSw1);

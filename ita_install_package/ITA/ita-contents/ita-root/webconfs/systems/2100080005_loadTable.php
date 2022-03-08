@@ -223,3 +223,4 @@ Module素材集
 };
 loadTableFunctionAdd($tmpFx,__FILE__);
 unset($tmpFx);
+?>
