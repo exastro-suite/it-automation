@@ -4486,7 +4486,10 @@
                     $nest_type_count = count($trg_nest_type_array);
 
                     // 0番目が変数ネスト管理対象
-                    $trg_nest_type_array_0 = $trg_nest_type_array[0];
+                    $trg_nest_type_array_0 = "";
+                    if (isset($trg_nest_type_array[0])) {
+                        $trg_nest_type_array_0 = $trg_nest_type_array[0];
+                    }
 
                     // 変更後の最大繰り返し数と元々の最大繰り返し数の差分
                     $max_col_seq_diff = $trg_max_col_seq - $nest_type_count;
