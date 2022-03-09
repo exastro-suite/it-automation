@@ -2055,6 +2055,9 @@ class CreateAnsibleExecFiles {
                                                      $ina_hostinfolist[$host_name]['SSH_KEY_FILE'],
                                                      $ssh_key_file_path);
 
+                    if($ret !== true) {
+                        return false;
+                    }
                     // ky_encryptで中身がスクランブルされているので復元する
                     $ret = ky_file_decrypt($ssh_key_file_path,$ssh_key_file_path);
                     $in_system_id = $ina_hostinfolist[$host_name]['SYSTEM_ID'];
@@ -2114,6 +2117,11 @@ class CreateAnsibleExecFiles {
                     $ret = $this->CreateWIN_cs_file($ina_hostinfolist[$host_name]['SYSTEM_ID'],
                                                     $ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'],
                                                     $win_ca_file_path);
+
+                    if($ret !== true) {
+                        return false;
+                    }
+
                     // ky_encryptで中身がスクランブルされているので、復元
                     $ret = ky_file_decrypt($win_ca_file_path,$win_ca_file_path);
 
@@ -11022,6 +11030,16 @@ class CreateAnsibleExecFiles {
             return false;
         }
 
+        // 実行ユーザーがroot以外の場合、鍵ファイルのオーナーを変更
+        $ExecUser = $this->getAnsibleExecuteUser();
+        if($ExecUser != 'root') {
+            if( !chown( $dst_file, $ExecUser) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000038",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+
         // Ansible実行時のSSH秘密鍵ファイルパス退避
         $in_in_dir_ssh_key_file = $dst_file;
         return true;
@@ -11123,6 +11141,17 @@ class CreateAnsibleExecFiles {
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             return false;
         }
+
+        // 実行ユーザーがroot以外の場合、鍵ファイルのオーナーを変更
+        $ExecUser = $this->getAnsibleExecuteUser();
+        if($ExecUser != 'root') {
+            if( !chown( $dst_file, $ExecUser) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000038",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+
         // Ansible実行時のサーバー証明書ファイルパス退避
         $in_dir_win_ca_file = $dst_file;
         return true;
