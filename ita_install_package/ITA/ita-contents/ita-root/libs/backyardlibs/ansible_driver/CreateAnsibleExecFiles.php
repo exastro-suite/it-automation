@@ -11032,7 +11032,7 @@ class CreateAnsibleExecFiles {
 
         // 実行ユーザーがroot以外の場合、鍵ファイルのオーナーを変更
         $ExecUser = $this->getAnsibleExecuteUser();
-        if($ExecUser != 'root') {
+        if(($ExecUser != 'root') && ($this->lv_exec_mode == DF_EXEC_MODE_ANSIBLE)) {
             if( !chown( $dst_file, $ExecUser) ){
                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000038",array(__LINE__));
                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
@@ -11144,7 +11144,7 @@ class CreateAnsibleExecFiles {
 
         // 実行ユーザーがroot以外の場合、鍵ファイルのオーナーを変更
         $ExecUser = $this->getAnsibleExecuteUser();
-        if($ExecUser != 'root') {
+        if(($ExecUser != 'root') && ($this->lv_exec_mode == DF_EXEC_MODE_ANSIBLE)) {
             if( !chown( $dst_file, $ExecUser) ){
                 $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000038",array(__LINE__));
                 $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
