@@ -456,6 +456,8 @@
         // 変数名テーブル作成
         //----------------------------------------------
         $moduleVarsLinkIDArray = [];
+        // tfファイルから取得したメンバー変数
+        $existMemberVarsArray = [];
         foreach($aryModuleVarsData as $data){
             $intModuleVarLinkId = null;
             $boolLoopNext = false;
@@ -652,6 +654,11 @@
 
                 // レコードに登録可能な配列に整形
                 $member_array = partMemberArrayForRegist($member_data_array);
+                $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["update"]);
+                $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["skip"]);
+                $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["restore"]);
+                $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["regist"]);
+
 
                 // 今回登録・更新予定のリスト
                 $regist_update_memberVarsArray = array_merge($member_array["regist"], $member_array["update"]);
@@ -1214,25 +1221,8 @@
         }
 
         $memberVarsArray = getAllMemberVars();
-        $existMemberVarsArray = [];
-        foreach($moduleVarsLinkIDArray as $moduleVarsData){
-            $_intModuleVarLinkId = $moduleVarsData["intModuleVarLinkId"];
-            $_moduleTypeID       = $moduleVarsData["moduleVarLinkTypeId"];
-            $_type_array         = $moduleVarsData["type_array"];
-            $_default_array      = $moduleVarsData["default_array"];
-            $_member_data_array  = [];
-            $_member_array       = [];
-            if (is_array($_type_array)) {
-                $_child_vars_id = 0;
-                $_parent_vars_id = 0;
-                $_array_nest_level = 0;
-                // メンバー変数テーブルの作成
-                $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["update"]);
-                $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["skip"]);
-                $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["restore"]);
-                $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["regist"]);
-            }
-        }
+
+        // メンバー変数テーブルの作成
         $memberVarsIndex = 0;
         foreach ($memberVarsArray as $memberVars) {
             $deleteFlag = true;
@@ -4469,7 +4459,9 @@
 
                     $_type_array = $type_array;
                     foreach ($trg_default_key_array as $trg_default_key) {
-                        $_type_array = $_type_array[$trg_default_key];
+                        if (isset($_type_array[$trg_default_key])) {
+                            $_type_array = $_type_array[$trg_default_key];
+                        }
                     }
 
                     // 変数ネスト管理対象
