@@ -1196,6 +1196,7 @@ $ary["ITAANSIBLEH-MNU-5000000"]     = "You can perform maintenance (view/registe
 $ary["ITAANSIBLEH-MNU-5000001"]     = "No.";
 $ary["ITAANSIBLEH-MNU-5000002"]     = "Ansible Role translation table";
 $ary["ITAANSIBLEH-MNU-5000003"]     = "Ansible Role translation table";
+$ary["ITAANSIBLEH-MNU-5000004"]     = "You can perform maintenance (view/register/update/discard) for translation table of Ansible-Legacy Role.";
 $ary["ITAANSIBLEH-MNU-5000100"]     = "Role package";
 $ary["ITAANSIBLEH-MNU-5000101"]     = "";
 $ary["ITAANSIBLEH-MNU-5000200"]     = "Role";

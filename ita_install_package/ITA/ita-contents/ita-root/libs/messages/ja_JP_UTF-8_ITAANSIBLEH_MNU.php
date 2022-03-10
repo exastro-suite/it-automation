@@ -1204,6 +1204,7 @@ $ary["ITAANSIBLEH-MNU-5000000"]     = "Ansible Roleで使用出来る読替変�
 $ary["ITAANSIBLEH-MNU-5000001"]     = "項番";
 $ary["ITAANSIBLEH-MNU-5000002"]     = "Ansible Role 読替変数一覧";
 $ary["ITAANSIBLEH-MNU-5000003"]     = "Ansible Role 読替変数一覧";
+$ary["ITAANSIBLEH-MNU-5000004"]     = "Ansible-Legacy Roleの読替変数をメンテナンス(閲覧/登録/更新/廃止)できます。";
 $ary["ITAANSIBLEH-MNU-5000100"]     = "ロールパッケージ";
 $ary["ITAANSIBLEH-MNU-5000101"]     = "";
 $ary["ITAANSIBLEH-MNU-5000200"]     = "ロール";
