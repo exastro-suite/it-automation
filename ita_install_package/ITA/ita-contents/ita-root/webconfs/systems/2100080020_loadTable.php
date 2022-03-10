@@ -44,7 +44,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $tmpAryColumn = $table->getColumns();
     $tmpAryColumn['MAX_COL_SEQ_ID']->setSequenceID('B_TERRAFORM_LRL_MAX_MEMBER_COL_RIC');
     $tmpAryColumn['JOURNAL_SEQ_NO']->setSequenceID('B_TERRAFORM_LRL_MAX_MEMBER_COL_JSQ');
-    
+
 	// ファイルアップロードで廃止／復活を無効にする。
 	$strResultType01 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12202");   //登録
 	$strResultType02 = $g['objMTS']->getSomeMessage("ITAWDCH-STD-12203");   //更新
@@ -71,7 +71,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 	$table->setDBJournalTableHiddenID('B_TERRAFORM_LRL_MAX_MEMBER_COL_JNL');
 	// 利用時は、更新対象カラムに、「$c->setHiddenMainTableColumn(true);」を付加すること
 	// VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定----
-		
+
 	unset($tmpAryColumn);
 
     // QMファイル名プレフィックス
@@ -84,7 +84,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     // 変数ID
     $c = new IDColumn('VARS_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109503"), 'B_TERRAFORM_MODULE_VARS_LINK', 'MODULE_VARS_LINK_ID', 'VARS_NAME');
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-1090504")); //エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109504")); //エクセル・ヘッダでの説明
 	$c->setJournalTableOfMaster('B_TERRAFORM_MODULE_VARS_LINK_JNL');
     $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
     $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
@@ -145,9 +145,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new NumColumn('MAX_COL_SEQ', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109507"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109508")); //エクセル・ヘッダでの説明
     //更新対象カラム
-    $c->setHiddenMainTableColumn(true); 
+    $c->setHiddenMainTableColumn(true);
     //エクセル/CSVからのアップロードは可能
-    $c->setAllowSendFromFile(true);    
+    $c->setAllowSendFromFile(true);
 
     $c->setSubtotalFlag(false);
     $c->setValidator(new IntNumValidator(1, 99999999));

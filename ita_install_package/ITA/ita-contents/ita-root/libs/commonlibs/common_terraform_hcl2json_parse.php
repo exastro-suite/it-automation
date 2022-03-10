@@ -75,10 +75,13 @@ class CommonTerraformHCL2JSONParse{
             $output[0] = preg_replace($pattern, $replacement, $output[0]);
 
             $json_str = json_decode($output[0], true);
+            $variable_list = [];
             // typeの配列化
-            $variable_list = $json_str["variable"];
+            if (isset($json_str["variable"])) {
+                $variable_list = $json_str["variable"];
+            }
 
-            if (is_array($variable_list)) {
+            if (is_array($variable_list) && !empty($variable_list)) {
                 foreach ($variable_list as $variable_block) {
                     foreach ($variable_block as $variable => $block) {
                         $val_res = [];
@@ -120,21 +123,23 @@ class CommonTerraformHCL2JSONParse{
                         // ２．list(list(string)) => ${list(list)} + ${list(string)}
                         $pattern = '/\"\$\{([a-z]+?)\(([a-z]+?)\((.*?)\)\)\}\"/';
                         $replacement = '{"${${1}(${2})}": ["${${2}(${3})}"]}';
-                        // $replacement = '{"${${1}(${2})}": "${${2}(${3})}"}';
-                        $typestr = preg_replace($pattern, $replacement, $typestr);
-                        // $typestr = preg_replace($pattern, $replacement, $typestr);
+                        while (preg_match($pattern, $typestr)) {
+                            $typestr = preg_replace($pattern, $replacement, $typestr);
+                        }
 
                         // ３．tuple
                         $pattern = '/\"\$\{([a-z]+?)\(([a-z]+?)\(\[(.*)\]\)\)\}\"/';
                         $replacement = '{"${${1}}": ["${${2}([${3}])}"]}';
-                        // $replacement = '{"${${1}}": "${${2}([${3}])}"}';
-                        $typestr = preg_replace($pattern, $replacement, $typestr);
+                        while (preg_match($pattern, $typestr)) {
+                            $typestr = preg_replace($pattern, $replacement, $typestr);
+                        }
 
                         // ４．object
                         $pattern = '/\"\$\{([a-z]+?)\(([a-z]+?)\(\{(.*)\}\)\)\}\"/';
                         $replacement = '{"${${1}}": ["${${2}({${3}})}"]}';
-                        // $replacement = '{"${${1}}": "${${2}({${3}})}"}';
-                        $typestr = preg_replace($pattern, $replacement, $typestr);
+                        while (preg_match($pattern, $typestr)) {
+                            $typestr = preg_replace($pattern, $replacement, $typestr);
+                        }
                         // --------------------------------------------------
 
                         // tuple
