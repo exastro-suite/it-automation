@@ -24,7 +24,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
 
     $arrayWebSetting = array();
-    $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-5010000");
+    $arrayWebSetting['page_info'] = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-5000004");
 /*
 Ansible（Legacy Role）パッケージ内読替変数管理
 */
