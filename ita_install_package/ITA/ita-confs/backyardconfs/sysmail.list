@@ -17,7 +17,7 @@
 # 006	X
 # 
 # [注意]
-# メールID「000」はNEC IT AutomationのWebDBCore機能で利用するのでデフォルト定義。
+# メールID「000」はExastro IT AutomationのWebDBCore機能で利用するのでデフォルト定義。
 # (削除不可)
 
 メール本文ID	置き換え文言数	FROM_MAIL_ADDRESS	TO_MAIL_ADDRESS	(CC_MAIL_ADDRESS)
