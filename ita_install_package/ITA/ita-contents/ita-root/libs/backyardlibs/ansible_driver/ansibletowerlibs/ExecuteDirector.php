@@ -834,7 +834,7 @@ class ExecuteDirector {
                 if($return_var !== 0) {
                     $log = file_get_contents($tmp_log_file);
                     $this->logger->error($log);
-                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040037",array($credential['host_name']));
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040037",array($credential['host_name'],$dest_path));
                     $this->errorLogOut($errorMessage);
                     $this->logger->error($errorMessage);
 

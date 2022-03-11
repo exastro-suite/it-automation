@@ -167,6 +167,8 @@ global $objDBCA;
             if($process_has_error) {
                 break;
             }
+            $process_was_scrammed = false;
+            $wfId = -1;
             ////////////////////////////////////////////////////////////////
             // AnsibleTowerに必要なデータを生成                           //
             ////////////////////////////////////////////////////////////////
@@ -177,30 +179,29 @@ global $objDBCA;
                 $process_has_error = true;
                 $error_flag = 1;
                 $logger->error("Faild to create Ansible Automation Controller environment. (exec_no: $tgt_execution_no)");
-            }
-            // マルチログかを取得する。
-            $MultipleLogMark = $director->getMultipleLogMark();
+            } else {
+                // マルチログかを取得する。
+                $MultipleLogMark = $director->getMultipleLogMark();
 
-            $wfId = -1;
-            $process_was_scrammed = false;
-            if(!$process_has_error) {
-                // トレースメッセージ
-                $logger->debug("launch (exec_no: $tgt_execution_no)");
+                if(!$process_has_error) {
+                    // トレースメッセージ
+                    $logger->debug("launch (exec_no: $tgt_execution_no)");
 
-                // 実行直前に緊急停止確認
-                if(isScrammedExecution($dbAccess, $tgt_execution_no)) {
-                    $process_was_scrammed = true;
-                } else {
-                    // ジョブワークフロー実行
-                    $wfId = $director->launchWorkflow($workflowTplId);
-                    if($wfId == -1) {
-                        $process_has_error = true;
-                        $error_flag = 1;
-                        $logger->error("Faild to launch workflowJob. (exec_no: $tgt_execution_no)");
-                        $errorMessage = $msgTplStorage->getSomeMessage("ITAANSIBLEH-ERR-6040008");
-                        $director->errorLogOut($errorMessage);
+                    // 実行直前に緊急停止確認
+                    if(isScrammedExecution($dbAccess, $tgt_execution_no)) {
+                        $process_was_scrammed = true;
                     } else {
-                        $logger->debug("execution start up complated. (exec_no: $tgt_execution_no)");
+                        // ジョブワークフロー実行
+                        $wfId = $director->launchWorkflow($workflowTplId);
+                        if($wfId == -1) {
+                            $process_has_error = true;
+                            $error_flag = 1;
+                            $logger->error("Faild to launch workflowJob. (exec_no: $tgt_execution_no)");
+                            $errorMessage = $msgTplStorage->getSomeMessage("ITAANSIBLEH-ERR-6040008");
+                            $director->errorLogOut($errorMessage);
+                        } else {
+                            $logger->debug("execution start up complated. (exec_no: $tgt_execution_no)");
+                        }
                     }
                 }
             }

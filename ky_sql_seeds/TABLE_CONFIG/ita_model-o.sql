@@ -538,6 +538,8 @@ OPERATION_NO_UAPK                 %INT%                            , -- オペ�
 PATTERN_ID                        %INT%                            , -- パターンID
 MODULE_VARS_LINK_ID               %INT%                            , -- 代入値リンクID
 VARS_ENTRY                        text                             ,
+ASSIGN_SEQ                        %INT%                            , -- 代入順序
+MEMBER_VARS                       %INT%                            , -- メンバー変数
 HCL_FLAG                          %VARCHR%(1)                      , -- HCL設定
 SENSITIVE_FLAG                    %VARCHR%(1)                      , -- Sensitive設定
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -562,6 +564,8 @@ OPERATION_NO_UAPK                 %INT%                            , -- オペ�
 PATTERN_ID                        %INT%                            , -- パターンID
 MODULE_VARS_LINK_ID               %INT%                            , -- 代入値リンクID
 VARS_ENTRY                        text                             ,
+ASSIGN_SEQ                        %INT%                            , -- 代入順序
+MEMBER_VARS                       %INT%                            , -- メンバー変数
 HCL_FLAG                          %VARCHR%(1)                      , -- HCL設定
 SENSITIVE_FLAG                    %VARCHR%(1)                      , -- Sensitive設定
 DISP_SEQ                          %INT%                            , -- 表示順序
@@ -584,7 +588,13 @@ COL_TYPE                          %INT%                   , -- カラムタイ�
 PATTERN_ID                        %INT%                   , -- 作業パターンID
 VAL_VARS_LINK_ID                  %INT%                   , -- Value値　作業パターン変数紐付
 KEY_VARS_LINK_ID                  %INT%                   , -- Key値　作業パターン変数紐付
+KEY_ASSIGN_SEQ                    %INT%                   , -- Keyの代入順序
+KEY_MEMBER_VARS                   %INT%                   , -- Keyのメンバ変数
+VAL_ASSIGN_SEQ                    %INT%                   , -- Valueの代入順序
+VAL_MEMBER_VARS                   %INT%                   , -- Valueのメンバ変数
 HCL_FLAG                          %VARCHR%(1)             , -- HCL設定
+VAL_VARS_HCL_FLAG                 %VARCHR%(1)             , -- Value値 HCL設定
+KEY_VARS_HCL_FLAG                 %VARCHR%(1)             , -- Key値 HCL設定
 NULL_DATA_HANDLING_FLG            %INT%                   , -- Null値の連携
 DISP_SEQ                          %INT%                   , -- 表示順序
 ACCESS_AUTH                       TEXT                    ,
@@ -610,7 +620,13 @@ COL_TYPE                          %INT%                   , -- カラムタイ�
 PATTERN_ID                        %INT%                   , -- 作業パターンID
 VAL_VARS_LINK_ID                  %INT%                   , -- Value値　作業パターン変数紐付
 KEY_VARS_LINK_ID                  %INT%                   , -- Key値　作業パターン変数紐付
+KEY_ASSIGN_SEQ                    %INT%                   , -- Keyの代入順序
+KEY_MEMBER_VARS                   %INT%                   , -- Keyのメンバ変数
+VAL_ASSIGN_SEQ                    %INT%                   , -- Valueの代入順序
+VAL_MEMBER_VARS                   %INT%                   , -- Valueのメンバ変数
 HCL_FLAG                          %VARCHR%(1)             , -- HCL設定
+VAL_VARS_HCL_FLAG                 %VARCHR%(1)             , -- Value値 HCL設定
+KEY_VARS_HCL_FLAG                 %VARCHR%(1)             , -- Key値 HCL設定
 NULL_DATA_HANDLING_FLG            %INT%                   , -- Null値の連携
 DISP_SEQ                          %INT%                   , -- 表示順序
 ACCESS_AUTH                       TEXT                    ,
@@ -630,6 +646,8 @@ MODULE_VARS_LINK_ID               %INT%                            ,
 MODULE_MATTER_ID                  %INT%                            ,
 VARS_NAME                         %VARCHR%(256)                    ,
 VARS_DESCRIPTION                  %VARCHR%(256)                    ,
+TYPE_ID                           %INT%                            , -- タイプID
+VARS_VALUE                        TEXT                             , -- デフォルト値
 DISP_SEQ                          %INT%                            , -- 表示順序
 ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -651,6 +669,115 @@ MODULE_VARS_LINK_ID               %INT%                            ,
 MODULE_MATTER_ID                  %INT%                            ,
 VARS_NAME                         %VARCHR%(256)                    ,
 VARS_DESCRIPTION                  %VARCHR%(256)                    ,
+TYPE_ID                           %INT%                            , -- タイプID
+VARS_VALUE                        TEXT                             , -- デフォルト値
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+-- ----更新系テーブル作成
+--変数タイプ一覧
+CREATE TABLE B_TERRAFORM_TYPES_MASTER
+(
+TYPE_ID %INT%                                                       , -- タイプID
+TYPE_NAME TEXT                                                      , -- タイプ名
+MEMBER_VARS_FLAG %INT%                                              , -- メンバー変数の入力有(1)/無(0))
+ASSIGN_SEQ_FLAG %INT%                                               , -- 代入順序の入力有(1)/無(0)                                            
+ENCODE_FLAG %INT%                                                   , -- (1)/無(0)
+DISP_SEQ %INT%                                                      , -- 表示順序
+ACCESS_AUTH TEXT                                                    ,
+NOTE %VARCHR%(4000)                                                 , -- 備考
+DISUSE_FLAG %VARCHR%(1)                                             , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP %DATETIME6%                                   , -- 最終更新日時
+LAST_UPDATE_USER %INT%                                              , -- 最終更新ユーザ
+PRIMARY KEY (TYPE_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----更新系テーブル作成
+--メンバー変数管理
+CREATE TABLE B_TERRAFORM_VAR_MEMBER
+(
+CHILD_MEMBER_VARS_ID              %INT%                            , -- メンバー変数のID
+PARENT_VARS_ID                    %INT%                            , -- 親変数(Module変数紐付管理)ID
+PARENT_MEMBER_VARS_ID             %INT%                            , -- 親メンバー変数のID
+CHILD_MEMBER_VARS_NEST            TEXT                             , -- メンバー変数のキー(フル)
+CHILD_MEMBER_VARS_KEY             TEXT                             , -- メンバー変数のキー
+CHILD_VARS_TYPE_ID                %INT%                            , -- 子メンバ変数のタイプID
+ARRAY_NEST_LEVEL                  %INT%                            , -- 子メンバ変数の階層
+ASSIGN_SEQ                        %INT%                            , -- 代入順序
+CHILD_MEMBER_VARS_VALUE           TEXT                             , -- デフォルト値
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY(CHILD_MEMBER_VARS_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+--メンバー変数管理(履歴)
+CREATE TABLE B_TERRAFORM_VAR_MEMBER_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+CHILD_MEMBER_VARS_ID              %INT%                            , -- メンバー変数のID
+PARENT_VARS_ID                    %INT%                            , -- 親変数(Module変数紐付管理)ID
+PARENT_MEMBER_VARS_ID             %INT%                            , -- 親メンバー変数のID
+CHILD_MEMBER_VARS_NEST            TEXT                             , -- メンバー変数のキー(フル)
+CHILD_MEMBER_VARS_KEY             TEXT                             , -- メンバー変数のキー
+CHILD_VARS_TYPE_ID                %INT%                            , -- 子メンバ変数のタイプID
+ARRAY_NEST_LEVEL                  %INT%                            , -- 子メンバ変数の階層
+ASSIGN_SEQ                        %INT%                            , -- 代入順序
+CHILD_MEMBER_VARS_VALUE           TEXT                             , -- デフォルト値
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY(JOURNAL_SEQ_NO)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 履歴系テーブル作成----
+
+-- ----更新系テーブル作成
+--変数ネスト管理
+CREATE TABLE B_TERRAFORM_LRL_MAX_MEMBER_COL
+(
+MAX_COL_SEQ_ID                    %INT%                            , -- 項番
+VARS_ID                           %INT%                            , -- 変数ID
+MEMBER_VARS_ID                    %INT%                            , -- メンバー変数ID
+MAX_COL_SEQ                       %INT%                            , -- 最大繰り返し数
+DISP_SEQ                          %INT%                            , -- 表示順序
+ACCESS_AUTH                       TEXT                             ,
+NOTE                              %VARCHR%(4000)                   , -- 備考
+DISUSE_FLAG                       %VARCHR%(1)                      , -- 廃止フラグ
+LAST_UPDATE_TIMESTAMP             %DATETIME6%                      , -- 最終更新日時
+LAST_UPDATE_USER                  %INT%                            , -- 最終更新ユーザ
+PRIMARY KEY(MAX_COL_SEQ_ID)
+)%%TABLE_CREATE_OUT_TAIL%%;
+-- 更新系テーブル作成----
+
+-- ----履歴系テーブル作成
+--変数ネスト管理(履歴)
+CREATE TABLE B_TERRAFORM_LRL_MAX_MEMBER_COL_JNL
+(
+JOURNAL_SEQ_NO                    %INT%                            , -- 履歴用シーケンス
+JOURNAL_REG_DATETIME              %DATETIME6%                      , -- 履歴用変更日時
+JOURNAL_ACTION_CLASS              %VARCHR%(8)                      , -- 履歴用変更種別
+MAX_COL_SEQ_ID                    %INT%                            , -- 項番
+VARS_ID                           %INT%                            , -- 変数ID
+MEMBER_VARS_ID                    %INT%                            , -- メンバー変数ID
+MAX_COL_SEQ                       %INT%                            , -- 最大繰り返し数
 DISP_SEQ                          %INT%                            , -- 表示順序
 ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -883,7 +1010,8 @@ CREATE VIEW D_TERRAFORM_VARS_ASSIGN AS
 SELECT
   TAB_A.*,
   TAB_B.MODULE_PTN_LINK_ID            VARS_PTN_LINK_ID,
-  TAB_B.MODULE_PTN_LINK_ID            REST_MODULE_VARS_LINK_ID
+  TAB_B.MODULE_PTN_LINK_ID            REST_MODULE_VARS_LINK_ID,
+  TAB_A.MEMBER_VARS                   REST_MEMBER_VARS
 FROM
   B_TERRAFORM_VARS_ASSIGN TAB_A
 LEFT JOIN
@@ -894,12 +1022,64 @@ CREATE VIEW D_TERRAFORM_VARS_ASSIGN_JNL AS
 SELECT
   TAB_A.*,
   TAB_B.MODULE_PTN_LINK_ID            VARS_PTN_LINK_ID,
-  TAB_B.MODULE_PTN_LINK_ID            REST_MODULE_VARS_LINK_ID
+  TAB_B.MODULE_PTN_LINK_ID            REST_MODULE_VARS_LINK_ID,
+  TAB_A.MEMBER_VARS                   REST_MEMBER_VARS
 FROM
   B_TERRAFORM_VARS_ASSIGN_JNL TAB_A
 LEFT JOIN
   D_TERRAFORM_MODULE_PTN_VARS_LINK_2 TAB_B ON (TAB_A.PATTERN_ID = TAB_B.PATTERN_ID AND TAB_A.MODULE_VARS_LINK_ID = TAB_B.MODULE_VARS_LINK_ID )
 ;
+
+--代入値管理/代入値自動登録　変数名+メンバー変数  リスト用 View
+CREATE VIEW E_TERRAFORM_VAR_MEMBER_LIST AS
+SELECT DISTINCT
+  TAB_A.CHILD_MEMBER_VARS_ID,
+  TAB_A.PARENT_VARS_ID,
+  TAB_A.PARENT_MEMBER_VARS_ID,
+  TAB_A.CHILD_MEMBER_VARS_NEST,
+  TAB_A.CHILD_MEMBER_VARS_KEY,
+  TAB_A.CHILD_VARS_TYPE_ID,
+  TAB_A.ARRAY_NEST_LEVEL,
+  TAB_A.ASSIGN_SEQ,
+  TAB_A.DISP_SEQ,
+  TAB_A.CHILD_MEMBER_VARS_VALUE,
+  TAB_A.ACCESS_AUTH,
+  TAB_A.NOTE,
+  TAB_A.DISUSE_FLAG,
+  TAB_A.LAST_UPDATE_TIMESTAMP,
+  TAB_A.LAST_UPDATE_USER,
+  [%CONCAT_HEAD/%]TAB_B.VARS_NAME[%CONCAT_MID/%]'.'[%CONCAT_MID/%]TAB_A.CHILD_MEMBER_VARS_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.CHILD_MEMBER_VARS_NEST[%CONCAT_TAIL/%] VAR_MEMBER_PULLDOWN 
+FROM
+  B_TERRAFORM_VAR_MEMBER          TAB_A
+  LEFT JOIN B_TERRAFORM_MODULE_VARS_LINK    TAB_B ON ( TAB_A.PARENT_VARS_ID = TAB_B.MODULE_VARS_LINK_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0';
+
+CREATE VIEW E_TERRAFORM_VAR_MEMBER_LIST_JNL AS
+SELECT DISTINCT
+  TAB_A.CHILD_MEMBER_VARS_ID,
+  TAB_A.PARENT_VARS_ID,
+  TAB_A.PARENT_MEMBER_VARS_ID,
+  TAB_A.CHILD_MEMBER_VARS_NEST,
+  TAB_A.CHILD_MEMBER_VARS_KEY,
+  TAB_A.CHILD_VARS_TYPE_ID,
+  TAB_A.ARRAY_NEST_LEVEL,
+  TAB_A.ASSIGN_SEQ,
+  TAB_A.DISP_SEQ,
+  TAB_A.CHILD_MEMBER_VARS_VALUE,
+  TAB_A.ACCESS_AUTH,
+  TAB_A.NOTE,
+  TAB_A.DISUSE_FLAG,
+  TAB_A.LAST_UPDATE_TIMESTAMP,
+  TAB_A.LAST_UPDATE_USER,
+  [%CONCAT_HEAD/%]TAB_B.VARS_NAME[%CONCAT_MID/%]'.'[%CONCAT_MID/%]TAB_A.CHILD_MEMBER_VARS_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.CHILD_MEMBER_VARS_NEST[%CONCAT_TAIL/%] VAR_MEMBER_PULLDOWN 
+FROM
+  B_TERRAFORM_VAR_MEMBER          TAB_A
+  LEFT JOIN B_TERRAFORM_MODULE_VARS_LINK    TAB_B ON ( TAB_A.PARENT_VARS_ID = TAB_B.MODULE_VARS_LINK_ID)
+WHERE
+  TAB_A.DISUSE_FLAG = '0' AND
+  TAB_B.DISUSE_FLAG = '0';
 
 --代入値自動登録設定メニュー用　VIEW
 CREATE VIEW D_TERRAFORM_VAL_ASSIGN AS 
@@ -911,9 +1091,15 @@ SELECT
         TAB_A.PATTERN_ID                     , -- 作業パターンID
         TAB_A.VAL_VARS_LINK_ID               , -- Value値　Module変数紐付
         TAB_A.KEY_VARS_LINK_ID               , -- Key値　Module変数紐付
+        TAB_A.KEY_ASSIGN_SEQ                 , -- Keyの代入順序
+        TAB_A.KEY_MEMBER_VARS                , -- Keyのメンバ変数
+        TAB_A.VAL_ASSIGN_SEQ                 , -- Valueの代入順序
+        TAB_A.VAL_MEMBER_VARS                , -- Valueのメンバ変数
         TAB_A.VAL_VARS_PTN_LINK_ID           , -- Value値 作業パターン+変数名(作業パターン変数紐付)
         TAB_A.KEY_VARS_PTN_LINK_ID           , -- Key値 作業パターン+変数名(作業パターン変数紐付)
         TAB_A.HCL_FLAG                       , -- HCL設定
+        TAB_A.VAL_VARS_HCL_FLAG              , -- Value値 HCL設定
+        TAB_A.KEY_VARS_HCL_FLAG              , -- Key値 HCL設定
         TAB_A.NULL_DATA_HANDLING_FLG         , -- Null値の連携
         TAB_B.MENU_GROUP_ID                  ,
         TAB_B.MENU_GROUP_ID     MENU_GROUP_ID_CLONE,
@@ -923,7 +1109,9 @@ SELECT
         TAB_B.MENU_NAME                      ,
         TAB_A.COLUMN_LIST_ID    REST_COLUMN_LIST_ID,      -- REST/EXCEL/CSV用　CMDB処理対象メニューグループ+メニュー+カラム一覧の識別シーケンス
         TAB_A.VAL_VARS_PTN_LINK_ID REST_VAL_VARS_LINK_ID, -- REST/EXCEL/CSV用　Value値　作業パターン+変数名(作業パターン変数紐付)
+        TAB_A.VAL_MEMBER_VARS       REST_VAL_MEMBER_VARS, -- REST/EXCEL/CSV用　Value値　変数名+メンバー変数
         TAB_A.KEY_VARS_PTN_LINK_ID REST_KEY_VARS_LINK_ID, -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
+        TAB_A.KEY_MEMBER_VARS       REST_KEY_MEMBER_VARS, -- REST/EXCEL/CSV用　Key値　変数名+メンバー変数
         TAB_A.DISP_SEQ                       ,
         TAB_A.ACCESS_AUTH                    ,
         TAB_A.NOTE                           ,
@@ -965,9 +1153,15 @@ SELECT
         TAB_A.PATTERN_ID                     , -- 作業パターンID
         TAB_A.VAL_VARS_LINK_ID               , -- Value値　Module変数紐付
         TAB_A.KEY_VARS_LINK_ID               , -- Key値　Module変数紐付
+        TAB_A.KEY_ASSIGN_SEQ                 , -- Keyの代入順序
+        TAB_A.KEY_MEMBER_VARS                , -- Keyのメンバ変数
+        TAB_A.VAL_ASSIGN_SEQ                 , -- Valueの代入順序
+        TAB_A.VAL_MEMBER_VARS                , -- Valueのメンバ変数
         TAB_A.VAL_VARS_PTN_LINK_ID           , -- Value値 作業パターン+変数名(作業パターン変数紐付)
         TAB_A.KEY_VARS_PTN_LINK_ID           , -- Key値 作業パターン+変数名(作業パターン変数紐付)
         TAB_A.HCL_FLAG                       , -- HCL設定
+        TAB_A.VAL_VARS_HCL_FLAG              , -- Value値 HCL設定
+        TAB_A.KEY_VARS_HCL_FLAG              , -- Key値 HCL設定
         TAB_A.NULL_DATA_HANDLING_FLG         , -- Null値の連携
         TAB_B.MENU_GROUP_ID                  ,
         TAB_B.MENU_GROUP_ID     MENU_GROUP_ID_CLONE,
@@ -977,7 +1171,9 @@ SELECT
         TAB_B.MENU_NAME                      ,
         TAB_A.COLUMN_LIST_ID    REST_COLUMN_LIST_ID,      -- REST/EXCEL/CSV用　CMDB処理対象メニューグループ+メニュー+カラム一覧の識別シーケンス
         TAB_A.VAL_VARS_PTN_LINK_ID REST_VAL_VARS_LINK_ID, -- REST/EXCEL/CSV用　Value値　作業パターン+変数名(作業パターン変数紐付)
+        TAB_A.VAL_MEMBER_VARS       REST_VAL_MEMBER_VARS, -- REST/EXCEL/CSV用　Value値　変数名+メンバー変数
         TAB_A.KEY_VARS_PTN_LINK_ID REST_KEY_VARS_LINK_ID, -- REST/EXCEL/CSV用　Key値　作業パターン+変数名(作業パターン変数紐付)
+        TAB_A.KEY_MEMBER_VARS       REST_KEY_MEMBER_VARS, -- REST/EXCEL/CSV用　Key値　変数名+メンバー変数
         TAB_A.DISP_SEQ                       ,
         TAB_A.ACCESS_AUTH                    ,
         TAB_A.NOTE                           ,
@@ -1016,6 +1212,8 @@ SELECT
         TAB_C.PATTERN_NAME                  ,
         TAB_A.VARS_NAME                     ,
         [%CONCAT_HEAD/%]TAB_A.MODULE_VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
+        TAB_A.TYPE_ID                       ,
+        TAB_A.VARS_VALUE                    ,
         TAB_A.DISP_SEQ                      ,
         TAB_A.ACCESS_AUTH                   ,
         TAB_A.NOTE                          ,
@@ -1041,6 +1239,8 @@ SELECT
         TAB_C.PATTERN_NAME                  ,
         TAB_A.VARS_NAME                     ,
         [%CONCAT_HEAD/%]TAB_A.MODULE_VARS_LINK_ID[%CONCAT_MID/%]':'[%CONCAT_MID/%]TAB_A.VARS_NAME[%CONCAT_TAIL/%] VARS_LINK_PULLDOWN,
+        TAB_A.TYPE_ID                       ,
+        TAB_A.VARS_VALUE                    ,
         TAB_A.DISP_SEQ                      ,
         TAB_A.ACCESS_AUTH                   ,
         TAB_A.NOTE                          ,
@@ -1090,6 +1290,8 @@ SELECT
          TAB_A.MODULE_VARS_LINK_ID       ,
          TAB_B.VARS_NAME                 ,
          TAB_A.VARS_ENTRY                ,
+         TAB_A.MEMBER_VARS               ,
+         TAB_A.ASSIGN_SEQ                ,
          TAB_A.HCL_FLAG                  ,
          TAB_A.SENSITIVE_FLAG            ,
          TAB_A.DISP_SEQ                  ,
@@ -1336,6 +1538,62 @@ SELECT  JOURNAL_SEQ_NO          ,
         LAST_UPDATE_USER
 FROM    B_TERRAFORM_POLICY_SETS_JNL;
 
+CREATE VIEW D_TERRAFORM_VAR_MEMBER AS
+SELECT
+        CHILD_MEMBER_VARS_ID,
+        PARENT_VARS_ID,
+        PARENT_MEMBER_VARS_ID,
+        CHILD_MEMBER_VARS_NEST,
+        CHILD_MEMBER_VARS_KEY,
+        CHILD_VARS_TYPE_ID,
+        ARRAY_NEST_LEVEL,
+        ASSIGN_SEQ,
+        CHILD_MEMBER_VARS_VALUE,
+          CASE
+            WHEN
+            NOT EXISTS(
+              SELECT PARENT_MEMBER_VARS_ID FROM B_TERRAFORM_VAR_MEMBER WHERE PARENT_MEMBER_VARS_ID = TAB_A.CHILD_MEMBER_VARS_ID
+            )
+            THEN 1
+            ELSE 0
+          END AS VARS_ASSIGN_FLAG,
+        DISP_SEQ,
+        ACCESS_AUTH,
+        NOTE,
+        DISUSE_FLAG,
+        LAST_UPDATE_TIMESTAMP,
+        LAST_UPDATE_USER
+FROM    B_TERRAFORM_VAR_MEMBER AS TAB_A;
+
+CREATE VIEW D_TERRAFORM_VAR_MEMBER_JNL AS
+SELECT
+TAB_A.JOURNAL_SEQ_NO,
+TAB_A.JOURNAL_REG_DATETIME,
+TAB_A.JOURNAL_ACTION_CLASS,
+TAB_A.CHILD_MEMBER_VARS_ID,
+TAB_A.PARENT_VARS_ID,
+TAB_A.PARENT_MEMBER_VARS_ID,
+TAB_A.CHILD_MEMBER_VARS_NEST,
+TAB_A.CHILD_MEMBER_VARS_KEY,
+TAB_A.CHILD_VARS_TYPE_ID,
+TAB_A.ARRAY_NEST_LEVEL,
+TAB_A.ASSIGN_SEQ,
+TAB_A.CHILD_MEMBER_VARS_VALUE,
+CASE
+WHEN
+NOT EXISTS(
+SELECT PARENT_MEMBER_VARS_ID FROM B_TERRAFORM_VAR_MEMBER WHERE PARENT_MEMBER_VARS_ID = TAB_A.CHILD_MEMBER_VARS_ID
+)
+THEN 1
+ELSE 0
+END AS VARS_ASSIGN_FLAG,
+TAB_A.DISP_SEQ,
+TAB_A.ACCESS_AUTH,
+TAB_A.NOTE,
+TAB_A.DISUSE_FLAG,
+TAB_A.LAST_UPDATE_TIMESTAMP,
+TAB_A.LAST_UPDATE_USER
+FROM B_TERRAFORM_VAR_MEMBER_JNL AS TAB_A;
 -- *****************************************************************************
 -- *** Terraform Views *****                                                 ***
 -- *****************************************************************************

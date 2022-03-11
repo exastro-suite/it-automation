@@ -432,7 +432,11 @@ function conductorInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSON
         switch($strCommand){
             case "INFO":
                 $aryRetBody = conductorInstancePrint($intSymphonyInstanceId);
-                 
+                #1825
+                if( isset($aryRetBody[0]['CONDUCTOR_INSTANCE_INFO']['CONDUCTOR_CLASS_NO']) ){
+                    unset($aryRetBody[0]['CONDUCTOR_INSTANCE_INFO']['CONDUCTOR_CLASS_NO']);
+                }
+
                 $intUIErrorMsgSaveIndex = 4;
                 break;
             case "CANCEL":

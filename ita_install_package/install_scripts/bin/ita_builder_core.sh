@@ -791,6 +791,46 @@ configure_ansible() {
 
 }
 
+# Terraform
+configure_terraform() {
+    
+    # Install some pip packages.
+    if [ "${exec_mode}" == "3" ]; then
+        pip3 install --upgrade pip requests >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        for key in ${PIP_PACKAGE["terraform"]}; do
+            echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            pip3 install $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Installation failed[$key]"
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+        done
+    else
+        for key in ${PIP_PACKAGE["terraform"]}; do
+            echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            pip3 install --ignore-installed --no-index --find-links=${PIP_PACKAGE_DOWNLOAD_DIR["terraform"]} $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Installation failed pip packages."
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+        done
+    fi
+
+    # Check installation some pip packages.
+    for key in ${PIP_PACKAGE_TERRAFORM["remote"]}; do
+        echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pip3 list --format=columns 2>> "$ITA_BUILDER_LOG_FILE" | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Package not installed [$key]"
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+    done
+
+}
+
 
 # ITA
 configure_ita() {
@@ -878,6 +918,11 @@ make_ita() {
     if [ "$ansible_driver" == "yes" ]; then
         log "ansible install and setting"
         configure_ansible
+    fi
+
+    if [ "$terraform_driver" == "yes" ]; then
+        log "packages for terraform install and setting"
+        configure_terraform
     fi
 
     log "Running the ITA installer"
@@ -1072,8 +1117,8 @@ if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
         func_exit_and_delete_file
     fi
 
-    if [ "${cobbler_driver}" != 'yes' -a "${cobbler_driver}" != 'no' ]; then
-       log "ERROR:cobbler_driver should be set to yes or no"
+    if [ "${terraform_driver}" != 'yes' -a "${terraform_driver}" != 'no' ]; then
+       log "ERROR:terraform_driver should be set to yes or no"
        ERR_FLG="false"
        func_exit_and_delete_file
     fi
@@ -1305,6 +1350,7 @@ declare -A PIP_PACKAGE_DOWNLOAD_DIR;
 PIP_PACKAGE_DOWNLOAD_DIR=(
     ["pip"]="${DOWNLOAD_DIR["pip"]}/pip"
     ["ansible"]="${DOWNLOAD_DIR["pip"]}/ansible"
+    ["terraform"]="${DOWNLOAD_DIR["pip"]}/terraform"
 )
 
 #-----------------------------------------------------------
@@ -1324,11 +1370,19 @@ PIP_PACKAGE_ANSIBLE=(
     ["local"]=`list_pip_package ${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]}`
 )
 
+# pip package (for terraform)
+declare -A PIP_PACKAGE_TERRAFORM;
+PIP_PACKAGE_TERRAFORM=(
+    ["remote"]="python-hcl2"
+    ["local"]=`list_pip_package ${PIP_PACKAGE_DOWNLOAD_DIR["terraform"]}`
+)
+
 # all pip packages
 declare -A PIP_PACKAGE;
 PIP_PACKAGE=(
     ["pip"]=${PIP_PACKAGE_PIP[${MODE}]}
     ["ansible"]=${PIP_PACKAGE_ANSIBLE[${MODE}]}
+    ["terraform"]=${PIP_PACKAGE_TERRAFORM[${MODE}]}
 )
 
 
