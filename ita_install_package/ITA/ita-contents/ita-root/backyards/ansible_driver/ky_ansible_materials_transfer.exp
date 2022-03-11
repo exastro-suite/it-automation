@@ -55,7 +55,7 @@ if { ${FROMTO} == "ITA" } {
    set REMOTE_SRC       ${USER}@${HOST}:${SRC_PATH}
    set REMOTE_DEST      ${DEST_PATH}
 }
-if { ${FROMTO} == "key" } {
+if { ${TYPE} == "key" } {
    set KEY_FILE_PATH    $env(KEY_FILE_PATH)
 }
 set timeout 120
@@ -81,7 +81,7 @@ if { ${TYPE} == "pass" } {
        exit ${STATUS}
     }
 } elseif { ${TYPE} == "key" } {
-    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${KEY_FILE_PATH} ${SRC_PATH} ${REMOTE_SRC} ${REMOTE_DEST}
+    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${KEY_FILE_PATH} ${REMOTE_SRC} ${REMOTE_DEST}
     expect "assword:" {
         exit 201
     } "(yes/no)?" {
