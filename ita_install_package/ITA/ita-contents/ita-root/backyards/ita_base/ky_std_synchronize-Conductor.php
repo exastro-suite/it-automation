@@ -860,74 +860,92 @@
                             if( $rowOfConductor['ABORT_EXECUTE_FLAG'] == '2' ){
                                 //呼び出し中のConductorインスタンスの緊急停止
                                 if( $rowOfFocusMovement['I_NODE_TYPE_ID'] == 4 && $rowOfFocusMovement['CONDUCTOR_INSTANCE_CALL_NO'] != "" ){
-                                    
-                                    $arySqlBind=array(
-                                        "CONDUCTOR_INSTANCE_NO" => $rowOfFocusMovement['CONDUCTOR_INSTANCE_CALL_NO'],
-                                        );   
-                                    $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
-                                    $arySymInsCallUpdateTgtSource = $aryRetBody[0];
-                                    
-                                    $arySymInsCallUpdateTgtSource['ABORT_EXECUTE_FLAG'] = '2';
-                                    $arySymInsCallUpdateTgtSource['TIME_START'] = str_replace("-","/",$arySymInsCallUpdateTgtSource['TIME_START']) ;
-                                    $arySymInsCallUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
-                                    // 更新用のテーブル定義
-                                    $aryConfigForIUD = $aryConfigForSymInsIUD;
+                                  $tmpAryRetBody = $objOLA->getConductorStatusFromNode($aryMovement);
+                                  foreach ($tmpAryRetBody as $key => $value) {
+                                    foreach ($value['RUNS_NODE'] as $subkey => $subvalue) {
+                                      $arySqlBind=array(
+                                          "CONDUCTOR_INSTANCE_NO" => $subvalue['CONDUCTOR_INSTANCE_CALL_NO'],
+                                          );
+                                      $aryRetBody = getsubConductorInstanceInfo($objDBCA,$arySqlBind,$strFxName);
+                                      if(count($aryRetBody) > 0){
+                                        $arySymInsCallUpdateTgtSource = $aryRetBody[0];
+                                        
+                                        $arySymInsCallUpdateTgtSource['ABORT_EXECUTE_FLAG'] = '2';
+                                        $arySymInsCallUpdateTgtSource['TIME_START'] = str_replace("-","/",$arySymInsCallUpdateTgtSource['TIME_START']) ;
+                                        $arySymInsCallUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
+                                        // 更新用のテーブル定義
+                                        $aryConfigForIUD = $aryConfigForSymInsIUD;
 
-                                    // BIND用のベースソース≒
-                                    $aryBaseSourceForBind = $arySymInsCallUpdateTgtSource;
-                                    
-                                    $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                                        // BIND用のベースソース≒
+                                        $aryBaseSourceForBind = $arySymInsCallUpdateTgtSource;
+                                        
+                                        $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
 
-                                    if( $aryRetBody !== true  ){
-                                        // 例外処理へ
-                                        $strErrStepIdInFx="00001000";
-                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                                    }    
+                                        if( $aryRetBody !== true  ){
+                                            // 例外処理へ
+                                            $strErrStepIdInFx="00001000";
+                                            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                        }
+                                      }
+                                    }
+                                  }
                                 }
                                 if( $rowOfFocusMovement['I_NODE_TYPE_ID'] == 10 && $rowOfFocusMovement['CONDUCTOR_INSTANCE_CALL_NO'] != "" ){
-                                    
-                                    $arySqlBind=array(
-                                        "SYMPHONY_INSTANCE_NO" => $rowOfFocusMovement['CONDUCTOR_INSTANCE_CALL_NO'],
-                                        );   
-                                    $aryRetBody = getsubSymphonyInstanceInfo($objDBCA,$arySqlBind,$strFxName);
-                                    $arySymInsCallUpdateTgtSource = $aryRetBody[0];
+                                  $tmpAryRetBody = $objOLA->getConductorStatusFromNode($aryMovement);
+                                  foreach ($tmpAryRetBody as $key => $value) {
+                                    foreach ($value['RUNS_NODE'] as $subkey => $subvalue) {
+                                      $arySqlBind=array(
+                                          "SYMPHONY_INSTANCE_NO" => $subvalue['CONDUCTOR_INSTANCE_CALL_NO'],
+                                          );
+                                      $aryRetBody = getsubSymphonyInstanceInfo($objDBCA,$arySqlBind,$strFxName);
+                                      if(count($aryRetBody) > 0){
+                                        $arySymInsCallUpdateTgtSource = $aryRetBody[0];
 
-                                    $arySymInsCallUpdateTgtSource['ABORT_EXECUTE_FLAG']   = 2; //発令済
-                                    $arySymInsCallUpdateTgtSource['LAST_UPDATE_USER']     = $g['login_id'];
-                                    $arySymInsCallUpdateTgtSource['TIME_START'] = str_replace("-","/",$arySymInsCallUpdateTgtSource['TIME_START']) ;
-                                    
-                                    // 更新用のテーブル定義
-                                    $aryConfigForIUD = $arrayConfigForSymInsIUD;
+                                        $arySymInsCallUpdateTgtSource['ABORT_EXECUTE_FLAG']   = 2; //発令済
+                                        $arySymInsCallUpdateTgtSource['LAST_UPDATE_USER']     = $g['login_id'];
+                                        $arySymInsCallUpdateTgtSource['TIME_START'] = str_replace("-","/",$arySymInsCallUpdateTgtSource['TIME_START']) ;
+                                        
+                                        // 更新用のテーブル定義
+                                        $aryConfigForIUD = $arrayConfigForSymInsIUD;
 
-                                    // BIND用のベースソース≒
-                                    $aryBaseSourceForBind = $arySymInsCallUpdateTgtSource;
-                                    
-                                    $aryRetBody = updateSymphonyInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                                        // BIND用のベースソース≒
+                                        $aryBaseSourceForBind = $arySymInsCallUpdateTgtSource;
+                                        
+                                        $aryRetBody = updateSymphonyInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
 
-                                    if( $aryRetBody !== true  ){
-                                        // 例外処理へ
-                                        $strErrStepIdInFx="00001000";
-                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
-                                    } 
+                                        if( $aryRetBody !== true  ){
+                                            // 例外処理へ
+                                            $strErrStepIdInFx="00001000";
+                                            throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                        }
+                                      }
+                                    }
+                                  }
 
 
                                 }
-                                //callノード
-                                $rowOfFocusMovement['STATUS_ID'] = 7;     //緊急停止
-                                $rowOfFocusMovement['TIME_START'] = str_replace("-","/",$rowOfFocusMovement['TIME_START']) ;
-                                $rowOfFocusMovement['TIME_END'] = "DATETIMEAUTO(6)";  
-                                // 更新用のテーブル定義
-                                $aryConfigForIUD = $aryConfigForMovInsIUD;
+                                
+                                $tmpAryRetBody = $objOLA->getConductorStatusFromNode($aryMovement);
+                                foreach ($tmpAryRetBody as $key => $value) {
+                                  foreach ($value['RUNS_NODE'] as $subkey => $subvalue) {
+                                    //callノード
+                                    $subvalue['STATUS_ID'] = 7;     //緊急停止
+                                    $subvalue['TIME_START'] = str_replace("-","/",$subvalue['TIME_START']) ;
+                                    $subvalue['TIME_END'] = "DATETIMEAUTO(6)";  
+                                    // 更新用のテーブル定義
+                                    $aryConfigForIUD = $aryConfigForMovInsIUD;
 
-                                // BIND用のベースソース
-                                $aryBaseSourceForBind = $rowOfFocusMovement;
-                                
-                                $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
-                                
-                                if( $aryRetBody !== true  ){
-                                    // 例外処理へ
-                                    $strErrStepIdInFx="00001100";
-                                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    // BIND用のベースソース
+                                    $aryBaseSourceForBind = $subvalue;
+
+                                    $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                                    
+                                    if( $aryRetBody !== true  ){
+                                        // 例外処理へ
+                                        $strErrStepIdInFx="00001100";
+                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    }
+                                  }
                                 }
 
                                 $arySymInsUpdateTgtSource = $rowOfConductor;
@@ -999,7 +1017,7 @@
                           $aryRetBody = updateConductorInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
                         }
                     }
-                    
+
                     //ConductorCallがある場合
                     if($rowOfFocusMovement['CONDUCTOR_INSTANCE_CALL_NO'] != ''){
                       $aryConductorCallNo = array();
