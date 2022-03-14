@@ -476,11 +476,11 @@ $ary["ITATERRAFORM-MNU-109433"]     = "If the variable type is list, set, enter 
 $ary["ITATERRAFORM-MNU-109500"]     = "Item No.";
 $ary["ITATERRAFORM-MNU-109501"]     = "Terraform_Nested_variable_list";
 $ary["ITATERRAFORM-MNU-109502"]     = "Terraform_Nested_variable_list";
-$ary["ITATERRAFORM-MNU-109503"]     = "Variable ID";
-$ary["ITATERRAFORM-MNU-109504"]     = "";
-$ary["ITATERRAFORM-MNU-109505"]     = "Member variable ID";
-$ary["ITATERRAFORM-MNU-109506"]     = "";
+$ary["ITATERRAFORM-MNU-109503"]     = "Variable name";
+$ary["ITATERRAFORM-MNU-109504"]     = "The name defined in the variable block";
+$ary["ITATERRAFORM-MNU-109505"]     = "Member variable name (iteration)";
+$ary["ITATERRAFORM-MNU-109506"]     = "A character string that represents the nesting of the target key by connecting the key indexes of the array type or Key-Value type with '.'.";
 $ary["ITATERRAFORM-MNU-109507"]     = "Maximum iteration count";
-$ary["ITATERRAFORM-MNU-109508"]     = "";
+$ary["ITATERRAFORM-MNU-109508"]     = "The number of times the target variable or the member variable under the member variable is repeated.";
 $ary["ITATERRAFORM-MNU-109509"]     = "In the variable nesting of Terraform, if the type of the variable defined in the tf file registered in the Module material collection is list, set and list, set, tuple, object is defined in that variable, the member variable You can maintain (view / update) the maximum number of iterations.";
 ?>

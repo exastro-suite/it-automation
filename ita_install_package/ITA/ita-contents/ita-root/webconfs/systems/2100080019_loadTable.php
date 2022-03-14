@@ -83,7 +83,7 @@ Terraform Module変数紐付管理
     $table->addColumn($c);
 
     // 子メンバ変数の階層
-    $c = new TextColumn('ARRAY_NEST_LEVEL', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109110"));
+    $c = new NumColumn('ARRAY_NEST_LEVEL', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109110"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109120")); //エクセル・ヘッダでの説明
     $c->setRequired(true); //登録/更新時には、入力必須
     $table->addColumn($c);
@@ -94,12 +94,12 @@ Terraform Module変数紐付管理
     $table->addColumn($c);
 
     // 列順序
-    $c = new TextColumn('ASSIGN_SEQ', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109150"));
+    $c = new NumColumn('ASSIGN_SEQ', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109150"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109160")); //エクセル・ヘッダでの説明
     $table->addColumn($c);
 
     // メンバー変数表示有無
-    $c = new TextColumn('VARS_ASSIGN_FLAG', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109230"));
+    $c = new NumColumn('VARS_ASSIGN_FLAG', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109230"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109240")); //エクセル・ヘッダでの説明
     $table->addColumn($c);
 
