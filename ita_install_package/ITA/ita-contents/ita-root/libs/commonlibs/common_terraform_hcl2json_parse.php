@@ -44,17 +44,30 @@ class CommonTerraformHCL2JSONParse{
     //----メンバー変数を取得する
     //*******************************************************************************************
     function getMemberVars($filepath, $root_dir_path) {
-        $command = "sudo which python3";
+        global $objMTS;
+        // python-hcl2のインストール確認
+        $command = "pip show python-hcl2";
         exec($command, $output, $retval);
         if ($retval != 0) {
             $this->res = false;
+            $this->err = $objMTS->getSomeMessage('ITATERRAFORM-ERR-221120');
         }
-        $python3 = $output[0];
-        $output = "";
 
-        // 対象ファイルをパーサーでjson化
-        $command = "sudo $python3 $root_dir_path/libs/commonlibs/common_terraform_hcl2json_parse.py '".$filepath."'";
-        exec($command, $output, $retval);
+        if ($this->res != false) {
+            $output = "";
+            // python3の場所特定
+            $command = "sudo which python3";
+            exec($command, $output, $retval);
+            if ($retval != 0) {
+                $this->res = false;
+            }
+            $python3 = $output[0];
+            $output = "";
+
+            // 対象ファイルをパーサーでjson化
+            $command = "sudo $python3 $root_dir_path/libs/commonlibs/common_terraform_hcl2json_parse.py '".$filepath."'";
+            exec($command, $output, $retval);
+        }
 
         // コマンド失敗
         if ($retval != 0) {

@@ -67,8 +67,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 	$tmpAryColumn['DISUSE_FLAG']->setOutputType("print_table", $outputType);
 
 	// ----VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定
-	$table->setDBMainTableHiddenID('B_TERRAFORM_LRL_MAX_MEMBER_COL');
-	$table->setDBJournalTableHiddenID('B_TERRAFORM_LRL_MAX_MEMBER_COL_JNL');
 	// 利用時は、更新対象カラムに、「$c->setHiddenMainTableColumn(true);」を付加すること
 	// VIEWをコンテンツソースにする場合、構成する実体テーブルを更新するための設定----
 
@@ -82,14 +80,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $table->setAccessAuth(true);    // データごとのRBAC設定
 	$table->setNoRegisterFlg(true);    // 登録画面無し
 
-    // 変数ID
+    // 変数名
     $c = new IDColumn('VARS_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109503"), 'B_TERRAFORM_MODULE_VARS_LINK', 'MODULE_VARS_LINK_ID', 'VARS_NAME');
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109504")); //エクセル・ヘッダでの説明
-	$c->setJournalTableOfMaster('B_TERRAFORM_MODULE_VARS_LINK_JNL');
-    $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
-    $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
-    $c->setJournalKeyIDOfMaster('MODULE_VARS_LINK_ID');
-    $c->setJournalDispIDOfMaster('VARS_NAME');
 
     //エクセル/CSVからのアップロードは不可能
     $c->setAllowSendFromFile(false);
@@ -111,7 +104,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
 	$table->addColumn($c);
 
-    // メンバー変数ID
+    // メンバー変数名
     $c = new IDColumn('MEMBER_VARS_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109505"), 'D_TERRAFORM_VAR_MEMBER', 'CHILD_MEMBER_VARS_ID', 'CHILD_MEMBER_VARS_NEST');
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109506")); //エクセル・ヘッダでの説明
 	$c->setJournalTableOfMaster('D_TERRAFORM_VAR_MEMBER_JNL');
