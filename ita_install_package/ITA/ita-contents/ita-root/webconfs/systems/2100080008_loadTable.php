@@ -120,39 +120,6 @@ Terraform代入値管理
     $c->setRequiredMark(true);//必須マークのみ付与
 
     $table->addColumn($c);
-
-    // REST/excel/csv入力用 メンバー変数名
-    $c = new IDColumn('REST_MEMBER_VARS',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109170"),'E_TERRAFORM_VAR_MEMBER_LIST','CHILD_MEMBER_VARS_ID','VAR_MEMBER_PULLDOWN','',array('OrderByThirdColumn'=>'CHILD_MEMBER_VARS_ID'));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109180"));
-
-    //コンテンツのソースがヴューの場合、登録/更新の対象外
-    $c->setHiddenMainTableColumn(false);
-
-    //エクセル/CSVからのアップロード対象
-    $c->setAllowSendFromFile(true);
-
-    //REST/excel/csv以外は非表示
-    $c->getOutputType('filter_table')->setVisible(false);
-    $c->getOutputType('print_table')->setVisible(false);
-    $c->getOutputType('update_table')->setVisible(false);
-    $c->getOutputType('register_table')->setVisible(false);
-    $c->getOutputType('delete_table')->setVisible(false);
-    $c->getOutputType('print_journal_table')->setVisible(false);
-    $c->getOutputType('excel')->setVisible(true);
-    $c->getOutputType('csv')->setVisible(true);
-    $c->getOutputType('json')->setVisible(true);
-
-    $c->setJournalTableOfMaster('E_TERRAFORM_VAR_MEMBER_LIST_JNL');
-    $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
-    $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
-    $c->setJournalKeyIDOfMaster('CHILD_MEMBER_VARS_ID');
-    $c->setJournalDispIDOfMaster('VAR_MEMBER_PULLDOWN');
-    //登録/更新時には、必須でない
-    $c->setRequired(false);
-    $c->setRequiredMark(true);//必須マークのみ付与
-
-    $table->addColumn($c);
-
     
 
     // RestAPI/Excel/CSVからの登録の場合に組み合わせバリデータで退避したPATTERN_IDを設定する。
@@ -1109,6 +1076,39 @@ Terraform代入値管理
     unset($objFunction03);
     unset($objFunction04);
     unset($objFunction05);
+
+        // REST/excel/csv入力用 メンバー変数名
+        $c = new IDColumn('REST_MEMBER_VARS',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109170"),'E_TERRAFORM_VAR_MEMBER_LIST','CHILD_MEMBER_VARS_ID','VAR_MEMBER_PULLDOWN','',array('OrderByThirdColumn'=>'CHILD_MEMBER_VARS_ID'));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109180"));
+    
+        //コンテンツのソースがヴューの場合、登録/更新の対象外
+        $c->setHiddenMainTableColumn(false);
+    
+        //エクセル/CSVからのアップロード対象
+        $c->setAllowSendFromFile(true);
+    
+        //REST/excel/csv以外は非表示
+        $c->getOutputType('filter_table')->setVisible(false);
+        $c->getOutputType('print_table')->setVisible(false);
+        $c->getOutputType('update_table')->setVisible(false);
+        $c->getOutputType('register_table')->setVisible(false);
+        $c->getOutputType('delete_table')->setVisible(false);
+        $c->getOutputType('print_journal_table')->setVisible(false);
+        $c->getOutputType('excel')->setVisible(true);
+        $c->getOutputType('csv')->setVisible(true);
+        $c->getOutputType('json')->setVisible(true);
+    
+        $c->setJournalTableOfMaster('E_TERRAFORM_VAR_MEMBER_LIST_JNL');
+        $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
+        $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
+        $c->setJournalKeyIDOfMaster('CHILD_MEMBER_VARS_ID');
+        $c->setJournalDispIDOfMaster('VAR_MEMBER_PULLDOWN');
+        //登録/更新時には、必須でない
+        $c->setRequired(false);
+        $c->setRequiredMark(true);//必須マークのみ付与
+    
+        $table->addColumn($c);
+    
     //メンバー変数名----
 
 
@@ -1758,7 +1758,7 @@ Terraform代入値管理
         }
 
         //変数でのメンバー変数、代入順序表示有無-------------------------------------------------------------------------
-        if( $boolExecuteContinue === true ){
+        if( $boolExecuteContinue === true && $intHclId == 1){
             $retBool = false;
             $boolExecuteContinue = false;
             $query = "SELECT "
@@ -1861,7 +1861,7 @@ Terraform代入値管理
         }
 
         //変数名、メンバー変数の組み合わせチェック
-        if( $boolExecuteContinue === true ){
+        if( $boolExecuteContinue === true && $intHclId == 1){
             if( 0 < strlen($intMemberVarsId)){
                 $retBool = false;
                 $query = "SELECT "
