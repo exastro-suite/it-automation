@@ -24,7 +24,7 @@ class CommonTerraformHCL2JSONParse{
         $this->aryReplaceElementFromSourceString = array();
         $this->aryVariableBlockFromSourceString = array();
         $this->err = NULL;
-        $this->res = NULL;
+        $this->res = true;
         //配列を初期化----
         $this->getMemberVars($filepath, $root_dir_path);
     }
@@ -81,7 +81,7 @@ class CommonTerraformHCL2JSONParse{
             }
         }
 
-        if ($this->res != false) {
+        if ($this->res == true) {
             // tfファイルの配列化
             $pattern = '/\"type\"\:\s(null)/';
             $replacement = '"type": "${null}"';
@@ -246,8 +246,6 @@ class CommonTerraformHCL2JSONParse{
         }
         return ["type" => $first_type_key, "default" => $default_array];
     }
-
-
 
     //解析用のメソッド----
 }
