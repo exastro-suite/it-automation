@@ -1329,7 +1329,6 @@ Terraform代入値管理
     $c->setSubtotalFlag(false);
     // 必須チェックは組合せバリデータで行う。
     $c->setRequired(false);//登録/更新時には、入力必須
-    $c->setRequiredMark(true);//必須マークのみ付与
 
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
