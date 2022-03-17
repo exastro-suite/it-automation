@@ -368,6 +368,9 @@
             if($ret === false){
                 // リソース(Module素材)で使用している変数抜出で一部エラーがあった。
                 $warning_flag = 1;
+                $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-151010",array($intMatterId));
+                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                continue;
             }
 
             foreach($aryVarName as $variable_block){
@@ -1854,23 +1857,29 @@
             if ($memberInfo["module_regist_flag"] == false) {
                 // 一番後ろのキーを削除して親を探す
                 $parentMemberArray = $memberInfo["type_nest_array"];
-                array_pop($parentMemberArray);
-                // メンバー変数だと2こ前までキーを削除
-                if (getTypeInfo($memberInfo["child_vars_type_id"])["MEMBER_VARS_FLAG"] == 1) {
+                if (count($parentMemberArray) > 0) {
                     array_pop($parentMemberArray);
                 }
-
-                if ($memberInfo["array_nest_level"] != 1) {
-                    $parent_array_index = array_search($parentMemberArray, array_column($memberInfoArray, "type_nest_array"));
-                    if ($parent_array_index !== false) {
-                        $memberInfo["parent_member_vars_id"] = $memberInfoArray[$parent_array_index]["child_member_vars_id"];
-                    } else {
-                        $memberInfo["parent_member_vars_id"] = NULL;
+                // メンバー変数だと2こ前までキーを削除
+                if (getTypeInfo($memberInfo["child_vars_type_id"])["MEMBER_VARS_FLAG"] == 1) {
+                    if (count($parentMemberArray) > 0) {
+                        array_pop($parentMemberArray);
                     }
                 }
-                // ネストが1であれば親がいないので探さない
-                else {
-                    $memberInfo["parent_member_vars_id"] = NULL;
+
+                if (isset($memberInfo["array_nest_level"])) {
+                    if ($memberInfo["array_nest_level"] != 1) {
+                        $parent_array_index = array_search($parentMemberArray, array_column($memberInfoArray, "type_nest_array"));
+                        if ($parent_array_index !== false) {
+                            $memberInfo["parent_member_vars_id"] = $memberInfoArray[$parent_array_index]["child_member_vars_id"];
+                        } else {
+                            $memberInfo["parent_member_vars_id"] = NULL;
+                        }
+                    }
+                    // ネストが1であれば親がいないので探さない
+                    else {
+                        $memberInfo["parent_member_vars_id"] = NULL;
+                    }
                 }
                 // メンバー変数に登録する用配列に整形
                 $_return = [
@@ -1936,9 +1945,11 @@
         foreach ($array_nest_level_list as $array_nest_level_key) {
             $trg_flag = false;
             for ($i = 0; $i < count($memberInfoArray); $i++) {
-                if ($array_nest_level_key == $memberInfoArray[$i]["array_nest_level"]) {
-                    $_memberInfoArray[$i]["array_nest_level"] = $new_array_nest_level;
-                    $trg_flag = true;
+                if (isset($memberInfoArray[$i])) {
+                    if ($array_nest_level_key == $memberInfoArray[$i]["array_nest_level"]) {
+                        $_memberInfoArray[$i]["array_nest_level"] = $new_array_nest_level;
+                        $trg_flag = true;
+                    }
                 }
             }
             if ($trg_flag) {
@@ -4518,5 +4529,6 @@
 
         return $member_vars_array;
     }
+
 
 ?>
