@@ -1775,20 +1775,29 @@
         $chk_status = false;
 
         //オペ+作業+変数の組み合わせが重複していないか判断
+        // メモ：オペ＋作業＋変数＋メンバー変数＋代入順序
         if( isset($ina_vars_ass_chk_list[$in_operation_id]
                                         [$in_patten_id]
-                                        [$in_vars_link_id])){
+                                        [$in_vars_link_id]
+                                        [$in_child_vars_link_id]
+                                        [$in_vars_assign_seq]
+                                        )){
 
             // 既に登録されている
             $dup_info = $ina_vars_ass_chk_list[$in_operation_id]
                                               [$in_patten_id]
-                                              [$in_vars_link_id];
+                                              [$in_vars_link_id]
+                                              [$in_child_vars_link_id]
+                                              [$in_vars_assign_seq];
             //代入値自動登録設定の項番:{}と項番:{}のオペレーションとホストが重複しています。代入値自動登録設定の項番:{}を処理対象外にしました。(オペレーションID:{} 変数区分:{})
             $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171200",array( $dup_info['COLUMN_ID'],
                                                                              $in_column_id,
                                                                              $in_column_id,
                                                                              $in_operation_id,
-                                                                             $in_key_value_vars_id));
+                                                                             $in_key_value_vars_id,
+                                                                             $in_child_vars_link_id,
+            $in_vars_assign_seq
+                                                                            ));
             LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
         }
         else{
@@ -1797,7 +1806,9 @@
             //オペ+作業+変数の組み合わせを退避
             $ina_vars_ass_chk_list[$in_operation_id]
                                   [$in_patten_id]
-                                  [$in_vars_link_id]            = array('COLUMN_ID'=>$in_column_id);
+                                  [$in_vars_link_id]
+                                  [$in_child_vars_link_id]
+                                  [$in_vars_assign_seq]           = array('COLUMN_ID'=>$in_column_id);
 
         }
         // 代入値管理の登録に必要な情報退避
