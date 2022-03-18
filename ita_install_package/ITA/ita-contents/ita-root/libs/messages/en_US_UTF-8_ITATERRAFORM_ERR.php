@@ -251,4 +251,8 @@ $ary["ITATERRAFORM-ERR-221080"]     = "Failed to update the member variable.(FIL
 $ary["ITATERRAFORM-ERR-221090"]     = "Failed to discard  the member variable.(FILE:{} LINE:{} ID:{})";
 $ary["ITATERRAFORM-ERR-221110"]     = "There was an error while uploading the file.\n{}";
 $ary["ITATERRAFORM-ERR-221120"]     = "python-hcl2 is not installed.";
+$ary["ITATERRAFORM-ERR-221130"]     = "Failed to get Variable information.";
+$ary["ITATERRAFORM-ERR-221131"]     = "Failed to get Variable information.(FILE:{} LINE:{})";
+$ary["ITATERRAFORM-ERR-221140"]     = "Failed to get Member Variable information. ID:{}";
+$ary["ITATERRAFORM-ERR-221141"]     = "Failed to get Member Variable information. (FILE:{} LINE:{} ID:{})";
 ?>
