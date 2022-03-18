@@ -12727,7 +12727,7 @@ class CreateAnsibleExecFiles {
                     $j = $j + 1;
                     $playbookwrite[$j] = "    - name: Templatefile Create " . sprintf("[%s]\n", $var_name);
                     $j = $j + 1;
-                    $playbookwrite[$j] = "      template: src=" . sprintf("%s", $in_tpf_path[$var_name]['src']) . " dest=" . sprintf("%s\n", $in_tpf_path[$var_name]['dest']);
+                    $playbookwrite[$j] = "      template: src=" . sprintf("'%s'", $in_tpf_path[$var_name]['src']) . " dest=" . sprintf("'%s'\n", $in_tpf_path[$var_name]['dest']);
                     $j = $j + 1;
                     $playbookwrite[$j] = "      delegate_to: 127.0.0.1\n";
                     $j = $j + 1;

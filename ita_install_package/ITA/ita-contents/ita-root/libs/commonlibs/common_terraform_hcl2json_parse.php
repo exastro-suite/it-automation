@@ -24,7 +24,7 @@ class CommonTerraformHCL2JSONParse{
         $this->aryReplaceElementFromSourceString = array();
         $this->aryVariableBlockFromSourceString = array();
         $this->err = NULL;
-        $this->res = NULL;
+        $this->res = true;
         //配列を初期化----
         $this->getMemberVars($filepath, $root_dir_path);
     }
@@ -67,21 +67,21 @@ class CommonTerraformHCL2JSONParse{
             // 対象ファイルをパーサーでjson化
             $command = "sudo $python3 $root_dir_path/libs/commonlibs/common_terraform_hcl2json_parse.py '".$filepath."'";
             exec($command, $output, $retval);
+            // コマンド失敗
+            if ($retval != 0) {
+                $this->res = false;
+            }
+            // エラーの場合
+            if (!preg_match('/^\{.*/', $output[0])) {
+                $this->res = false;
+                $this->err = $output[0];
+                $this->command = $command;
+                $this->output = $output;
+                $this->retval = $retval;
+            }
         }
 
-        // コマンド失敗
-        if ($retval != 0) {
-            $this->res = false;
-        }
-        // エラーの場合
-        if (!preg_match('/^\{.*/', $output[0])) {
-            $this->res = false;
-            $this->err = $output[0];
-            $this->command = $command;
-            $this->output = $output;
-            $this->retval = $retval;
-        }
-        else {
+        if ($this->res == true) {
             // tfファイルの配列化
             $pattern = '/\"type\"\:\s(null)/';
             $replacement = '"type": "${null}"';
@@ -246,8 +246,6 @@ class CommonTerraformHCL2JSONParse{
         }
         return ["type" => $first_type_key, "default" => $default_array];
     }
-
-
 
     //解析用のメソッド----
 }

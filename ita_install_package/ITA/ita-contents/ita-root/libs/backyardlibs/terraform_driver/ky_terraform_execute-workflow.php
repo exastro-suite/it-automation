@@ -1188,7 +1188,6 @@ try {
                         }
 
                         if (isset($ary_vars_data[$vars_link_id])) {
-                            $a = [];
                             // メンバー変数を取らない配列のタイプ
                             $ary_vars_data[$vars_link_id]['MEMBER_VARS_LIST'][] = ["MEMBER_VARS" => $vars_member_vars, "SENSITIVE_FLAG" => $sensitive_flag, "VARS_ENTRY" => $vars_entry, "ASSIGN_SEQ" => $vars_assign_seq];
                         } else {
@@ -1387,7 +1386,6 @@ try {
                                         "SENSITIVE_FLAG" => $trgMemberVarsRecords[$key]["SENSITIVE_FLAG"],
                                         "VARS_ENTRY"     => array_values($temp_ary)
                                     ];
-                                    $a = 1;
                                 }
                                 else {
                                     $key = array_search($member_id, array_column($member_vars_list, "MEMBER_VARS"));
@@ -1397,7 +1395,6 @@ try {
                                         "SENSITIVE_FLAG" => $member_vars_list[$key]["SENSITIVE_FLAG"],
                                         "VARS_ENTRY"     => $member_vars_list[$key]["VARS_ENTRY"]
                                     ];
-                                    $a = 2;
                                 }
                             }
 
@@ -3164,19 +3161,17 @@ function generateMemberVarsArray($member_vars_array, $member_vars_key, $member_v
             foreach ($map as $key) {
                 $ref = &$ref[$key];
             }
-            $a = [];
+
             // メンバー変数を設定・具体値を代入
             if ($typeInfo["ENCODE_FLAG"] == 1) {
-                $a[] = 1;
                 $member_vars_value = decodeHCL($member_vars_value);
             }
             if ($typeInfo["MEMBER_VARS_FLAG"] == 1 && $typeInfo["MEMBER_VARS_FLAG"] != 1) {
-                $a[] = 2;
                 $ref[$member_vars_key] = [];
             } else {
-                $a[] = 3;
                 $ref[$member_vars_key] = $member_vars_value;
             }
+
             // 仮配列と返却用配列をマージ
             $res = array_replace_recursive($member_vars_array, $temp_array);
         }
@@ -3394,5 +3389,18 @@ function encodeHCL($array)
     $res = preg_replace('/\"(.*?)\"\:(.*?)/', '"${1}" = ${2}', $json);
     return $res;
 }
+//----------------------------------------------
+// HCLから配列にdecodeする
+//----------------------------------------------
+function decodeHCL($hcl)
+{
+    $json = preg_replace('/\"(.*?)\"\ = \"(.*?)\"/', '"${1}": "${2}"', $hcl);
+    $res = json_decode($json);
+    if (!$res) {
+        $res = $hcl;
+    }
+    return $res;
+}
+
 
 ?>

@@ -344,7 +344,11 @@ function AccessAuthUpdate(&$targetArray,$VarAccessAuthStrList) {
         $key = $targetRecord['VARS_NAME_ID'];
         // ロールパッケージ管理のアクセス権ロールと比較
         if(array_key_exists($targetRecord['VARS_NAME_ID'],$VarAccessAuthStrList)) {
-            $nowAccessAuth = $VarAccessAuthStrList[$targetRecord['VARS_NAME_ID']];
+            if(isset($VarAccessAuthStrList[$targetRecord['VARS_NAME_ID']])) {
+                $nowAccessAuth = $VarAccessAuthStrList[$targetRecord['VARS_NAME_ID']];
+            } else {
+                $nowAccessAuth = "";
+            }
             // アクセス権ロールに差異がある
             if($targetRecord['ACCESS_AUTH'] != $nowAccessAuth) {
                 $targetArray[$PkeyID]['ACCESS_AUTH'] = $nowAccessAuth;
