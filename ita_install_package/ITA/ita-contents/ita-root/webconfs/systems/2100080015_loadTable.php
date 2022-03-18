@@ -1207,6 +1207,7 @@ Terrraform 代入値自動登録設定
                            ." D_TERRAFORM_VAR_MEMBER TAB_1 "
                            ."WHERE "
                            ." TAB_1.DISUSE_FLAG = ('0') "
+                           ." AND TAB_1.VARS_ASSIGN_FLAG = ('1') "
                            ." AND TAB_1.PARENT_VARS_ID = :PARENT_VARS_ID "
                            ."ORDER BY KEY_COLUMN ASC ";
             
@@ -1302,6 +1303,7 @@ Terrraform 代入値自動登録設定
                 $strErrMsg = "";
                 $aryDataSet = array();
                 $type_Flg = "";
+                $aryTypeSet = array();
 
                 //入力不要
                 $strMsgBody01 = $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109403");
@@ -1334,6 +1336,8 @@ Terrraform 代入値自動登録設定
                 $tmpBoolWhiteKeyAdd = false;
                 $strFxName = "";
                 $aryAddResultData = array();
+                $aryAddResultData[0] = "DEFAULT";
+                $type_Flg == "DEFAULT";
 
                 if(!strlen($strModuleVarsLinkId)){
                     $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
@@ -1442,7 +1446,6 @@ Terrraform 代入値自動登録設定
                         $type_Flg = $aryAddResultData[0];
                 }
         
-        
                 unset($aryRetBody);
                 unset($strQuery);
                 unset($aryForBind);
@@ -1453,6 +1456,8 @@ Terrraform 代入値自動登録設定
                     }else{
                         if($type_Flg == "MEMBER_FLAG_VAL" ||  $type_Flg == "FLAG_VAL"){
                             $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
+                        }elseif($type_Flg == "DEFAULT"){
+                            $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
                         }else{
                             $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                         }
@@ -2453,6 +2458,7 @@ Terrraform 代入値自動登録設定
                 $aryErrMsgBody = array();
                 $strErrMsg = "";
                 $aryDataSet = array();
+                $aryTypeSet = array();
                 $type_Flg = "";
 
 
@@ -2489,7 +2495,8 @@ Terrraform 代入値自動登録設定
                 $tmpBoolWhiteKeyAdd = false;
                 $strFxName = "";
                 $aryAddResultData = array();
-
+                $aryAddResultData[0] = "DEFAULT";
+                $type_Flg == "DEFAULT";
                 if(!strlen($strModuleVarsLinkId)){
                     $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
                 }
@@ -2609,6 +2616,8 @@ Terrraform 代入値自動登録設定
                         }else{
                             if($type_Flg == "MEMBER_FLAG_VAL" ||  $type_Flg == "FLAG_VAL"){
                                 $strOptionBodies = makeSelectOption($arraySelectElement, $data, $tmpBoolWhiteKeyAdd, "", true);
+                            }elseif($type_Flg == "DEFAULT"){
+                                $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
                             }else{
                                 $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody01;
                             }
@@ -4451,9 +4460,10 @@ Terrraform 代入値自動登録設定
                 // key-Value型で各変数が同一か判定
                 if($retBool === true) {
                     if(in_array($rg_col_type, array(3))){
-                        if(($rg_key_vars_link_id === $rg_val_vars_link_id) &&
+                        if((($rg_key_vars_link_id === $rg_val_vars_link_id) &&
                            ($rg_key_member_vars_id === $rg_val_member_vars_id) &&
-                           ($rg_key_assign_seq_id === $rg_val_assign_seq_id)) {
+                           ($rg_key_assign_seq_id === $rg_val_assign_seq_id)) || 
+                           ($rg_key_vars_link_id === $rg_val_vars_link_id && $rg_hcl_id == 2)) {
                             $retBool = false;
                             $boolExecuteContinue = false;
                             $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211460");
