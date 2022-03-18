@@ -1085,10 +1085,13 @@ try {
                 . "D_TERRAFORM_VARS_DATA.VARS_ENTRY, "
                 . "D_TERRAFORM_VARS_DATA.MEMBER_VARS, "
                 . "D_TERRAFORM_VARS_DATA.ASSIGN_SEQ, "
-                . "B_TERRAFORM_MODULE_VARS_LINK.TYPE_ID "
+                . "B_TERRAFORM_MODULE_VARS_LINK.TYPE_ID, "
+                . "D_TERRAFORM_VAR_MEMBER.VARS_ASSIGN_FLAG "
                 . "FROM   D_TERRAFORM_VARS_DATA "
                 . "LEFT OUTER JOIN B_TERRAFORM_MODULE_VARS_LINK "
                 . "ON D_TERRAFORM_VARS_DATA.MODULE_VARS_LINK_ID = B_TERRAFORM_MODULE_VARS_LINK.MODULE_VARS_LINK_ID "
+                . "LEFT OUTER JOIN D_TERRAFORM_VAR_MEMBER "
+                . "ON D_TERRAFORM_VARS_DATA.MEMBER_VARS = D_TERRAFORM_VAR_MEMBER.CHILD_MEMBER_VARS_ID "
                 . "WHERE  D_TERRAFORM_VARS_DATA.DISUSE_FLAG = '0' "
                 . "AND    B_TERRAFORM_MODULE_VARS_LINK.DISUSE_FLAG = '0' "
                 . "AND    D_TERRAFORM_VARS_DATA.OPERATION_NO_UAPK = {$operation_no} "
@@ -1113,6 +1116,7 @@ try {
             }
             // fetch行数を取得
             $fetch_counter = $objQuery->effectedRowCount();
+
             if ($fetch_counter > 0) {
                 $vars_array = [];
                 $member_vars_link_id_list = [];
@@ -1173,6 +1177,7 @@ try {
                         $vars_type_id     = $vars['TYPE_ID'];
                         $vars_type_info   = getTypeInfo($vars_type_id);
                         $vars_member_vars = $vars['MEMBER_VARS'];
+                        $vars_assign_flag = $vars["VARS_ASSIGN_FLAG"]; // 代入値系管理フラグ
 
                         //HCL設定を判定
                         $hcl_boolean = false;
@@ -1189,11 +1194,11 @@ try {
 
                         if (isset($ary_vars_data[$vars_link_id])) {
                             // メンバー変数を取らない配列のタイプ
-                            $ary_vars_data[$vars_link_id]['MEMBER_VARS_LIST'][] = ["MEMBER_VARS" => $vars_member_vars, "SENSITIVE_FLAG" => $sensitive_flag, "VARS_ENTRY" => $vars_entry, "ASSIGN_SEQ" => $vars_assign_seq];
+                            $ary_vars_data[$vars_link_id]['MEMBER_VARS_LIST'][] = ["MEMBER_VARS" => $vars_member_vars, "SENSITIVE_FLAG" => $sensitive_flag, "VARS_ENTRY" => $vars_entry, "ASSIGN_SEQ" =>$vars_assign_seq, "VARS_ASSIGN_FLAG" => $vars_assign_flag];
                         } else {
                             // メンバー変数を取らない配列のタイプ
                             $ary_vars_data[$vars_link_id] = ['VARS_NAME' => $vars_name, 'VARS_ENTRY' => $vars_entry, 'ASSIGN_SEQ' => $vars_assign_seq, 'MEMBER_VARS' => [], 'HCL_FLAG' => $hcl_boolean, 'SENSITIVE_FLAG' => $sensitive_boolean, "VARS_TYPE_ID" => $vars_type_id];
-                            $ary_vars_data[$vars_link_id]['MEMBER_VARS_LIST'][] = ["MEMBER_VARS" => $vars_member_vars, "SENSITIVE_FLAG" => $sensitive_flag, "VARS_ENTRY" => $vars_entry, "ASSIGN_SEQ" => $vars_assign_seq];
+                            $ary_vars_data[$vars_link_id]['MEMBER_VARS_LIST'][] = ["MEMBER_VARS" => $vars_member_vars, "SENSITIVE_FLAG" => $sensitive_flag, "VARS_ENTRY" => $vars_entry, "ASSIGN_SEQ" => $vars_assign_seq, "VARS_ASSIGN_FLAG" => $vars_assign_flag];
                         }
                     }
                 }
@@ -1380,20 +1385,31 @@ try {
                                     }
                                     // 降順に並べ替え
                                     asort($temp_ary);
+                                    $sensitive_flag = false;
+                                    if (isset($trgMemberVarsRecords[$key]["SENSITIVE_FLAG"])) {
+                                        $sensitive_flag = $trgMemberVarsRecords[$key]["SENSITIVE_FLAG"];
+                                    }
 
                                     $temp_member_vars_list[] = [
-                                        "MEMBER_VARS"    => $member_id,
-                                        "SENSITIVE_FLAG" => $trgMemberVarsRecords[$key]["SENSITIVE_FLAG"],
-                                        "VARS_ENTRY"     => array_values($temp_ary)
+                                        "MEMBER_VARS"      => $member_id,
+                                        "SENSITIVE_FLAG"   => $sensitive_flag,
+                                        "VARS_ENTRY"       => array_values($temp_ary),
+                                        "VARS_ASSIGN_FLAG" => $trgMemberVarsRecords[$key]["VARS_ASSIGN_FLAG"],
                                     ];
                                 }
                                 else {
+                                    $sensitive_flag = false;
+                                    if (isset($trgMemberVarsRecords[$key]["SENSITIVE_FLAG"])) {
+                                        $sensitive_flag = $trgMemberVarsRecords[$key]["SENSITIVE_FLAG"];
+                                    }
+
                                     $key = array_search($member_id, array_column($member_vars_list, "MEMBER_VARS"));
                                     // 配列型でない場合、何もしない
                                     $temp_member_vars_list[] = [
-                                        "MEMBER_VARS"    => $member_id,
-                                        "SENSITIVE_FLAG" => $member_vars_list[$key]["SENSITIVE_FLAG"],
-                                        "VARS_ENTRY"     => $member_vars_list[$key]["VARS_ENTRY"]
+                                        "MEMBER_VARS"      => $member_id,
+                                        "SENSITIVE_FLAG"   => $member_vars_list[$key]["SENSITIVE_FLAG"],
+                                        "VARS_ENTRY"       => $member_vars_list[$key]["VARS_ENTRY"],
+                                        "VARS_ASSIGN_FLAG" => $member_vars_list[$key]["VARS_ASSIGN_FLAG"],
                                     ];
                                 }
                             }
@@ -1403,13 +1419,12 @@ try {
 
                             // ３．代入値管理で取得した値を置き換え
                             foreach ($member_vars_list as $member_vars) {
-                                $t = 0;
                                 foreach ($trgMemberVarsRecords as &$trgMemberVarsRecord) {
                                     if ($member_vars["MEMBER_VARS"] == $trgMemberVarsRecord["CHILD_MEMBER_VARS_ID"]) {
                                         $trgMemberVarsRecord["CHILD_MEMBER_VARS_VALUE"] = $member_vars["VARS_ENTRY"];
-                                        $trgMemberVarsRecord["VARS_ENTRY_FLAG"] = 1;
+                                        $trgMemberVarsRecord["VARS_ENTRY_FLAG"]  = 1;
+                                        $trgMemberVarsRecord["VARS_ASSIGN_FLAG"] = $member_vars["VARS_ASSIGN_FLAG"];
                                     }
-                                    $t++;
                                 }
                                 unset($trgMemberVarsRecord);
                                 // sensitive設定をチェック
@@ -1419,15 +1434,47 @@ try {
                                 }
                             }
 
-                            // ４．取得したデータから配列を形成
+                            // ４．置換する値がなかった場合、エラーとする
+                            $err_id_list = [];
+                            foreach ($trgMemberVarsRecords as $trgMemberVarsRecord) {
+                                if($trgMemberVarsRecord["VARS_ENTRY_FLAG"] == 0 && $trgMemberVarsRecord["VARS_ASSIGN_FLAG"] == 1) {
+                                    $err_id_list[] = $trgMemberVarsRecord["CHILD_MEMBER_VARS_ID"];
+                                }
+                            }
+                            if (!empty($err_id_list)) {
+                                $ids_string = json_encode($err_id_list);
+                                //error_logにメッセージを追記
+                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221140", array($ids_string)); //メンバー変数の取得に失敗しました。ID:[]
+                                LocalLogPrint($error_log, $message);
+
+                                // 異常フラグON
+                                $error_flag = 1;
+                                // 例外処理へ
+                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221141", array(__FILE__, __LINE__, $ids_string));
+                                throw new Exception($backyard_log);
+                            }
+
+                            // ５．取得したデータから配列を形成
                             $trgMemberVarsArray = generateMemberVarsArrayForHCL($trgMemberVarsRecords);
 
-                            // ５．HCLに変換
+                            // ６．HCLに変換
                             $var_value = encodeHCL($trgMemberVarsArray);
                             $hclFlag = true;
                         }
                     }
 
+                    // 変数エラーキャッチ(ID変換失敗時)
+                    if ($var_key == NULL) {
+                        //error_logにメッセージを追記
+                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221130"); //変数名の取得に失敗しました。
+                        LocalLogPrint($error_log, $message);
+
+                        // 異常フラグON
+                        $error_flag = 1;
+                        // 例外処理へ
+                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221131", array(__FILE__, __LINE__));
+                        throw new Exception($backyard_log);
+                    }
                     //Workspaceに対し変数を登録
                     $statusCode = 0;
                     $count = 0;
@@ -3214,12 +3261,12 @@ function generateMemberVarsArray($member_vars_array, $member_vars_key, $member_v
 //----------------------------------------------
 function getMemberVarsByModuleVarsLinkIDForHCL($moduleVarsLinkID)
 {
-    global $objDBCA, $objMTS, $vg_terraform_var_member_table_name, $log_output_php;
+    global $objDBCA, $objMTS, $vg_terraform_var_member_view_name, $log_output_php;
     global $root_dir_path;
     $res = [];
 
     $sqlUtnBody = "SELECT * "
-    . "FROM {$vg_terraform_var_member_table_name} "     // メンバー変数テーブル(B_TERRAFORM_VAR_MEMBER)
+    . "FROM {$vg_terraform_var_member_view_name} "     // メンバー変数テーブル(B_TERRAFORM_VAR_MEMBER)
         . "WHERE DISUSE_FLAG = '0' "
         . "AND PARENT_VARS_ID = :PARENT_VARS_ID " // or is null
         . "ORDER BY ARRAY_NEST_LEVEL, ASSIGN_SEQ ASC ";
@@ -3394,13 +3441,14 @@ function encodeHCL($array)
 //----------------------------------------------
 function decodeHCL($hcl)
 {
-    $json = preg_replace('/\"(.*?)\"\ = \"(.*?)\"/', '"${1}": "${2}"', $hcl);
-    $res = json_decode($json);
+    $res = false;
+    if (!is_array($hcl)) {
+        $json = preg_replace('/\"(.*?)\"\ = \"(.*?)\"/', '"${1}": "${2}"', $hcl);
+        $res = json_decode($json);
+    }
     if (!$res) {
         $res = $hcl;
     }
     return $res;
 }
 
-
-?>
