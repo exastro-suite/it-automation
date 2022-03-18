@@ -1337,7 +1337,7 @@ Terrraform 代入値自動登録設定
                 $strFxName = "";
                 $aryAddResultData = array();
                 $aryAddResultData[0] = "DEFAULT";
-                $type_Flg == "DEFAULT";
+                $type_Flg = "DEFAULT";
 
                 if(!strlen($strModuleVarsLinkId)){
                     $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
@@ -2496,7 +2496,7 @@ Terrraform 代入値自動登録設定
                 $strFxName = "";
                 $aryAddResultData = array();
                 $aryAddResultData[0] = "DEFAULT";
-                $type_Flg == "DEFAULT";
+                $type_Flg = "DEFAULT";
                 if(!strlen($strModuleVarsLinkId)){
                     $strNoOptionMessageText = $strHiddenInputBody.$strMsgBody02;
                 }
