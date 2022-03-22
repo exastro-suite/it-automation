@@ -908,10 +908,9 @@ Terraform代入値管理
                     $intRowLength = -1;
                 }
     
-                if(count($aryTypeSet) == 1){
+                if(count($aryTypeSet) == 1 && isset($aryTypeSet[0]['TYPE_ID'])){
                     //表示用デフォルト値をセット
                     $aryAddResultData[1] = $aryTypeSet[0]['DEFAULT_VALUE'];
-    
                     //タイプIDをセット
                     $typeId = $aryTypeSet[0]['TYPE_ID'];
                     if($typeId == ""){
@@ -968,7 +967,6 @@ Terraform代入値管理
                     $intErrrorType = 502;
                 }
         }
-
         $type_Flg = $aryAddResultData[0];
 
         unset($aryRetBody);

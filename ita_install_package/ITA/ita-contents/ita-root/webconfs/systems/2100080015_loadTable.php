@@ -1384,7 +1384,7 @@ Terrraform 代入値自動登録設定
                             $intRowLength = -1;
                         }
             
-                        if(count($aryTypeSet) == 1){
+                        if(count($aryTypeSet) == 1 && isset($aryTypeSet[0]['TYPE_ID'])){
                             //表示用デフォルト値をセット
                             $aryAddResultData[1] = $aryTypeSet[0]['DEFAULT_VALUE'];
             
@@ -2543,7 +2543,7 @@ Terrraform 代入値自動登録設定
                             $intRowLength = -1;
                         }
             
-                        if(count($aryTypeSet) == 1){
+                        if(count($aryTypeSet) == 1 && isset($aryTypeSet[0]['TYPE_ID'])){
                             //表示用デフォルト値をセット
                             $aryAddResultData[1] = $aryTypeSet[0]['DEFAULT_VALUE'];
             
