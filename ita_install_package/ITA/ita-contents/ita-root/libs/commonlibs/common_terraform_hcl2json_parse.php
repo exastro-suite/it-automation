@@ -179,22 +179,6 @@ class CommonTerraformHCL2JSONParse{
 
                         // object --------------------------------------------
                         // 入れ子はこれで取得できる。
-                        // $pattern = '/\"\$\{([a-z]+?)\(\{(.*)\}\)\}\"/';
-                        // $replacement = '{"${${1}}": {${2}}}';
-                        // while (preg_match($pattern, $typestr)) {
-                        //     $typestr = preg_replace($pattern, $replacement, $typestr);
-                        // }
-
-                        // // 入れ子以外で並んでいる場合
-                        // $pattern = '/\"\$\{([a-z]*?)\(\{(.*)\}\)\}\"/';
-                        // $replacement = '{"${${1}}": {${2}}}';
-                        // $typestr = preg_replace($pattern, $replacement, $typestr);
-
-                        // $pattern = '/\}\)\}\"(.*)\"\$\{([a-z]*?)\(\{(.*)/';
-                        // $replacement = '}}${1}{"${${2}}": {${3}';
-                        // $typestr = preg_replace($pattern, $replacement, $typestr);
-
-                        // 入れ子はこれで取得できる。
                         $pattern = '/\"\$\{([a-z]+?)\(\{(.*)\}\)\}\"/';
                         $replacement = '{"${${1}}": {${2}}}';
                         while (preg_match($pattern, $typestr)) {
@@ -210,8 +194,17 @@ class CommonTerraformHCL2JSONParse{
                         $replacement = '}}${1}{"${${2}}": {${3}';
                         $typestr = preg_replace($pattern, $replacement, $typestr);
 
+                        // この形に対応 {"${object}": {"key-object": "${map(any)}"}}
+                        $pattern = '/\{\"\$\{(.*?)\}\"\: \{\"(.*?)\"\:\s\"\$\{(.*?)\}\"\}\}/';
+                        $pattern2 = '/\{\"\$\{(.*?)\((.*)\)*\}\"\: \{\"(.*?)\"\:\s\"\$\{(.*?)\}\"\}\}/';
+                        $replacement = '{"${${1}(${3})}": {"${2}": "${${3}}"}}';
+                        while (preg_match($pattern, $typestr) && !preg_match($pattern2, $typestr)) {
+                            $typestr = preg_replace($pattern, $replacement, $typestr);
+                        }
+
+                        // この形に対応 {"${object}": {"key-object": "${map(set(string))}"}}
                         $pattern = '/\{\"\$\{(.*?)\}\"\:\s\{\"(.*?)\"\:\s\{\"\$\{(.*?)\}\"\:\s(.*)\}\}\}/';
-                        $pattern2 = '/\{\"\$\{(.*?)\((.*)\)\}\"\:\s\{\"(.*?)\"\:\s\{\"\$\{(.*?)\}\"\:\s(.*)\}\}\}/';
+                        $pattern2 = '/\{\"\$\{(.*?)\((.*?)\)*\}\"\:\s\{\"(.*?)\"\:\s\{\"\$\{(.*?)\}\"\:\s(.*)\}\}\}/';
                         $replacement = '{"${${1}(${3})}": {"${2}": "${${3}}"}}';
                         while (preg_match($pattern, $typestr) && !preg_match($pattern2, $typestr)) {
                             $typestr = preg_replace($pattern, $replacement, $typestr);
