@@ -1398,11 +1398,15 @@ class TableControlAgent {
 	}
 
 	public function readAllFromFileOnce($miFilePath, &$strBody){
-		$bool = file_exists($miFilePath);
+		#1845 
+		$bool = is_file($miFilePath);
 		if( $bool === true ){
-			$filepointer = fopen($miFilePath ,"rb");
-			$strBody = fread($filepointer, filesize($miFilePath));
-			fclose($filepointer);
+			$filesize = filesize($miFilePath);
+			if( $filesize != 0 ){
+				$filepointer = fopen($miFilePath ,"rb");
+				$strBody = fread($filepointer, filesize($miFilePath));
+				fclose($filepointer);
+			}
 		}
 		return $bool;
 	}
