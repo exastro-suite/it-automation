@@ -205,7 +205,7 @@ class CommonTerraformHCL2JSONParse{
                         // この形に対応 {"${object}": {"key-object": "${map(set(string))}"}}
                         $pattern = '/\{\"\$\{(.*?)\}\"\:\s\{\"(.*?)\"\:\s\{\"\$\{(.*?)\}\"\:\s(.*)\}\}\}/';
                         $pattern2 = '/\{\"\$\{(.*?)\((.*?)\)*\}\"\:\s\{\"(.*?)\"\:\s\{\"\$\{(.*?)\}\"\:\s(.*)\}\}\}/';
-                        $replacement = '{"${${1}(${3})}": {"${2}": "${${3}}"}}';
+                        $replacement = '{"${${1}(${3})}": {"${2}": {"${${3}}": ${4}}}}';
                         while (preg_match($pattern, $typestr) && !preg_match($pattern2, $typestr)) {
                             $typestr = preg_replace($pattern, $replacement, $typestr);
                         }
