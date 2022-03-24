@@ -1500,6 +1500,10 @@ Terraform代入値管理
                 if( strlen($intOperationNoUAPK) === 0 || strlen($intPatternId) === 0 || strlen($intVarsLinkId) === 0 ){
                     $boolSystemErrorFlag = true;
                 }
+                //復活の場合----
+
+                $columnId = $strNumberForRI;
+
             }
             //更新前のレコードから、各カラムの値を取得----
         }else if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
@@ -1523,6 +1527,15 @@ Terraform代入値管理
                                            $arrayRegData['SENSITIVE_FLAG']:null;
             $intRestMemberVarsId      = array_key_exists('REST_MEMBER_VARS',$arrayRegData)?
                                            $arrayRegData['REST_MEMBER_VARS']:null;
+            // 主キーの値を取得する。
+            if( $strModeId == "DTUP_singleRecUpdate" ){
+                // 更新処理の場合
+                $columnId = $strNumberForRI;
+            }
+            else{
+                // 登録処理の場合
+                $columnId = array_key_exists('ASSIGN_ID',$arrayRegData)?$arrayRegData['ASSIGN_ID']:null;
+            }
 
         }
 
@@ -1697,6 +1710,7 @@ Terraform代入値管理
                     ."D_TERRAFORM_VARS_ASSIGN "
                     ."WHERE "
                     ."DISUSE_FLAG = '0' "
+                    ."AND ASSIGN_ID   <> :ASSIGN_ID "
                     ."AND OPERATION_NO_UAPK   = :OPERATION_NO_UAPK "
                     ."AND PATTERN_ID          = :PATTERN_ID "
                     ."AND MODULE_VARS_LINK_ID = :MODULE_VARS_LINK_ID ";
@@ -1705,6 +1719,7 @@ Terraform代入値管理
             $aryForBind['OPERATION_NO_UAPK'] = $intOperationNoUAPK;
             $aryForBind['PATTERN_ID'] = $intPatternId;                
             $aryForBind['MODULE_VARS_LINK_ID'] = $intVarsLinkId;
+            $aryForBind['ASSIGN_ID']    = $columnId;
 
             $retArray = singleSQLExecuteAgent($query, $aryForBind, "NONAME_FUNC(VARS_MULTI_CHECK)");
             
@@ -1717,36 +1732,17 @@ Terraform代入値管理
                     $sensitivetypearray[] = $row['SENSITIVE_FLAG'];
                 }
                 //HCL設定の混在不可
-                if($strModeId == "DTUP_singleRecUpdate"){
-                    //更新時はHCLがONもしくはOFFのレコードが1つの場合は登録可能
-                    if($intHclId == 1 && in_array(2,$hcltypearray) && 1 < count($hcltypearray) || $intHclId == 2 && 1 < count($hcltypearray)){
-                        $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-201080");
-                        $boolExecuteContinue = false;
-                        $retBool = false;
-                    }
-                //HCLの入力値が1かつ　OP/MV/変数の組み合わせが一致するHCLの値を取得　その中に2があるかつ配列に1つ以上の値がある    
-                }elseif($intHclId == 1 && in_array(2,$hcltypearray) && 0 < count($hcltypearray) || $intHclId == 2 && 0 < count($hcltypearray)){
-                    $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-201090");
+                if(($intHclId == 1 && in_array(2, $hcltypearray)) || ($intHclId == 2 && in_array(1, $hcltypearray))){
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-201080");
                     $boolExecuteContinue = false;
                     $retBool = false;
                 }
 
-                //Sensitive設定の統一
-                if($boolExecuteContinue == true){
-                    if($strModeId == "DTUP_singleRecUpdate"){
-                        if($intSensitiveId == 1 && in_array(2,$sensitivetypearray) && 1 < count($sensitivetypearray) || $intSensitiveId == 2 && in_array(1,$sensitivetypearray) && 1 < count($sensitivetypearray)){
-                            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-201100");
-                            $boolExecuteContinue = false;
-                            $retBool = false;
-                        }
-                        
-                    }elseif($intSensitiveId == 1 && in_array(2,$sensitivetypearray) || $intSensitiveId == 2 && in_array(1,$sensitivetypearray)){
-                        $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-201110");
-                        $boolExecuteContinue = false;
-                        $retBool = false;
-                    }else{
-                        $retBool = true;
-                    }
+                // Sensitive設定の統一
+                if($intSensitiveId == 1 && in_array(2,$sensitivetypearray) || $intSensitiveId == 2 && in_array(1,$sensitivetypearray)){
+                    $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-201110");
+                    $boolExecuteContinue = false;
+                    $retBool = false;
                 }
             }else{
                 web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
@@ -1824,7 +1820,7 @@ Terraform代入値管理
                                 $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-201140");
                             }
                         }elseif($member_vars_flg == 0 && $assign_seq_flg == 1){
-                            if( 0 < strlen($intAssignSeqId)){
+                            if( 0 < strlen($intAssignSeqId) && !strlen($intMemberVarsId)){
                                 $retBool = true;
                                 $boolExecuteContinue = true;
                             }elseif(1 > strlen($intAssignSeqId)){
