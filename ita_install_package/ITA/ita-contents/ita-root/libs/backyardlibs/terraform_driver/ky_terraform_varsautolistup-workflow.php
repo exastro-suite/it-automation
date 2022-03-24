@@ -634,37 +634,34 @@
                 }
 
                 // 変数ネスト管理に合わせたタイプの整形
+                $type_array0 = $type_array;
                 $type_array = adjustMemberTypeArrayByMaxColSeq($type_array, $tmp_member_data_array);
+                $type_array1 = $type_array;
 
                 $child_vars_id = 0;
                 $parent_vars_id = 0;
                 $array_nest_level = 0;
                 createMemberArray($intModuleVarLinkId, $child_vars_id, $parent_vars_id, $tmp_member_data_array_2, $type_array, $default_array);
-
                 // -----------------------------------------------
                 // ローカルID→項番に差し替え、親項番の取得、変数ネスト管理テーブルから最大繰り返し数の取得
                 $tmp_member_data_array_3 = createMemberArrayForRegist($tmp_member_data_array_2);
                 // 変数ネスト管理に合わせてタイプの整形
                 $type_array = adjustMemberTypeArrayByMaxColSeq($type_array, $tmp_member_data_array_3, true);
-
+                $type_array3 = $type_array;
                 // ここでローカル番号に振り替えられてしまうので注意
                 $child_vars_id = 0;
                 $parent_vars_id = 0;
                 $array_nest_level = 0;
                 createMemberArray($intModuleVarLinkId, $child_vars_id, $parent_vars_id, $member_data_array, $type_array, $default_array);
                 $member_data_array = createMemberArrayForRegist($member_data_array);
-                // -----------------------------------------------
 
+                // -----------------------------------------------
                 // レコードに登録可能な配列に整形
                 $member_array = partMemberArrayForRegist($member_data_array);
                 $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["update"]);
                 $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["skip"]);
                 $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["restore"]);
                 $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["regist"]);
-
-
-                // 今回登録・更新予定のリスト
-                $regist_update_memberVarsArray = array_merge($member_array["regist"], $member_array["update"]);
 
                 // ---------------------ここから実際の登録------------
                 // １．メンバー変数の登録
@@ -1861,7 +1858,7 @@
                     array_pop($parentMemberArray);
                 }
                 // メンバー変数だと2こ前までキーを削除
-                if (getTypeInfo($memberInfo["child_vars_type_id"])["MEMBER_VARS_FLAG"] == 1) {
+                if (isset($memberInfo["child_vars_type_id"]) && getTypeInfo($memberInfo["child_vars_type_id"])["MEMBER_VARS_FLAG"] == 1) {
                     if (count($parentMemberArray) > 0) {
                         array_pop($parentMemberArray);
                     }
@@ -1881,34 +1878,36 @@
                         $memberInfo["parent_member_vars_id"] = NULL;
                     }
                 }
-                // メンバー変数に登録する用配列に整形
-                $_return = [
-                    "CHILD_MEMBER_VARS_ID"    => $memberInfo["child_member_vars_id"],    // メンバー変数ID
-                    "PARENT_VARS_ID"          => $memberInfo["module_id"],               // Module変数ID
-                    "PARENT_MEMBER_VARS_ID"   => $memberInfo["parent_member_vars_id"],   // 親のメンバー変数ID
-                    "CHILD_MEMBER_VARS_KEY"   => $memberInfo["child_member_vars_key"],   // メンバー変数
-                    "CHILD_MEMBER_VARS_NEST"  => $memberInfo["child_member_vars_nest"],  // メンバー変数(フルパス)
-                    "CHILD_MEMBER_VARS_VALUE" => $memberInfo["child_member_vars_value"], // 具体値
-                    "ARRAY_NEST_LEVEL"        => $memberInfo["array_nest_level"],        // 階層
-                    "CHILD_VARS_TYPE_ID"      => $memberInfo["child_vars_type_id"],      // タイプID
-                    "ASSIGN_SEQ"              => $memberInfo["assign_seq"],              // 代入順序
-                    "MAX_COL_SEQ"             => $memberInfo["max_col_seq"],             // 最大繰り返し数
-                ];
 
-                if (isset($memberInfo["regist_flag"]) && isset($memberInfo["regist_flag"]) == 1) {
-                    $return["regist"][] = $_return;
-                }
-                elseif (isset($memberInfo["skip_flag"]) && $memberInfo["skip_flag"] == 1) {
-                    $return["skip"][] = $_return;
-                }
-                elseif (isset($memberInfo["update_flag"]) && isset($memberInfo["update_flag"]) == 1) {
-                    $return["update"][] = $_return;
-                }
-                elseif (isset($memberInfo["restore_flag"]) && isset($memberInfo["restore_flag"]) == 1) {
-                    $return["restore"][] = $_return;
-                }
-                else {
-                    $return["regist"][] = $_return;
+                if (isset($memberInfo["type_nest_array"])) {
+                    // メンバー変数に登録する用配列に整形
+                    $_return = [
+                        "CHILD_MEMBER_VARS_ID"    => $memberInfo["child_member_vars_id"],    // メンバー変数ID
+                        "PARENT_VARS_ID"          => $memberInfo["module_id"],               // Module変数ID
+                        "PARENT_MEMBER_VARS_ID"   => $memberInfo["parent_member_vars_id"],   // 親のメンバー変数ID
+                        "CHILD_MEMBER_VARS_KEY"   => $memberInfo["child_member_vars_key"],   // メンバー変数
+                        "CHILD_MEMBER_VARS_NEST"  => $memberInfo["child_member_vars_nest"],  // メンバー変数(フルパス)
+                        "CHILD_MEMBER_VARS_VALUE" => $memberInfo["child_member_vars_value"], // 具体値
+                        "ARRAY_NEST_LEVEL"        => $memberInfo["array_nest_level"],        // 階層
+                        "CHILD_VARS_TYPE_ID"      => $memberInfo["child_vars_type_id"],      // タイプID
+                        "ASSIGN_SEQ"              => $memberInfo["assign_seq"],              // 代入順序
+                        "MAX_COL_SEQ"             => $memberInfo["max_col_seq"],             // 最大繰り返し数
+                    ];
+                    if (isset($memberInfo["regist_flag"]) && isset($memberInfo["regist_flag"]) == 1) {
+                        $return["regist"][] = $_return;
+                    }
+                    elseif (isset($memberInfo["skip_flag"]) && $memberInfo["skip_flag"] == 1) {
+                        $return["skip"][] = $_return;
+                    }
+                    elseif (isset($memberInfo["update_flag"]) && isset($memberInfo["update_flag"]) == 1) {
+                        $return["update"][] = $_return;
+                    }
+                    elseif (isset($memberInfo["restore_flag"]) && isset($memberInfo["restore_flag"]) == 1) {
+                        $return["restore"][] = $_return;
+                    }
+                    else {
+                        $return["regist"][] = $_return;
+                    }
                 }
             }
             $child_array_index++;
@@ -1964,6 +1963,14 @@
         // 昇順に並び替え
         array_multisort($array_nest_level_keys, SORT_ASC, $assign_seq_keys, SORT_ASC, $memberInfoArray);
 
+        $tmpMemberInfoArray = [];
+        foreach ($memberInfoArray as $memberInfo) {
+            if (isset($memberInfo["module_id"])) {
+                $tmpMemberInfoArray[] = $memberInfo;
+            }
+        }
+        $memberInfoArray = $tmpMemberInfoArray;
+
         // ローカルIDをシーケンスIDに振り返る
         $child_array_index = 0;
         // 項番の更新
@@ -1971,12 +1978,9 @@
             // 既存レコードの検索
             $searchData =
                 [
-                    // "CHILD_MEMBER_VARS_ID"    => $memberInfo["child_member_vars_id"],    // メンバー変数ID
                     "PARENT_VARS_ID"          => $memberInfo["module_id"],               // Module変数ID
-                    // "PARENT_MEMBER_VARS_ID"   => $memberInfo["parent_member_vars_id"],   // 親のメンバー変数ID
                     "CHILD_MEMBER_VARS_KEY"   => $memberInfo["child_member_vars_key"],   // メンバー変数
                     "CHILD_MEMBER_VARS_NEST"  => $memberInfo["child_member_vars_nest"],  // メンバー変数(フルパス)
-                    // "CHILD_MEMBER_VARS_VALUE" => $memberInfo["child_member_vars_value"], // 具体値
                     "ARRAY_NEST_LEVEL"        => $memberInfo["array_nest_level"],        // 階層
                     "CHILD_VARS_TYPE_ID"      => $memberInfo["child_vars_type_id"],      // タイプID
                     "ASSIGN_SEQ"              => $memberInfo["assign_seq"],              // 代入順序
@@ -2020,10 +2024,14 @@
             if ($memberInfo["module_regist_flag"] == false) {
                 // 一番後ろのキーを削除して親を探す
                 $parentMemberArray = $memberInfo["type_nest_array"];
-                array_pop($parentMemberArray);
+                if (!empty($parentMemberArray)) {
+                    array_pop($parentMemberArray);
+                }
                 // メンバー変数だと2こ前までキーを削除
                 if (getTypeInfo($memberInfo["child_vars_type_id"])["MEMBER_VARS_FLAG"] == 1) {
-                    array_pop($parentMemberArray);
+                    if (!empty($parentMemberArray)) {
+                        array_pop($parentMemberArray);
+                    }
                 }
 
                 if ($memberInfo["array_nest_level"] != 1) {
@@ -2073,25 +2081,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -2102,13 +2098,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -2175,49 +2165,25 @@
             $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
 
             if ($objQueryUtn->getStatus() === false) {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryUtn->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001400")));
             }
             if ($objQueryJnl->getStatus() === false) {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryJnl->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001500")));
             }
             if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryUtn->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001600")));
             }
             if ($objQueryJnl->sqlBind($arrayJnlBind) != "") {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryJnl->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001700")));
@@ -2227,13 +2193,7 @@
             //----------------------------------------------
             $rUtn = $objQueryUtn->sqlExecute();
             if ($rUtn != true) {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryUtn->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001800")));
@@ -2244,13 +2204,7 @@
             //----------------------------------------------
             $rJnl = $objQueryJnl->sqlExecute();
             if ($rJnl != true) {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryJnl->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001900")));
@@ -2331,49 +2285,25 @@
         $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001400")));
         }
         if ($objQueryJnl->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__, $objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001500")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001600")));
         }
         if ($objQueryJnl->sqlBind($arrayJnlBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001700")));
@@ -2383,13 +2313,7 @@
         //----------------------------------------------
         $rUtn = $objQueryUtn->sqlExecute();
         if ($rUtn != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001800")));
@@ -2400,13 +2324,7 @@
         //----------------------------------------------
         $rJnl = $objQueryJnl->sqlExecute();
         if ($rJnl != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001900")));
@@ -2441,25 +2359,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -2470,13 +2376,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -2543,49 +2443,25 @@
         $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001400")));
         }
         if ($objQueryJnl->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001500")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001600")));
         }
         if ($objQueryJnl->sqlBind($arrayJnlBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001700")));
@@ -2595,13 +2471,7 @@
         //----------------------------------------------
         $rUtn = $objQueryUtn->sqlExecute();
         if ($rUtn != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001800")));
@@ -2612,13 +2482,7 @@
         //----------------------------------------------
         $rJnl = $objQueryJnl->sqlExecute();
         if ($rJnl != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001900")));
@@ -2652,25 +2516,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -2681,13 +2533,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -2760,49 +2606,25 @@
         $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001400")));
         }
         if ($objQueryJnl->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001500")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001600")));
         }
         if ($objQueryJnl->sqlBind($arrayJnlBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001700")));
@@ -2812,13 +2634,7 @@
         //----------------------------------------------
         $rUtn = $objQueryUtn->sqlExecute();
         if ($rUtn != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001800")));
@@ -2829,13 +2645,7 @@
         //----------------------------------------------
         $rJnl = $objQueryJnl->sqlExecute();
         if ($rJnl != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001900")));
@@ -2912,25 +2722,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -2941,13 +2739,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3019,25 +2811,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3048,13 +2828,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3098,25 +2872,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3127,13 +2889,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3174,25 +2930,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3203,13 +2947,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3266,25 +3004,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3295,13 +3021,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3353,25 +3073,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3382,13 +3090,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3430,25 +3132,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3459,13 +3149,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3572,49 +3256,25 @@
         $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001400")));
         }
         if ($objQueryJnl->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001500")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001600")));
         }
         if ($objQueryJnl->sqlBind($arrayJnlBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001700")));
@@ -3624,13 +3284,7 @@
         //----------------------------------------------
         $rUtn = $objQueryUtn->sqlExecute();
         if ($rUtn != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001800")));
@@ -3641,13 +3295,7 @@
         //----------------------------------------------
         $rJnl = $objQueryJnl->sqlExecute();
         if ($rJnl != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001900")));
@@ -3689,25 +3337,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3718,13 +3354,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3774,25 +3404,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3803,13 +3421,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3854,25 +3466,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3883,13 +3483,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -3932,25 +3526,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -3961,13 +3543,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -4034,49 +3610,25 @@
         $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001400")));
         }
         if ($objQueryJnl->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001500")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001600")));
         }
         if ($objQueryJnl->sqlBind($arrayJnlBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001700")));
@@ -4086,13 +3638,7 @@
         //----------------------------------------------
         $rUtn = $objQueryUtn->sqlExecute();
         if ($rUtn != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001800")));
@@ -4103,13 +3649,7 @@
         //----------------------------------------------
         $rJnl = $objQueryJnl->sqlExecute();
         if ($rJnl != true) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryJnl->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001900")));
@@ -4173,25 +3713,13 @@
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
 
         if ($objQueryUtn->getStatus() === false) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
         }
         if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
@@ -4202,13 +3730,7 @@
         //----------------------------------------------
         $r = $objQueryUtn->sqlExecute();
         if (!$r) {
-            $FREE_LOG = sprintf(
-                "FILE:%s LINE:%s %s",
-                basename(__FILE__),
-                __LINE__,
-                $objQueryUtn->getLastError()
-            );
-            require($root_dir_path . $log_output_php);
+            LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
             // 異常フラグON  例外処理へ
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
@@ -4275,49 +3797,25 @@
             $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
 
             if ($objQueryUtn->getStatus() === false) {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryUtn->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001400")));
             }
             if ($objQueryJnl->getStatus() === false) {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryJnl->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__, $objQueryJnl->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001500")));
             }
             if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryUtn->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001600")));
             }
             if ($objQueryJnl->sqlBind($arrayJnlBind) != "") {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryJnl->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryJnl->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001700")));
@@ -4327,13 +3825,7 @@
             //----------------------------------------------
             $rUtn = $objQueryUtn->sqlExecute();
             if ($rUtn != true) {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryUtn->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__,$objQueryUtn->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001800")));
@@ -4344,13 +3836,7 @@
             //----------------------------------------------
             $rJnl = $objQueryJnl->sqlExecute();
             if ($rJnl != true) {
-                $FREE_LOG = sprintf(
-                    "FILE:%s LINE:%s %s",
-                    basename(__FILE__),
-                    __LINE__,
-                    $objQueryJnl->getLastError()
-                );
-                require($root_dir_path . $log_output_php);
+                LocalLogPrint(basename(__FILE__),__LINE__, $objQueryJnl->getLastError());
                 // 異常フラグON  例外処理へ
                 $error_flag = 1;
                 throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00001900")));
@@ -4438,6 +3924,7 @@
             if ($typeInfo["ENCODE_FLAG"] == 1) {
                 $member_vars_value = decodeHCL($member_vars_value);
             }
+
             if ($typeInfo["MEMBER_VARS_FLAG"] == 1 && $typeInfo["MEMBER_VARS_FLAG"] != 1 ) {
                 $ref[$member_vars_key] = [];
             } else {
@@ -4494,13 +3981,28 @@
                     }
 
                     // 変数ネスト管理対象の現在の最大繰り返し数
-                    $nest_type_count = count($trg_nest_type_array);
+                    $nest_type_count = 0;
+                    if (is_array($trg_nest_type_array)) {
+                        $nest_type_count = count($trg_nest_type_array);
+                    }
+                    // else if(!is_array($trg_nest_type_array) && $trg_nest_type_array != "") {
+                    //     $nest_type_count = 1;
+                    // }
 
                     // 0番目が変数ネスト管理対象
                     $trg_nest_type_array_0 = "";
                     if (isset($trg_nest_type_array[0])) {
                         $trg_nest_type_array_0 = $trg_nest_type_array[0];
                     }
+
+                    // // 変数ネスト管理対象の現在の最大繰り返し数
+                    // $nest_type_count = count($trg_nest_type_array);
+
+                    // // 0番目が変数ネスト管理対象
+                    // $trg_nest_type_array_0 = "";
+                    // if (isset($trg_nest_type_array[0])) {
+                    //     $trg_nest_type_array_0 = $trg_nest_type_array[0];
+                    // }
 
                     // 変更後の最大繰り返し数と元々の最大繰り返し数の差分
                     $max_col_seq_diff = $trg_max_col_seq - $nest_type_count;
@@ -4529,6 +4031,23 @@
 
         return $member_vars_array;
     }
+
+    //----------------------------------------------
+    // HCLから配列にdecodeする
+    //----------------------------------------------
+    function decodeHCL($hcl)
+    {
+        $res = false;
+        if (!is_array($hcl)) {
+            $json = preg_replace('/\"(.*?)\"\ = \"(.*?)\"/', '"${1}": "${2}"', $hcl);
+            $res = json_decode($json);
+        }
+        if (!$res) {
+            $res = $hcl;
+        }
+        return $res;
+    }
+
 
 
 ?>
