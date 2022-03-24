@@ -60,6 +60,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c = new FileUploadColumn('MENU_GROUP_ICON',$g['objMTS']->getSomeMessage("ITAWDCH-MNU-1030501"));
     $c->setFileHideMode(false);
     $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
+    $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
     $table->addColumn($c);
     
     //メニュー情報
