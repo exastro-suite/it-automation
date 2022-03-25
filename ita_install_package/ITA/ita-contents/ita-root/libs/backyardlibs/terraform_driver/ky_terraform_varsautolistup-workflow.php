@@ -604,14 +604,8 @@
                                 }
                                 // 最終更新者がユーザの場合
                                 elseif ($registedMaxMemberColData["isSystem"] == false) {
-                                    // $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $registedMaxMemberColData["maxColSeq"]);
                                     $tmp_member_data_array[$m]["max_col_seq"] = $registedMaxMemberColData["maxColSeq"];
                                     $tmp_member_data_array[$m]["force_max_col_seq_flag"] = true;
-                                    // if (!$res) {
-                                    //     // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
-                                    //     $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221040", array(__FILE__, __LINE__));
-                                    //     throw new Exception($errorMsg);
-                                    // }
                                 }
                             }
                         }
@@ -1678,6 +1672,10 @@
 
                     // Module変数から最大繰り返し数を取得
                     $max_col_seq = countMaxColSeqByModule($trg_default_key_array, $default_array, $child_vars_type_id, $module_regist_flag);
+
+                    // boolean型の場合、文字列に変換
+                    if (is_bool($child_member_vars_value)) $child_member_vars_value = ((true === $child_member_vars_value) ? 'true' : 'false');
+
                     $res = [
                         "module_id"               => $module_id,               // Module変数紐付けの項番
                         "child_member_vars_id"    => $child_vars_id,           // 自分のローカルID
@@ -1685,7 +1683,7 @@
                         "child_member_vars_nest"  => $child_member_vars_nest,  // メンバー変数(フル)
                         "child_member_vars_key"   => $child_member_vars_key,   // メンバー変数のキーのみ
                         "child_member_vars_value" => $child_member_vars_value, // デフォルト値
-                        "array_nest_level"        => $array_nest_level,      // 階層
+                        "array_nest_level"        => $array_nest_level,        // 階層
                         "trg_default_key"         => $trg_default_key,
                         "child_vars_type_id"      => $child_vars_type_id,      // タイプID
                         "assign_seq"              => $assign_seq,              // 代入順序
@@ -1722,6 +1720,9 @@
                     $child_member_vars_value = NULL;
                 }
             }
+            // boolean型の場合、文字列に変換
+            if (is_bool($child_member_vars_value)) $child_member_vars_value = ((true === $child_member_vars_value) ? 'true' : 'false');
+
             $child_member_vars_key = "";
             $trg_default_key = "";
 

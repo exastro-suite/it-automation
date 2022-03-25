@@ -49,8 +49,9 @@ class CommonTerraformHCL2JSONParse{
         $command = "pip show python-hcl2";
         exec($command, $output, $retval);
         if ($retval != 0) {
+            $err_detail = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221120");
             $this->res = false;
-            $this->err = $objMTS->getSomeMessage('ITATERRAFORM-ERR-221120');
+            $this->err = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221110", array($err_detail));
         }
 
         if ($this->res != false) {
@@ -74,7 +75,7 @@ class CommonTerraformHCL2JSONParse{
             // エラーの場合
             if (!preg_match('/^\{.*/', $output[0])) {
                 $this->res = false;
-                $this->err = $output[0];
+                $this->err = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221150", array($output[0]));
                 $this->command = $command;
                 $this->output = $output;
                 $this->retval = $retval;
