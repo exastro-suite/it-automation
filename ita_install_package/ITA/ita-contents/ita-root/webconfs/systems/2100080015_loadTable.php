@@ -1116,7 +1116,7 @@ Terrraform 代入値自動登録設定
                             $aryAddResultData[0] = "ASSIGN_FLAG_VAL";
                         }
                         elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
-                            $aryAddResultData[0]  = "FLAG_VAL";
+                            $aryAddResultData[0]  = "MEMBER_FLAG_VAL";
                         }
                         else{
                             $intErrorType = 501;
@@ -1435,7 +1435,7 @@ Terrraform 代入値自動登録設定
                                 $aryAddResultData[0] = "ASSIGN_FLAG_VAL";
                             }
                             elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
-                                $aryAddResultData[0]  = "FLAG_VAL";
+                                $aryAddResultData[0]  = "MEMBER_FLAG_VAL";
                             }
                             else{
                                 $intErrorType = 501;
@@ -2270,7 +2270,7 @@ Terrraform 代入値自動登録設定
                             $aryAddResultData[0] = "ASSIGN_FLAG_VAL";
                         }
                         elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
-                            $aryAddResultData[0]  = "FLAG_VAL";
+                            $aryAddResultData[0]  = "MEMBER_FLAG_VAL";
                         }
                         else{
                             $intErrorType = 501;
@@ -2594,7 +2594,7 @@ Terrraform 代入値自動登録設定
                                 $aryAddResultData[0] = "ASSIGN_FLAG_VAL";
                             }
                             elseif(1 == $memberVarsFlg &&  1 == $assignSeqFlg){
-                                $aryAddResultData[0]  = "FLAG_VAL";
+                                $aryAddResultData[0]  = "MEMBER_FLAG_VAL";
                             }
                             else{
                                 $intErrorType = 501;
