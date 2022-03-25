@@ -556,8 +556,6 @@
             ];
 
             // メンバー変数テーブルの作成
-            $tmp_member_data_array = [];
-            $member_data_array = [];
             if (is_array($type_array)) {
                 $child_vars_id = 0;
                 $parent_vars_id = 0;
@@ -566,6 +564,7 @@
 
                 // データの整形（配列の作成ローカル番号）
                 createMemberArray($intModuleVarLinkId, $child_vars_id, $parent_vars_id, $tmp_member_data_array, $type_array, $default_array);
+
                 // Module変数紐付管理登録対象が変数ネスト管理対象か判別
                 foreach($tmp_member_data_array as $tmp_member_data) {
                     if ($tmp_member_data["module_regist_flag"] == true) {
@@ -632,11 +631,13 @@
                     }
                     $m++;
                 }
+                $tmp_member_data_array = [];
+                $tmp_member_data_array_2 = [];
+                $tmp_member_data_array_3 = [];
+                $member_data_array = [];
 
                 // 変数ネスト管理に合わせたタイプの整形
-                $type_array0 = $type_array;
                 $type_array = adjustMemberTypeArrayByMaxColSeq($type_array, $tmp_member_data_array);
-                $type_array1 = $type_array;
 
                 $child_vars_id = 0;
                 $parent_vars_id = 0;
@@ -647,14 +648,13 @@
                 $tmp_member_data_array_3 = createMemberArrayForRegist($tmp_member_data_array_2);
                 // 変数ネスト管理に合わせてタイプの整形
                 $type_array = adjustMemberTypeArrayByMaxColSeq($type_array, $tmp_member_data_array_3, true);
-                $type_array3 = $type_array;
+
                 // ここでローカル番号に振り替えられてしまうので注意
                 $child_vars_id = 0;
                 $parent_vars_id = 0;
                 $array_nest_level = 0;
                 createMemberArray($intModuleVarLinkId, $child_vars_id, $parent_vars_id, $member_data_array, $type_array, $default_array);
                 $member_data_array = createMemberArrayForRegist($member_data_array);
-
                 // -----------------------------------------------
                 // レコードに登録可能な配列に整形
                 $member_array = partMemberArrayForRegist($member_data_array);

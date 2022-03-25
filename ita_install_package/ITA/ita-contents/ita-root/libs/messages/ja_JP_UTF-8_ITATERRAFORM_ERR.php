@@ -257,4 +257,5 @@ $ary["ITATERRAFORM-ERR-221130"]     = "変数の取得に失敗しました。";
 $ary["ITATERRAFORM-ERR-221131"]     = "変数の取得に失敗しました。(FILE:{} LINE:{})";
 $ary["ITATERRAFORM-ERR-221140"]     = "メンバー変数の取得に失敗しました。ID:{}";
 $ary["ITATERRAFORM-ERR-221141"]     = "メンバー変数の取得に失敗しました。(FILE:{} LINE:{} ID:{})";
+$ary["ITATERRAFORM-ERR-221150"]     = "ファイルに構文エラーがあります。\n{}";
 ?>
