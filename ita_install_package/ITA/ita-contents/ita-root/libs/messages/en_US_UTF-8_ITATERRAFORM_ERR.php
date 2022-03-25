@@ -255,4 +255,5 @@ $ary["ITATERRAFORM-ERR-221130"]     = "Failed to get Variable information.";
 $ary["ITATERRAFORM-ERR-221131"]     = "Failed to get Variable information.(FILE:{} LINE:{})";
 $ary["ITATERRAFORM-ERR-221140"]     = "Failed to get Member Variable information. ID:{}";
 $ary["ITATERRAFORM-ERR-221141"]     = "Failed to get Member Variable information. (FILE:{} LINE:{} ID:{})";
+$ary["ITATERRAFORM-ERR-221150"]     = "There is a syntax error in the file.\n{}";
 ?>
