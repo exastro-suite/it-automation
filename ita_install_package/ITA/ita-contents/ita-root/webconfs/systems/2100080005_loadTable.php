@@ -187,8 +187,7 @@ Module素材集
                 $retBool = $parseResult["res"];
                 // エラーの場合はエラー文の取得
                 if (!$retBool) {
-                    $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-221110", array($parseResult["err"]));
-                    // $retStrBody = "aaaaa";
+                    $retStrBody = $parseResult["err"];
                 }
                 unset($objWSRA);
 
