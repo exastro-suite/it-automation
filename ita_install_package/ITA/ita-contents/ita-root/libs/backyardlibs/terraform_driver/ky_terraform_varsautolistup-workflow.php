@@ -2973,7 +2973,7 @@
     //*******************************************************************************************
     function getTypeID($strType)
     {
-        global $objDBCA, $vg_terraform_types_master;
+        global $objDBCA, $objMTS, $vg_terraform_types_master;
         global $root_dir_path;
 
         $type_id = "";
@@ -3054,7 +3054,7 @@
     //*******************************************************************************************
     function getTypeInfo($typeID)
     {
-        global $objDBCA, $vg_terraform_types_master;
+        global $objDBCA, $objMTS, $vg_terraform_types_master;
         global $root_dir_path;
 
         $typeInfo = [];
@@ -3113,7 +3113,7 @@
     //*******************************************************************************************
     function getModuleVarsLinkTypeInfo($moduleLinkVarsID)
     {
-        global $objDBCA, $vg_terraform_module_vars_link_table_name;
+        global $objDBCA, $objMTS, $vg_terraform_module_vars_link_table_name;
         global $root_dir_path;
 
         $typeInfo = false;
@@ -3314,6 +3314,7 @@
     //----変数ネスト管理情報の取得(Module変数紐付管理IDが登録済みかどうか/最終更新者/最大繰り返し数)
     //*******************************************************************************************
     function getRegistMaxModuleColData($moduleLinkVarsID) {
+        global $objMTS;
         $res = [
             "isRegist"  => false, // 登録済みフラグ
             "isSystem"  => true,  // 最終更新者がシステムフラグ
@@ -3382,6 +3383,7 @@
     //----変数ネスト管理情報の取得(メンバー変数が登録済みかどうか/最終更新者/最大繰り返し数)
     //*******************************************************************************************
     function getRegistMaxMemberColData($memberVarsID) {
+        global $objMTS;
         $res = [
             "isRegist"  => false, // 登録済みフラグ
             "isSystem"  => true,  // 最終更新者がシステムフラグ
@@ -3450,7 +3452,7 @@
     //*******************************************************************************************
     function getMaxColSeq($maxMemberColID) {
         $res = false;
-        global $root_dir_path, $objDBCA, $vg_terraform_max_member_col_table_name;
+        global $root_dir_path, $objDBCA, $objMTS, $vg_terraform_max_member_col_table_name;
 
         $sqlUtnBody = "SELECT "
             . " MAX_COL_SEQ "
