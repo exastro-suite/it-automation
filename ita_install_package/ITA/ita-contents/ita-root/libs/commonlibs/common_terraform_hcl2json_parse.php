@@ -229,19 +229,28 @@ class CommonTerraformHCL2JSONParse{
                         $replacement = '"${1}": "${null}"';
                         $typestr = preg_replace($pattern, $replacement, $typestr);
 
-                        $block["type"]       = json_decode($typestr, true);
+                        $tmp_type = json_decode($typestr, true);
                         if(json_last_error() !== JSON_ERROR_NONE) {
                             $this->res = false;
                             $this->err = json_last_error_msg();
                         }
 
+
                         $block["variable"]   = $variable;
-                        $moduleInfo = $this->getModuleRecord($block["type"], $block["default"]);
 
                         if (empty($block["default"])) {
                             $block["default"] = "";
                         }
 
+                        // map型が含まれる場合は全部をmapとみなす
+                        $is_map = false;
+                        $this->isMap($tmp_type, $is_map);
+                        if ($is_map) {
+                            $tmp_type = '${map}';
+                            $block["typeStr"] = $tmp_type;
+                        }
+                        $block["type"]       = $tmp_type;
+                        $moduleInfo = $this->getModuleRecord($block["type"], $block["default"]);
                         if (preg_match('/^\$\{(.*?)\}$/', $moduleInfo["type"], $match)) {
                             $block["typeStr"] = $match[1];
                         }
@@ -264,21 +273,47 @@ class CommonTerraformHCL2JSONParse{
     //*******************************************************************************************
     function getModuleRecord($type_array, $default_array)
     {
-
         if (is_array($type_array)) {
             foreach ($type_array as $type_key => $type_value) {
                 $first_type_key = $type_key;
                 break;
             }
-            foreach ($default_array as $default_key => $default_value) {
-                $first_default_key = $default_value;
-                break;
-            }
         } else {
             $first_type_key = $type_array;
-            $first_default_key = $default_array;
         }
         return ["type" => $first_type_key, "default" => $default_array];
+    }
+
+    //*******************************************************************************************
+    //----map型判定
+    //*******************************************************************************************
+    function isMap($type_array, &$is_map=false) {
+        $pattern = '/^\$\{map(.*?)\}$/';
+        $pattern2 = '/^\$\{map\}$/';
+        if (is_array($type_array) && $is_map == false) {
+            // mapの存在チェック
+            foreach ($type_array as $type_key => $type_value) {
+                if (is_array($type_value)) {
+                    // もう一周
+                    $this->isMap($type_value, $is_map);
+                    if (preg_match($pattern, $type_key) || preg_match($pattern2, $type_key)) {
+                        $is_map = true;
+                    }
+                }
+                // 最端でループから抜ける
+                else {
+                    if (preg_match($pattern, $type_key) || preg_match($pattern, $type_value) || preg_match($pattern2, $type_key) || preg_match($pattern2, $type_value)) {
+                        $is_map = true;
+                    }
+                }
+            }
+        }
+        elseif (!is_array($type_array) && $is_map == false)
+        {
+            if (preg_match($pattern, $type_array) || preg_match($pattern2, $type_array)) {
+                $is_map = true;
+            }
+        }
     }
 
     //解析用のメソッド----
