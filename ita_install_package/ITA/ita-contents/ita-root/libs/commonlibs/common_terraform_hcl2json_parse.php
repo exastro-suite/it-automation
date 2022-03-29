@@ -126,6 +126,13 @@ class CommonTerraformHCL2JSONParse{
 
                         $typestr = '"' . $typestr . '"';
 
+                        // ),)のカンマを削除
+                        $pattern = '/\)\,\)/';
+                        $replacement = '))';
+                        while (preg_match($pattern, $typestr)) {
+                            $typestr = preg_replace($pattern, $replacement, $typestr);
+                        }
+
                         // listとset
                         // --------------------------------------------------
                         // list/setの下が
