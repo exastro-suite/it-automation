@@ -1481,7 +1481,7 @@ Terrraform 代入値自動登録設定
 
                 $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
                 if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
-                    if(strlen($g['KEY_MEMBER_VARS_UPDATE_VALUE']) !== 0){
+                    if(array_key_exists('KEY_MEMBER_VARS_UPDATE_VALUE',$g)){
                         $exeQueryData[$objColumn->getID()] = $g['KEY_MEMBER_VARS_UPDATE_VALUE'];
                     }
                 }else if( $modeValue=="DTUP_singleRecDelete" ){
@@ -2643,7 +2643,7 @@ Terrraform 代入値自動登録設定
 
                 $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
                 if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
-                    if(strlen($g['VAL_MEMBER_VARS_UPDATE_VALUE']) !== 0){
+                    if(array_key_exists('VAL_MEMBER_VARS_UPDATE_VALUE',$g)){
                         $exeQueryData[$objColumn->getID()] = $g['VAL_MEMBER_VARS_UPDATE_VALUE'];
                     }
                 }else if( $modeValue=="DTUP_singleRecDelete" ){
@@ -3262,8 +3262,7 @@ Terrraform 代入値自動登録設定
         $g['PATTERN_ID_UPDATE_VALUE']        = "";
         $g['KEY_VARS_LINK_ID_UPDATE_VALUE']  = "";
         $g['VAL_VARS_LINK_ID_UPDATE_VALUE']  = "";
-        $g['KEY_MEMBER_VARS_UPDATE_VALUE']   = "";
-        $g['VAL_MEMBER_VARS_UPDATE_VALUE']   = "";
+
         $key_rest_call = false;
         $val_rest_call = false;
         //----呼出元がUIがRestAPI/Excel/CSVかを判定
