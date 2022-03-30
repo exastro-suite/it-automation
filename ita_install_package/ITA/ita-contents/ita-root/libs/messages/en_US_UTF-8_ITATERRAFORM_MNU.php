@@ -483,4 +483,12 @@ $ary["ITATERRAFORM-MNU-109506"]     = "A character string that represents the ne
 $ary["ITATERRAFORM-MNU-109507"]     = "Maximum iteration count";
 $ary["ITATERRAFORM-MNU-109508"]     = "The number of times the target variable or the member variable under the member variable is repeated.";
 $ary["ITATERRAFORM-MNU-109509"]     = "In the variable nesting of Terraform, if the type of the variable defined in the tf file registered in the Module material collection is list, set and list, set, tuple, object is defined in that variable, the member variable You can maintain (view / update) the maximum number of iterations.";
+$ary["ITATERRAFORM-MNU-109510"]     = "Default value defined in the variable block";
+$ary["ITATERRAFORM-MNU-109511"]     = "The member variable ID in the hierarchy one level above the member variable";
+$ary["ITATERRAFORM-MNU-109512"]     = "KEY name of member variable";
+$ary["ITATERRAFORM-MNU-109513"]     = "Nesting information for member variables";
+$ary["ITATERRAFORM-MNU-109514"]     = "Member variable type";
+$ary["ITATERRAFORM-MNU-109515"]     = "Hierarchy of member variables";
+$ary["ITATERRAFORM-MNU-109516"]     = "Default value of member variable";
+$ary["ITATERRAFORM-MNU-109517"]     = "Numerical index of member variables";
 ?>
