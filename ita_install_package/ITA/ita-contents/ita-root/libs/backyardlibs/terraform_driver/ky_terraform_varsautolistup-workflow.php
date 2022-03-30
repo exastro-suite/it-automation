@@ -649,9 +649,9 @@
                 $array_nest_level = 0;
                 createMemberArray($intModuleVarLinkId, $child_vars_id, $parent_vars_id, $member_data_array, $type_array, $default_array);
                 $member_data_array = createMemberArrayForRegist($member_data_array);
-                // -----------------------------------------------
                 // レコードに登録可能な配列に整形
                 $member_array = partMemberArrayForRegist($member_data_array);
+                // -----------------------------------------------
                 $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["update"]);
                 $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["skip"]);
                 $existMemberVarsArray = array_merge($existMemberVarsArray, $member_array["restore"]);
@@ -723,7 +723,7 @@
                 // ２．メンバー変数の更新
                 if (!empty($member_array["update"])) {
                     foreach ($member_array["update"] as $member_data) {
-                        $res = updateMemberVars($member_data["CHILD_MEMBER_VARS_ID"], $member_data["CHILD_MEMBER_VARS_VALUE"], $member_data["CHILD_VARS_TYPE_ID"]);
+                        $res = updateMemberVars($member_data["CHILD_MEMBER_VARS_ID"], $member_data["PARENT_MEMBER_VARS_ID"], $member_data["CHILD_MEMBER_VARS_VALUE"], $member_data["CHILD_VARS_TYPE_ID"]);
                         if (!$res) {
                             $error_flag = 1;
                             // 「メンバー変数の更新に失敗しました。」
@@ -1215,7 +1215,6 @@
         }
 
         $memberVarsArray = getAllMemberVars();
-
         // メンバー変数テーブルの作成
         $memberVarsIndex = 0;
         foreach ($memberVarsArray as $memberVars) {
@@ -1806,16 +1805,14 @@
             // 既存レコードの検索
             $searchData =
                 [
-                    // "CHILD_MEMBER_VARS_ID"    => $memberInfo["child_member_vars_id"],    // メンバー変数ID
                     "PARENT_VARS_ID"          => $memberInfo["module_id"],               // Module変数ID
-                    // "PARENT_MEMBER_VARS_ID"   => $memberInfo["parent_member_vars_id"],   // 親のメンバー変数ID
                     "CHILD_MEMBER_VARS_KEY"   => $memberInfo["child_member_vars_key"],   // メンバー変数
                     "CHILD_MEMBER_VARS_NEST"  => $memberInfo["child_member_vars_nest"],  // メンバー変数(フルパス)
-                    // "CHILD_MEMBER_VARS_VALUE" => $memberInfo["child_member_vars_value"], // 具体値
                     "ARRAY_NEST_LEVEL"        => $memberInfo["array_nest_level"],        // 階層
                     "CHILD_VARS_TYPE_ID"      => $memberInfo["child_vars_type_id"],      // タイプID
                     "ASSIGN_SEQ"              => $memberInfo["assign_seq"],              // 代入順序
                 ];
+            // 既存レコード
             $duplicatedMemberVars = getMemberVarsByMemberData($searchData);
             if (count($duplicatedMemberVars) < 1 && $updateSequenceFlag == true) {
                 if ($memberInfo["module_regist_flag"] == false) {
@@ -1828,10 +1825,15 @@
                         return false;
                     }
                 }
-            } elseif (count($duplicatedMemberVars) > 0) {
+            }
+            elseif (count($duplicatedMemberVars) > 0) {
                 // 対応なし
                 // 具体値の比較
                 if ($duplicatedMemberVars["CHILD_MEMBER_VARS_VALUE"] != $memberInfo["child_member_vars_value"]) {
+                    $memberInfoArray[$child_array_index]["update_flag"] = 1;
+                }
+                // 親メンバー変数IDに更新がある場合
+                elseif ($duplicatedMemberVars["PARENT_MEMBER_VARS_ID"] != $memberInfo["parent_member_vars_id"]) {
                     $memberInfoArray[$child_array_index]["update_flag"] = 1;
                 }
                 // タイプに差分がある場合(NULL => 値を代入する場合のみ)
@@ -1849,13 +1851,14 @@
             }
             $child_array_index++;
         }
+
         // 親変数を検索
         $child_array_index = 0;
         foreach ($memberInfoArray as $memberInfo) {
             if ($memberInfo["module_regist_flag"] == false) {
                 // 一番後ろのキーを削除して親を探す
                 $parentMemberArray = $memberInfo["type_nest_array"];
-                if (count($parentMemberArray) > 0) {
+                if (is_array($parentMemberArray) && count($parentMemberArray) > 0) {
                     array_pop($parentMemberArray);
                 }
                 // メンバー変数だと2こ前までキーを削除
@@ -1897,14 +1900,14 @@
                     if (isset($memberInfo["regist_flag"]) && isset($memberInfo["regist_flag"]) == 1) {
                         $return["regist"][] = $_return;
                     }
-                    elseif (isset($memberInfo["skip_flag"]) && $memberInfo["skip_flag"] == 1) {
-                        $return["skip"][] = $_return;
-                    }
                     elseif (isset($memberInfo["update_flag"]) && isset($memberInfo["update_flag"]) == 1) {
                         $return["update"][] = $_return;
                     }
                     elseif (isset($memberInfo["restore_flag"]) && isset($memberInfo["restore_flag"]) == 1) {
                         $return["restore"][] = $_return;
+                    }
+                    elseif (isset($memberInfo["skip_flag"]) && $memberInfo["skip_flag"] == 1) {
+                        $return["skip"][] = $_return;
                     }
                     else {
                         $return["regist"][] = $_return;
@@ -2382,14 +2385,10 @@
             $error_flag = 1;
             throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
         }
-        //----------------------------------------------
-        // リソース（Module素材)ファイル名格納
-        //----------------------------------------------
+
         while ($row = $objQueryUtn->resultFetch()) {
             $trg_record = $row;
         }
-        // fetch行数を取得
-        $intFetchedFromTerraformMatterFile = $objQueryUtn->effectedRowCount();
 
         // DBアクセス事後処理
         unset($objQueryUtn);
@@ -2496,9 +2495,9 @@
         return true;
     }
     //*******************************************************************************************
-    //----メンバー変数の値を更新する
+    //----メンバー変数の親メンバー変数ID/デフォルト値を更新する
     //*******************************************************************************************
-    function updateMemberVars($child_member_vars_id, $default, $type_id)
+    function updateMemberVars($child_member_vars_id, $parent_member_vars_id, $default, $type_id)
     {
         global $g, $objMTS, $objDBCA;
         global $root_dir_path, $log_output_php;
@@ -2572,6 +2571,7 @@
         $arrayValue = $trg_record;
 
         $arrayValue["CHILD_VARS_TYPE_ID"]      = $type_id;
+        $arrayValue["PARENT_MEMBER_VARS_ID"]   = $parent_member_vars_id;
         $arrayValue["CHILD_MEMBER_VARS_VALUE"] = $default;
 
         $arrayValue['JOURNAL_SEQ_NO']          = $retArray[0];
@@ -4050,7 +4050,6 @@
         }
         return $res;
     }
-
 
 
 ?>
