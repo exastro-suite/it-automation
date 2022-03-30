@@ -89,7 +89,7 @@ Terraform Module変数紐付管理
 
     //デフォルト値
     $c = new TextColumn('VARS_VALUE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104430"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104440")); //エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109510")); //エクセル・ヘッダでの説明
     $table->addColumn($c);
 
 

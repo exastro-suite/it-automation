@@ -70,28 +70,28 @@ Terraform Module変数紐付管理
 
     // 親メンバ変数のID
     $c = new IDColumn('PARENT_MEMBER_VARS_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109030"), 'D_TERRAFORM_VAR_MEMBER', 'CHILD_MEMBER_VARS_ID', 'CHILD_MEMBER_VARS_ID');
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109040")); //エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109511")); //エクセル・ヘッダでの説明
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
 
     // 子メンバ変数のKEY
     $c = new TextColumn('CHILD_MEMBER_VARS_KEY', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109050"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109060")); //エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109512")); //エクセル・ヘッダでの説明
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
 
     // 階層を含めたメンバー変数名
     $c = new TextColumn('CHILD_MEMBER_VARS_NEST', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109070"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109080")); //エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109513")); //エクセル・ヘッダでの説明
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
 
     // 変数型のタイプ
     $c = new IDColumn('CHILD_VARS_TYPE_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109090"), 'B_TERRAFORM_TYPES_MASTER', 'TYPE_ID', 'TYPE_NAME');
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109100")); //エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109514")); //エクセル・ヘッダでの説明
     $c->setRequired(true); //登録/更新時には、入力必須
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
@@ -99,7 +99,7 @@ Terraform Module変数紐付管理
 
     // 子メンバ変数の階層
     $c = new NumColumn('ARRAY_NEST_LEVEL', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109110"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109120")); //エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109515")); //エクセル・ヘッダでの説明
     $c->setRequired(true); //登録/更新時には、入力必須
     $c->setSubtotalFlag(false);
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
@@ -108,14 +108,14 @@ Terraform Module変数紐付管理
 
     // 子メンバ変数のVALUE
     $c = new TextColumn('CHILD_MEMBER_VARS_VALUE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109130"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109140")); //エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109516")); //エクセル・ヘッダでの説明
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);
     $table->addColumn($c);
 
     // 列順序
     $c = new NumColumn('ASSIGN_SEQ', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109150"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109160")); //エクセル・ヘッダでの説明
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109517")); //エクセル・ヘッダでの説明
     $c->setSubtotalFlag(false);
     //コンテンツのソースがヴューの場合、登録/更新の対象とする
     $c->setHiddenMainTableColumn(true);

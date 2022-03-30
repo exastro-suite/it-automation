@@ -201,28 +201,6 @@ class CommonTerraformHCL2JSONParse{
                         $pattern = '/\}\)\}\"(.*)\"\$\{([a-z]*?)\(\{(.*)/';
                         $replacement = '}}${1}{"${${2}}": {${3}';
                         $typestr = preg_replace($pattern, $replacement, $typestr);
-
-                        // この形に対応 {"${object}": {"key-object": "${map(any)}"}}
-                        $pattern = '/\{\"\$\{(.*?)\}\"\: \{\"(.*?)\"\:\s\"\$\{(.*?)\}\"\}\}/';
-                        $pattern2 = '/\{\"\$\{(.*?)\((.*)\)*\}\"\: \{\"(.*?)\"\:\s\"\$\{(.*?)\}\"\}\}/';
-                        $replacement = '{"${${1}(${3})}": {"${2}": "${${3}}"}}';
-                        while (preg_match($pattern, $typestr) && !preg_match($pattern2, $typestr)) {
-                            $typestr = preg_replace($pattern, $replacement, $typestr);
-                        }
-
-                        // この形に対応 {"${object}": {"key-object": "${map(set(string))}"}}
-                        $pattern = '/\{\"\$\{(.*?)\}\"\:\s\{\"(.*?)\"\:\s\{\"\$\{(.*?)\}\"\:\s(.*)\}\}\}/';
-                        $pattern2 = '/\{\"\$\{(.*?)\((.*?)\)*\}\"\:\s\{\"(.*?)\"\:\s\{\"\$\{(.*?)\}\"\:\s(.*)\}\}\}/';
-                        $replacement = '{"${${1}(${3})}": {"${2}": {"${${3}}": ${4}}}}';
-                        while (preg_match($pattern, $typestr) && !preg_match($pattern2, $typestr)) {
-                            $typestr = preg_replace($pattern, $replacement, $typestr);
-                        }
-
-                        $pattern = '/\{\"\$\{(.*?)\((.*?)\((.*?)\)\)\}\"\:\s(.*?)\}/';
-                        $replacement = '{"${${1}(${2})}": ${4}}';
-                        while (preg_match($pattern, $typestr)) {
-                            $typestr = preg_replace($pattern, $replacement, $typestr);
-                        }
                         // -------------------------------------------- object
 
                         $pattern = '/\"(.*?)\"\:\s(None)/';
@@ -230,11 +208,11 @@ class CommonTerraformHCL2JSONParse{
                         $typestr = preg_replace($pattern, $replacement, $typestr);
 
                         $tmp_type = json_decode($typestr, true);
+
                         if(json_last_error() !== JSON_ERROR_NONE) {
                             $this->res = false;
                             $this->err = json_last_error_msg();
                         }
-
 
                         $block["variable"]   = $variable;
 
@@ -269,19 +247,19 @@ class CommonTerraformHCL2JSONParse{
     }
 
     //*******************************************************************************************
-    //----Module変数紐付けに登録する用の値を取得
+    //----Module変数紐付けに登録する用の値を取得（type配列の一番上/配列でない場合はtype_arrayを利用）
     //*******************************************************************************************
     function getModuleRecord($type_array, $default_array)
     {
         if (is_array($type_array)) {
             foreach ($type_array as $type_key => $type_value) {
                 $first_type_key = $type_key;
-                break;
+                return ["type" => $first_type_key, "default" => $default_array];
             }
         } else {
             $first_type_key = $type_array;
+            return ["type" => $first_type_key, "default" => $default_array];
         }
-        return ["type" => $first_type_key, "default" => $default_array];
     }
 
     //*******************************************************************************************
@@ -315,7 +293,6 @@ class CommonTerraformHCL2JSONParse{
             }
         }
     }
-
     //解析用のメソッド----
 }
 //----ここまでクラス定義
