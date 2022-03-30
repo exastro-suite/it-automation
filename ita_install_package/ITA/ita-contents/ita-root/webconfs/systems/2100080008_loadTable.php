@@ -1007,7 +1007,7 @@ Terraform代入値管理
 
         $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
         if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" ){
-            if(strlen($g['MEMBER_VARS_UPDATE_VALUE']) !== 0){
+            if(array_key_exists('MEMBER_VARS_UPDATE_VALUE',$g)){
                 $exeQueryData[$objColumn->getID()] = $g['MEMBER_VARS_UPDATE_VALUE'];
             }
         }else if( $modeValue=="DTUP_singleRecDelete" ){
@@ -1590,7 +1590,6 @@ Terraform代入値管理
             }
         }
 
-        $g['MEMBER_VARS_UPDATE_VALUE'] = "";
         if($rest_call === true){
             $intMemberVarsId  = $intRestMemberVarsId;
             $g['MEMBER_VARS_UPDATE_VALUE'] = $intMemberVarsId;
