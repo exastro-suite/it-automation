@@ -3655,7 +3655,11 @@ Terrraform 代入値自動登録設定
                     $aryDiscover = array();
                     $row = $objQuery->resultFetch();
                     unset($objQuery);
-                    $typeId = $row['TYPE_ID'];
+                    if(isset($row['TYPE_ID'])){
+                      $typeId = $row['TYPE_ID'];
+                    }else{
+                      $typeId = "";
+                    }
     
                     if(0 < strlen($typeId)){
                         $query = "SELECT "
@@ -3808,7 +3812,11 @@ Terrraform 代入値自動登録設定
                     $aryDiscover = array();
                     $row = $objQuery->resultFetch();
                     unset($objQuery);
-                    $typeId = $row['TYPE_ID'];
+                    if(isset($row['TYPE_ID'])){
+                      $typeId = $row['TYPE_ID'];
+                    }else{
+                      $typeId = "";
+                    }
     
                     if(0 < strlen($typeId)){
                         $query = "SELECT "

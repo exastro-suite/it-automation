@@ -1674,6 +1674,7 @@ Terraform代入値管理
                 if( $row['REC_COUNT'] == '1' ){
                     $retBool = true;
                 }else if( $row['REC_COUNT'] == '0' ){
+                    $boolExecuteContinue = false;
                     $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-201050");
                 }else{
                     web_log("DB Access error file:" . basename(__FILE__) . " line:" . __LINE__);
@@ -1773,7 +1774,12 @@ Terraform代入値管理
                 $aryDiscover = array();
                 $row = $objQuery->resultFetch();
                 unset($objQuery);
-                $typeId = $row['TYPE_ID'];
+                if(isset($row['TYPE_ID'])){
+                  $typeId = $row['TYPE_ID'];
+                }else{
+                  $typeId = "";
+                }
+                
                 if(0 < strlen($typeId)){
                     $query = "SELECT "
                     ."MEMBER_VARS_FLAG  "
