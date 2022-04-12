@@ -169,6 +169,7 @@
     $warning_flag               = 0;        // 警告フラグ(1：警告発生)
     $error_flag                 = 0;        // 異常フラグ(1：異常発生)
     $db_update_flg              = false;    // DB更新フラグ
+    $aryAccessAuth              = array();  //アクセス許可情報
     $lv_a_proc_loaded_list_varsetup_pkey = 2100080001;
     $lv_a_proc_loaded_list_valsetup_pkey = 2100080002;
 
@@ -287,7 +288,8 @@
         //----------------------------------------------
         $sqlUtnBody = "SELECT "
                      ." {$strColumnIdOfMatterId} MATTER_ID,"
-                     ." {$strColumnIdOfMatterFile} MATTER_FILE "
+                     ." {$strColumnIdOfMatterFile} MATTER_FILE, "
+                     ." ACCESS_AUTH "
                      ."FROM {$strTableCurTerraformMatter} "     // リソーステーブル(B_TERRAFORM_MODULE)
                      ."WHERE DISUSE_FLAG = '0' ";
 
@@ -333,6 +335,8 @@
         while ( $row = $objQueryUtn->resultFetch() ){
            // moduleIDをkeyにし、module素材ファイル名を配列に追加
             $aryMatterFilePerMatterId[$row["MATTER_ID"]] = $row["MATTER_FILE"];
+            //アクセス許可情報追加
+            $aryAccessAuth[$row["MATTER_ID"]] = $row["ACCESS_AUTH"];
         }
         // fetch行数を取得
         $intFetchedFromTerraformMatterFile = $objQueryUtn->effectedRowCount();
@@ -382,7 +386,8 @@
                     'memberVars' => array(
                         "type" => $variable_block["type"],
                         "default" => $variable_block["default"]
-                    )
+                    ),
+                    'accessAuth' => $aryAccessAuth[$intMatterId]
                 );
                 array_push($aryModuleVarsData, $addData);
             }
@@ -473,6 +478,7 @@
             $memberVars = $data["memberVars"];
             $type_array = $memberVars["type"];
             $default_array = $memberVars["default"];
+            $access_auth = $data['accessAuth'];
 
             if (is_array($default_array)) {
                 $variableDefault = encodeHCL($default_array);
@@ -574,7 +580,7 @@
                             $registedMaxMemberColData = getRegistMaxModuleColData($intModuleVarLinkId);
                             // 未登録の場合
                             if (!$registedMaxMemberColData["isRegist"]) {
-                                $res = registMaxMemberCol($intModuleVarLinkId, NULL, $tmp_member_data["max_col_seq"]);
+                                $res = registMaxMemberCol($intModuleVarLinkId, NULL, $tmp_member_data["max_col_seq"], $access_auth);
                                 if (!$res) {
                                     // 「変数ネスト管理の最大繰り返し数の登録に失敗しました。」
                                     $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221040", array(__FILE__, __LINE__));
@@ -585,7 +591,7 @@
                             else {
                                 // 登録済みの最大繰り返し数と取得した要素数に差がある且つ最終更新者がシステムの場合
                                 if ($registedMaxMemberColData["maxColSeq"] - $tmp_member_data["max_col_seq"] != 0 && $registedMaxMemberColData["isSystem"] == true) {
-                                    $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tmp_member_data["max_col_seq"]);
+                                    $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tmp_member_data["max_col_seq"], $access_auth);
                                     if (!$res) {
                                         // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                         $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221050");
@@ -595,12 +601,21 @@
                                 // 最終更新者がシステム且つ廃止状態の場合
                                 elseif ($registedMaxMemberColData["DISUSE_FLAG"] == 1 && $registedMaxMemberColData["isSystem"] == true)
                                 {
-                                    $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tmp_member_data["max_col_seq"]);
+                                    $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tmp_member_data["max_col_seq"], $access_auth);
                                     if (!$res) {
                                         // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                         $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221050", array(__FILE__, __LINE__, $registedMaxMemberColData["MAX_COL_SEQ_ID"]));
                                         throw new Exception($errorMsg);
                                     }
+                                }
+                                //アクセス許可情報が変更されている場合
+                                elseif ($registedMaxMemberColData["ACCESS_AUTH"] != $access_auth) {
+                                  $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $registedMaxMemberColData["maxColSeq"], $access_auth);
+                                  if (!$res) {
+                                      // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
+                                      $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221050");
+                                      throw new Exception($errorMsg);
+                                  }
                                 }
                                 // 最終更新者がユーザの場合
                                 elseif ($registedMaxMemberColData["isSystem"] == false) {
@@ -683,7 +698,7 @@
                         $tfMaxColseq = $member_data["MAX_COL_SEQ"];
                         // 変数ネスト管理とtfファイルから取得した最大繰り返し数に差分があり、最終更新者がシステムの場合は変数ネスト管理の値を更新
                         if ($registedMaxMemberColData["isRegist"] == true && $registedMaxColseq != $tfMaxColseq && $registedMaxMemberColData["isSystem"] == true) {
-                            $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq);
+                            $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq, $access_auth);
                             if (!$res) {
                                 // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                 $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221050", array(__FILE__, __LINE__, $registedMaxMemberColData["MAX_COL_SEQ_ID"]));
@@ -691,7 +706,7 @@
                             }
                         }
                         elseif($registedMaxMemberColData["isRegist"] == true && $registedMaxMemberColData["DISUSE_FLAG"] == 1 && $registedMaxMemberColData["isSystem"] == true) {
-                            $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq);
+                            $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq, $access_auth);
                             if (!$res) {
                                 // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                 $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221050", array(__FILE__, __LINE__, $registedMaxMemberColData["MAX_COL_SEQ_ID"]));
@@ -699,7 +714,7 @@
                             }
                         }
                         elseif ($registedMaxMemberColData["isRegist"] == true && $registedMaxMemberColData["DISUSE_FLAG"] == 1 && $registedMaxMemberColData["isSystem"] == false) {
-                            $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $registedMaxColseq);
+                            $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $registedMaxColseq, $access_auth);
                             if (!$res) {
                                 // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                 $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221050", array(__FILE__, __LINE__, $registedMaxMemberColData["MAX_COL_SEQ_ID"]));
@@ -708,7 +723,7 @@
                         }
                         // 最大繰り返し数の登録
                         if ($registedMaxMemberColData["isRegist"] == false) {
-                            $res = registMaxMemberCol($member_data["PARENT_VARS_ID"], $member_data["CHILD_MEMBER_VARS_ID"], $member_data["MAX_COL_SEQ"]);
+                            $res = registMaxMemberCol($member_data["PARENT_VARS_ID"], $member_data["CHILD_MEMBER_VARS_ID"], $member_data["MAX_COL_SEQ"], $access_auth);
 
                             if (!$res) {
                                 $error_flag = 1;
@@ -739,7 +754,7 @@
                             $tfMaxColseq = $member_data["MAX_COL_SEQ"];
                             // 変数ネスト管理とtfファイルから取得した最大繰り返し数に差分があり、最終更新者がシステムの場合は変数ネスト管理の値を更新
                             if ($registedMaxMemberColData["isRegist"] == true && $registedMaxMemberColData["DISUSE_FLAG"] == 0  && $registedMaxColseq != $tfMaxColseq && $registedMaxMemberColData["isSystem"] == true) {
-                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq);
+                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq, $access_auth);
                                 if (!$res) {
                                     // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                     $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221050", array(__FILE__, __LINE__, $member_data["MAX_COL_SEQ"]));
@@ -768,7 +783,7 @@
                             $tfMaxColseq = $member_data["MAX_COL_SEQ"];
                             // 復活させる
                             if ($registedMaxMemberColData["isRegist"]) {
-                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq);
+                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq, $access_auth);
                                 if(!$res) {
                                     // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                     $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221060", array(__FILE__, __LINE__, $registedMaxMemberColData["MAX_COL_SEQ_ID"]));
@@ -776,7 +791,7 @@
                                 }
                             }
                             else {
-                                $res = registMaxMemberCol($member_data["PARENT_VARS_ID"], $member_data["CHILD_MEMBER_VARS_ID"], $member_data["MAX_COL_SEQ"]);
+                                $res = registMaxMemberCol($member_data["PARENT_VARS_ID"], $member_data["CHILD_MEMBER_VARS_ID"], $member_data["MAX_COL_SEQ"], $access_auth);
                                 if (!$res) {
                                     $error_flag = 1;
                                     // 「変数ネスト管理の最大繰り返し数の登録に失敗しました。」
@@ -799,7 +814,7 @@
                             $tfMaxColseq = $member_data["MAX_COL_SEQ"];
                             // 変数ネスト管理とtfファイルから取得した最大繰り返し数に差分があり、最終更新者がシステムの場合は変数ネスト管理の値を更新
                             if ($registedMaxMemberColData["isRegist"] == true && $registedMaxColseq != $tfMaxColseq && $registedMaxMemberColData["isSystem"] == true) {
-                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq);
+                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq, $access_auth);
                                 if (!$res) {
                                     // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                     $errorMsg = $objMTS->getSomeMessage(
@@ -808,7 +823,7 @@
                                 }
                             }
                             elseif($registedMaxMemberColData["isRegist"] == true && $registedMaxMemberColData["DISUSE_FLAG"] == 1 && $registedMaxMemberColData["isSystem"] == true) {
-                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq);
+                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $tfMaxColseq, $access_auth);
                                 if (!$res) {
                                     // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                     $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221050", array(__FILE__, __LINE__, $registedMaxMemberColData["MAX_COL_SEQ_ID"]));
@@ -816,7 +831,7 @@
                                 }
                             }
                             elseif ($registedMaxMemberColData["isRegist"] == true && $registedMaxMemberColData["DISUSE_FLAG"] == 1 && $registedMaxMemberColData["isSystem"] == false) {
-                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $registedMaxColseq);
+                                $res = updateMaxColSeq($registedMaxMemberColData["MAX_COL_SEQ_ID"], $registedMaxColseq, $access_auth);
                                 if (!$res) {
                                     // 「変数ネスト管理の最大繰り返し数の更新に失敗しました。」
                                     $errorMsg = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221050", array(__FILE__, __LINE__, $registedMaxMemberColData["MAX_COL_SEQ_ID"]));
@@ -3183,7 +3198,7 @@
     //*******************************************************************************************
     //----変数ネスト管理にレコードを登録する
     //*******************************************************************************************
-    function registMaxMemberCol($vars_id, $member_vars_id, $max_col_seq) {
+    function registMaxMemberCol($vars_id, $member_vars_id, $max_col_seq, $access_auth) {
         $res = false;
         global $strCurTableTerraformMaxMemberColTable; // B_TERRAFORM_LRL_MAX_MEMBER_COL
         // VARS_ID, MEMBER_VARS_ID, MAX_COL_SEQ
@@ -3227,6 +3242,8 @@
             $arrayValue["MEMBER_VARS_ID"]      = $member_vars_id; // メンバー変数ID
         }
         $arrayValue["MAX_COL_SEQ"]             = $max_col_seq; // 最大繰り返し数
+        
+        $arrayValue["ACCESS_AUTH"]             = $access_auth;
 
         // $arrayConfig["MAX_COL_SEQ_ID"]         = $max_col_seq_id;// 項番
 
@@ -3321,6 +3338,7 @@
             "isSystem"  => true,  // 最終更新者がシステムフラグ
             "maxColSeq" => 0,
             "MAX_COL_SEQ_ID" => NULL, // 項番
+            "ACCESS_AUTH" => NULL, //アクセス許可情報
             "DISUSE_FLAG" => NULL,
         ];
         global $root_dir_path, $objDBCA, $vg_terraform_max_member_col_table_name;
@@ -3370,6 +3388,7 @@
                 }
                 $res["maxColSeq"] = $row["MAX_COL_SEQ"];
                 $res["MAX_COL_SEQ_ID"] = $row["MAX_COL_SEQ_ID"];
+                $res["ACCESS_AUTH"] = $row["ACCESS_AUTH"];
                 $res["DISUSE_FLAG"] = $row["DISUSE_FLAG"];
             }
         }
@@ -3508,7 +3527,7 @@
     //*******************************************************************************************
     //----変数ネスト管理の最大繰り返し数を更新する
     //*******************************************************************************************
-    function updateMaxColSeq($maxMemberColID, $maxColSeq) {
+    function updateMaxColSeq($maxMemberColID, $maxColSeq, $access_auth) {
         $res = false;
         global $strCurTableTerraformMaxMemberColTable; // B_TERRAFORM_LRL_MAX_MEMBER_COL
         // MAX_COL_SEQ_ID, VARS_ID, MEMBER_VARS_ID, MAX_COL_SEQ
@@ -3583,6 +3602,8 @@
         $arrayValue["MAX_COL_SEQ"]             = $maxColSeq;      // 最大繰り返し数
 
         $arrayValue["LAST_UPDATE_USER"]        = $db_access_user_id;      // 最大繰り返し数
+        
+        $arrayValue["ACCESS_AUTH"]             = $access_auth;    // アクセス許可情報
 
         $temp_array = array();
 
