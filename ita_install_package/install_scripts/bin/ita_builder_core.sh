@@ -836,18 +836,15 @@ configure_terraform() {
 configure_ita() {
     # Creating a sudo configuration file
     cat << EOS > /etc/sudoers.d/it-automation
-daemon       ALL=(ALL)  NOPASSWD:ALL
 apache       ALL=(ALL)  NOPASSWD:ALL
 EOS
 
     #Check create a sudo configuration file
     if [ -e /etc/sudoers.d/it-automation ]; then
-        grep -E "^\s*daemon\s+ALL=\(ALL\)\s+NOPASSWD:ALL\s*" /etc/sudoers.d/it-automation >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        local daemon_txt=`echo $?`
         grep -E "^\s*apache\s+ALL=\(ALL\)\s+NOPASSWD:ALL\s*" /etc/sudoers.d/it-automation >> "$ITA_BUILDER_LOG_FILE" 2>&1
         local apache_txt=`echo $?`
 
-        if [ $daemon_txt -ne 0 ] || [ $apache_txt -ne 0 ]; then
+        if [ $apache_txt -ne 0 ]; then
             log 'ERROR:Failed to create configuration text in /etc/sudoers.d/it-automation.'
             ERR_FLG="false"
             func_exit_and_delete_file
