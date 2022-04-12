@@ -3887,6 +3887,8 @@
             if ($module_regist_flag == true && $typeInfo["MEMBER_VARS_FLAG"] == 1 && $typeInfo["ASSIGN_SEQ_FLAG"] == 1 && $typeInfo["ENCODE_FLAG"] == 0) {
                 if (is_array($default_array)) {
                     $max_col_seq = count($default_array);
+                }else{
+                  $max_col_seq = 1;
                 }
             }
             elseif ($typeInfo["MEMBER_VARS_FLAG"] == 1 && $typeInfo["ASSIGN_SEQ_FLAG"] == 1 && $typeInfo["ENCODE_FLAG"] == 0) {
@@ -3903,6 +3905,8 @@
                 }
                 if (is_array($default)) {
                     $max_col_seq = count($default);
+                }else{
+                  $max_col_seq = 1;
                 }
             }
         }
