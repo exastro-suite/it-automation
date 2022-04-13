@@ -691,7 +691,7 @@
             // プロトコル
             $aryParm['protocol'] = $arycollectSVInfo['PROTOCOL'];
             // ホスト名
-            if($arycollectSVInfo['HOST_DESIGNATE_TYPE_ID'] == 0 ){
+            if($arycollectSVInfo['HOST_DESIGNATE_TYPE_ID'] == 2 ){
                 $aryParm['hostName'] =  $arycollectSVInfo['HOSTNAME'];
             }else{
                 $aryParm['hostName'] =  $arycollectSVInfo['IP_ADDRESS'];
