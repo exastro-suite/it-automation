@@ -16,8 +16,8 @@
 ////en_US_UTF-8_ITAHOSTGROUP_MNU
 $ary["ITAHOSTGROUP-MNU-100001"]     = "HostGroup list";
 $ary["ITAHOSTGROUP-MNU-100002"]     = "Host Group ID";
-$ary["ITAHOSTGROUP-MNU-100003"]     = "HostGroup list";
-$ary["ITAHOSTGROUP-MNU-100004"]     = "HostGroup list";
+$ary["ITAHOSTGROUP-MNU-100003"]     = "HostGroup managemaent";
+$ary["ITAHOSTGROUP-MNU-100004"]     = "HostGroup managemaent";
 $ary["ITAHOSTGROUP-MNU-100005"]     = "HostGroup name";
 $ary["ITAHOSTGROUP-MNU-100006"]     = "Single line text input. 256 byte limit.";
 $ary["ITAHOSTGROUP-MNU-100007"]     = "Priority (larger value is higher)";

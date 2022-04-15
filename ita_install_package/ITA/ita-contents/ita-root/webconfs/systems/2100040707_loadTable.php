@@ -48,9 +48,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     
     // QMファイル名プレフィックス
-    $table->setDBMainTableLabel('AnsibleCommonVarsUsedList');
+    $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207319"));
     // エクセルのシート名
-    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile','AnsibleCommonVarsUsedList');
+    $table->getFormatter('excel')->setGeneValue('sheetNameForEditByFile',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1207320"));
 
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
