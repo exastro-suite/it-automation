@@ -1360,4 +1360,19 @@ $ary["ITAANSIBLEH-MNU-9010001060"]  = "isolated Tower";
 $ary["ITAANSIBLEH-MNU-9010001061"]  = "対象ノードがAnsible Towerのisolated node／Ansible Automation Controllerのexecution nodeの場合に「●」を選択します。";
 $ary["ITAANSIBLEH-MNU-9010002000"]  = "Sensitive設定";
 $ary["ITAANSIBLEH-MNU-9010002010"]  = "「ON」の場合、登録後に具体値が表示されなくなります。";
+$ary["ITAANSIBLEH-MNU-1200010000"] = "Connection information to git that is source code management (SCM).";
+$ary["ITAANSIBLEH-MNU-1200010000"] = "SCM管理 Git連携先情報";
+$ary["ITAANSIBLEH-MNU-1200010100"] = "ホスト名";
+$ary["ITAANSIBLEH-MNU-1200010101"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルでログインする為のホスト名(またはIPアドレス)を入力します。
+Ansible driverのバックヤード機能がインストールされているホストにAnsible Automation Controllerと連携するGitリポジトリが作成されます。
+実行エンジンがAnsible Automation Controllerの場合に必須入力です。";
+$ary["ITAANSIBLEH-MNU-1200010200"] = "Linux アカウント";
+$ary["ITAANSIBLEH-MNU-1200010300"] = "ユーザー";
+$ary["ITAANSIBLEH-MNU-1200010301"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルで接続する為のユーザを入力します。
+実行エンジンがAnsible Automation Controllerの場合に必須入力です。";
+$ary["ITAANSIBLEH-MNU-1200010400"] = "ssh秘密鍵ファイル";
+$ary["ITAANSIBLEH-MNU-1200010401"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルの鍵認証で接続する為の公開鍵ファイルを入力します。
+実行エンジンがAnsible Automation Controllerの場合に必須入力です。";
+$ary["ITAANSIBLEH-MNU-1200010500"] = "パスフレーズ";
+$ary["ITAANSIBLEH-MNU-1200010501"] = "ssh秘密鍵ファイルに設定されているパスフレーズを入力します。";
 ?>

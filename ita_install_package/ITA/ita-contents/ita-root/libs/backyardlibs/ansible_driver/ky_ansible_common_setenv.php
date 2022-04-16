@@ -70,6 +70,10 @@
         define("DF_SCP_IN_PARAMATERS_TOWER_PATH",      "SCP_IN_PARAMATERS_TOWER_PATH");
         define("DF_SCP_IN_PARAMATERS_FILE_ITA_PATH",   "SCP_IN_PARAMATERS_FILE_ITA_PATH");
         define("DF_SCP_IN_PARAMATERS_FILE_TOWER_PATH", "SCP_IN_PARAMATERS_FILE_TOWER_PATH");
+        define("DF_GITREPO_OUT_PATH",                  "GITREPO_OUT_PATH");
+        define("DF_GITREPO_TMP_PATH",                  "GITREPO_TMP_PATH");
+        define("DF_GITREPO_SYMPHONY_PATH",             "GITREPO_SYMPHONY_PATH");
+        define("DF_GITREPO_CONDUCTOR_PATH",            "GITREPO_CONDUCTOR_PATH");
 
         // AnsibleTower処理区分
         define("DF_EXECUTION_FUNCTION"        ,'1');

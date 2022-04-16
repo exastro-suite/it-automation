@@ -1350,4 +1350,19 @@ $ary["ITAANSIBLEH-MNU-9010001060"]  = "isolated Tower";
 $ary["ITAANSIBLEH-MNU-9010001061"]  = "If the target node is an isolated node for Ansible Tower or an execution node for Ansible Automation Controller, select \"●\"";
 $ary["ITAANSIBLEH-MNU-9010002000"]  = "Sensitive setting";
 $ary["ITAANSIBLEH-MNU-9010002010"]  = "If \"ON\", the specific value will not be displayed after registration.";
+$ary["ITAANSIBLEH-MNU-1200010000"] = "SCM Management Git link destination inforamtion";
+$ary["ITAANSIBLEH-MNU-1200010100"] = "Host name";
+$ary["ITAANSIBLEH-MNU-1200010101"] = "Input the Host name (or IP Address) needed in order to login to the Git repository from the Ansible Automation Controller with ssh protocol.
+A Git repository linked with the Ansible Automation Controller will be created to the Host installed by the Ansible backyard function.
+This item is required if the selected Execution engine is \"Ansible Automation Controller\".";
+$ary["ITAANSIBLEH-MNU-1200010200"] = "Linux account";
+$ary["ITAANSIBLEH-MNU-1200010300"] = "User";
+$ary["ITAANSIBLEH-MNU-1200010301"] = "Input the User needed in order to login to the Git repository from the Ansible Automation Controller with ssh protocol.
+This item is required if the selected Execution engine is \"Ansible Automation Controller\".";
+$ary["ITAANSIBLEH-MNU-1200010400"] = "ssh secret key file";
+$ary["ITAANSIBLEH-MNU-1200010401"] = "Input the public key  needed in order to login to the Git repository from the Ansible Automation Controller with ssh protocol.
+This item is required if the selected Execution engine is \"Ansible Automation Controller\".";
+$ary["ITAANSIBLEH-MNU-1200010500"] = "Passphrase";
+$ary["ITAANSIBLEH-MNU-1200010501"] = "Input the passphrase set to the ssh secret key file.";
+
 ?>

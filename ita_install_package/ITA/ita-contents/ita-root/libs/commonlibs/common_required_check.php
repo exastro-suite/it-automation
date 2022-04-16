@@ -327,4 +327,88 @@ class AuthTypeParameterRequiredCheck {
         return $result;
     }
 }
+class TowerHostListGitInterfaceParameterCheck {
+    function getColumnDataFunction($strModeId,$columnName, $Type, $DelFlagCloumnName, $arrayVariant, $arrayRegData) {
+        $UIbase = "";
+        $DBbase = "";
+        switch($strModeId){
+        case "DTUP_singleRecUpdate":
+        case "DTUP_singleRecRegister":
+        case "DTUP_singleRecDelete":
+            $UIbase   = array_key_exists($columnName,$arrayRegData)?$arrayRegData[$columnName]:null;
+            break;
+        }
+        switch($strModeId){
+        case "DTUP_singleRecUpdate":
+        case "DTUP_singleRecRegister":
+        case "DTUP_singleRecDelete":
+            $DBbase   = isset($arrayVariant['edit_target_row'][$columnName])?$arrayVariant['edit_target_row'][$columnName]:null;
+            break;
+        }
+        $ret_array = array();
+        $ret_array['UI'] = $UIbase;
+        $ret_array['DB'] = $DBbase;
+        // DBに反映されるデータ
+        // PasswordColumnの場合
+        // 更新されていない場合はarrayRegDataはNullになるので設定済みのパスワード($arrayVariant['edit_target_row'])取得
+        $del_flag = false;
+        // 削除チェックボタン有無判定
+        if(! empty($Type[$DelFlagCloumnName])) {
+            if( isset($arrayRegData[$Type[$DelFlagCloumnName]])) {
+                // 削除チェックボタンの状態判定
+                if($arrayRegData[$Type[$DelFlagCloumnName]] == "on"){
+                    $del_flag = true;
+                }
+            }
+        }
+        if(! empty($Type[$DelFlagCloumnName])) {
+            if(strlen($ret_array['UI'])==0) {
+                $ret_value = $ret_array['DB'];
+            } else {
+                $ret_value = $ret_array['UI'];
+            }
+        } else {
+            $ret_value = $ret_array['UI'];
+        }
+        if($del_flag === true) {
+            $ret_value = "";
+        }
+        return $ret_value;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // 処理内容
+    //   Towerホスト一覧で設定されているGit接続情報の入力チェック
+    //
+    //   
+    // 戻り値
+    //   true:   正常
+    //   他:     エラー
+    ////////////////////////////////////////////////////////////////////////////////
+    function ParameterCheck($strExecMode, $ColumnArray ,$ValueColumnName, $MyNameCloumnName, $RequiredCloumnName) {
+
+        global $g;
+        global $root_dir_path;
+        $retBool = true;
+        $retStrBody = '';
+
+        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php' );
+
+        if($strExecMode == DF_EXEC_MODE_AAC) {
+            // 実行エンジンがAnsible Automation Controlleの場合、必須入力の項目チェック
+            foreach($ColumnArray as $item=>$Type) {
+                if(($ColumnArray[$item][$ValueColumnName] == "") && ($ColumnArray[$item][$RequiredCloumnName] === true)) {
+                    $errormsg = $Type[$MyNameCloumnName];
+                    if(strlen($retStrBody) != 0) { $retStrBody .= "\n";}
+                    $retStrBody .= $errormsg;
+                    $retBool = false;
+                }
+            }
+        }
+        if($retBool === false) {
+            return $retStrBody;
+        }
+        return $retBool;
+    }
+}
 ?>

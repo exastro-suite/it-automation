@@ -72,6 +72,11 @@ NULL_DATA_HANDLING_FLG          INT                               , -- Null値�
 ANSIBLE_NUM_PARALLEL_EXEC       INT                               , -- 並列実行数
 ANSIBLE_REFRESH_INTERVAL        INT                               , 
 ANSIBLE_TAILLOG_LINES           INT                               , 
+-- Git連携先情報
+ANS_GIT_HOSTNAME                VARCHAR (128)                     , -- バックヤードサーバー「Ansible_Driver」 接続ホスト名
+ANS_GIT_USER                    VARCHAR (128)                     , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス ユーザー
+ANS_GIT_SSH_KEY_FILE            VARCHAR (256)                     , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス 公開鍵
+ANS_GIT_SSH_KEY_FILE_PASSPHRASE text                              , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス 公開鍵 パスフレーズ
 --
 DISP_SEQ                        INT                               , -- 表示順序
 ACCESS_AUTH                     TEXT                              ,
@@ -121,6 +126,11 @@ NULL_DATA_HANDLING_FLG          INT                               , -- Null値�
 ANSIBLE_NUM_PARALLEL_EXEC       INT                               , -- 並列実行数
 ANSIBLE_REFRESH_INTERVAL        INT                               , 
 ANSIBLE_TAILLOG_LINES           INT                               , 
+-- Git連携先情報
+ANS_GIT_HOSTNAME                VARCHAR (128)                     , -- バックヤードサーバー「Ansible_Driver」 接続ホスト名
+ANS_GIT_USER                    VARCHAR (128)                     , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス ユーザー
+ANS_GIT_SSH_KEY_FILE            VARCHAR (256)                     , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス 公開鍵
+ANS_GIT_SSH_KEY_FILE_PASSPHRASE text                              , -- バックヤードサーバー「Ansible_Driver」 Gitリポジトリ アクセス 公開鍵 パスフレーズ
 --
 DISP_SEQ                        INT                               , -- 表示順序
 ACCESS_AUTH                     TEXT                              ,
