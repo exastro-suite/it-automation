@@ -36,3 +36,8 @@
 /ita-root/webconfs/users
 /ita-root/webroot/menus/sheets
 /ita-root/webroot/menus/users
+/ita-root/uploadfiles/2100040702
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old/0000000001

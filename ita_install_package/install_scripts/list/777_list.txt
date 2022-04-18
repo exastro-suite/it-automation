@@ -87,3 +87,8 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100090001/old/-000000005
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100100001/old/-000000006
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100120001/old/-000160015
+/ita-root/uploadfiles/2100040702
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old/0000000001

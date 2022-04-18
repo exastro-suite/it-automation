@@ -78,7 +78,7 @@ func_set_total_cnt() {
     fi
 
     if [ "$ANSIBLE_FLG" -eq 1 ]; then
-        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+5))
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+6))
     fi
 
     if [ "$COBBLER_FLG" -eq 1 ]; then
@@ -994,6 +994,32 @@ else
         func_create_tables $VAL
     done
 
+fi
+
+###################################################
+#Ansible-driver用awxユーザ、sshキー作成
+log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Create awx user and ssh key for Ansible driver."
+###################################################
+if [ "$ANSIBLE_FLG" -eq 1 ]; then
+
+    #check awx user
+    cat /etc/group | grep ^awx: >> "$LOG_FILE" 2>&1
+    if [ $? -ne 0 ]; then
+        #create awx user
+        useradd awx >> "$LOG_FILE" 2>&1
+    fi
+
+    #create ssh key
+    if test -e /home/awx/.ssh/rsa_awx_key ; then
+        rm -f /home/awx/.ssh/rsa_awx_key*
+    fi
+    su - awx -c 'ssh-keygen -t rsa -b 4096 -C "" -f ~/.ssh/rsa_awx_key -N ""' >> "$LOG_FILE" 2>&1
+    su - awx -c 'cat ~/.ssh/rsa_awx_key.pub >> ~/.ssh/authorized_keys' >> "$LOG_FILE" 2>&1
+    chmod 600 /home/awx/.ssh/authorized_keys >> "$LOG_FILE" 2>&1
+    cat /home/awx/.ssh/rsa_awx_key | base64 | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' > "$ITA_DIRECTORY"/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/rsa_awx_key
+    cat /home/awx/.ssh/rsa_awx_key | base64 | tr '[A-Za-z]' '[N-ZA-Mn-za-m]' > "$ITA_DIRECTORY"/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old/0000000001/rsa_awx_key
+
+    PROCCESS_CNT=$((PROCCESS_CNT+1))
 fi
 
 ###################################################
