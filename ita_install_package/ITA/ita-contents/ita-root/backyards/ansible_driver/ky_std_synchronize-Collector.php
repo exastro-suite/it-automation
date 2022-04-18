@@ -761,9 +761,14 @@
                 $strCollectlogPath = $tmpCollectlogdir . "/" . $tmpCollectlogfile;
                 //ログ出力先チェック、ディレクトリ作成
                 if( !is_dir($tmpCollectlogdir) ){
+                    #1907　umask退避-umask設定-mkdir,umask戻し
+                    $mask = umask();
+                    umask(000);
                     if ( mkdir($tmpCollectlogdir,0777,true) ){
                         chmod($tmpCollectlogdir, 0777);
+                        umask($mask);
                     }else{
+                        umask($mask);
                         exit;
                     }
                 }
