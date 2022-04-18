@@ -226,6 +226,8 @@ class CreateAnsibleExecFiles {
 
     private $lv_Ansible_temporary_files_Dir;       //.tmpディレクトリ
 
+    private $lv_GitRepo_temporary_DirAry;         // Git ローカルリポジトリ作成用作業ディレクトリ
+
     //親PlayBook内各ディレクトリ変数
     private $lv_Playbook_child_playbooks_Dir;      //PlayBook内 子PlayBookパス
     private $lv_Hostvarsfile_template_file_Dir;    //inディレクトリ配下 テンプレートファイルパス
@@ -459,6 +461,8 @@ class CreateAnsibleExecFiles {
         global $root_dir_path;
         global $vg_TowerProjectsScpPathArray;
 
+        global $vg_tower_driver_name;
+
         // Tower(/var/lib/awx/projects)ディレクトリへのファイル転送パス配列
         $vg_TowerProjectsScpPathArray = array();
 
@@ -549,6 +553,8 @@ class CreateAnsibleExecFiles {
 
         // Tower Projectディレクトリパス生成
         $this->setTowerProjectDirPath();
+
+        $this->lv_GitRepo_temporary_DirAry = getInputDataTempDir($in_exec_no,$vg_tower_driver_name);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -788,6 +794,10 @@ class CreateAnsibleExecFiles {
         $Tower_out_Dir = sprintf("%s/%s",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_OUT_DIR);
         $this->setTowerProjectsScpPath(DF_SCP_OUT_TOWER_PATH,$Tower_out_Dir);
         $this->setTowerProjectsScpPath(DF_SCP_OUT_ITA_PATH,$this->getAnsible_out_Dir());
+
+        // Gitリポジトリ作業用 ディレクトリバス
+        $path = sprintf("%s/%s",$this->lv_GitRepo_temporary_DirAry["DIR_NAME"],self::LC_ITA_OUT_DIR);
+        $this->setTowerProjectsScpPath(DF_GITREPO_OUT_PATH,$path);
     
         // ユーザー公開用データリレイストレージパス
         $user_out_Dir = $c_outdir . "/" . self::LC_ANS_OUTDIR_DIR;
@@ -820,6 +830,10 @@ class CreateAnsibleExecFiles {
                 $this->setTowerProjectsScpPath(DF_SCP_SYMPHONY_TOWER_PATH,$this->lv_symphony_instance_Dir);
                 $ita_conductor_instance_Dir= sprintf("%s/%s",$this->getAnsibleBaseDir('SYMPHONY_SH_PATH_ITA'),$ins_Path);
                 $this->setTowerProjectsScpPath(DF_SCP_SYMPHONY_ITA_PATH,$ita_conductor_instance_Dir);
+
+                // Gitリポジトリ作業用 ディレクトリバス
+                $path = sprintf("%s/%s/%s/%s",$this->lv_GitRepo_temporary_DirAry["DIR_NAME"],self::LC_ITA_TMP_DIR,self::LC_ITA_SYMPHONY_DIR,$ins_Path);
+                $this->setTowerProjectsScpPath(DF_GITREPO_SYMPHONY_PATH,$path);
                 break;
             }
         }
@@ -837,11 +851,15 @@ class CreateAnsibleExecFiles {
                 $this->lv_conductor_instance_Dir= sprintf("%s/%s",$this->getAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ANS'),$ins_Path);
                 break;
             default:
-                $this->lv_conductor_instance_Dir= sprintf("%s/%s/%s/%s",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_TMP_DIR,self::LC_ITA_CONDUCTOR_DIR,$ins_Path);
                 // Tower(/var/lib/awx/projects)ディレクトリへのファイル転送パス退避
+                $this->lv_conductor_instance_Dir= sprintf("%s/%s/%s/%s",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_TMP_DIR,self::LC_ITA_CONDUCTOR_DIR,$ins_Path);
                 $this->setTowerProjectsScpPath(DF_SCP_CONDUCTOR_TOWER_PATH,$this->lv_conductor_instance_Dir);
                 $ita_conductor_instance_Dir= sprintf("%s/%s",$this->getAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ITA'),$ins_Path);
                 $this->setTowerProjectsScpPath(DF_SCP_CONDUCTOR_ITA_PATH,$ita_conductor_instance_Dir);
+
+                // Gitリポジトリ作業用 ディレクトリバス
+                $path = sprintf("%s/%s/%s/%s",$this->lv_GitRepo_temporary_DirAry["DIR_NAME"],self::LC_ITA_TMP_DIR,self::LC_ITA_CONDUCTOR_DIR,$ins_Path);
+                $this->setTowerProjectsScpPath(DF_GITREPO_CONDUCTOR_PATH,$path);
                 break;
             }
         }
@@ -1369,6 +1387,10 @@ class CreateAnsibleExecFiles {
         $Tower_tmp_Dir = sprintf("%s/%s",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_TMP_DIR);
         $this->setTowerProjectsScpPath(DF_SCP_TMP_TOWER_PATH,$Tower_tmp_Dir);
         $this->setTowerProjectsScpPath(DF_SCP_TMP_ITA_PATH,$this->getAnsible_tmp_Dir());
+
+        // Gitリポジトリ作業用 ディレクトリバス
+        $path = sprintf("%s/%s",$this->lv_GitRepo_temporary_DirAry["DIR_NAME"],self::LC_ITA_TMP_DIR);
+        $this->setTowerProjectsScpPath(DF_GITREPO_TMP_PATH,$path);
 
         // Tower用のsymphonyディレクトリ生成
         if(strlen($in_symphony_instance_no) != 0) {

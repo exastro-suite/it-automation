@@ -42,6 +42,7 @@ class RestApiCaller {
     private $msgTplStorage;
 
     private $baseURI;
+    private $directURI;
     private $decryptedAuthToken;
 
     private $accessToken;
@@ -56,6 +57,7 @@ class RestApiCaller {
 
     function __construct($protocol, $hostName, $portNo, $encryptedAuthToken,$proxySetting) {
         $this->baseURI = $protocol . "://" . $hostName . ":" . $portNo . self::API_BASE_PATH;
+        $this->directURI = $protocol . "://" . $hostName . ":" . $portNo;
         $this->decryptedAuthToken= ky_decrypt($encryptedAuthToken);
 
         $this->logger = LogWriter::getInstance();
@@ -119,10 +121,10 @@ class RestApiCaller {
         return $response_array;
     }
 
-    function restCall($method, $apiUri, $content = array(), $header = array(), $Rest_stdout_flg=false) {
+    function restCall($method, $apiUri, $content = array(), $header = array(), $Rest_stdout_flg=false, $DirectUrl=false) {
 
         $httpContext = array();
-        $arrHeader      = array();
+        $arrHeader   = array();
 
         if($Rest_stdout_flg == false) {
             // コンテンツ付与
@@ -182,7 +184,11 @@ class RestApiCaller {
             if(isset($line['line'])) $nowline = $line['line'];
             $print_backtrace .= sprintf("%s: line:%s\n",$nowfile,$nowline);
         }
-        $print_url = sprintf("URL: %s%s\n",$this->baseURI,$apiUri);
+        if($DirectUrl === false) {
+            $url = sprintf("%s%s",$this->baseURI,$apiUri);
+        } else {
+            $url = sprintf("%s%s",$this->directURI,$apiUri);
+        }
         $print_HttpContext = sprintf("http context\n%s",print_r($httpContext,true));
 
         ////////////////////////////////
@@ -190,10 +196,12 @@ class RestApiCaller {
         ////////////////////////////////
         $http_response_header = null;
         $responseContents = file_get_contents(
-                                $this->baseURI . $apiUri,
+                                $url,
                                 false,
                                 stream_context_create($httpContext)
                             );
+
+        $print_url = "URL: " . $url . "\n";
 
         $print_HttpResponsHeader =  sprintf("http response header\n%s",print_r($http_response_header,true));
 

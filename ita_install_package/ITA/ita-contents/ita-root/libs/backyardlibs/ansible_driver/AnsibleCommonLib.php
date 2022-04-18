@@ -1638,4 +1638,11 @@ class InventryFileAddOptionContlorl {
         $retStrBody          = "";
         return [$retBool,$boolSystemErrorFlag,$retStrBody];
     }
+    function getInputDataTempDir($EcecuteNo, $DriverName) {
+        global $root_dir_path;
+        $ary["BASE_DIR"] = sprintf("%s/temp/ansible_driver_temp",$root_dir_path);
+        $ary["DIR_NAME"] = sprintf("%s/temp/ansible_driver_temp/%s_%010s",$root_dir_path, $DriverName, $EcecuteNo);
+        return $ary;
+    }
+
 ?>

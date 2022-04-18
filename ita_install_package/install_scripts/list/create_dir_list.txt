@@ -9,6 +9,7 @@
 /ita-root/logs/update_by_file
 /ita-root/logs/webaplogs
 /ita-root/repositorys
+/ita-root/repositorys/ansible_driver
 /ita-root/temp/data_download
 /ita-root/temp/data_export
 /ita-root/temp/data_import/backup
