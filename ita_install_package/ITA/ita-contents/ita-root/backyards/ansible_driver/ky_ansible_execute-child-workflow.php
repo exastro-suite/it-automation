@@ -2208,6 +2208,29 @@
 
             $in_utn_file_dir = $in_exe_ins_input_file_dir . "/" . $in_zip_subdir . "/" . str_pad( $in_execution_no, $intNumPadding, "0", STR_PAD_LEFT );
 
+            if( ! is_dir( $in_exe_ins_input_file_dir) ){
+                if( !mkdir( $in_exe_ins_input_file_dir, 0777,true) ){
+                    // 事前準備を中断
+                    $FREE_LOG = $objMTS->getSomeMessage($msg_code_1,array($in_execution_no));
+                    require ($root_dir_path . $log_output_php );
+
+                    return false;
+                }
+                if( !chmod( $in_exe_ins_input_file_dir, 0777 ) ){
+                    // 事前準備を中断
+                    $FREE_LOG = $objMTS->getSomeMessage($msg_code_2,array($in_execution_no));
+                    require ($root_dir_path . $log_output_php );
+                    return false;
+                }
+            } else {
+                if( !chmod( $in_exe_ins_input_file_dir, 0777 ) ){
+                    // 事前準備を中断
+                    $FREE_LOG = $objMTS->getSomeMessage($msg_code_2,array($in_execution_no));
+                    require ($root_dir_path . $log_output_php );
+                    return false;
+                }
+            }
+
             if( !is_dir( $in_utn_file_dir ) ){
                 // ここ(UTNのdir)だけは再帰的に作成する
                 if( !mkdir( $in_utn_file_dir, 0777,true) ){
