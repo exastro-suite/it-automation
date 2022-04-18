@@ -1931,6 +1931,15 @@ function yamlParseAnalysis($strTargetfile){
         foreach ($arrTargetParm as $key1 => $value1) {
             if( is_array($value1) ){
 
+                # 1897
+                foreach ($value1 as $key2 => $value2) {
+                    if( !is_array( $value2 ) ){
+                        if( is_numeric( $key2 ) ){
+                            $arrVarsList[$key1][ '['.$key2.']' ] = $value2 ;
+                        }
+                    }
+                }
+
                 $in_fastarry_f = "";
                 $in_var_name = "";
                 $in_var_name_path = "";
