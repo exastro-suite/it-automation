@@ -907,7 +907,7 @@ make_ita() {
     log "php install and setting"
     configure_php
         
-    if [ "$cicd_for_iac" == "yes" ]; then
+    if [ "$ansible_driver" == "yes" ] || [ "$cicd_for_iac" == "yes" ]; then
         log "git install and setting"
         configure_git
     fi
