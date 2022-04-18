@@ -1360,7 +1360,6 @@ $ary["ITAANSIBLEH-MNU-9010001060"]  = "isolated Tower";
 $ary["ITAANSIBLEH-MNU-9010001061"]  = "対象ノードがAnsible Towerのisolated node／Ansible Automation Controllerのexecution nodeの場合に「●」を選択します。";
 $ary["ITAANSIBLEH-MNU-9010002000"]  = "Sensitive設定";
 $ary["ITAANSIBLEH-MNU-9010002010"]  = "「ON」の場合、登録後に具体値が表示されなくなります。";
-$ary["ITAANSIBLEH-MNU-1200010000"] = "Connection information to git that is source code management (SCM).";
 $ary["ITAANSIBLEH-MNU-1200010000"] = "SCM管理 Git連携先情報";
 $ary["ITAANSIBLEH-MNU-1200010100"] = "ホスト名";
 $ary["ITAANSIBLEH-MNU-1200010101"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルでログインする為のホスト名(またはIPアドレス)を入力します。
