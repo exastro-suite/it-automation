@@ -30,6 +30,7 @@ class ControlGit {
      * コンストラクタ
      */
     public function __construct($EcecuteNo, $DriverName, $HostName) {
+        global $root_dir_path;
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
