@@ -79,7 +79,7 @@ foreach($splitTargetArray as $splitTarget){
 
     $menuId = sprintf("%010d", $splitTarget['INPUT_MENU_ID']);
 
-    $cmd = "grep setDBMainTableHiddenID /exastro/ita-root/webconfs/sheets/${menuId}_loadTable.php";
+    $cmd = "grep setDBMainTableHiddenID ${root_dir_path}/ita-root/webconfs/sheets/${menuId}_loadTable.php";
     $output = NULL;
     exec($cmd, $output, $return_var);
 
