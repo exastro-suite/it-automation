@@ -3570,9 +3570,13 @@
 
                             //ログ出力先チェック、ディレクトリ作成
                             if( !is_dir($tmpNoticelogdir) ){
+                                #1907　umask退避-設定-戻し
+                                $mask = umask();
+                                umask(000);
                                 if ( mkdir($tmpNoticelogdir,0777,true) ){
                                     chmod($tmpNoticelogdir, 0777);
                                 }
+                                umask($mask);
                             }
 
                             //通知設定がある場合

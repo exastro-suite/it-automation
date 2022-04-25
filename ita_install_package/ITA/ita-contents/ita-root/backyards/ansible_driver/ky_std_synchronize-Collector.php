@@ -761,9 +761,14 @@
                 $strCollectlogPath = $tmpCollectlogdir . "/" . $tmpCollectlogfile;
                 //ログ出力先チェック、ディレクトリ作成
                 if( !is_dir($tmpCollectlogdir) ){
+                    #1907　umask退避-umask設定-mkdir,umask戻し
+                    $mask = umask();
+                    umask(000);
                     if ( mkdir($tmpCollectlogdir,0777,true) ){
                         chmod($tmpCollectlogdir, 0777);
+                        umask($mask);
                     }else{
+                        umask($mask);
                         exit;
                     }
                 }
@@ -1930,6 +1935,15 @@ function yamlParseAnalysis($strTargetfile){
     if( $arrTargetParm  != array() ){
         foreach ($arrTargetParm as $key1 => $value1) {
             if( is_array($value1) ){
+
+                # 1897
+                foreach ($value1 as $key2 => $value2) {
+                    if( !is_array( $value2 ) ){
+                        if( is_numeric( $key2 ) ){
+                            $arrVarsList[$key1][ '['.$key2.']' ] = $value2 ;
+                        }
+                    }
+                }
 
                 $in_fastarry_f = "";
                 $in_var_name = "";

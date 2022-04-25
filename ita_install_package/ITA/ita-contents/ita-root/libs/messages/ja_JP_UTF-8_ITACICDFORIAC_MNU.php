@@ -36,7 +36,7 @@ $ary["ITACICDFORIAC-MNU-1200010401"]   = "リモートリポジトリと接続�
 ローカルのGitの場合、Localを選択して下さい。";
 $ary["ITACICDFORIAC-MNU-1200010500"]   = "Visibilityタイプ";
 $ary["ITACICDFORIAC-MNU-1200010501"]   = "リモートリポジトリのVisibilityタイプを選択して下さい。
-プロトコルでhttpsを選択した場合、Visibilityタイプの選択は必須です。";
+プロトコルでprivayeを選択した場合、Visibilityタイプの選択は必須です。";
 $ary["ITACICDFORIAC-MNU-1200010600"]   = "Git アカウント情報";
 $ary["ITACICDFORIAC-MNU-1200010700"]   = "ユーザ";
 $ary["ITACICDFORIAC-MNU-1200010701"]   = "Gitのユーザを入力して下さい。

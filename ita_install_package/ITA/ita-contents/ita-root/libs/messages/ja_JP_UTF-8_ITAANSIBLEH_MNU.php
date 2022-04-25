@@ -637,8 +637,8 @@ $ary["ITAANSIBLEH-MNU-1203065"]     = "実行エンジン";
 $ary["ITAANSIBLEH-MNU-1203066"]     = "実行するエンジンを3種類から選択します。
 ・Ansible Core
 ・Ansible Tower
-・Ansible Automation controller
-※Ansible TowerはAnsible Automation Pratform2.0以降でAnsible Automation controllerに変更になりました。
+・Ansible Automation Controller
+※Ansible TowerはAnsible Automation Pratform2.0以降でAnsible Automation Controllerに変更になりました。
 Ansible Core以外を選択した場合もansible-vaultコマンドを実行するAnsible Coreインターフェースの設定が必要です。";
 $ary["ITAANSIBLEH-MNU-1203070"]     = "Access_key_id";
 $ary["ITAANSIBLEH-MNU-1203080"]     = "Ansibleサーバ接続時の認証に使用するアクセスキーIDです。";
@@ -1235,7 +1235,7 @@ $ary["ITAANSIBLEH-MNU-9010000000"]  = "認証トークン";
 $ary["ITAANSIBLEH-MNU-9010000001"]  = "ITAからRestAPIでAnsible Automation Controllerに接続するユーザーの認証トークンです。";
 $ary["ITAANSIBLEH-MNU-9010000002"]  = "組織名";
 $ary["ITAANSIBLEH-MNU-9010000003"]  = "Ansible Automation Controllerに登録されている組織名を入力します。";
-$ary["ITAANSIBLEH-MNU-9010000004"]  = "Ansible-Core インターフェース";
+$ary["ITAANSIBLEH-MNU-9010000004"]  = "Ansible Core インターフェース";
 $ary["ITAANSIBLEH-MNU-9010000005"]  = "Ansible Automation Controller インターフェース";
 $ary["ITAANSIBLEH-MNU-9010000006"]  = "Legacy";
 $ary["ITAANSIBLEH-MNU-9010000007"]  = "Legacy Role";
@@ -1326,7 +1326,7 @@ $ary["ITAANSIBLEH-MNU-9010000038"]  = "ansible.cfg";
 $ary["ITAANSIBLEH-MNU-9010000039"]  = "作業実行時に使用するansible.cfgをアップロードします。
 未アップロードの場合は、デフォルトが使用されます。
 また、ロールパッケージ管理でアップロードされているzipファイルにansible.cfgが含まれている場合は、アップロードしたansible.cfgで上書きされます。";
-$ary["ITAANSIBLEH-MNU-9010000040"]  = "Ansible-Core利用情報";
+$ary["ITAANSIBLEH-MNU-9010000040"]  = "Ansible Core利用情報";
 $ary["ITAANSIBLEH-MNU-9010001000"]  = "Ansible Automation Controllerのホスト情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>クラスター構成で構築されている場合、クラスター内のホップノードを除いたノード情報を登録して下さい。
 クラスター構成でない場合は、対象ノード(1台)の情報を登録して下さい。";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "項番";
@@ -1360,4 +1360,18 @@ $ary["ITAANSIBLEH-MNU-9010001060"]  = "isolated Tower";
 $ary["ITAANSIBLEH-MNU-9010001061"]  = "対象ノードがAnsible Towerのisolated node／Ansible Automation Controllerのexecution nodeの場合に「●」を選択します。";
 $ary["ITAANSIBLEH-MNU-9010002000"]  = "Sensitive設定";
 $ary["ITAANSIBLEH-MNU-9010002010"]  = "「ON」の場合、登録後に具体値が表示されなくなります。";
+$ary["ITAANSIBLEH-MNU-1200010000"] = "SCM管理 Git連携先情報";
+$ary["ITAANSIBLEH-MNU-1200010100"] = "ホスト名";
+$ary["ITAANSIBLEH-MNU-1200010101"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルでログインする為のホスト名(またはIPアドレス)を入力します。
+Ansible driverのバックヤード機能がインストールされているホストにAnsible Automation Controllerと連携するGitリポジトリが作成されます。
+実行エンジンがAnsible Automation Controllerの場合に必須入力です。";
+$ary["ITAANSIBLEH-MNU-1200010200"] = "Linux アカウント";
+$ary["ITAANSIBLEH-MNU-1200010300"] = "ユーザー";
+$ary["ITAANSIBLEH-MNU-1200010301"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルで接続する為のユーザを入力します。
+実行エンジンがAnsible Automation Controllerの場合に必須入力です。";
+$ary["ITAANSIBLEH-MNU-1200010400"] = "ssh秘密鍵ファイル";
+$ary["ITAANSIBLEH-MNU-1200010401"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルの鍵認証で接続する為の公開鍵ファイルを入力します。
+実行エンジンがAnsible Automation Controllerの場合に必須入力です。";
+$ary["ITAANSIBLEH-MNU-1200010500"] = "パスフレーズ";
+$ary["ITAANSIBLEH-MNU-1200010501"] = "ssh秘密鍵ファイルに設定されているパスフレーズを入力します。";
 ?>
