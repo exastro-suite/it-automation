@@ -168,8 +168,8 @@ $ary["ITACREPAR-MNU-102618"]        = "[Original data] Basic console/Operation l
 $ary["ITACREPAR-MNU-102701"]        = "Menu for creating items to be selected for \"Reference other menu\" in the \"Menu  item creation information\" menu.<br/>
 Automatically created.";
 $ary["ITACREPAR-MNU-102702"]        = "Id";
-$ary["ITACREPAR-MNU-102703"]        = "Reference other menu";
-$ary["ITACREPAR-MNU-102704"]        = "Reference other menu";
+$ary["ITACREPAR-MNU-102703"]        = "Other menu link";
+$ary["ITACREPAR-MNU-102704"]        = "Other menu link";
 $ary["ITACREPAR-MNU-102705"]        = "Menu group";
 $ary["ITACREPAR-MNU-102706"]        = "";
 $ary["ITACREPAR-MNU-102707"]        = "Menu";
