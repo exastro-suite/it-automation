@@ -1,4 +1,4 @@
-Exastro IT Automation 1.10.0 (2022-05-XX)
+Exastro IT Automation 1.10.0 (2022-05-12)
 ==================================================
 
 Installer
