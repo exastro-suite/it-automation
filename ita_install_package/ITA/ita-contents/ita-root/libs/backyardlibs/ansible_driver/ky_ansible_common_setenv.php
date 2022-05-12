@@ -51,11 +51,35 @@
         // 実行エンジン
         define("DF_EXEC_MODE_ANSIBLE"         ,'1');         // Ansibleで実行
         define("DF_EXEC_MODE_TOWER"           ,'2');         // AnsibleTowerで実行
+        define("DF_EXEC_MODE_AAC"             ,'3');         // ansible automation controllerで実行
+
+        // Towerノードタイプ
+        define("DF_EXECUTE_NODE"              ,'execute_node');         //  ISOLATED・実行ノード
+        define("DF_CONTROL_NODE"              ,'control?nide');         //  ハイブリット・制御ノード
+
+        $vg_TowerProjectsScpPathArray = array();       // Tower(/var/lib/awx/projects)ディレクトリへのファイル転送パス配列
+        define("DF_SCP_CONDUCTOR_ITA_PATH",            "SCP_CONDUCTOR_ITA_PATH");
+        define("DF_SCP_CONDUCTOR_TOWER_PATH",          "SCP_CONDUCTOR_TOWER_PATH");
+        define("DF_SCP_SYMPHONY_ITA_PATH",             "SCP_SYMPHONY_ITA_PATH");
+        define("DF_SCP_SYMPHONY_TOWER_PATH",           "SCP_SYMPHONY_TOWER_PATH");
+        define("DF_SCP_OUT_ITA_PATH",                  "SCP_OUT_ITA_PATH");
+        define("DF_SCP_OUT_TOWER_PATH",                "SCP_OUT_TOWER_PATH");
+        define("DF_SCP_TMP_ITA_PATH",                  "SCP_TMP_ITA_PATH");
+        define("DF_SCP_TMP_TOWER_PATH",                "SCP_TMP_TOWER_PATH");
+        define("DF_SCP_IN_PARAMATERS_ITA_PATH",        "SCP_IN_PARAMATERS_ITA_PATH");
+        define("DF_SCP_IN_PARAMATERS_TOWER_PATH",      "SCP_IN_PARAMATERS_TOWER_PATH");
+        define("DF_SCP_IN_PARAMATERS_FILE_ITA_PATH",   "SCP_IN_PARAMATERS_FILE_ITA_PATH");
+        define("DF_SCP_IN_PARAMATERS_FILE_TOWER_PATH", "SCP_IN_PARAMATERS_FILE_TOWER_PATH");
+        define("DF_GITREPO_OUT_PATH",                  "GITREPO_OUT_PATH");
+        define("DF_GITREPO_TMP_PATH",                  "GITREPO_TMP_PATH");
+        define("DF_GITREPO_SYMPHONY_PATH",             "GITREPO_SYMPHONY_PATH");
+        define("DF_GITREPO_CONDUCTOR_PATH",            "GITREPO_CONDUCTOR_PATH");
 
         // AnsibleTower処理区分
         define("DF_EXECUTION_FUNCTION"        ,'1');
         define("DF_CHECKCONDITION_FUNCTION"   ,'2');
         define("DF_DELETERESOURCE_FUNCTION"   ,'3');
+        define("DF_RESULTFILETRANSFER_FUNCTION"   ,'4');
 
         // B_ANS_TWR_JOBTP_PROPERTY->PROPERTY_TYPE
         define("DF_JobTemplateKeyValueProperty","1");
@@ -139,5 +163,7 @@
     $VarName_pattenAry[DF_README_VARS][] = array('parent'=>false, 'type'=>DF_VAR_TYPE_GBL,  'pattern'=>$GBL_parent_VarName);
     $VarName_pattenAry[DF_README_VARS][] = array('parent'=>true,  'type'=>DF_VAR_TYPE_USER, 'pattern'=>$USER_parent_VarName);
 
+    $vg_TowerProjectPath         = "/var/lib/awx/projects";  // Tower Project Path
+    $vg_TowerExastroProjectPath  = "/var/lib/exastro";       // Tower Exastro専用 Project Path
 
 ?>

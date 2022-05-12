@@ -3181,7 +3181,7 @@ class SingleRowTableFormatter extends TableFormatter {
                     if($this->strFormatterId == "register_table") {
                         $RoleList = array();
                         $obj = new RoleBasedAccessControl($g['objDBCA']);
-                        if($outputRowData[$AccessAuthColumnName] == ""){
+                        if(!is_array($outputRowData) || !array_key_exists($AccessAuthColumnName, $outputRowData) || $outputRowData[$AccessAuthColumnName] == ""){
                             $RoleList = array();
                             // 廃止以外のロールリスト
                             $DefaultAccessRoleString = $obj->getDefaultAccessRoleString($g['login_id'],'NAME',true); // 廃止を含む
@@ -3247,7 +3247,13 @@ class SingleRowTableFormatter extends TableFormatter {
                 
             } elseif( get_class($this) == "RegisterTableFormatter" && 
                 ( get_class($objColumn) == "SensitiveMultiTextColumn" || get_class($objColumn) == "SensitiveSingleTextColumn" )) {
-                $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, $outputRowData['SENSITIVE_FLAG']);
+                if(is_array($outputRowData) && array_key_exists('SENSITIVE_FLAG', $outputRowData)){
+                    $sensitiveFlg = $outputRowData['SENSITIVE_FLAG'];
+                }
+                else{
+                    $sensitiveFlg = null;
+                }
+                $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, $sensitiveFlg);
             } elseif( get_class($this) == "RegisterTableFormatter" && get_class($objColumn) == "PasswordColumn") {
                 $tmpStr .= $objColumn->getOutputBodyDuplicate($this->strFormatterId, $outputRowData, 1);
             } else {

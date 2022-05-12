@@ -366,8 +366,10 @@
                     $aryMsgBody[] = "Selected row count is not 1.";
                     //二行以上見つかった異常----
                 }else{
-                    $intNowVal = $row1['VALUE'];
-                    $intLatelstValue = $intNowVal;
+                    if($intResultStatus === 0){
+                        $intNowVal = $row1['VALUE'];
+                        $intLatelstValue = $intNowVal;
+                    }
                 }
             }else{
                 $intResultStatus=102;

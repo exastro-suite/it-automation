@@ -1077,11 +1077,26 @@ try {
             //----------------------------------------------
             // operation_noとpattern_idから変数名と代入値を取得
             //----------------------------------------------
-            $sql = "SELECT * "
-                . "FROM   {$vg_terraform_vars_data_view_name} "
-                . "WHERE  DISUSE_FLAG = '0' "
-                . "AND    OPERATION_NO_UAPK = {$operation_no} "
-                . "AND    PATTERN_ID = {$pattern_id} ";
+            $sql = "SELECT "
+                . "D_TERRAFORM_VARS_DATA.MODULE_VARS_LINK_ID, "
+                . "D_TERRAFORM_VARS_DATA.VARS_NAME, "
+                . "D_TERRAFORM_VARS_DATA.HCL_FLAG, "
+                . "D_TERRAFORM_VARS_DATA.SENSITIVE_FLAG, "
+                . "D_TERRAFORM_VARS_DATA.VARS_ENTRY, "
+                . "D_TERRAFORM_VARS_DATA.MEMBER_VARS, "
+                . "D_TERRAFORM_VARS_DATA.ASSIGN_SEQ, "
+                . "B_TERRAFORM_MODULE_VARS_LINK.TYPE_ID, "
+                . "D_TERRAFORM_VAR_MEMBER.VARS_ASSIGN_FLAG "
+                . "FROM   D_TERRAFORM_VARS_DATA "
+                . "LEFT OUTER JOIN B_TERRAFORM_MODULE_VARS_LINK "
+                . "ON D_TERRAFORM_VARS_DATA.MODULE_VARS_LINK_ID = B_TERRAFORM_MODULE_VARS_LINK.MODULE_VARS_LINK_ID "
+                . "LEFT OUTER JOIN D_TERRAFORM_VAR_MEMBER "
+                . "ON D_TERRAFORM_VARS_DATA.MEMBER_VARS = D_TERRAFORM_VAR_MEMBER.CHILD_MEMBER_VARS_ID "
+                . "WHERE  D_TERRAFORM_VARS_DATA.DISUSE_FLAG = '0' "
+                . "AND    B_TERRAFORM_MODULE_VARS_LINK.DISUSE_FLAG = '0' "
+                . "AND    D_TERRAFORM_VARS_DATA.OPERATION_NO_UAPK = {$operation_no} "
+                . "AND    D_TERRAFORM_VARS_DATA.PATTERN_ID = {$pattern_id} ";
+
             // SQL準備
             $objQuery = $objDBCA->sqlPrepare($sql);
             if ($objQuery->getStatus() === false) {
@@ -1101,33 +1116,91 @@ try {
             }
             // fetch行数を取得
             $fetch_counter = $objQuery->effectedRowCount();
+
             if ($fetch_counter > 0) {
+                $vars_array = [];
+                $member_vars_link_id_list = [];
                 // 1件以上ある場合、レコードFETCH
                 while ($row = $objQuery->resultFetch()) {
-                    //VARS_LINK_ID(key)/VARS_NAME/VARS_ENTRYを配列に格納
-                    $vars_link_id = $row['MODULE_VARS_LINK_ID'];
-                    $vars_name = $row['VARS_NAME'];
-                    $vars_entry = $row['VARS_ENTRY'];
-
-                    //HCL設定を判定
-                    $hcl_flag = $row['HCL_FLAG'];
-                    $hcl_boolean = false;
-                    if ($hcl_flag == 1) {
-                        $hcl_boolean = false; //1(OFF)ならfalse
-                    } elseif ($hcl_flag == 2) {
-                        $hcl_boolean = true; //2(ON)ならtrue
+                    if (isset($row["MEMBER_VARS"]) && $row["MEMBER_VARS"] != NULL) {
+                        $member_vars_link_id_list[] = $row;
+                    } else {
+                        $vars_array[] = $row;
                     }
+                }
 
-                    //Sensitive設定を判定
-                    $sensitive_flag = $row['SENSITIVE_FLAG'];
-                    $sensitive_boolean = false;
-                    if ($sensitive_flag == 1) {
-                        $sensitive_boolean = false; //1(OFF)ならfalse
-                    } elseif ($sensitive_flag == 2) {
-                        $sensitive_boolean = true; //2(ON)ならtrue
-                        $vars_entry = ky_decrypt($vars_entry); //具体値をデコード
+                if (!empty($vars_array)) {
+                    foreach ($vars_array as $vars) {
+                        //VARS_LINK_ID(key)/VARS_NAME/ASSIGN_SEQ/MEMBER_VARS/VARS_ENTRY/TYPE_IDを配列に格納
+                        $vars_link_id     = $vars['MODULE_VARS_LINK_ID'];
+                        $vars_name        = $vars['VARS_NAME'];
+                        $vars_entry       = $vars['VARS_ENTRY'];
+                        $vars_assign_seq  = $vars['ASSIGN_SEQ'];
+                        $vars_type_id     = $vars['TYPE_ID'];
+                        $vars_list        = [];
+
+                        //HCL設定を判定
+                        $hcl_flag = $vars['HCL_FLAG'];
+                        $hcl_boolean = false;
+                        if ($hcl_flag == 1) {
+                            $hcl_boolean = false; //1(OFF)ならfalse
+                        } elseif ($hcl_flag == 2) {
+                            $hcl_boolean = true; //2(ON)ならtrue
+                        }
+
+                        //Sensitive設定を判定
+                        $sensitive_flag = $vars['SENSITIVE_FLAG'];
+                        $sensitive_boolean = false;
+                        if ($sensitive_flag == 1) {
+                            $sensitive_boolean = false; //1(OFF)ならfalse
+                        } elseif ($sensitive_flag == 2) {
+                            $sensitive_boolean = true; //2(ON)ならtrue
+                            $vars_entry = ky_decrypt($vars_entry); //具体値をデコード
+                        }
+
+                        if (isset($ary_vars_data[$vars_link_id])) {
+                            $ary_vars_data[$vars_link_id]['VARS_LIST'][intval($vars_assign_seq)] = $vars_entry;
+                        } else {
+                            $ary_vars_data[$vars_link_id] = ['VARS_NAME' => $vars_name, 'VARS_ENTRY' => $vars_entry, 'ASSIGN_SEQ' => $vars_assign_seq, 'MEMBER_VARS' => [], 'HCL_FLAG' => $hcl_boolean, 'SENSITIVE_FLAG' => $sensitive_boolean, "VARS_TYPE_ID" => $vars_type_id];
+                            $ary_vars_data[$vars_link_id]['VARS_LIST'][intval($vars_assign_seq)] = $vars_entry;
+                        }
                     }
-                    $ary_vars_data[$vars_link_id] = array('VARS_NAME' => $vars_name, 'VARS_ENTRY' => $vars_entry, 'HCL_FLAG' => $hcl_boolean, 'SENSITIVE_FLAG' => $sensitive_boolean);
+                }
+
+                if (!empty($member_vars_link_id_list)) {
+                    foreach ($member_vars_link_id_list as $vars) {
+                        //VARS_LINK_ID(key)/VARS_NAME/ASSIGN_SEQ/MEMBER_VARS/VARS_ENTRYを配列に格納
+                        $vars_link_id     = $vars['MODULE_VARS_LINK_ID'];
+                        $vars_name        = $vars['VARS_NAME'];
+                        $vars_entry       = $vars['VARS_ENTRY'];
+                        $vars_assign_seq  = $vars['ASSIGN_SEQ'];
+                        $vars_type_id     = $vars['TYPE_ID'];
+                        $vars_type_info   = getTypeInfo($vars_type_id);
+                        $vars_member_vars = $vars['MEMBER_VARS'];
+                        $vars_assign_flag = $vars["VARS_ASSIGN_FLAG"]; // 代入値系管理フラグ
+
+                        //HCL設定を判定
+                        $hcl_boolean = false;
+
+                        //Sensitive設定を判定
+                        $sensitive_flag = $vars['SENSITIVE_FLAG'];
+                        $sensitive_boolean = false;
+                        if ($sensitive_flag == 1) {
+                            $sensitive_boolean = false; //1(OFF)ならfalse
+                        } elseif ($sensitive_flag == 2) {
+                            $sensitive_boolean = true; //2(ON)ならtrue
+                            $vars_entry = ky_decrypt($vars_entry); //具体値をデコード
+                        }
+
+                        if (isset($ary_vars_data[$vars_link_id])) {
+                            // メンバー変数を取らない配列のタイプ
+                            $ary_vars_data[$vars_link_id]['MEMBER_VARS_LIST'][] = ["MEMBER_VARS" => $vars_member_vars, "SENSITIVE_FLAG" => $sensitive_flag, "VARS_ENTRY" => $vars_entry, "ASSIGN_SEQ" =>$vars_assign_seq, "VARS_ASSIGN_FLAG" => $vars_assign_flag];
+                        } else {
+                            // メンバー変数を取らない配列のタイプ
+                            $ary_vars_data[$vars_link_id] = ['VARS_NAME' => $vars_name, 'VARS_ENTRY' => $vars_entry, 'ASSIGN_SEQ' => $vars_assign_seq, 'MEMBER_VARS' => [], 'HCL_FLAG' => $hcl_boolean, 'SENSITIVE_FLAG' => $sensitive_boolean, "VARS_TYPE_ID" => $vars_type_id];
+                            $ary_vars_data[$vars_link_id]['MEMBER_VARS_LIST'][] = ["MEMBER_VARS" => $vars_member_vars, "SENSITIVE_FLAG" => $sensitive_flag, "VARS_ENTRY" => $vars_entry, "ASSIGN_SEQ" => $vars_assign_seq, "VARS_ASSIGN_FLAG" => $vars_assign_flag];
+                        }
+                    }
                 }
 
                 //変数追加処理のフラグをtrueにする
@@ -1245,13 +1318,163 @@ try {
             // Movementに紐づく代入値がある場合、代入値(Variables)登録処理を実行
             //--------------------------------------------------------------
             if ($vars_set_flag == true) {
-                foreach ($ary_vars_data as $data) {
-                    $var_key = $data['VARS_NAME'];
-                    $var_value = $data['VARS_ENTRY'];
-                    $hclFlag = $data['HCL_FLAG'];
-                    $sensitiveFlag = $data['SENSITIVE_FLAG'];
-                    $category = "terraform";
+                foreach ($ary_vars_data as $vars_link_id => $data) {
+                    $var_key          = $data['VARS_NAME'];
+                    $var_value        = $data['VARS_ENTRY'];
+                    $assign_seq       = $data['ASSIGN_SEQ'];
+                    $vars_list        = [];
+                    $member_vars_list = [];
+                    $hclFlag          = $data['HCL_FLAG'];
+                    $sensitiveFlag    = $data['SENSITIVE_FLAG'];
+                    $varsTypeID       = $data['VARS_TYPE_ID'];
+                    $varsTypeInfo     = getTypeInfo($varsTypeID);
+                    $category         = 'terraform';
+                    if (isset($data['VARS_LIST'])) {
+                        $vars_list    = $data['VARS_LIST'];
+                    }
+                    if (isset($data['MEMBER_VARS_LIST'])) {
+                        $member_vars_list = $data['MEMBER_VARS_LIST'];
+                    }
 
+                    // HCL組み立て
+                    /*------------------------------
+                    * 1.Module変数紐付けのタイプが配列型でない場合
+                    * 2.Module変数紐付けのタイプが配列型且つメンバー変数がない場合
+                    * 3.Module変数紐付けのタイプが配列型且つメンバー変数である場合
+                    ---------------------------------*/
+                    // 1.Module変数紐付けのタイプが配列型でない場合
+                    if ($hclFlag == true || $varsTypeInfo["MEMBER_VARS_FLAG"] == 0 && $varsTypeInfo["ASSIGN_SEQ_FLAG"] == 0 && $varsTypeInfo["ENCODE_FLAG"] == 0) {
+                    }
+                    // 2.Module変数紐付けのタイプが配列型且つメンバー変数がない場合
+                    elseif($varsTypeInfo["MEMBER_VARS_FLAG"] == 0 && $varsTypeInfo["ASSIGN_SEQ_FLAG"] == 1 && $varsTypeInfo["ENCODE_FLAG"] == 1) {
+                        // HCL組み立て(メンバー変数)
+                        if (count($vars_list) > 0) {
+                            // HCLに変換
+                            asort($vars_list);
+                            $temp_ary = [];
+                            foreach($vars_list as $vars_data) {
+                                $temp_ary[] = $vars_data;
+                            }
+                            $var_value = encodeHCL($temp_ary);
+                        }
+                        $hclFlag = true;
+                    }
+                    // 3.Module変数紐付けのタイプが配列型且つメンバー変数である場合
+                    else {
+                        // HCL組み立て(メンバー変数)
+                        if (count($member_vars_list) > 0 && $hclFlag == false) {
+                            $temp_member_vars_list = [];
+                            // １．対象変数のメンバー変数を全て取得（引数：Module変数紐付け/MODULE_VARS_LINK_ID）
+                            $trgMemberVarsRecords = getMemberVarsByModuleVarsLinkIDForHCL($vars_link_id);
+                            // 重複を削除
+                            $member_ids_array = array_unique(array_column($member_vars_list, "MEMBER_VARS"));
+                            // ２．配列型の変数を配列にする
+                            foreach ($member_ids_array as $member_idx => $member_id) {
+                                // メンバー変数IDからタイプ情報を取得する
+                                $key = array_search($member_id, array_column($trgMemberVarsRecords, "CHILD_MEMBER_VARS_ID"));
+                                $typeInfo = getTypeInfo($trgMemberVarsRecords[$key]["CHILD_VARS_TYPE_ID"]);
+                                // メンバー変数対象でない配列型のみ配列型に形成する
+                                if ($typeInfo["MEMBER_VARS_FLAG"] == 0 && $typeInfo["ASSIGN_SEQ_FLAG"] == 1 && $typeInfo["ENCODE_FLAG"] == 1) {
+                                    $temp_ary  = [];
+                                    $i = 0;
+                                    // 代入順序をキーインデックスにして具体値をtemp_aryに収める
+                                    foreach ($member_vars_list as $member_vars_data) {
+                                        if ($member_id == $member_vars_data["MEMBER_VARS"]) {
+                                            $temp_ary[$member_vars_data["ASSIGN_SEQ"]] = $member_vars_data["VARS_ENTRY"];
+                                        }
+                                    }
+                                    // 降順に並べ替え
+                                    asort($temp_ary);
+                                    $sensitive_flag = false;
+                                    if (isset($trgMemberVarsRecords[$key]["SENSITIVE_FLAG"])) {
+                                        $sensitive_flag = $trgMemberVarsRecords[$key]["SENSITIVE_FLAG"];
+                                    }
+
+                                    $temp_member_vars_list[] = [
+                                        "MEMBER_VARS"      => $member_id,
+                                        "SENSITIVE_FLAG"   => $sensitive_flag,
+                                        "VARS_ENTRY"       => array_values($temp_ary),
+                                        "VARS_ASSIGN_FLAG" => $trgMemberVarsRecords[$key]["VARS_ASSIGN_FLAG"],
+                                    ];
+                                }
+                                else {
+                                    $sensitive_flag = false;
+                                    if (isset($trgMemberVarsRecords[$key]["SENSITIVE_FLAG"])) {
+                                        $sensitive_flag = $trgMemberVarsRecords[$key]["SENSITIVE_FLAG"];
+                                    }
+
+                                    $key = array_search($member_id, array_column($member_vars_list, "MEMBER_VARS"));
+                                    // 配列型でない場合、何もしない
+                                    $temp_member_vars_list[] = [
+                                        "MEMBER_VARS"      => $member_id,
+                                        "SENSITIVE_FLAG"   => $member_vars_list[$key]["SENSITIVE_FLAG"],
+                                        "VARS_ENTRY"       => $member_vars_list[$key]["VARS_ENTRY"],
+                                        "VARS_ASSIGN_FLAG" => $member_vars_list[$key]["VARS_ASSIGN_FLAG"],
+                                    ];
+                                }
+                            }
+
+                            // MEMBER_VARS_LISTの中身を入れ替える
+                            $member_vars_list = $temp_member_vars_list;
+
+                            // ３．代入値管理で取得した値を置き換え
+                            foreach ($member_vars_list as $member_vars) {
+                                foreach ($trgMemberVarsRecords as &$trgMemberVarsRecord) {
+                                    if ($member_vars["MEMBER_VARS"] == $trgMemberVarsRecord["CHILD_MEMBER_VARS_ID"]) {
+                                        $trgMemberVarsRecord["CHILD_MEMBER_VARS_VALUE"] = $member_vars["VARS_ENTRY"];
+                                        $trgMemberVarsRecord["VARS_ENTRY_FLAG"]  = 1;
+                                        $trgMemberVarsRecord["VARS_ASSIGN_FLAG"] = $member_vars["VARS_ASSIGN_FLAG"];
+                                    }
+                                }
+                                unset($trgMemberVarsRecord);
+                                // sensitive設定をチェック
+                                // 対象代入値に一つでもsensitive設定があればseneitiveはON
+                                if ($sensitiveFlag == false && $member_vars["SENSITIVE_FLAG"] == 2) {
+                                    $sensitiveFlag = true;
+                                }
+                            }
+
+                            // ４．置換する値がなかった場合、エラーとする
+                            $err_id_list = [];
+                            foreach ($trgMemberVarsRecords as $trgMemberVarsRecord) {
+                                if($trgMemberVarsRecord["VARS_ENTRY_FLAG"] == 0 && $trgMemberVarsRecord["VARS_ASSIGN_FLAG"] == 1) {
+                                    $err_id_list[] = $trgMemberVarsRecord["CHILD_MEMBER_VARS_ID"];
+                                }
+                            }
+                            if (!empty($err_id_list)) {
+                                $ids_string = json_encode($err_id_list);
+                                //error_logにメッセージを追記
+                                $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221140", array($ids_string)); //メンバー変数の取得に失敗しました。ID:[]
+                                LocalLogPrint($error_log, $message);
+
+                                // 異常フラグON
+                                $error_flag = 1;
+                                // 例外処理へ
+                                $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221141", array(__FILE__, __LINE__, $ids_string));
+                                throw new Exception($backyard_log);
+                            }
+
+                            // ５．取得したデータから配列を形成
+                            $trgMemberVarsArray = generateMemberVarsArrayForHCL($trgMemberVarsRecords);
+
+                            // ６．HCLに変換
+                            $var_value = encodeHCL($trgMemberVarsArray);
+                            $hclFlag = true;
+                        }
+                    }
+
+                    // 変数エラーキャッチ(ID変換失敗時)
+                    if ($var_key == NULL) {
+                        //error_logにメッセージを追記
+                        $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221130"); //変数名の取得に失敗しました。
+                        LocalLogPrint($error_log, $message);
+
+                        // 異常フラグON
+                        $error_flag = 1;
+                        // 例外処理へ
+                        $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221131", array(__FILE__, __LINE__));
+                        throw new Exception($backyard_log);
+                    }
                     //Workspaceに対し変数を登録
                     $statusCode = 0;
                     $count = 0;
@@ -2796,7 +3019,401 @@ if ($error_flag != 0) {
     exit(0);
 }
 
+//----------------------------------------------
+// 親のインデックスを集めた配列作成
+//----------------------------------------------
+function makeParentIDMap($memberVarsRecords)
+{
+    // 返却用配列
+    $res = [];
+    // 親メンバー変数のキー一覧
+    $parent_member_keys_list = [];
 
+    // ネスト取得
+    $array_nest_level_list = array_column($memberVarsRecords, "ARRAY_NEST_LEVEL");
+    // 並び替え
+    sort($array_nest_level_list);
+    // 重複削除
+    $array_nest_level_list = array_merge(array_unique($array_nest_level_list));
+
+    foreach ($array_nest_level_list as $array_nest_level) {
+        foreach ($memberVarsRecords as $memberVarsRecord) {
+            // キーの取得
+            $key = $memberVarsRecord["CHILD_MEMBER_VARS_KEY"];
+            // indexが数値の場合は[]を外す
+            if (preg_match("/^\[([0-9]+)\]$/", $memberVarsRecord["CHILD_MEMBER_VARS_KEY"], $match)) {
+                $key = $match[1];
+            }
+            // タイプ情報の取得
+            $typeInfo = getTypeInfo($memberVarsRecord["CHILD_VARS_TYPE_ID"]);
+            if ($memberVarsRecord["ARRAY_NEST_LEVEL"] == $array_nest_level) {
+                // 親のネストリストを取得
+                // インデックスを検索
+                if ($memberVarsRecord["PARENT_MEMBER_VARS_ID"] != NULL) {
+                    $parent_index = array_search($memberVarsRecord["PARENT_MEMBER_VARS_ID"], array_column($res, "child_member_vars_id"));
+
+                    $parent_member_keys_list = $res[$parent_index]["parent_member_keys_list"];
+                    $parent_key = $res[$parent_index]["child_member_vars_key"];
+                    // indexが数値の場合は[]を外す
+                    if ($res[$parent_index]["child_member_vars_key"] != "") {
+                        if (preg_match("/^\[([0-9]+)\]$/", $res[$parent_index]["child_member_vars_key"], $match_2)) {
+                            $parent_key = $match_2[1];
+                        }
+                        $parent_member_keys_list[] = $parent_key;
+                    }
+                }
+                $res[] = [
+                    "child_member_vars_id"    => $memberVarsRecord["CHILD_MEMBER_VARS_ID"],
+                    "child_member_vars_key"   => $key,
+                    "parent_member_keys_list" => $parent_member_keys_list,
+                ];
+            }
+        }
+    }
+    return $res;
+}
+
+//----------------------------------------------
+// HCL作成のためにメンバー変数一覧を配列に形成
+//----------------------------------------------
+function generateMemberVarsArrayForHCL($memberVarsRecords)
+{
+    $member_vars_res = [];
+    // 親リストの取得
+    $parentIDMap = makeParentIDMap($memberVarsRecords);
+
+    // 階層リストの作成
+    $array_nest_level_list = array_column($memberVarsRecords, "ARRAY_NEST_LEVEL");
+    // 階層順に並べ替え
+    rsort($array_nest_level_list);
+    // 階層リストから重複の削除
+    $array_nest_level_list = array_unique($array_nest_level_list);
+
+    $member_vars_array = [];
+
+    foreach ($memberVarsRecords as $memberVarsRecord) {
+        // $temp_member_vars_res = [];
+        $key = $memberVarsRecord["CHILD_MEMBER_VARS_KEY"];
+        if (preg_match("/^\[([0-9]+)\]$/", $memberVarsRecord["CHILD_MEMBER_VARS_KEY"], $match)) {
+            $key = $match[1];
+        }
+        // タイプ情報の取得
+        $typeInfo = getTypeInfo($memberVarsRecord["CHILD_VARS_TYPE_ID"]);
+        // 配列組み立て
+        $trgParentIDMapID = array_search($memberVarsRecord["CHILD_MEMBER_VARS_ID"], array_column($parentIDMap, "child_member_vars_id"));
+        $trgParentIDMap = $parentIDMap[$trgParentIDMapID];
+        // 配列型のものは配列を具体値に代入する
+        $member_vars_res = generateMemberVarsArray($member_vars_res, $key, $memberVarsRecord["CHILD_MEMBER_VARS_VALUE"], $typeInfo, $trgParentIDMap["parent_member_keys_list"]);
+    }
+    return $member_vars_res;
+}
+//----------------------------------------------
+// Typeの情報を取得する
+//----------------------------------------------
+function getTypeInfo($typeID)
+{
+    global $objDBCA, $vg_terraform_types_master;
+    global $root_dir_path;
+
+    $typeInfo = [];
+
+    $sqlUtnBody = "SELECT "
+        . " * "
+        . "FROM {$vg_terraform_types_master} "     // リソーステーブル(B_TERRAFORM_MODULE)
+        . "WHERE DISUSE_FLAG = '0' "
+        . "AND TYPE_ID = :TYPE_ID ";
+
+    $arrayUtnBind = array("TYPE_ID" => $typeID);
+
+    //----------------------------------------------
+    // クエリー生成
+    //----------------------------------------------
+    $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
+
+    if ($objQueryUtn->getStatus() === false) {
+        $FREE_LOG = sprintf(
+            "FILE:%s LINE:%s %s",
+            basename(__FILE__),
+            __LINE__,
+            $objQueryUtn->getLastError()
+        );
+        require($root_dir_path . $log_output_php);
+        // 異常フラグON  例外処理へ
+        $error_flag = 1;
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
+    }
+    if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
+        $FREE_LOG = sprintf(
+            "FILE:%s LINE:%s %s",
+            basename(__FILE__),
+            __LINE__,
+            $objQueryUtn->getLastError()
+        );
+        require($root_dir_path . $log_output_php);
+        // 異常フラグON
+        $error_flag = 1;
+        // 例外処理へ
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000400")));
+    }
+    //----------------------------------------------
+    // SQL実行 Module素材テーブル(B_TERRAFORM_MODULE)
+    //----------------------------------------------
+    $r = $objQueryUtn->sqlExecute();
+    if (!$r) {
+        $FREE_LOG = sprintf(
+            "FILE:%s LINE:%s %s",
+            basename(__FILE__),
+            __LINE__,
+            $objQueryUtn->getLastError()
+        );
+        require($root_dir_path . $log_output_php);
+        // 異常フラグON  例外処理へ
+        $error_flag = 1;
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
+    }
+    //----------------------------------------------
+    // リソース（Module素材)ファイル名格納
+    //----------------------------------------------
+    while ($row = $objQueryUtn->resultFetch()) {
+        $typeInfo = $row;
+    }
+    // fetch行数を取得
+    $intFetchedFromTerraformMatterFile = $objQueryUtn->effectedRowCount();
+
+    // DBアクセス事後処理
+    unset($objQueryUtn);
+
+    return $typeInfo;
+}
+//----------------------------------------------
+// HCL作成のためにメンバー変数一覧を多次元配列に整形
+//----------------------------------------------
+function generateMemberVarsArray($member_vars_array, $member_vars_key, $member_vars_value, $typeInfo, $map)
+    {
+        $res = [];
+
+        if (empty($map)) {
+            // 仮配列と返却用配列をマージ
+            $member_vars_array[$member_vars_key] = $member_vars_value;
+            $res = $member_vars_array;
+        } else {
+            // 返却用配列
+            $res = [];
+            // 仮配列
+            $temp_array = [];
+            $temp = [];
+            $ref = &$temp_array;
+
+            // 多次元配列作成
+            foreach ($map as $key) {
+                $ref = &$ref[$key];
+            }
+
+            // メンバー変数を設定・具体値を代入
+            if ($typeInfo["ENCODE_FLAG"] == 1) {
+                $member_vars_value = decodeHCL($member_vars_value);
+            }
+            if ($typeInfo["MEMBER_VARS_FLAG"] == 1 && $typeInfo["MEMBER_VARS_FLAG"] != 1) {
+                $ref[$member_vars_key] = [];
+            } else {
+                $ref[$member_vars_key] = $member_vars_value;
+            }
+
+            // 仮配列と返却用配列をマージ
+            $res = array_replace_recursive($member_vars_array, $temp_array);
+        }
+
+        return $res;
+    }
+    function generateMemberVarsArray1($member_vars_array, $member_vars_key, $member_vars_value, $typeInfo, $map)
+    {
+        // 返却用配列
+        $res = [];
+        // 仮配列
+        $temp_array = [];
+        $ref = &$temp_array;
+
+        // 多次元配列作成
+        foreach ($map as $key) {
+            $ref = &$ref[$key];
+        }
+        // メンバー変数を設定・具体値を代入
+        if ($typeInfo["ENCODE_FLAG"] == 1) {
+            $member_vars_value = decodeHCL($member_vars_value);
+        }
+        if ($typeInfo["MEMBER_VARS_FLAG"] == 1) {
+            $ref[$member_vars_key] = [];
+        } else {
+            $ref[$member_vars_key] = &$member_vars_value;
+        }
+
+
+        // 仮配列と返却用配列をマージ
+        $res = array_replace_recursive($member_vars_array, $temp_array);
+
+
+
+        return $res;
+    }
+
+//----------------------------------------------
+// HCL作成のためにメンバー変数一覧を取得
+//----------------------------------------------
+function getMemberVarsByModuleVarsLinkIDForHCL($moduleVarsLinkID)
+{
+    global $objDBCA, $objMTS, $vg_terraform_var_member_view_name, $log_output_php;
+    global $root_dir_path;
+    $res = [];
+
+    $sqlUtnBody = "SELECT * "
+    . "FROM {$vg_terraform_var_member_view_name} "     // メンバー変数テーブル(B_TERRAFORM_VAR_MEMBER)
+        . "WHERE DISUSE_FLAG = '0' "
+        . "AND PARENT_VARS_ID = :PARENT_VARS_ID " // or is null
+        . "ORDER BY ARRAY_NEST_LEVEL, ASSIGN_SEQ ASC ";
+
+    $arrayUtnBind = array(
+        "PARENT_VARS_ID" => $moduleVarsLinkID,
+    );
+
+    //----------------------------------------------
+    // クエリー生成
+    //----------------------------------------------
+    $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
+
+    if ($objQueryUtn->getStatus() === false) {
+        $FREE_LOG = sprintf(
+            "FILE:%s LINE:%s %s",
+            basename(__FILE__),
+            __LINE__,
+            $objQueryUtn->getLastError()
+        );
+        require($root_dir_path . $log_output_php);
+        // 異常フラグON  例外処理へ
+        $error_flag = 1;
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
+    }
+    if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
+        $FREE_LOG = sprintf(
+            "FILE:%s LINE:%s %s",
+            basename(__FILE__),
+            __LINE__,
+            $objQueryUtn->getLastError()
+        );
+        require($root_dir_path . $log_output_php);
+        // 異常フラグON
+        $error_flag = 1;
+        // 例外処理へ
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000400")));
+    }
+    //----------------------------------------------
+    // SQL実行 メンバー変数管理(B_TERRAFORM_VAR_MEMBER)
+    //----------------------------------------------
+    $r = $objQueryUtn->sqlExecute();
+    if (!$r) {
+        $FREE_LOG = sprintf(
+            "FILE:%s LINE:%s %s",
+            basename(__FILE__),
+            __LINE__,
+            $objQueryUtn->getLastError()
+        );
+        require($root_dir_path . $log_output_php);
+        // 異常フラグON  例外処理へ
+        $error_flag = 1;
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
+    }
+    //----------------------------------------------
+    // リソース（Module素材)ファイル名格納
+    //----------------------------------------------
+    while ($row = $objQueryUtn->resultFetch()) {
+        $row["VARS_ENTRY_FLAG"] = 0;
+        $res[] = $row;
+    }
+    // fetch行数を取得
+    $intFetchedFromTerraformMatterFile = $objQueryUtn->effectedRowCount();
+
+    // DBアクセス事後処理
+    unset($objQueryUtn);
+
+    return $res;
+}
+//----------------------------------------------
+// Module変数情報の取得
+//----------------------------------------------
+function getModuleVarsData($moduleMatterID)
+{
+    global $objDBCA, $objMTS, $vg_terraform_module_vars_link_table_name, $log_output_php;
+    global $root_dir_path;
+    $res = []; // 返却値格納変数
+
+    $sqlUtnBody = "SELECT * "
+        . "FROM {$vg_terraform_module_vars_link_table_name} " // Module変数紐付管理テーブル(B_TERRAFORM_MODULE_VARS_LINK)
+        . "WHERE DISUSE_FLAG = '0' "
+        . "AND MODULE_MATTER_ID = :MODULE_MATTER_ID ";
+
+    $arrayUtnBind = array(
+        "MODULE_MATTER_ID" => $moduleMatterID,
+    );
+
+    //----------------------------------------------
+    // クエリー生成
+    //----------------------------------------------
+    $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
+
+    if ($objQueryUtn->getStatus() === false) {
+        $FREE_LOG = sprintf(
+            "FILE:%s LINE:%s %s",
+            basename(__FILE__),
+            __LINE__,
+            $objQueryUtn->getLastError()
+        );
+        require($root_dir_path . $log_output_php);
+        // 異常フラグON  例外処理へ
+        $error_flag = 1;
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
+    }
+    if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
+        $FREE_LOG = sprintf(
+            "FILE:%s LINE:%s %s",
+            basename(__FILE__),
+            __LINE__,
+            $objQueryUtn->getLastError()
+        );
+        require($root_dir_path . $log_output_php);
+        // 異常フラグON
+        $error_flag = 1;
+        // 例外処理へ
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000400")));
+    }
+    //----------------------------------------------
+    // SQL実行 Module変数紐付管理テーブル(B_TERRAFORM_MODULE_VARS_LINK)
+    //----------------------------------------------
+    $r = $objQueryUtn->sqlExecute();
+    if (!$r) {
+        $FREE_LOG = sprintf(
+            "FILE:%s LINE:%s %s",
+            basename(__FILE__),
+            __LINE__,
+            $objQueryUtn->getLastError()
+        );
+        require($root_dir_path . $log_output_php);
+        // 異常フラグON  例外処理へ
+        $error_flag = 1;
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
+    }
+    //----------------------------------------------
+    // Module変数情報格納
+    //----------------------------------------------
+    while ($row = $objQueryUtn->resultFetch()) {
+        $res = $row;
+    }
+    // fetch行数を取得
+    $intFetchedFromTerraformMatterFile = $objQueryUtn->effectedRowCount();
+
+    // DBアクセス事後処理
+    unset($objQueryUtn);
+
+    return $res;
+}
 //----------------------------------------------
 // logファイルへの出力関数
 //----------------------------------------------
@@ -2810,6 +3427,28 @@ function LocalLogPrint($log_file, $message)
         fclose($filepointer);
     }
 }
+//----------------------------------------------
+// 配列からHCLへencodeする
+//----------------------------------------------
+function encodeHCL($array)
+{
+    $json = json_encode($array, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $res = preg_replace('/\"(.*?)\"\:(.*?)/', '"${1}" = ${2}', $json);
+    return $res;
+}
+//----------------------------------------------
+// HCLから配列にdecodeする
+//----------------------------------------------
+function decodeHCL($hcl)
+{
+    $res = false;
+    if (!is_array($hcl)) {
+        $json = preg_replace('/\"(.*?)\"\ = \"(.*?)\"/', '"${1}": "${2}"', $hcl);
+        $res = json_decode($json);
+    }
+    if (!$res) {
+        $res = $hcl;
+    }
+    return $res;
+}
 
-
-?>

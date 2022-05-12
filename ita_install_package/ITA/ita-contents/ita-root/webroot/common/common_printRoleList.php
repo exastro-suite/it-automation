@@ -96,9 +96,11 @@ try {
 
     //Sessionのログインチェックをして、ユーザが一致していたら処理を継続
     $auth = null;
+    $sessiontimeoutFlag = FALSE;
     saLoginExecute($auth, $objDBCA, null, false);
     $loginCheck = $auth->checkAuth();
     if($loginCheck == false){
+        $sessiontimeoutFlag = TRUE;
         throw new Exception($objMTS->getSomeMessage("ITAWDCH-ERR-60001"));
     }
     $loginUserName = $auth->getUsername();
@@ -190,6 +192,10 @@ try {
     }
     $result_role_info = array();
     header("Content-Type: text/html; charset=utf-8");
+    if ( $sessiontimeoutFlag == TRUE ){
+        $ErrorMsg = $objMTS->getSomeMessage("ITAWDCH-MNU-1300006");
+        $result_role_info=["redirectOrderForHADACClient",["0","/common/common_auth.php?login",'status'],$ErrorMsg,$_GET];
+    }
     echo json_encode($result_role_info);
 }
 

@@ -30,8 +30,10 @@
         $strLoginFormTailBody = "";
 
         // ルートディレクトリを取得
-        $root_dir_path = $g['root_dir_path'];
-        if (empty($root_dir_path)) {
+        if($g != null && array_key_exists('root_dir_path', $g)){
+            $root_dir_path = $g['root_dir_path'];
+        }
+        else{
             $root_dir_path = getApplicationRootDirPath();
         }
         $scheme_n_authority = getSchemeNAuthority();
@@ -362,6 +364,11 @@
                         $objQuery->sqlBind($tmpArrayBind);
                         $r = $objQuery->sqlExecute();
                 }
+                //csrf対策
+                if( $_POST["csrf_token"] != $_SESSION["csrf_token"] ){
+                  header("Location: /common/common_forbidden.php");
+                  exit();
+                } 
                 
                 break;
             case "id_error":

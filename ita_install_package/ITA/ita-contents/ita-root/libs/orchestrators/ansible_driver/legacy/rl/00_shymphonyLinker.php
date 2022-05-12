@@ -430,6 +430,7 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         
         global $root_dir_path;
         require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleTableDefinition.php');
+        require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/FileUploadColumnFileAccess.php');
 
         $arrayConfig = array();
         CreateExecInstMngArray($arrayConfig);
@@ -454,10 +455,18 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
 
-        // ansible tower実行の場合だけvirtualenvを設定
-        $virtualenv_name = "";
-        if($exec_mode == 2) {
+        // 実行エンジン毎の設定値を初期化
+        $virtualenv_name      = "";
+        $EngineVirtualenvName = "";
+        $ExecuteEnvName       = "";
+        if($exec_mode == DF_EXEC_MODE_ANSIBLE) {
+            $EngineVirtualenvName= $arySinglePatternSource["ANS_ENGINE_VIRTUALENV_NAME"];
+        }
+        if($exec_mode == DF_EXEC_MODE_TOWER) {
             $virtualenv_name = $arySinglePatternSource["ANS_VIRTUALENV_NAME"];
+        }
+        if($exec_mode == DF_EXEC_MODE_AAC) {
+            $ExecuteEnvName = $arySinglePatternSource["ANS_EXECUTION_ENVIRONMENT_NAME"];
         }
         
         $arrayValue = array(
@@ -488,7 +497,9 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
         "I_ANS_PLAYBOOK_HED_DEF"=>$arySinglePatternSource["ANS_PLAYBOOK_HED_DEF"],
         "I_ANS_EXEC_OPTIONS"=>$exec_opt . ' ' . $arySinglePatternSource["ANS_EXEC_OPTIONS"],
         "I_VIRTUALENV_NAME"=>$virtualenv_name,
-        "I_ENGINE_VIRTUALENV_NAME"=>$arySinglePatternSource["ANS_ENGINE_VIRTUALENV_NAME"],
+        "I_ENGINE_VIRTUALENV_NAME"=> $EngineVirtualenvName,
+        "I_EXECUTION_ENVIRONMENT_NAME"=>$ExecuteEnvName,
+        "I_ANSIBLE_CONFIG_FILE"=>$arySinglePatternSource["ANS_ANSIBLE_CONFIG_FILE"],
         "EXEC_MODE"=>$exec_mode,
         "CONDUCTOR_NAME"=>$conductor_name,
         "CONDUCTOR_INSTANCE_NO"=>$conductor_instance_no,
@@ -538,6 +549,41 @@ $tmpFx = function ($objOLA, $intPatternId, $intOperationNoUAPK, $strPreserveDate
                 throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
             }
             
+            $srcMenuID      = "2100000305";
+            $srcColumnName  = "ANS_ANSIBLE_CONFIG_FILE";
+            $srcPKey        = $intPatternId;
+
+            $destMenuID     = "2100020314";
+            $destColumnName = "I_ANSIBLE_CONFIG_FILE";
+            $destPkey       = $p_execution_utn_no;
+            $destJnlkey     = $p_execution_jnl_no;
+
+            $srcObj = new FileUploadColumnAccess($srcMenuID,$srcColumnName);
+
+            $destObj = new FileUploadColumnAccess($destMenuID,$destColumnName);
+
+            $HistoryDirUseFlg = true;
+
+            $ret = $destObj->CreateBaseDir($destPkey,$destJnlkey,$HistoryDirUseFlg);
+            if($ret === false) {
+                $msg = $destObj->GetLastError();
+                web_log($msg[1]);
+                $strErrStepIdInFx="00000012";
+                throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+            }
+
+            $FileName = $arySinglePatternSource["ANS_ANSIBLE_CONFIG_FILE"];
+
+            if( $FileName != "") {
+                $ret = $srcObj->upLoadFileCopy($srcObj,$destObj,$srcPKey,$destPkey,$destJnlkey,$FileName);
+                if($ret === false) {
+                    $msg = $srcObj->GetLastError();
+                    web_log($msg[1]);
+                    $strErrStepIdInFx="00000013";
+                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                }
+            }
+
             // トランザクション終了
             $objDBCA->transactionExit();
         }
@@ -1049,7 +1095,7 @@ $tmpFx = function ($objOLA, $target_execution_no, $aryProperParameter=array()){
             $response_array = $restApiCaller->authorize();
             if($response_array['success'] != true) {
                 // TODO
-                throw new Exception("Faild to authorize to ansible_tower. " . $response_array['responseContents']['errorMessage']);
+                throw new Exception("Faild to authorize to Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
             }
 
             global $g;

@@ -39,6 +39,7 @@ if(empty($root_dir_path)) {
     $root_dir_path = $root_dir_temp[0] . "ita-root";
 }
 
+require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/DBAccesser.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/LogWriter.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/MessageTemplateStorageHolder.php");
@@ -48,6 +49,7 @@ require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlib
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiInstanceGroups.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiOrganization.php");
 require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiConfig.php");
+require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiExecutionEnvironment.php");
 
 ////////////////////////////////
 // ログ出力設定
@@ -126,7 +128,8 @@ try {
     }
    
     // 実行エンジンがAnsible Towerの場合のみ処理続行
-    if($ifInfoRows[0]['ANSIBLE_EXEC_MODE'] != 2) {
+    if(($ifInfoRows[0]['ANSIBLE_EXEC_MODE'] != DF_EXEC_MODE_TOWER) &&
+       ($ifInfoRows[0]['ANSIBLE_EXEC_MODE'] != DF_EXEC_MODE_AAC)) {
         exit(0);
     }
 
@@ -145,7 +148,7 @@ try {
     // RESTの認証
     ////////////////////////////////
     // トレースメッセージ
-    $logger->debug("Authorize AnsibleTower.");
+    $logger->debug("Authorize Ansible Automation Controller.");
 
     $restApiCaller = new RestApiCaller($ansibleTowerIfInfo['ANSTWR_PROTOCOL'],    
                                         $ansibleTowerIfInfo['ANSTWR_HOSTNAME'],
@@ -159,7 +162,7 @@ try {
                                 . $ansibleTowerIfInfo['ANSTWR_HOSTNAME'] . ":"
                                 . $ansibleTowerIfInfo['ANSTWR_PORT'] . "\n"
                                 . "TOKEN: " . $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN'] . "\n");
-        throw new Exception("Faild to authorize to ansible_tower. " . $response_array['responseContents']['errorMessage']);
+        throw new Exception("Faild to authorize to Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
     }
 
     //==========================================================
@@ -171,7 +174,7 @@ try {
         ////////////////////////////////////////////////////////////
         $response_array = AnsibleTowerRestApiInstanceGroups::getAll($restApiCaller);
         if($response_array['success'] == false) {
-            throw new Exception("Faild to get instance groups data from ansible_tower. " . $response_array['responseContents']['errorMessage']);
+            throw new Exception("Faild to get instance groups data from Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
         }
 
         ////////////////////////////////////////////////////////////
@@ -220,7 +223,7 @@ try {
         ////////////////////////////////////////////////////////////
         $response_array = AnsibleTowerRestApiOrganizations::getAll($restApiCaller);
         if($response_array['success'] == false) {
-            throw new Exception("Faild to get organizations data from ansible_tower. " . $response_array['responseContents']['errorMessage']);
+            throw new Exception("Faild to get organizations data from Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
         }
     
         ////////////////////////////////////////////////////////////
@@ -263,51 +266,114 @@ try {
     // virtualenv情報更新
     //==========================================================
     try {
-        ////////////////////////////////////////////////////////////
-        // Towerのvirtualenv情報取得
-        ////////////////////////////////////////////////////////////
-        $response_array = AnsibleTowerRestApiConfig::get($restApiCaller);
-        if($response_array['success'] == false) {
-            throw new Exception("Faild to get virtualenv data from ansible_tower. " . $response_array['responseContents']['errorMessage']);
-        }
-    
-        ////////////////////////////////////////////////////////////
-        // トランザクション開始
-        ////////////////////////////////////////////////////////////
-        $dbAccess->beginTransaction();
-    
-        ////////////////////////////////////////////////////////////
-        // ITA側の既に登録済みのVIRTUALENV情報取得
-        ////////////////////////////////////////////////////////////
-        $VirtualEnvRows = $dbAccess->selectRows("B_ANS_TWR_VIRTUALENV", true);   
-    
-        ////////////////////////////////////////////////////////////
-        // データベース更新
-        ////////////////////////////////////////////////////////////
-        $TableName      = "B_ANS_TWR_VIRTUALENV";
-        $PkeyItem       = "ROW_ID";
-        $NameItem       = "VIRTUALENV_NAME";
-        $IDItem         = "VIRTUALENV_NO";
-        $Contents_array = array();
-        if( isset($response_array['responseContents']['custom_virtualenvs'] )) {
-            foreach($response_array['responseContents']['custom_virtualenvs'] as $no=>$name) {
-                $Contents_array[] = array(
-                    'name' => $name,
-                    'id'   => $no,
-                );
+        if($ifInfoRows[0]['ANSIBLE_EXEC_MODE'] == DF_EXEC_MODE_TOWER) {
+            ////////////////////////////////////////////////////////////
+            // Towerのvirtualenv情報取得
+            ////////////////////////////////////////////////////////////
+            $response_array = AnsibleTowerRestApiConfig::get($restApiCaller);
+            if($response_array['success'] == false) {
+                throw new Exception("Faild to get virtualenv data from Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
             }
+        
+            ////////////////////////////////////////////////////////////
+            // トランザクション開始
+            ////////////////////////////////////////////////////////////
+            $dbAccess->beginTransaction();
+    
+            ////////////////////////////////////////////////////////////
+            // ITA側の既に登録済みのVIRTUALENV情報取得
+            ////////////////////////////////////////////////////////////
+            $VirtualEnvRows = $dbAccess->selectRows("B_ANS_TWR_VIRTUALENV", true);   
+    
+            ////////////////////////////////////////////////////////////
+            // データベース更新
+            ////////////////////////////////////////////////////////////
+            $TableName      = "B_ANS_TWR_VIRTUALENV";
+            $PkeyItem       = "ROW_ID";
+            $NameItem       = "VIRTUALENV_NAME";
+            $IDItem         = "VIRTUALENV_NO";
+            $Contents_array = array();
+            if( isset($response_array['responseContents']['custom_virtualenvs'] )) {
+                foreach($response_array['responseContents']['custom_virtualenvs'] as $no=>$name) {
+                    $Contents_array[] = array(
+                        'name' => $name,
+                        'id'   => $no,
+                    );
+                }
+            }
+            DBUpdate($Contents_array,$TableName,$VirtualEnvRows,$PkeyItem,$NameItem,$IDItem);
+
+            ////////////////////////////////////////////////////////////
+            // トランザクション終了
+            ////////////////////////////////////////////////////////////
+            $dbAccess->commit();
+
         }
-        DBUpdate($Contents_array,$TableName,$VirtualEnvRows,$PkeyItem,$NameItem,$IDItem);
     } catch (Exception $e) {
         $logger->error("Faild to make virtualenv data.");
         throw new Exception($e->getMessage());
     }
-    
-    ////////////////////////////////////////////////////////////
-    // トランザクション終了
-    ////////////////////////////////////////////////////////////
-    $dbAccess->commit();
 
+    //==========================================================
+    // 実行環境情報更新
+    //==========================================================
+    try {
+        if($ifInfoRows[0]['ANSIBLE_EXEC_MODE'] == DF_EXEC_MODE_AAC) {
+            ////////////////////////////////////////////////////////////
+            // Towerの実行環境情報取得
+            ////////////////////////////////////////////////////////////
+            $response_array = AnsibleTowerRestApiExecutionEnvironment::get($restApiCaller);
+
+            if($response_array['success'] == false) {
+                throw new Exception("Faild to get Execution Environment data from Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
+            }
+
+            if( ! array_key_exists('responseContents',$response_array)) {
+                throw new Exception("responseContents tag is not found in Ansible Automation Controller. " . var_export($response_array,true));
+            }
+
+            if( ! array_key_exists('results',$response_array['responseContents'] )) {
+                throw new Exception("responseContents->results tag not found in Ansible Automation Controller. " . var_export($response_array,true));
+            }
+        
+            ////////////////////////////////////////////////////////////
+            // トランザクション開始
+            ////////////////////////////////////////////////////////////
+            $dbAccess->beginTransaction();
+    
+            ////////////////////////////////////////////////////////////
+            // ITA側の既に登録済みの実行環境情報取得
+            ////////////////////////////////////////////////////////////
+            $VirtualEnvRows = $dbAccess->selectRows("B_ANS_TWR_EXECUTION_ENVIRONMENT", true);   
+    
+            ////////////////////////////////////////////////////////////
+            // データベース更新
+            ////////////////////////////////////////////////////////////
+            $TableName      = "B_ANS_TWR_EXECUTION_ENVIRONMENT";
+            $PkeyItem       = "ROW_ID";
+            $NameItem       = "EXECUTION_ENVIRONMENT_NAME";
+            $IDItem         = "EXECUTION_ENVIRONMENT_NO";
+            $Contents_array = array();
+            if( isset($response_array['responseContents']['results'] )) {
+                foreach($response_array['responseContents']['results'] as $no=>$paramList) {
+                    $Contents_array[] = array(
+                        'name' => $paramList['name'],
+                        'id'   => $no,
+                    );
+                }
+            }
+            DBUpdate($Contents_array,$TableName,$VirtualEnvRows,$PkeyItem,$NameItem,$IDItem);
+
+            ////////////////////////////////////////////////////////////
+            // トランザクション終了
+            ////////////////////////////////////////////////////////////
+            $dbAccess->commit();
+
+        }
+    } catch (Exception $e) {
+        $logger->error("Faild to make Execution Environment data.");
+        throw new Exception($e->getMessage());
+    }
 } catch (Exception $e) {
 
     $error_flag = 1;

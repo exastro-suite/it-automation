@@ -33,6 +33,8 @@
 ##       KEY_FILE_PATH:   鍵認証ファイル
 ##       SRC_PATH:        ファイル転送元パス
 ##       DEST_PATH:       ファイル転送先パス
+##       FROMTO:          転送方向
+##                          ITA: ITA->TOWER   TOWER:  TOWER->ITA
 ##      <<exit code>>
 ##       0:   正常
 ##       他:　異常
@@ -45,12 +47,20 @@ set PASSWD           $env(PASSWD)
 set KEY_FILE_PATH    " "
 set SRC_PATH         $env(SRC_PATH)
 set DEST_PATH        $env(DEST_PATH)
+set FROMTO           $env(FROMTO)
+if { ${FROMTO} == "ITA" } {
+   set REMOTE_SRC       ${SRC_PATH}
+   set REMOTE_DEST      ${USER}@${HOST}:${DEST_PATH}
+} else {
+   set REMOTE_SRC       ${USER}@${HOST}:${SRC_PATH}
+   set REMOTE_DEST      ${DEST_PATH}
+}
 if { ${TYPE} == "key" } {
    set KEY_FILE_PATH    $env(KEY_FILE_PATH)
 }
 set timeout 120
 if { ${TYPE} == "pass" } {
-    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SRC_PATH} ${USER}@${HOST}:${DEST_PATH}
+    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${REMOTE_SRC} ${REMOTE_DEST}
     expect "assword:" {
         send "${PASSWD}\n"
         exp_continue
@@ -71,7 +81,7 @@ if { ${TYPE} == "pass" } {
        exit ${STATUS}
     }
 } elseif { ${TYPE} == "key" } {
-    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${KEY_FILE_PATH} ${SRC_PATH} ${USER}@${HOST}:${DEST_PATH}
+    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${KEY_FILE_PATH} ${REMOTE_SRC} ${REMOTE_DEST}
     expect "assword:" {
         exit 201
     } "(yes/no)?" {
@@ -91,7 +101,7 @@ if { ${TYPE} == "pass" } {
     }
 }
 if { ${TYPE} == "none" } {
-    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${SRC_PATH} ${USER}@${HOST}:${DEST_PATH}
+    spawn scp -pr -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${REMOTE_SRC} ${REMOTE_DEST}
     expect "password:" {
         exit 201
     } "(yes/no)?" {

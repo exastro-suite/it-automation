@@ -33,6 +33,7 @@ global $error_flag;
 global $warning_flag;
 global $objMTS;
 global $objDBCA;
+global $vg_tower_driver_name;
 
     require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/DBAccesser.php");
     require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/LogWriter.php");
@@ -42,6 +43,7 @@ global $objDBCA;
     require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php" );
     require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/restapi_command/AnsibleTowerRestApiConfig.php");
     require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ansibletowerlibs/setenv.php");
+    require_once($root_dir_path . "/libs/backyardlibs/ansible_driver/ControlGit.php");
     
     ////////////////////////////////
     // ログ出力設定
@@ -75,7 +77,7 @@ global $objDBCA;
         // 接続トークン取得
         ////////////////////////////////
         // トレースメッセージ
-        $logger->debug("Authorize AnsibleTower.");
+        $logger->debug("Authorize Ansible Automation Controller.");
 
         $proxySetting              = array();
         $proxySetting['address']   = $ansibleTowerIfInfo["ANSIBLE_PROXY_ADDRESS"];
@@ -96,7 +98,7 @@ global $objDBCA;
                                   . $ansibleTowerIfInfo['ANSTWR_PORT'] . "\n"
                                   . "TOKEN: " . $ansibleTowerIfInfo['ANSTWR_AUTH_TOKEN'] . "\n");
   
-            $logger->error("Faild to authorize to ansible_tower. " . $response_array['responseContents']['errorMessage']);
+            $logger->error("Faild to authorize to Ansible Automation Controller. " . $response_array['responseContents']['errorMessage']);
         }
 
         $workflowTplId = -1;
@@ -104,8 +106,10 @@ global $objDBCA;
         if(!$process_has_error) {
             // トレースメッセージ
             $logger->debug("maintenance environment (exec_no: $tgt_execution_no)");
-    
-            $director = new ExecuteDirector($restApiCaller, $logger, $dbAccess, $exec_out_dir, $JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry);
+
+            $director = new ExecuteDirector($restApiCaller, $logger, $dbAccess, $exec_out_dir, $ansibleTowerIfInfo, $JobTemplatePropertyParameterAry,$JobTemplatePropertyNameAry);
+
+            $GitObj  = new ControlGit($tgt_execution_no, $vg_tower_driver_name, $ansibleTowerIfInfo["ANS_GIT_HOSTNAME"]);
         }
 
         // Tower 接続確認
@@ -136,6 +140,21 @@ global $objDBCA;
                     $version = $response_array['responseContents']['version'];
                     $ary = explode(".", $version);
                     if(count($ary) == 3) {
+                        if($ary[0] < 4) {
+                            if($ansibleTowerIfInfo['ANSIBLE_EXEC_MODE'] != DF_EXEC_MODE_TOWER) {
+                                $process_has_error = true;
+                                $error_flag = 1;
+                                $errorMessage = $msgTplStorage->getSomeMessage("ITAANSIBLEH-ERR-2007",array($version));
+                                $director->errorLogOut($errorMessage);
+                            }
+                        } else {
+                            if($ansibleTowerIfInfo['ANSIBLE_EXEC_MODE'] != DF_EXEC_MODE_AAC) {
+                                $process_has_error = true;
+                                $error_flag = 1;
+                                $errorMessage = $msgTplStorage->getSomeMessage("ITAANSIBLEH-ERR-2007",array($version));
+                                $director->errorLogOut($errorMessage);
+                            }
+                        }
                         $version = sprintf("%03d%03d",$ary[0],$ary[1]);
                         // Towerのバージョンが3.5以下かを判定する。
                         if($version <= "003005") {
@@ -167,40 +186,41 @@ global $objDBCA;
             if($process_has_error) {
                 break;
             }
+            $process_was_scrammed = false;
+            $wfId = -1;
             ////////////////////////////////////////////////////////////////
             // AnsibleTowerに必要なデータを生成                           //
             ////////////////////////////////////////////////////////////////
             $TowerHostList = array();
-            $workflowTplId = $director->build($toProcessRow, $ansibleTowerIfInfo,$TowerHostList);
+
+            $workflowTplId = $director->build($GitObj, $toProcessRow, $ansibleTowerIfInfo,$TowerHostList);
             if($workflowTplId == -1) {
                 // メイン処理での異常フラグをON
                 $process_has_error = true;
                 $error_flag = 1;
-                $logger->error("Faild to create ansibletower environment. (exec_no: $tgt_execution_no)");
-            }
-            // マルチログかを取得する。
-            $MultipleLogMark = $director->getMultipleLogMark();
-            
-            $wfId = -1;
-            $process_was_scrammed = false;
-            if(!$process_has_error) {
-                // トレースメッセージ
-                $logger->debug("launch (exec_no: $tgt_execution_no)");
+                $logger->error("Faild to create Ansible Automation Controller environment. (exec_no: $tgt_execution_no)");
+            } else {
+                // マルチログかを取得する。
+                $MultipleLogMark = $director->getMultipleLogMark();
+                if(!$process_has_error) {
+                    // トレースメッセージ
+                    $logger->debug("launch (exec_no: $tgt_execution_no)");
 
-                // 実行直前に緊急停止確認
-                if(isScrammedExecution($dbAccess, $tgt_execution_no)) {
-                    $process_was_scrammed = true;
-                } else {
-                    // ジョブワークフロー実行
-                    $wfId = $director->launchWorkflow($workflowTplId);
-                    if($wfId == -1) {
-                        $process_has_error = true;
-                        $error_flag = 1;
-                        $logger->error("Faild to launch workflowJob. (exec_no: $tgt_execution_no)");
-                        $errorMessage = $msgTplStorage->getSomeMessage("ITAANSIBLEH-ERR-6040008");
-                        $director->errorLogOut($errorMessage);
+                    // 実行直前に緊急停止確認
+                    if(isScrammedExecution($dbAccess, $tgt_execution_no)) {
+                        $process_was_scrammed = true;
                     } else {
-                        $logger->debug("execution start up complated. (exec_no: $tgt_execution_no)");
+                        // ジョブワークフロー実行
+                        $wfId = $director->launchWorkflow($workflowTplId);
+                        if($wfId == -1) {
+                            $process_has_error = true;
+                            $error_flag = 1;
+                            $logger->error("Faild to launch workflowJob. (exec_no: $tgt_execution_no)");
+                            $errorMessage = $msgTplStorage->getSomeMessage("ITAANSIBLEH-ERR-6040008");
+                            $director->errorLogOut($errorMessage);
+                        } else {
+                            $logger->debug("execution start up complated. (exec_no: $tgt_execution_no)");
+                        }
                     }
                 }
             }
@@ -227,12 +247,13 @@ global $objDBCA;
             if(($process_was_scrammed || $process_has_error) &&
                 $ansibleTowerIfInfo['ANSTWR_DEL_RUNTIME_DATA'] == 1 &&
                 $director != null) {
-                 $ret = $director->delete($tgt_execution_no,$TowerHostList);
+
+                 $ret = $director->delete($GitObj, $tgt_execution_no, $TowerHostList);
                  if($ret == false) {
                      $warning_flag = 1;
-                 $logger->error("Faild to cleanup ansibletower environment. (exec_no: $tgt_execution_no)");
+                 $logger->error("Faild to cleanup Ansible Automation Controller environment. (exec_no: $tgt_execution_no)");
                  } else {
-                     $logger->debug("Cleanup ansibletower environment SUCCEEDED. (exec_no: $tgt_execution_no)");
+                     $logger->debug("Cleanup Ansible Automation Controller environment SUCCEEDED. (exec_no: $tgt_execution_no)");
                  }
             }
             break;
@@ -258,7 +279,7 @@ global $objDBCA;
             // トレースメッセージ
             $logger->debug("monitoring environment (exec_no: $tgt_execution_no)");
 
-            $director = new ExecuteDirector($restApiCaller, $logger, $dbAccess, "");
+            $director = new ExecuteDirector($restApiCaller, $logger, $dbAccess, "", $ansibleTowerIfInfo);
             $status = $director->monitoring($toProcessRow, $ansibleTowerIfInfo);
 
             // マルチログかを取得する。
@@ -297,6 +318,20 @@ global $objDBCA;
             // トレースメッセージ
             $logger->debug("Update execution_management row. status=>" . $status);
             break;
+        case DF_RESULTFILETRANSFER_FUNCTION:
+            if($process_has_error) {
+                break;
+            }
+            if($director != null) {
+                $ret = $director->transfer($tgt_execution_no,$TowerHostList);
+                if($ret == false) {
+                    $warning_flag = 1;
+                    $logger->error("Faild to transfer the execution result file from Ansible Automation Controller. (exec_no: $tgt_execution_no)");
+                } else {
+                    $logger->debug("transfer the execution result file from Ansible Automation Controller environment SUCCEEDED. (exec_no: $tgt_execution_no)");
+                }
+            }
+            break;
         case DF_DELETERESOURCE_FUNCTION:
             if($process_has_error) {
                 break;
@@ -307,12 +342,12 @@ global $objDBCA;
             }
 
             if($ansibleTowerIfInfo['ANSTWR_DEL_RUNTIME_DATA'] == 1 && $director != null) {
-                $ret = $director->delete($tgt_execution_no,$TowerHostList);
+                $ret = $director->delete($GitObj, $tgt_execution_no,$TowerHostList);
                 if($ret == false) {
                     $warning_flag = 1;
-                    $logger->error("Faild to clean up ansibletower environment. (exec_no: $tgt_execution_no)");
+                    $logger->error("Faild to clean up Ansible Automation Controller environment. (exec_no: $tgt_execution_no)");
                 } else {
-                    $logger->debug("Clean up ansibletower environment SUCCEEDED. (exec_no: $tgt_execution_no)");
+                    $logger->debug("Clean up Ansible Automation Controller environment SUCCEEDED. (exec_no: $tgt_execution_no)");
                 }
             }
             break;

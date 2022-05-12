@@ -481,8 +481,16 @@ callback.prototype = {
 
         var ary_result = getArrayBySafeSeparator(result);
 
-        checkTypicalFlagInHADACResult(ary_result);
-
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                redirectTo(ary_result[1],ary_result[2],ary_result,3);
+                return;
+            }
+        }
+        
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
             

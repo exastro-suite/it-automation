@@ -1140,7 +1140,7 @@ function Mix1_1_destroyWorkspaceInsRegister(obj, workspaceID, workspaceName) {
 function Mix1_1_newOpenWindow(currentElement,currentText){
   var searchText = decodeURIComponent(escape(atob(currentText)));;
   var current_id = currentElement.offsetParent.id;
-  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "4";
+  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "5";
   var searchText1 = document.getElementById(target_id).children[0].innerText;
   var url = "01_browse.php?no=2100080004&filter=on&Filter1Tbl_5=" + searchText1 + ":" + searchText;
   window.open(url, '_blank');
@@ -1148,7 +1148,7 @@ function Mix1_1_newOpenWindow(currentElement,currentText){
 function Mix1_1_newOpenWindow2(currentElement,currentText){
   var searchText = decodeURIComponent(escape(atob(currentText)));;
   var current_id = currentElement.offsetParent.id;
-  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "4";
+  var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "5";
   var searchText1 = document.getElementById(target_id).children[0].innerText;
   var url = "01_browse.php?no=2100080014&filter=on&Filter1Tbl_3=" + searchText1 + ":" + searchText;
   window.open(url, '_blank');

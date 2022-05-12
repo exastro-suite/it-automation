@@ -1,0 +1,110 @@
+#!/usr/bin/expect
+#   Copyright 2022 NEC Corporation
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+######################################################################
+##
+##  【概要】
+##      リモートホスト内　ファイルコピー
+##
+##  【特記事項】
+##      <<引数>>
+##      expect ky_ansible_materials_remotecopy.exp
+##      <<環境変数>>
+##       HOST:            リモートホスト
+##       TYPE:            認証方式
+##                        パスワード認証: pass
+##                        鍵認証:         key
+##                        パスワード省略: none
+##       USER:            ユーザー名
+##       PASSWD:          パスワード
+##       KEY_FILE_PATH:   鍵認証ファイル
+##       SRC_PATH:        コピー元パス
+##       DEST_PATH:       コピー先パス
+##      <<exit code>>
+##       0:   正常
+##       他:　異常
+##
+######################################################################
+set HOST             $env(HOST)
+set TYPE             $env(TYPE)
+set USER             $env(USER)
+set PASSWD           $env(PASSWD)
+set KEY_FILE_PATH    " "
+set DEST_PATH        $env(DEST_PATH)
+set SRC_PATH         $env(SRC_PATH)
+if { ${TYPE} == "key" } {
+   set KEY_FILE_PATH    $env(KEY_FILE_PATH)
+}
+set timeout 120
+if { ${TYPE} == "pass" } {
+    spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${USER}@${HOST} /bin/cp -rfp ${SRC_PATH} ${DEST_PATH}
+    expect "assword:" {
+        send "${PASSWD}\n"
+        exp_continue
+    } "(yes/no)?" {
+        send "yes\n"
+        exp_continue
+    } " " {
+        exp_continue
+    } timeout {
+        exit 200
+    } eof {
+       catch wait result
+       set OS_ERROR [ lindex $result 2 ]
+       if { ${OS_ERROR} == -1 } {
+           exit 202
+       }
+       set STATUS [ lindex $result 3 ]
+       exit ${STATUS}
+    }
+} elseif { ${TYPE} == "key" } {
+    spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${KEY_FILE_PATH} ${USER}@${HOST} /bin/cp -rfp ${SRC_PATH} ${DEST_PATH}
+    expect "assword:" {
+        exit 201
+    } "(yes/no)?" {
+        exit 201
+    } " " {
+        exp_continue
+    } timeout {
+        exit 200
+    } eof {
+       catch wait result
+       set OS_ERROR [ lindex $result 2 ]
+       if { ${OS_ERROR} == -1 } {
+           exit 202
+       }
+       set STATUS [ lindex $result 3 ]
+       exit ${STATUS}
+    }
+}
+if { ${TYPE} == "none" } {
+    spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${USER}@${HOST} /bin/cp -rfp ${SRC_PATH} ${DEST_PATH}
+    expect "password:" {
+        exit 201
+    } "(yes/no)?" {
+        exit 201
+    } timeout {
+        exit 200
+    } eof {
+       catch wait result
+       set OS_ERROR [ lindex $result 2 ]
+       if { ${OS_ERROR} == -1 } {
+           exit 202
+       }
+       set STATUS [ lindex $result 3 ]
+       exit ${STATUS}
+    }
+}
+exit 203

@@ -159,6 +159,11 @@ class CreateAnsibleExecFiles {
     const LC_ANS_UNDEFINE_NAME               = "__undefinesymbol__";
 
     const LC_OPERATION_VAR_NAME              = "__operation__";
+    const LC_IN_PARAM_DIR_EPC                = "__parameters_dir_for_epc__";
+    const LC_IN_PARAM_FILE_DIR_EPC           = "__parameters_file_dir_for_epc__";
+    const LC_OUT_PARAM_DIR                   = "__parameter_dir__";
+    const LC_OUT_PARAM_FILE_DIR              = "__parameters_file_dir__";
+    const LC_MOVEMENT_STS_FILE               = "__movement_status_filepath__";
     // Ansible 作業ファイル名
     const LC_ANS_HOSTS_FILE                  = "hosts";
     const LC_ANS_PLAYBOOK_FILE               = "playbook.yml";
@@ -220,6 +225,8 @@ class CreateAnsibleExecFiles {
     private $lv_Ansible_in_original_dialog_files_Dir; //in/original_dialog_filesディレクトリ
 
     private $lv_Ansible_temporary_files_Dir;       //.tmpディレクトリ
+
+    private $lv_GitRepo_temporary_DirAry;         // Git ローカルリポジトリ作成用作業ディレクトリ
 
     //親PlayBook内各ディレクトリ変数
     private $lv_Playbook_child_playbooks_Dir;      //PlayBook内 子PlayBookパス
@@ -347,11 +354,25 @@ class CreateAnsibleExecFiles {
     private  $lv_vault_value_update_list; // ansible-vaultで暗号化した具体値の更新が済んでいる代入値管理のKey配列
 
     private  $lv_engine_virtualenv_name;  // Ansible Engine virtualenv path
+    private  $lv_ansible_cnf_file;        // Ansible Config File Name
 
     // LegacyRoleCheckConcreteValueIsVarで必要とする情報
     private  $LegacyRoleCheckConcreteValueIsVar_use_host_name;
     private  $LegacyRoleCheckConcreteValueIsVar_use_var_list;
 
+    private  $lv_TowerInstanceDirPath;                        // Tower 作業インスタンス毎 Project Path
+                                                              // lv_TowerInstanceDirPath["TowerPath"]   "/var/lib/awx/projects"
+                                                              // lv_TowerInstanceDirPath["ExastroPath"] "/var/lib/exastro"
+
+    private  $lv_exec_mode;                                   // 実行エンジン
+   
+    // Tower 作業インスタンス毎 out側ディレクトリ名
+    const    LC_ITA_OUT_DIR       = "__ita_out_dir__";
+    const    LC_ITA_IN_DIR        = "__ita_in_dir__";         // 実在しないディレクトリ
+    const    LC_ITA_CONDUCTOR_DIR = "__ita_conductor_dir__";
+    const    LC_ITA_SYMPHONY_DIR  = "__ita_symphony_dir__";
+    const    LC_ITA_TMP_DIR       = "__ita_tmp_dir__";  
+    
     ////////////////////////////////////////////////////////////////////////////////
     // 処理内容
     //   コンストラクタ
@@ -362,6 +383,9 @@ class CreateAnsibleExecFiles {
     //   $in_ansible_ita_base_dir:  ansible作業用 NFSベースディレクトリ (ITA側)
     //   $in_ansible_ans_base_dir:  ansible作業用 NFSベースディレクトリ (Ansible側)
     //   $in_symphony_ans_base_dir: symphony NFSベースディレクトリ (Ansible側)
+    //   $in_Conductor_ans_base_dir: Conductor NFSベースディレクトリ (Ansible側)
+    //   $in_symphony_ita_base_dir:  symphony NFSベースディレクトリ (ITA側)
+    //   $in_Conductor_ita_base_dir: Conductor NFSベースディレクトリ (ITA側)
     //   $in_ita_child_playbook_dir:    
     //                      ITA側で管理している子PlayBook格納ディレクトリ
     //                      ※Pkeyyの直前のディレクトリ
@@ -399,6 +423,7 @@ class CreateAnsibleExecFiles {
     //   $in_ans_if_info:   ansibleインターフェース情報
     //   $in_exec_no:       作業番号
     //   $in_engine_virtualenv_name:  Ansible Engine virtualenv path
+    //   $in_ansible_cnf_file:  Ansible config file name
     //   &$in_objMTS:       メッセージ定義クラス変数
     //   &$in_objDBCA:      データベースアクセスクラス変数
     // 
@@ -409,6 +434,9 @@ class CreateAnsibleExecFiles {
                          $in_ansible_ita_base_dir,
                          $in_ansible_ans_base_dir,
                          $in_symphony_ans_base_dir,
+                         $in_Conductor_ans_base_dir,
+                         $in_symphony_ita_base_dir,
+                         $in_Conductor_ita_base_dir,
                          $in_ita_child_playbook_dir,
                          $in_ita_dialog_file_dir,
                          $in_ita_template_file_dir,
@@ -428,8 +456,18 @@ class CreateAnsibleExecFiles {
                          $in_ans_if_info,    
                          $in_exec_no,
                          $in_engine_virtualenv_name,
+                         $in_ansible_cnf_file,
                          &$in_objMTS,&$in_objDBCA){
         global $root_dir_path;
+        global $vg_TowerProjectsScpPathArray;
+
+        global $vg_tower_driver_name;
+
+        // Tower(/var/lib/awx/projects)ディレクトリへのファイル転送パス配列
+        $vg_TowerProjectsScpPathArray = array();
+
+        // 実行エンジンを退避
+        $this->lv_exec_mode = $in_ans_if_info['ANSIBLE_EXEC_MODE'];
 
         //Ansibleドライバ(legacy/pioneer)区分設定
         $this->setAnsibleDriverID($in_driver_id);
@@ -438,7 +476,9 @@ class CreateAnsibleExecFiles {
         $this->setAnsibleBaseDir('ANSIBLE_SH_PATH_ITA',$in_ansible_ita_base_dir);
         $this->setAnsibleBaseDir('ANSIBLE_SH_PATH_ANS',$in_ansible_ans_base_dir);
         $this->setAnsibleBaseDir('SYMPHONY_SH_PATH_ANS',$in_symphony_ans_base_dir);
-        $this->setAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ANS',$in_ans_if_info['CONDUCTOR_STORAGE_PATH_ANS']);
+        $this->setAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ANS',$in_Conductor_ans_base_dir);
+        $this->setAnsibleBaseDir('SYMPHONY_SH_PATH_ITA',$in_symphony_ita_base_dir);
+        $this->setAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ITA',$in_Conductor_ita_base_dir);
 
         //ITA子PlayBook格納ディレクトリ
         $this->setITA_child_playbook_Dir($in_ita_child_playbook_dir);
@@ -506,10 +546,15 @@ class CreateAnsibleExecFiles {
         $this->lv_vault_value_update_list   = array();
 
         $this->lv_engine_virtualenv_name    = $in_engine_virtualenv_name;
+        $this->lv_ansible_cnf_file          = $in_ansible_cnf_file;
 
         $this->LegacyRoleCheckConcreteValueIsVar_use_host_name = "";
         $this->LegacyRoleCheckConcreteValueIsVar_use_var_list  = array();
 
+        // Tower Projectディレクトリパス生成
+        $this->setTowerProjectDirPath();
+
+        $this->lv_GitRepo_temporary_DirAry = getInputDataTempDir($in_exec_no,$vg_tower_driver_name);
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -532,6 +577,7 @@ class CreateAnsibleExecFiles {
     //   false:  異常
     ////////////////////////////////////////////////////////////////////////////////
     function getAnsibleWorkingDirectories($in_oct_id,$in_execno){
+
         $aryRetAnsibleWorkingDir = array();
         
         $base_dir = $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA');
@@ -743,6 +789,15 @@ class CreateAnsibleExecFiles {
         }
         // outディレクトリ名を記憶
         $this->setAnsible_out_Dir($c_outdir);
+
+        // Tower(/var/lib/awx/projects)ディレクトリへのファイル転送パス退避
+        $Tower_out_Dir = sprintf("%s/%s",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_OUT_DIR);
+        $this->setTowerProjectsScpPath(DF_SCP_OUT_TOWER_PATH,$Tower_out_Dir);
+        $this->setTowerProjectsScpPath(DF_SCP_OUT_ITA_PATH,$this->getAnsible_out_Dir());
+
+        // Gitリポジトリ作業用 ディレクトリバス
+        $path = sprintf("%s/%s",$this->lv_GitRepo_temporary_DirAry["DIR_NAME"],self::LC_ITA_OUT_DIR);
+        $this->setTowerProjectsScpPath(DF_GITREPO_OUT_PATH,$path);
     
         // ユーザー公開用データリレイストレージパス
         $user_out_Dir = $c_outdir . "/" . self::LC_ANS_OUTDIR_DIR;
@@ -759,14 +814,28 @@ class CreateAnsibleExecFiles {
         }
      
         // ホスト変数定義ファイルに記載するパスなのでAnsible側のストレージパスに変更
-        $this->lv_user_out_Dir = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                             $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                             $user_out_Dir);
+        $this->lv_user_out_Dir = $this->setAnsibleSideFilePath($user_out_Dir,self::LC_ITA_OUT_DIR);
 
         // symphonyからの起動か判定 ディレクトリはsymphonyバックヤードで作成済み
         if(strlen($in_symphony_instance_no) != 0) {
             // ユーザー公開用symphonyインスタンス作業用 データリレイストレージパス
-            $this->lv_symphony_instance_Dir = $this->getAnsibleBaseDir('SYMPHONY_SH_PATH_ANS') . "/" . sprintf("%010s",$in_symphony_instance_no);
+            $ins_Path = sprintf("%010s",$in_symphony_instance_no);
+            switch($this->lv_exec_mode) {
+            case DF_EXEC_MODE_ANSIBLE:
+                $this->lv_symphony_instance_Dir = sprintf("%s/%s",$this->getAnsibleBaseDir('SYMPHONY_SH_PATH_ANS'),$ins_Path);
+                break;
+            default:
+                $this->lv_symphony_instance_Dir = sprintf("%s/%s/%s/%s",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_TMP_DIR,self::LC_ITA_SYMPHONY_DIR,$ins_Path);
+                // Tower(/var/lib/awx/projects)ディレクトリへのファイル転送パス退避
+                $this->setTowerProjectsScpPath(DF_SCP_SYMPHONY_TOWER_PATH,$this->lv_symphony_instance_Dir);
+                $ita_conductor_instance_Dir= sprintf("%s/%s",$this->getAnsibleBaseDir('SYMPHONY_SH_PATH_ITA'),$ins_Path);
+                $this->setTowerProjectsScpPath(DF_SCP_SYMPHONY_ITA_PATH,$ita_conductor_instance_Dir);
+
+                // Gitリポジトリ作業用 ディレクトリバス
+                $path = sprintf("%s/%s/%s/%s",$this->lv_GitRepo_temporary_DirAry["DIR_NAME"],self::LC_ITA_TMP_DIR,self::LC_ITA_SYMPHONY_DIR,$ins_Path);
+                $this->setTowerProjectsScpPath(DF_GITREPO_SYMPHONY_PATH,$path);
+                break;
+            }
         }
         else
         {
@@ -775,8 +844,24 @@ class CreateAnsibleExecFiles {
 
         // conductorからの起動か判定 ディレクトリはconductorバックヤードで作成済み
         if(strlen($in_conductor_instance_no)  != 0) {
+            $ins_Path = sprintf("%010s",$in_conductor_instance_no);
             // ユーザー公開用conductorインスタンス作業用 データリレイストレージパス
-            $this->lv_conductor_instance_Dir = $this->getAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ANS') . "/" . sprintf("%010s",$in_conductor_instance_no);
+            switch($this->lv_exec_mode) {
+            case DF_EXEC_MODE_ANSIBLE:
+                $this->lv_conductor_instance_Dir= sprintf("%s/%s",$this->getAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ANS'),$ins_Path);
+                break;
+            default:
+                // Tower(/var/lib/awx/projects)ディレクトリへのファイル転送パス退避
+                $this->lv_conductor_instance_Dir= sprintf("%s/%s/%s/%s",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_TMP_DIR,self::LC_ITA_CONDUCTOR_DIR,$ins_Path);
+                $this->setTowerProjectsScpPath(DF_SCP_CONDUCTOR_TOWER_PATH,$this->lv_conductor_instance_Dir);
+                $ita_conductor_instance_Dir= sprintf("%s/%s",$this->getAnsibleBaseDir('CONDUCTOR_STORAGE_PATH_ITA'),$ins_Path);
+                $this->setTowerProjectsScpPath(DF_SCP_CONDUCTOR_ITA_PATH,$ita_conductor_instance_Dir);
+
+                // Gitリポジトリ作業用 ディレクトリバス
+                $path = sprintf("%s/%s/%s/%s",$this->lv_GitRepo_temporary_DirAry["DIR_NAME"],self::LC_ITA_TMP_DIR,self::LC_ITA_CONDUCTOR_DIR,$ins_Path);
+                $this->setTowerProjectsScpPath(DF_GITREPO_CONDUCTOR_PATH,$path);
+                break;
+            }
         }
         else
         {
@@ -799,6 +884,7 @@ class CreateAnsibleExecFiles {
         
         // INディレクトリ名を記憶
         $this->setAnsible_in_Dir($c_indir);
+
     
         // ドライバ区分がLEGACYの場合にchild_playbooksディレクトリ作成
         if ($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID){
@@ -1090,7 +1176,6 @@ class CreateAnsibleExecFiles {
                     }
                 }
 
-
                 // 作業パターンIDに紐づけられているロール名取得
                 $w_RoleInfoList = array();
                 $w_RoleNameList = array();
@@ -1254,6 +1339,16 @@ class CreateAnsibleExecFiles {
             if( file_exists($wk_dir) === true ){
                 exec("/bin/rm -rf " . $wk_dir);
             }
+
+            // ITA独自ディレクトリの存在を確認し削除
+            $wk_dir = $c_indir . "/" . self::LC_ITA_OUT_DIR;
+            if( file_exists($wk_dir) === true ){
+                exec("/bin/rm -rf " . $wk_dir);
+            }
+            $wk_dir = $c_indir . "/" . self::LC_ITA_TMP_DIR;
+            if( file_exists($wk_dir) === true ){
+                exec("/bin/rm -rf " . $wk_dir);
+            }
         }
 
         // host_varsディレクトリ作成
@@ -1272,23 +1367,99 @@ class CreateAnsibleExecFiles {
         // host_varsディレクトリ名を記憶
         $this->setAnsible_host_vars_Dir($c_dirwk);
     
+        // tmpディレクトリ作成
+        $c_tmpdir = $c_dir . "/" . self::LC_ANS_TMP_DIR;
+        if( !mkdir( $c_tmpdir, 0777 ) ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+        if( !chmod( $c_tmpdir, 0777 ) ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+    
+        // tmpディレクトリ名を記憶
+        $this->setAnsible_tmp_Dir($c_tmpdir);
+    
+        // Tower(/var/lib/awx/projects)ディレクトリへのファイル転送パス退避
+        $Tower_tmp_Dir = sprintf("%s/%s",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_TMP_DIR);
+        $this->setTowerProjectsScpPath(DF_SCP_TMP_TOWER_PATH,$Tower_tmp_Dir);
+        $this->setTowerProjectsScpPath(DF_SCP_TMP_ITA_PATH,$this->getAnsible_tmp_Dir());
+
+        // Gitリポジトリ作業用 ディレクトリバス
+        $path = sprintf("%s/%s",$this->lv_GitRepo_temporary_DirAry["DIR_NAME"],self::LC_ITA_TMP_DIR);
+        $this->setTowerProjectsScpPath(DF_GITREPO_TMP_PATH,$path);
+
+        // Tower用のsymphonyディレクトリ生成
+        if(strlen($in_symphony_instance_no) != 0) {
+            switch($this->lv_exec_mode) {
+            case DF_EXEC_MODE_ANSIBLE:
+                break;
+            default:
+                $c_dirwk = $c_tmpdir . "/" . self::LC_ITA_SYMPHONY_DIR;
+                if( !mkdir( $c_dirwk, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( !chmod( $c_dirwk, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                $ins_Path = sprintf("%010s",$in_symphony_instance_no);
+                $c_dirwk = $c_tmpdir . "/" . self::LC_ITA_SYMPHONY_DIR . "/" . $ins_Path;
+                if( !mkdir( $c_dirwk, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( !chmod( $c_dirwk, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                break;
+            }
+        } 
+        // Tower用のconductorディレクトリ生成
+        if(strlen($in_conductor_instance_no)  != 0) {
+            switch($this->lv_exec_mode) {
+            case DF_EXEC_MODE_ANSIBLE:
+                break;
+            default:
+                $c_dirwk = $c_tmpdir . "/" . self::LC_ITA_CONDUCTOR_DIR;
+                if( !mkdir( $c_dirwk, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( !chmod( $c_dirwk, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                $ins_Path = sprintf("%010s",$in_conductor_instance_no);
+                $c_dirwk = $c_tmpdir . "/" . self::LC_ITA_CONDUCTOR_DIR . "/" . $ins_Path;
+                if( !mkdir( $c_dirwk, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( !chmod( $c_dirwk, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                break;
+            }
+        }
+
         // ドライバ区分がPIONEERの場合にPIONEER用作業ディレクトリ作成
         if ($this->getAnsibleDriverID() == DF_PIONEER_DRIVER_ID){
-            $c_tmpdir = $c_dir . "/" . self::LC_ANS_TMP_DIR;
-            if( !mkdir( $c_tmpdir, 0777 ) ){
-                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__)); 
-                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                return false;
-            }
-            if( !chmod( $c_tmpdir, 0777 ) ){
-                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
-                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                return false;
-            }
-    
-            // tmpディレクトリ名を記憶
-            $this->setAnsible_tmp_Dir($c_tmpdir);
-    
+
             // original_dialog_filesディレクトリ作成
             $c_dirwk = $c_tmpdir . "/" . self::LC_ANS_ORG_DIALOG_FILES_DIR;
             if( !mkdir( $c_dirwk, 0777 ) ){
@@ -1492,7 +1663,6 @@ class CreateAnsibleExecFiles {
                                        $in_exec_playbook_hed_def,
                                        $in_exec_option)
     {
-
         $this->lv_hostinfolist = $ina_hostinfolist;
 
         // 追加された予約変数生成
@@ -1724,6 +1894,16 @@ class CreateAnsibleExecFiles {
             }
             break;
         }
+
+        //////////////////////////////////////////////////////////////////////////
+        // Movement一覧にAnsible Config Fileが設定されている場合にin配下にコピー
+        //////////////////////////////////////////////////////////////////////////
+        if($this->lv_ansible_cnf_file != "") {
+            $ret = $this->CopyAnsibleConfigFile();
+            if($ret === false) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -1897,6 +2077,9 @@ class CreateAnsibleExecFiles {
                                                      $ina_hostinfolist[$host_name]['SSH_KEY_FILE'],
                                                      $ssh_key_file_path);
 
+                    if($ret !== true) {
+                        return false;
+                    }
                     // ky_encryptで中身がスクランブルされているので復元する
                     $ret = ky_file_decrypt($ssh_key_file_path,$ssh_key_file_path);
                     $in_system_id = $ina_hostinfolist[$host_name]['SYSTEM_ID'];
@@ -1918,12 +2101,10 @@ class CreateAnsibleExecFiles {
 //                        return false;
 //                    }
 
-                    $ssh_key_file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                    $ssh_key_file_pathi1 = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
                                                      $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
                                                      $ssh_key_file_path);
-                    if($ret === false){
-                        return false;
-                    }
+                    $ssh_key_file_path = $this->setAnsibleSideFilePath($ssh_key_file_path,self::LC_ITA_IN_DIR);
 
                     // 秘密鍵認証の場合にssh-agntでパスフレーズの入力を省略する為の情報生成
                     if($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE'] == DF_LOGIN_AUTH_TYPE_KEY_PP_USE) {
@@ -1958,8 +2139,14 @@ class CreateAnsibleExecFiles {
                     $ret = $this->CreateWIN_cs_file($ina_hostinfolist[$host_name]['SYSTEM_ID'],
                                                     $ina_hostinfolist[$host_name]['WINRM_SSL_CA_FILE'],
                                                     $win_ca_file_path);
+
+                    if($ret !== true) {
+                        return false;
+                    }
+
                     // ky_encryptで中身がスクランブルされているので、復元
                     $ret = ky_file_decrypt($win_ca_file_path,$win_ca_file_path);
+
                     $in_system_id = $ina_hostinfolist[$host_name]['SYSTEM_ID'];
                     if($ret === false) {
                         $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000116",array($in_system_id));
@@ -1979,12 +2166,8 @@ class CreateAnsibleExecFiles {
 //                        return false;
 //                    }
 
-                    $win_ca_file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                    $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                    $win_ca_file_path);
-                    if($ret === false){
-                        return false;
-                    }
+                    $win_ca_file_path = $this->setAnsibleSideFilePath($win_ca_file_path,self::LC_ITA_IN_DIR);
+
                     if(($this->getAnsibleDriverID() == DF_LEGACY_DRIVER_ID) ||
                        ($this->getAnsibleDriverID() == DF_LEGACY_ROLE_DRIVER_ID)){
                         // hostsファイルに追加するサーバー証明書ファイルのパラメータ生成
@@ -2969,14 +3152,9 @@ class CreateAnsibleExecFiles {
                     $value = $value . "    - include: " . $this->getPlaybook_child_playbook_file($key,$file) . "\n";
                     break;
                 case DF_PIONEER_DRIVER_ID:
-                    //"log_file_dir='" . $this->getAnsible_out_Dir() . "' " . 
-                    //"host_vars_file='" . $this->getAnsible_original_hosts_vars_Dir() . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}' ".
-                    $log_file_path  = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                  $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                  $this->getAnsible_out_Dir());
-                    $host_vars_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                  $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                  $this->getAnsible_original_hosts_vars_Dir());
+                    $log_file_path = $this->setAnsibleSideFilePath($this->getAnsible_out_Dir(),self::LC_ITA_OUT_DIR);
+                    $host_vars_path = $this->setAnsibleSideFilePath($this->getAnsible_original_hosts_vars_Dir(),self::LC_ITA_TMP_DIR);
+
                     $value = $value . "    - name: pioneer_module exec\n";
                     $value = $value . "      pioneer_module: username={{ " . self::LC_ANS_USERNAME_VAR_NAME . " }} " .
                                                   "protocol={{ " . self::LC_ANS_PROTOCOL_VAR_NAME . " }} " .
@@ -3178,11 +3356,7 @@ class CreateAnsibleExecFiles {
                                          $hostname_2,
                                          str_pad( $pkey, $intNumPadding, "0", STR_PAD_LEFT ),       
                                          $dialog_file);
-
-                     $file_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                              $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                              $arry_val);
-
+                    $file_path = $this->setAnsibleSideFilePath($arry_val,self::LC_ITA_IN_DIR);
 
                      //[対話ファイル変数名]=対話ファイル名
                      $host_vars_list[$arry_key] = $file_path;
@@ -3995,6 +4169,14 @@ class CreateAnsibleExecFiles {
 
                         // ユーザー公開用 conductorインスタンス作業用データリレイストレージパス 変数の名前
                         $local_vars[] = self::LC_CONDUCTO_DIR_VAR_NAME;
+
+                        $local_vars[] = self::LC_OPERATION_VAR_NAME;
+                        $local_vars[] = self::LC_IN_PARAM_DIR_EPC;
+                        $local_vars[] = self::LC_IN_PARAM_FILE_DIR_EPC;
+                        $local_vars[] = self::LC_OUT_PARAM_DIR;
+                        $local_vars[] = self::LC_OUT_PARAM_FILE_DIR;
+                        $local_vars[] = self::LC_MOVEMENT_STS_FILE;
+
                         $varsLineArray = array();
                         $varsArray     = array();
                         $FillterVars   = false;  // Fillterを含む変数の抜き出しあり
@@ -8747,9 +8929,7 @@ class CreateAnsibleExecFiles {
                     $tpf_path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
 
                     // ファイルパスをansible側から見たパスに変更する。
-                    $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                            $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                            $tpf_path);
+                    $tpf_path = $this->setAnsibleSideFilePath($tpf_path,self::LC_ITA_IN_DIR);
 
                     // $la_tpf_path[テンプレート変数]=ホスト変数ファイル内のテンプレートファイルパス
                     $la_tpf_path[$tpf_var_name] = $tpf_path;
@@ -9965,11 +10145,8 @@ class CreateAnsibleExecFiles {
 
                         // inディレクトリ配下のcopyファイルバスを取得
                         $cpf_path = $this->getHostvarsfile_copy_file_value($cpf_key,$cpf_file_name);
-
                         // ファイルパスをansible側から見たパスに変更する。
-                        $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                $cpf_path);
+                        $cpf_path = $this->setAnsibleSideFilePath($cpf_path,self::LC_ITA_IN_DIR);
 
                         $la_cpf_path[$cpf_var_name] = $cpf_path;
                     }
@@ -10639,9 +10816,7 @@ class CreateAnsibleExecFiles {
                                                                            $file_info_list['CONTENTS_FILE']);
 
                         // ファイルパスをansible側から見たパスに変更する。
-                        $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                $cpf_path);
+                        $cpf_path = $this->setAnsibleSideFilePath($cpf_path,self::LC_ITA_IN_DIR);
 
                         // $la_cpf_path[copy変数]=inディレクトリ配下ののcopyファイルパス
                         $la_cpf_path[$cpf_var_name] = $cpf_path;
@@ -10877,6 +11052,16 @@ class CreateAnsibleExecFiles {
             return false;
         }
 
+        // 実行ユーザーがroot以外の場合、鍵ファイルのオーナーを変更
+        $ExecUser = $this->getAnsibleExecuteUser();
+        if(($ExecUser != 'root') && ($this->lv_exec_mode == DF_EXEC_MODE_ANSIBLE)) {
+            if( !chown( $dst_file, $ExecUser) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000038",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+
         // Ansible実行時のSSH秘密鍵ファイルパス退避
         $in_in_dir_ssh_key_file = $dst_file;
         return true;
@@ -10978,6 +11163,17 @@ class CreateAnsibleExecFiles {
             $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
             return false;
         }
+
+        // 実行ユーザーがroot以外の場合、鍵ファイルのオーナーを変更
+        $ExecUser = $this->getAnsibleExecuteUser();
+        if(($ExecUser != 'root') && ($this->lv_exec_mode == DF_EXEC_MODE_ANSIBLE)) {
+            if( !chown( $dst_file, $ExecUser) ){
+                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-5000038",array(__LINE__));
+                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                return false;
+            }
+        }
+
         // Ansible実行時のサーバー証明書ファイルパス退避
         $in_dir_win_ca_file = $dst_file;
         return true;
@@ -11098,31 +11294,23 @@ class CreateAnsibleExecFiles {
                     // テンプレートファイルバスを取得
                     $tpf_path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
 
-                    $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                            $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                            $tpf_path);
+                    $tpf_path = $this->setAnsibleSideFilePath($tpf_path,self::LC_ITA_IN_DIR);
 
                     break;
                 case DF_PIONEER_DRIVER_ID:
                     // templateモジュールのコピー先パス生成 ホスト名は__loginhostname__
                     $tpf_path = $this->getHostvarsfile_pioneer_template_file_value($tpf_key,$tpf_file_name,$in_host_name);
-                    $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                            $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                            $tpf_path);
+                    $tpf_path = $this->setAnsibleSideFilePath($tpf_path,self::LC_ITA_IN_DIR);
 
                     // templateモジュールのコピー先パス生成 ホスト名は__loginhostname__
                     $tmpmod_tpf_path = $this->getHostvarsfile_pioneer_template_file_value($tpf_key,$tpf_file_name,'{{ ' . self::LC_ANS_LOGINHOST_VAR_NAME . ' }}');
-                    $tmpmod_tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                   $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                   $tmpmod_tpf_path);
+                    $tmpmod_tpf_path = $this->setAnsibleSideFilePath($tmpmod_tpf_path,self::LC_ITA_IN_DIR);
 
                     // templateモジュールのsrc/destパス退避
                     $this->lv_tpf_var_file_path_list[$tpf_var_name] = array();
 
                     $tpf_src_path = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
-                    $tpf_src_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                $tpf_src_path);
+                    $tpf_src_path = $this->setAnsibleSideFilePath($tpf_src_path,self::LC_ITA_IN_DIR);
 
                     $this->lv_tpf_var_file_path_list[$tpf_var_name]['src']  = $tpf_src_path;
                     $this->lv_tpf_var_file_path_list[$tpf_var_name]['dest'] = $tmpmod_tpf_path;
@@ -11201,9 +11389,8 @@ class CreateAnsibleExecFiles {
                     $cpf_path = $this->getHostvarsfile_pioneer_copy_file_value($cpf_key,$cpf_file_name);
                     break;
                 }
-                $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                        $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                        $cpf_path);
+
+                $cpf_path = $this->setAnsibleSideFilePath($cpf_path,self::LC_ITA_IN_DIR);
 
                 // $ina_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
                 $ina_cpf_vars_list[$in_host_name][$cpf_var_name] = $cpf_path;
@@ -11718,10 +11905,7 @@ class CreateAnsibleExecFiles {
                     }
                     // inディレクトリ配下のcopyファイルバスを取得
                     $path = $this->getHostvarsfile_copy_file_value($key,$file_name);
-
-                    $path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                        $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                        $path);
+                    $path = $this->setAnsibleSideFilePath($path,self::LC_ITA_IN_DIR);
 
                     // $ina_legacy_Role_cpf_vars_list[copy変数]=inディレクトリ配下ののcopyファイルパス
                     $ina_legacy_Role_cpf_vars_list[$var_name] = $path;
@@ -11759,10 +11943,7 @@ class CreateAnsibleExecFiles {
                     }
                     // inディレクトリ配下のテンプレートファイルバスを取得
                     $path = $this->getHostvarsfile_template_file_value($tpf_key,$tpf_file_name);
-
-                    $path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                        $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                        $path);
+                    $path = $this->setAnsibleSideFilePath($path,self::LC_ITA_IN_DIR);
 
                     // $ina_legacy_Role_tpf_vars_list[copy変数]=inディレクトリ配下のテンプレートファイルパス
                     $ina_legacy_Role_tpf_vars_list[$tpf_var_name] = $path;
@@ -11982,10 +12163,7 @@ class CreateAnsibleExecFiles {
 
                             // inディレクトリ配下のcopyファイルバスを取得
                             $cpf_path = $this->getHostvarsfile_pioneer_copy_file_value($cpf_key,$cpf_file_name);
-
-                            $cpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                    $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                    $cpf_path);
+                            $cpf_path = $this->setAnsibleSideFilePath($cpf_path,self::LC_ITA_IN_DIR);
 
                             // $la_cpf_path[copy変数]=inディレクトリ配下のcopyファイルパス
                             $la_cpf_path[$cpf_var_name] = $cpf_path;
@@ -12236,25 +12414,18 @@ class CreateAnsibleExecFiles {
 
                             // inディレクトリ配下のtemplateファイルバスを取得
                             $tpf_path = $this->getHostvarsfile_pioneer_template_file_value($tpf_key,$tpf_file_name,$hostname);
-
-                            $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                    $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                    $tpf_path);
+                            $tpf_path = $this->setAnsibleSideFilePath($tpf_path,self::LC_ITA_IN_DIR);
 
                             // $la_tpf_path[template変数]=inディレクトリ配下のtemplateファイルパス
                             $la_tpf_path[$tpf_var_name] = $tpf_path;
 
                             // templateモジュールのコピー先パス生成 ホスト名は__loginhostname__
                             $tmpmod_tpf_path = $this->getHostvarsfile_pioneer_template_file_value($tpf_key,$tpf_file_name,'{{ ' . self::LC_ANS_LOGINHOST_VAR_NAME . ' }}');
-                            $tmpmod_tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                    $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                    $tmpmod_tpf_path);
+                            $tmpmod_tpf_path = $this->setAnsibleSideFilePath($tmpmod_tpf_path,self::LC_ITA_IN_DIR);
 
                             // templateモジュールのコピー元パス生成
                             $src_tpf_path = $this->getHostvarsfile_pioneer_template_file($tpf_key,$tpf_file_name);
-                            $src_tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                        $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                        $src_tpf_path);
+                            $src_tpf_path = $this->setAnsibleSideFilePath($src_tpf_path,self::LC_ITA_IN_DIR);
 
                             // templateモジュールのsrc/destパス退避
                             $this->lv_tpf_var_file_path_list[$tpf_var_name] = array();
@@ -12409,9 +12580,7 @@ class CreateAnsibleExecFiles {
                                                                                $file_info_list['CONTENTS_FILE']);
 
                         // ファイルパスをansible側から見たパスに変更する。
-                        $tpf_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                                $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                                $tpf_path);
+                        $tpf_path = $this->setAnsibleSideFilePath($tpf_path,self::LC_ITA_IN_DIR);
 
                         // $la_tpf_path[テンプレート変数]=inディレクトリ配下ののcopyファイルパス
                         $la_tpf_path[$tpf_var_name] = $tpf_path;
@@ -12573,15 +12742,14 @@ class CreateAnsibleExecFiles {
                 $j = $j + 1;
                 $playbookwrite[$j] = "    - name: include\n";
                 $j = $j + 1;
-                $host_vars_path = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                              $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                              $this->getAnsible_pioneer_template_hosts_vars_Dir());
+                $host_vars_path = $this->setAnsibleSideFilePath($this->getAnsible_pioneer_template_hosts_vars_Dir(),self::LC_ITA_TMP_DIR);
+
                 $playbookwrite[$j] = "      include_vars: " . $host_vars_path . "/{{ " . self::LC_ANS_LOGINHOST_VAR_NAME . " }}\n";
                 foreach( $in_tpf_path as $var_name=>$fileinfo ) {
                     $j = $j + 1;
                     $playbookwrite[$j] = "    - name: Templatefile Create " . sprintf("[%s]\n", $var_name);
                     $j = $j + 1;
-                    $playbookwrite[$j] = "      template: src=" . sprintf("%s", $in_tpf_path[$var_name]['src']) . " dest=" . sprintf("%s\n", $in_tpf_path[$var_name]['dest']);
+                    $playbookwrite[$j] = "      template: src=" . sprintf("'%s'", $in_tpf_path[$var_name]['src']) . " dest=" . sprintf("'%s'\n", $in_tpf_path[$var_name]['dest']);
                     $j = $j + 1;
                     $playbookwrite[$j] = "      delegate_to: 127.0.0.1\n";
                     $j = $j + 1;
@@ -13184,14 +13352,37 @@ if(isset($Expansion_root)) {
         foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
             $hostname = $hostinfo['HOSTNAME'];
 
-            $host_var_name  = "__parameters_dir_for_epc__"; 
+            $host_var_name  = self::LC_IN_PARAM_DIR_EPC;
+
             $mkdir          = sprintf("%s/%s/%s/in/_parameters/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
-            $host_var_vaule = sprintf("%s/%s/%s/in/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            $scpsrcdir      = sprintf("%s/%s/%s/in/_parameters",$ita_base_dir,$drive_list[$driver_id],$execute_no);
+            switch($this->lv_exec_mode) {
+            case DF_EXEC_MODE_ANSIBLE:
+                $host_var_vaule = sprintf("%s/%s/%s/in/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+                break;
+            default:
+                $host_var_vaule = sprintf("%s/_parameters",$this->getTowerProjectDirPath("ExastroPath"));
+                $this->setTowerProjectsScpPath(DF_SCP_IN_PARAMATERS_ITA_PATH,$scpsrcdir);
+                $this->setTowerProjectsScpPath(DF_SCP_IN_PARAMATERS_TOWER_PATH,$host_var_vaule);
+                break;
+            }
+
             // ディレクトリ存在確認
             if( ! is_dir($mkdir)) {
-                $ret = mkdir($mkdir,0755,true);
+                $ret = mkdir($mkdir,0777,true);
                 if($ret === false) {
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                // mkdir 0777が効かない
+                if( !chmod( dirname($mkdir), 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( !chmod( $mkdir, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     return false;
                 }
@@ -13204,14 +13395,36 @@ if(isset($Expansion_root)) {
                 break;
             }
 
-            $host_var_name  = "__parameter_dir__"; 
+            $host_var_name  = self::LC_OUT_PARAM_DIR; 
+
+
             $mkdir          = sprintf("%s/%s/%s/out/_parameters/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
             $host_var_vaule = sprintf("%s/%s/%s/out/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            switch($this->lv_exec_mode) {
+            case DF_EXEC_MODE_ANSIBLE:
+                $host_var_vaule = sprintf("%s/%s/%s/out/_parameters"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+                break;
+            default:
+                $host_var_vaule = sprintf("%s/%s/_parameters",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_OUT_DIR);
+                break;
+            }
+
             // ディレクトリ存在確認
             if( ! is_dir($mkdir)) {
-                $ret = mkdir($mkdir,0755,true);
+                $ret = mkdir($mkdir,0777,true);
                 if($ret === false) {
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                // mkdir 0777が効かない
+                if( !chmod( dirname($mkdir), 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( !chmod( $mkdir, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     return false;
                 }
@@ -13224,14 +13437,37 @@ if(isset($Expansion_root)) {
                 break;
             }
 
-            $host_var_name  = "__parameters_file_dir_for_epc__"; 
+            $host_var_name  = self::LC_IN_PARAM_FILE_DIR_EPC;
+
             $mkdir          = sprintf("%s/%s/%s/in/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
+            $scpsrcdir      = sprintf("%s/%s/%s/in/_parameters_file",$ita_base_dir,$drive_list[$driver_id],$execute_no);
             $host_var_vaule = sprintf("%s/%s/%s/in/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            switch($this->lv_exec_mode) {
+            case DF_EXEC_MODE_ANSIBLE:
+                $host_var_vaule = sprintf("%s/%s/%s/in/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+                break;
+            default:
+                $host_var_vaule = sprintf("%s/_parameters_file",$this->getTowerProjectDirPath("ExastroPath"));
+                $this->setTowerProjectsScpPath(DF_SCP_IN_PARAMATERS_FILE_ITA_PATH,$scpsrcdir);
+                $this->setTowerProjectsScpPath(DF_SCP_IN_PARAMATERS_FILE_TOWER_PATH,$host_var_vaule);
+                break;
+            }
             // ディレクトリ存在確認
             if( ! is_dir($mkdir)) {
-                $ret = mkdir($mkdir,0755,true);
+                $ret = mkdir($mkdir,0777,true);
                 if($ret === false) {
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                // mkdir 0777が効かない
+                if( !chmod( dirname($mkdir), 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( !chmod( $mkdir, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     return false;
                 }
@@ -13244,14 +13480,34 @@ if(isset($Expansion_root)) {
                 break;
             }
 
-            $host_var_name  = "__parameters_file_dir__"; 
+            $host_var_name  = self::LC_OUT_PARAM_FILE_DIR; 
+
             $mkdir          = sprintf("%s/%s/%s/out/_parameters_file/%s",$ita_base_dir,$drive_list[$driver_id],$execute_no,$hostname);
             $host_var_vaule = sprintf("%s/%s/%s/out/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            switch($this->lv_exec_mode) {
+            case DF_EXEC_MODE_ANSIBLE:
+                $host_var_vaule = sprintf("%s/%s/%s/out/_parameters_file"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+                break;
+            default:
+                $host_var_vaule = sprintf("%s/%s/_parameters_file",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_OUT_DIR);
+                break;
+            }
             // ディレクトリ存在確認
             if( ! is_dir($mkdir)) {
-                $ret = mkdir($mkdir,0755,true);
+                $ret = mkdir($mkdir,0777,true);
                 if($ret === false) {
                     $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55202",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                // mkdir 0777が効かない
+                if( !chmod( dirname($mkdir), 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
+                    $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                    return false;
+                }
+                if( !chmod( $mkdir, 0777 ) ){
+                    $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-55203",array(__LINE__));
                     $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                     return false;
                 }
@@ -13297,8 +13553,18 @@ if(isset($Expansion_root)) {
         foreach($ina_hostinfolist as $host_ip=>$hostinfo) {
             $hostname = $hostinfo['HOSTNAME'];
 
-            $host_var_name  = "__movement_status_filepath__"; 
+            $host_var_name  = self::LC_MOVEMENT_STS_FILE; 
+
             $host_var_vaule = sprintf("%s/%s/%s/out/MOVEMENT_STATUS_FILE"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+            switch($this->lv_exec_mode) {
+            case DF_EXEC_MODE_ANSIBLE:
+                $host_var_vaule = sprintf("%s/%s/%s/out/MOVEMENT_STATUS_FILE"   ,$ans_base_dir,$drive_list[$driver_id],$execute_no);
+                break;
+            default:
+                $host_var_vaule = sprintf("%s/%s/MOVEMENT_STATUS_FILE",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_OUT_DIR);
+                break;
+            }
+
             $ina_host_vars[$host_ip][$host_var_name] = $host_var_vaule;
             switch($this->getAnsibleDriverID()){
             case DF_PIONEER_DRIVER_ID:
@@ -13470,9 +13736,8 @@ if(isset($Expansion_root)) {
         }
 
         $ITADestDirPath = sprintf("%s/%010s",$this->getAnsible_upload_files_Dir(),$row['ASSIGN_ID']);
-        $AnsDestDirPath = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
-                                      $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
-                                      $ITADestDirPath);
+
+        $AnsDestDirPath = $this->setAnsibleSideFilePath($ITADestDirPath,self::LC_ITA_IN_DIR);
 
         if( !is_dir( $ITADestDirPath) ){
             //ドライバ区分ディレクトリが存在している場合はなにもしない
@@ -13502,7 +13767,6 @@ if(isset($Expansion_root)) {
 
         $row['VARS_ENTRY'] = $AnsDestDirPath;
         $row['VARS_ENTRY_FILE'] = "";
-
         return true;
     }
     function AnsibleEnginVirtualenvPathCheck() {
@@ -13568,6 +13832,101 @@ if(isset($Expansion_root)) {
     }
     function GetEngineVirtualenvName() {
         return $this->lv_engine_virtualenv_name;
+    }
+
+    function getTowerProjectDirPath($PathId) {
+        //lv_TowerInstanceDirPath["TowerPath"]   "Tower Projects Ptah
+        //lv_TowerInstanceDirPath["ExastroPath"] "Tower Exastro Projects Ptah
+        return $this->lv_TowerInstanceDirPath[$PathId];
+    }
+
+    function setTowerProjectDirPath() {
+        global $vg_TowerProjectPath;
+        global $vg_TowerExastroProjectPath;
+
+        switch($this->getAnsibleDriverID()) {
+        case DF_LEGACY_DRIVER_ID:
+            $TowerPath   = sprintf("%s/ita_legacy_executions_%010s",     $vg_TowerProjectPath,$this->lv_exec_no);
+            $ExastroPath = sprintf("%s/ita_legacy_executions_%010s",     $vg_TowerExastroProjectPath,$this->lv_exec_no);
+            break;
+        case DF_PIONEER_DRIVER_ID:
+            $TowerPath   = sprintf("%s/ita_pioneer_executions_%010s",    $vg_TowerProjectPath,$this->lv_exec_no);
+            $ExastroPath = sprintf("%s/ita_pioneer_executions_%010s",    $vg_TowerExastroProjectPath,$this->lv_exec_no);
+            break;
+        case DF_LEGACY_ROLE_DRIVER_ID:
+            $TowerPath   = sprintf("%s/ita_legacy_role_executions_%010s",$vg_TowerProjectPath,$this->lv_exec_no);
+            $ExastroPath = sprintf("%s/ita_legacy_role_executions_%010s",$vg_TowerExastroProjectPath,$this->lv_exec_no);
+            break;
+        }
+        $this->lv_TowerInstanceDirPath = array();
+        $this->lv_TowerInstanceDirPath["TowerPath"]   = $TowerPath;
+        $this->lv_TowerInstanceDirPath["ExastroPath"] = $ExastroPath;
+        return true;
+    }
+
+    function setAnsibleSideFilePath($in_Path,$in_DirId) {
+        switch($this->lv_exec_mode) {
+        case DF_EXEC_MODE_ANSIBLE:
+            $Upd_Path  = str_replace($this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ITA'),
+                                     $this->getAnsibleBaseDir('ANSIBLE_SH_PATH_ANS'),
+                                     $in_Path);
+            break;
+        default:
+            $Upd_Path  = $this->setAnsibleTowerSideFilePath($in_Path,$in_DirId);
+            break;
+        }
+        return $Upd_Path;
+    }
+    function setAnsibleTowerSideFilePath($in_Path,$in_DirId) {
+        // ホスト変数定義ファイルに記載するパスなのでAnsible側のストレージパスに変更
+        switch($in_DirId) {
+        case self::LC_ITA_OUT_DIR:
+            $Aft_Path = sprintf("%s/%s",$this->getTowerProjectDirPath("ExastroPath"),$in_DirId);
+            $Upd_Path  = str_replace($this->getAnsible_out_Dir(),
+                                     $Aft_Path,
+                                     $in_Path);
+            break;
+        case self::LC_ITA_IN_DIR:
+            $Aft_Path = sprintf("%s",$this->getTowerProjectDirPath("ExastroPath"));
+            $Upd_Path  = str_replace($this->getAnsible_in_Dir(),
+                                     $Aft_Path,
+                                     $in_Path);
+            break;
+        case self::LC_ITA_TMP_DIR:
+            $Aft_Path = sprintf("%s/%s",$this->getTowerProjectDirPath("ExastroPath"),self::LC_ITA_TMP_DIR);
+            $Upd_Path  = str_replace($this->getAnsible_tmp_Dir(),
+                                     $Aft_Path,
+                                     $in_Path);
+            break;
+        }
+        return $Upd_Path;
+    }
+    function setTowerProjectsScpPath($id,$path) {
+        global $vg_TowerProjectsScpPathArray;
+        $vg_TowerProjectsScpPathArray[$id] = $path;
+    }
+    function getTowerProjectsScpPath() {
+        global $vg_TowerProjectsScpPathArray;
+        return $vg_TowerProjectsScpPathArray;
+    }
+    function CopyAnsibleConfigFile() {
+        global $root_dir_path;
+        $src_file = sprintf("%s/uploadfiles/2100000305/ANS_ANSIBLE_CONFIG_FILE/%010d/%s", $root_dir_path ,$this->run_pattern_id,$this->lv_ansible_cnf_file);
+        $dest_file = $this->getAnsible_in_Dir() . "/ansible.cfg";
+        if( file_exists($src_file) === false ){
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-50083",array($this->run_pattern_id)); 
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+        $cmd = sprintf("/bin/cp -f %s %s  2>&1",escapeshellarg($src_file),escapeshellarg($dest_file));
+        $outAry = array();
+        exec($cmd ,$outAry, $ret);
+        if($ret != 0) {
+            $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-50084",array($this->run_pattern_id,implode("\n",$outAry)));
+            $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+            return false;
+        }
+        return true;
     }
 }
 

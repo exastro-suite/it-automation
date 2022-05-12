@@ -148,7 +148,7 @@
             $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
 
             //Value  変数名用
-            $int_seq_no = 6;
+            $int_seq_no = 8;
             require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
             $arrayResult02 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
 
@@ -202,7 +202,7 @@
             $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "register_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
 
             //Value　変数名用
-            $int_seq_no = 6;
+            $int_seq_no = 8;
             $arrayResult02 = AddSelectTagToDynamicSelectTab($objTable, "register_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
 
             // 結果判定
@@ -228,6 +228,471 @@
             }
             return makeAjaxProxyResultStream($arrayResult);
         }
+
+        //----Value　変数名
+        function Mix1_1_val_module_vars_upd($strVarsLinkIdNumeric,$strhclId){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix1_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+
+            $aryVariant = array('VAL_VARS_LINK_ID'=>$strVarsLinkIdNumeric,'VAL_MEMBER_VARS'=>'','HCL_FLAG'=>$strhclId);
+
+            // メンバー変数名用
+            $int_seq_no = 10;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            if( $arrayResult01[0]=="000" ) {
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream);
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+        
+        function Mix2_1_val_module_vars_reg($strVarsLinkIdNumeric,$strhclId)
+        {
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix2_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+
+            $aryVariant = array('VAL_VARS_LINK_ID'=>$strVarsLinkIdNumeric,'VAL_MEMBER_VARS'=>'','HCL_FLAG'=>$strhclId);
+
+
+            // メンバー変数名用
+            $int_seq_no = 10;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "register_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            // 結果判定
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream);
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+        
+        //----Key　変数名
+        function Mix1_1_key_module_vars_upd($strVarsLinkIdNumeric,$strhclId){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix1_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+
+            $aryVariant = array('KEY_VARS_LINK_ID'=>$strVarsLinkIdNumeric,'KEY_MEMBER_VARS'=>'','HCL_FLAG'=>$strhclId);
+
+            // メンバー変数名用
+            $int_seq_no = 6;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            if( $arrayResult01[0]=="000" ) {
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream);
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+        
+        function Mix2_1_key_module_vars_reg($strVarsLinkIdNumeric,$strhclId)
+        {
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix2_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+
+            $aryVariant = array('KEY_VARS_LINK_ID'=>$strVarsLinkIdNumeric,'KEY_MEMBER_VARS'=>'','HCL_FLAG'=>$strhclId);
+
+
+            // メンバー変数名用
+            $int_seq_no = 6;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "register_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            // 結果判定
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream);
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+        //valueメンバー変数　代入順序
+        function Mix1_1_val_member_vars_upd($objVarID,$objChlVarID)
+        {
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix1_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+            $aryVariant = array('VAL_VARS_LINK_ID' => $objVarID,'VAL_MEMBER_VARS' =>$objChlVarID,'HCL_FLAG'=>'');
+
+            //メンバー変数名用
+            $int_seq_no = 10;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream2 = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream, $strOutputStream2);
+
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+
+        function Mix2_1_val_member_vars_reg($objVarID,$objChlVarID){
+            // グローバル変数宣言
+            global $g;
+            
+            // ローカル変数宣言
+            $aryOverride = array("Mix2_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+            $strOutputStream2 = "";
+
+            $objTable = loadTable();
+
+            $strResultCode = "000";
+            $strDetailCode = "000";
+
+            // 本体ロジックをコール
+            $aryVariant = array('VAL_VARS_LINK_ID' => $objVarID,'VAL_MEMBER_VARS' =>$objChlVarID,'HCL_FLAG'=>'');
+
+            //メンバー変数名用
+            $int_seq_no = 10;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "register_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+            // 結果判定
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream2 = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream, $strOutputStream2);
+
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+
+        //keyメンバー変数　代入順序
+        function Mix1_1_key_member_vars_upd($objVarID,$objChlVarID)
+        {
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix1_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+            $aryVariant = array('KEY_VARS_LINK_ID' => $objVarID,'KEY_MEMBER_VARS' =>$objChlVarID,'HCL_FLAG'=>'');
+
+            //メンバー変数
+            $int_seq_no = 6;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream2 = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream, $strOutputStream2);
+
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+
+        function Mix2_1_key_member_vars_reg($objVarID,$objChlVarID){
+            // グローバル変数宣言
+            global $g;
+            
+            // ローカル変数宣言
+            $aryOverride = array("Mix2_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+            $strOutputStream2 = "";
+
+            $objTable = loadTable();
+
+            $strResultCode = "000";
+            $strDetailCode = "000";
+
+            // 本体ロジックをコール
+            $aryVariant = array('KEY_VARS_LINK_ID' => $objVarID,'KEY_MEMBER_VARS' =>$objChlVarID,'HCL_FLAG'=>'');
+
+            //メンバー変数名用
+            $int_seq_no = 6;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "register_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+            // 結果判定
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4]));
+                $strOutputStream2 = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream, $strOutputStream2);
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+
+        //HCL設定
+
+        function Mix1_1_val_hcl_upd($strhclId,$strModuleVarsLinkId){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix1_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+
+            $aryVariant = array('HCL_FLAG'=>$strhclId,'VAL_VARS_LINK_ID'=>$strModuleVarsLinkId, 'VAL_MEMBER_VARS'=>'');
+
+            //メンバ変数名用
+            $int_seq_no = 10;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "update_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            // 結果判定
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4],$arrayResult01[5]));
+                $strOutputStream = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream);
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+
+        function Mix2_1_val_hcl_reg($strhclId,$strModuleVarsLinkId){
+            // グローバル変数宣言
+            global $g;
+
+            // ローカル変数宣言
+            $aryOverride = array("Mix2_1");
+            
+            $arrayResult = array();
+            $aryVariant = array();
+            $arySetting = array();
+
+            $strResultCode = "";
+            $strDetailCode = "";
+            $strOutputStream = "";
+
+            $objTable = loadTable();
+
+            // 本体ロジックをコール
+
+            $aryVariant = array('HCL_FLAG'=>$strhclId,'VAL_VARS_LINK_ID'=>$strModuleVarsLinkId, 'VAL_MEMBER_VARS'=>'');
+
+            //メンバ変数名用
+            $int_seq_no = 10;
+            require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/table_control_agent/12_singleRowTable_AddSelectTag.php");
+            $arrayResult01 = AddSelectTagToDynamicSelectTab($objTable, "register_table", $int_seq_no, $aryVariant, $arySetting, $aryOverride);
+
+            // 結果判定
+            if( $arrayResult01[0]=="000" ){
+                $strResultCode = "000";
+                $strDetailCode = "000";
+                $strResult01Stream = makeAjaxProxyResultStream(array($arrayResult01[2],$arrayResult01[3],$arrayResult01[4],$arrayResult01[5]));
+                $strOutputStream = makeAjaxProxyResultStream(array($strResult01Stream));
+            }else{
+                $strResultCode = "500";
+                $strDetailCode = "000";
+            }
+            $arrayResult = array($strResultCode,$strDetailCode,$strOutputStream);
+
+            if($arrayResult[0]=="000"){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-STD-4001",__FUNCTION__));
+            }else if(intval($arrayResult[0])<500){
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4002",__FUNCTION__));
+            }else{
+                web_log( $g['objMTS']->getSomeMessage("ITAWDCH-ERR-4001",__FUNCTION__));
+            }
+            return makeAjaxProxyResultStream($arrayResult);
+        }
+
+
+
+        //カラム 変数名----
+
         //作業パターン----
 
         //-- サイト個別PHP要素、ここまで--

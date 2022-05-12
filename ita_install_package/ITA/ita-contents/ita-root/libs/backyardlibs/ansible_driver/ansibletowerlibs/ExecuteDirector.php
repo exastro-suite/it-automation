@@ -51,9 +51,12 @@ require_once($rest_api_command . "AnsibleTowerRestApiWorkflowJobTemplateNodes.ph
 require_once($rest_api_command . "AnsibleTowerRestApiOrganization.php");
 require_once($rest_api_command . "AnsibleTowerRestApiInstanceGroups.php");
 require_once($rest_api_command . "AnsibleTowerRestApiConfig.php");
+require_once($rest_api_command . "AnsibleTowerRestApiExecutionEnvironment.php");
+require_once($rest_api_command . "AnsibleTowerRestApirPassThrough.php");
 
 class ExecuteDirector {
 
+    public  $restinfo;
     private $restApiCaller;
     private $logger;
     private $dbAccess;
@@ -73,7 +76,9 @@ class ExecuteDirector {
     private $jobFileList;
     private $jobLogFileList;
     private $jobOrgLogFileList;
-    function __construct($restApiCaller, $logger, $dbAccess, $exec_out_dir, $JobTemplatePropertyParameterAry=array(),$JobTemplatePropertyNameAry=array()) {
+
+    private $AnsibleExecMode;
+    function __construct($restApiCaller, $logger, $dbAccess, $exec_out_dir, $ifInfoRow, $JobTemplatePropertyParameterAry=array(),$JobTemplatePropertyNameAry=array()) {
         $this->restApiCaller = $restApiCaller;
         $this->logger = $logger;
         $this->dbAccess = $dbAccess;
@@ -92,6 +97,8 @@ class ExecuteDirector {
         $this->jobFileList = array();
         $this->jobLogFileList = array();
         $this->jobOrgLogFileList = array();
+        $this->restinfo          = array();
+        $this->AnsibleExecMode   = $ifInfoRow["ANSIBLE_EXEC_MODE"];
     }
 
     function setTowerVersion($version) {
@@ -101,7 +108,7 @@ class ExecuteDirector {
         return($this->version);
     }
 
-    function build($exeInsRow, $ifInfoRow, &$TowerHostList) {
+    function build($GitObj, $exeInsRow, $ifInfoRow, &$TowerHostList) {
 
         global $vg_tower_driver_name;
 
@@ -112,6 +119,7 @@ class ExecuteDirector {
         $virtualenv_name = $exeInsRow['I_VIRTUALENV_NAME'];
 
         // Towerのvirtualenv確認
+        // 実行エンジンがTower以外はI_VIRTUALENV_NAMEは空なので、実行エンジンのチェックはしない
         $virtualenv_name_ok = false;
         if($virtualenv_name != "") {
             $response_array = AnsibleTowerRestApiConfig::get($this->restApiCaller);
@@ -134,7 +142,44 @@ class ExecuteDirector {
                 return -1;
             }
         }
+        // AACの実行環境確認
+        // 実行エンジンがAAC以外はI_EXECUTION_ENVIRONMENT_NAMEは空なので、実行エンジンのチェックはしない
+        $execution_environment_id = false;
+        $execution_environment_name = $exeInsRow['I_EXECUTION_ENVIRONMENT_NAME'];
+        if($execution_environment_name != "") {
+            $response_array = AnsibleTowerRestApiExecutionEnvironment::get($this->restApiCaller);
 
+            if($response_array['success'] == false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040038",array($execution_environment_name));
+                $this->errorLogOut($errorMessage);
+                return -1;
+            }
+            if( ! array_key_exists('responseContents',$response_array)) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040038",array($execution_environment_name));
+                $this->errorLogOut($errorMessage);
+                return -1;
+            }
+
+            if( ! array_key_exists('results',$response_array['responseContents'] )) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040038",array($execution_environment_name));
+                $this->errorLogOut($errorMessage);
+                return -1;
+            }
+            if( isset($response_array['responseContents']['results'] )) {
+                foreach($response_array['responseContents']['results'] as $no=>$paramList) {
+                    if($paramList['name'] == $execution_environment_name) {
+                        $execution_environment_id = $paramList['id'];
+                        break;
+                    }
+                }
+            }
+
+            if($execution_environment_id === false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040039",array($execution_environment_name));
+                $this->errorLogOut($errorMessage);
+                return -1;
+            }
+        }
 
         $OrganizationName = trim($ifInfoRow['ANSTWR_ORGANIZATION']);
         if(strlen($OrganizationName) != 0) {
@@ -196,7 +241,26 @@ class ExecuteDirector {
             return -1;
         }
 
-        $ret = $this->MaterialsTransfer($execution_no, $ifInfoRow, $TowerHostList);
+        // Gitリポジトリに展開する資材を作業ディレクトリに作成
+        $tmp_path_ary = getInputDataTempDir($execution_no, $vg_tower_driver_name);
+        $ret = $this->createMaterialsTransferTempDir($execution_no, $ifInfoRow, $TowerHostList, $tmp_path_ary["DIR_NAME"]);
+        if($ret == false) {
+            return -1;
+        }
+
+        // 実行エンジンを判定　AACの場合にAnsible Automation Controllerと連携するGitリポジトリを作成
+        if($this->AnsibleExecMode == DF_EXEC_MODE_AAC) {
+
+            $srcFiles = $tmp_path_ary["DIR_NAME"] . "/*";
+            $ret = $this->createGitRepo($GitObj, $srcFiles);
+            if($ret == false) {
+
+                return -1;
+            }
+        }
+
+        $tmp_path_ary = getInputDataTempDir($execution_no, $vg_tower_driver_name);
+        $ret = $this->MaterialsTransferToTower($execution_no, $ifInfoRow, $TowerHostList, $tmp_path_ary['DIR_NAME']);
         if($ret == false) {
             $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040036");
             $this->errorLogOut($errorMessage);
@@ -204,11 +268,49 @@ class ExecuteDirector {
         }
 
         // project生成
-        $projectId = $this->createProject($execution_no,$OrganizationId,$virtualenv_name);
-        if($projectId == -1) {
-            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040003");
-            $this->errorLogOut($errorMessage);
-            return -1;
+        // Git連携用 認証情報生成
+        if($this->AnsibleExecMode == DF_EXEC_MODE_AAC) {
+            // Git連携用 認証情報生成
+            $credential['username']       = $ifInfoRow["ANS_GIT_USER"];
+            $credential['ssh_key_data']   = getGitSshKeyFileContent($ifInfoRow["ANSIBLE_IF_INFO_ID"], $ifInfoRow["ANS_GIT_SSH_KEY_FILE"]);
+            $credential['ssh_key_unlock'] = ky_decrypt($ifInfoRow["ANS_GIT_SSH_KEY_FILE_PASSPHRASE"]);
+
+            $git_credentialId = $this->createGitCredential($execution_no, $credential, $OrganizationId);
+            if($git_credentialId == -1) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040040");
+                $this->errorLogOut($errorMessage);
+                return -1;
+            }
+
+            // project生成  scmタイプ:git
+            $addParam               = array();
+            $addParam["scm_type"]   = AnsibleTowerRestApiProjects::SCMTYPE_GIT;
+            $addParam["scm_url"]    = $GitObj->GetiRepoUrl();
+            $addParam["credential"] = $git_credentialId; 
+            $response_array = $this->createProject($execution_no,$OrganizationId,$virtualenv_name,$addParam);
+            if($response_array == -1) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040003");
+                $this->errorLogOut($errorMessage);
+                return -1;
+            }
+            $projectId = $response_array['responseContents']['id'];
+            // project_updatesオブジェクトは明示的に削除する必要なし
+            $ret = $this->createProjectStatusCheck($response_array);
+            if($ret !== true) {
+                // エラーログはcreateProjectStatusCheckで出力
+                return -1;
+            }
+        } else {
+            // project生成  scmタイプ:手動
+            $addParam               = array();
+            $addParam["scm_type"]   = "";
+            $projectId = $this->createProject($execution_no,$OrganizationId,$virtualenv_name,$addParam);
+            if($projectId == -1) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040003");
+                $this->errorLogOut($errorMessage);
+                return -1;
+            }
+            $projectId = $projectId['responseContents']['id'];
         }
 
         // ansible vault認証情報生成
@@ -248,7 +350,7 @@ class ExecuteDirector {
             }
 
             // ジョブテンプレート生成
-            $jobTemplateId = $this->createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $vault_credentialId, $inventoryId, $exeInsRow['RUN_MODE']);
+            $jobTemplateId = $this->createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $vault_credentialId, $inventoryId, $exeInsRow['RUN_MODE'],$execution_environment_id);
             if($jobTemplateId == -1) {
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040006");
                 $this->errorLogOut($errorMessage);
@@ -288,20 +390,50 @@ class ExecuteDirector {
             return -1;
         }
 
+
         return $workflowTplId;
     }
 
-    function delete($execution_no, $TowerHostList) {
+    function transfer($execution_no, $TowerHostList) {
+        $this->logger->trace(__METHOD__);
+
+        global $vg_tower_driver_name;
+        $allResult = true;
+
+        $ret = $this->ResultFileTransfer($execution_no, $TowerHostList);
+        if($ret == false) {
+            $allResult = false;
+        }
+        return $allResult;
+
+    }
+    function delete($GitObj, $execution_no, $TowerHostList) {
 
         $this->logger->trace(__METHOD__);
 
         global $vg_tower_driver_name;
         $allResult = true;
 
-        $allResult = true;
-        $ret = $this->MaterialsDelete($execution_no, $TowerHostList);
+        // Ansible Automation Controller側の/var/lib/exastro配下の該当ディレクトリ削除
+        $ret = $this->MaterialsDelete("ExastroPath",$execution_no, $TowerHostList);
         if($ret == false) {
             $allResult = false;
+        }
+
+        // Gitリポジトリに展開する資材を作業ディレクトリを削除
+        $ret = $this->deleteMaterialsTransferTempDir($execution_no);
+
+        // Ansible Automation Controllerと連携するGitリポジトリを削除
+        if($this->AnsibleExecMode == DF_EXEC_MODE_AAC) {
+            $ret = $GitObj->GitRepoDirDelete();
+        }
+
+        // 実行エンジンを判定　Towerの場合に/var/lib/awx/projects配下の該当ディレクトリ削除
+        if($this->AnsibleExecMode == DF_EXEC_MODE_TOWER) {
+            $ret = $this->MaterialsDelete("TowerPath",$execution_no, $TowerHostList);
+            if($ret == false) {
+                $allResult = false;
+            }
         }
 
         // ジョブテンプレート名でジョブテンプレートを抽出
@@ -348,6 +480,15 @@ class ExecuteDirector {
         $ret = $this->cleanUpWorkflowJobs($execution_no);
         if($ret == false) {
             $allResult = false;
+        }
+
+        // Git連携用 認証情報を抽出
+        // 抽出したワークフローを削除
+        if($this->AnsibleExecMode == DF_EXEC_MODE_AAC) {
+            $ret = $this->cleanUpGitCredential($execution_no);
+            if($ret == false) {
+                $allResult = false;
+            }
         }
 
         //
@@ -409,14 +550,154 @@ class ExecuteDirector {
         return $wfJobId;
     }
 
-    private function MaterialsTransfer($execution_no, $ifInfoRow, $TowerHostList) {
+    private function createMaterialsTransferTempDir($execution_no, $ifInfoRow, $TowerHostList, $tmp_path) {
+
+        $this->logger->trace(__METHOD__);
+
+        global $root_dir_path;
+        global $vg_tower_driver_name;
+
+        $result_code = true;
+
+        ///////////////////////////////////////////////////////////
+        // 一時ディレクトリを削除
+        // src path: ~/ita-root/temp/ansible_driver_temp/Movement毎のディレクトリ
+        ///////////////////////////////////////////////////////////
+        $src_path = $tmp_path;
+        if(file_exists($src_path)) {
+            $cmd = sprintf("/bin/rm -rf %s 2>&1",
+                            $src_path);
+            exec($cmd,$arry_out,$return_var);
+            if($return_var !== 0) {
+                $log         = implode("\n",$arry_out);
+                $log         .= "\n".$this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2002",array($cmd));
+                $this->errorLogOut($log);
+                $this->logger->error($log);
+    
+                $result_code = false;
+                return $result_code;
+            }
+        }
+        ///////////////////////////////////////////////////////////
+        // in配下を一時ディレクトリにコピー
+        // src  path: ansible data_relay_storage path(ita)/legacy/ns/0000000007/in
+        // dest path: ~/ita-root/temp/ansible_driver_temp/Movement毎のディレクトリ
+        ///////////////////////////////////////////////////////////
+        $src_path  = $this->getMaterialsTransferSourcePath($ifInfoRow['ANSIBLE_STORAGE_PATH_LNX'],$execution_no);
+        $dest_path = $tmp_path;
+        $cmd = sprintf("/bin/cp -rfp %s %s 2>&1",
+                       $src_path,
+                       $dest_path);
+        exec($cmd,$arry_out,$return_var);
+        if($return_var !== 0) {
+            $log         = implode("\n",$arry_out);
+            $log         .= "\n".$this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2002",array($cmd));
+            $this->errorLogOut($log);
+            $this->logger->error($log);
+    
+            $result_code = false;
+            return $result_code;
+        }
+
+        global $vg_TowerProjectsScpPathArray;
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // out配下を一時ディレクトリ配下にコピー
+        // src  path: ansible data_relay_storage path(ita)/legacy/ns/0000000007/out
+        // dest path: ~/ita-root/temp/ansible_driver_temp/Movement毎のディレクトリ/__ita_out_dir__
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        $src_path  = $vg_TowerProjectsScpPathArray[DF_SCP_OUT_ITA_PATH];
+        $dest_path = $vg_TowerProjectsScpPathArray[DF_GITREPO_OUT_PATH];
+        $cmd = sprintf("/bin/cp -rfp %s %s 2>&1",
+                       $src_path,
+                       $dest_path);
+        exec($cmd,$arry_out,$return_var);
+        if($return_var !== 0) {
+            $log         = implode("\n",$arry_out);
+            $log         .= "\n".$this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2002",array($cmd));
+            $this->errorLogOut($log);
+            $this->logger->error($log);
+    
+            $result_code = false;
+            return $result_code;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // tmp配下を一時ディレクトリ配下にコピー
+        // src  path: ansible data_relay_storage path(ita)/xx mode name xx/xx mode id xx/0000050044/tmp
+        // dest path: ~/ita-root/temp/ansible_driver_temp/Movement毎のディレクトリ/__ita_tmp_dir__
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        $src_path  = $vg_TowerProjectsScpPathArray[DF_SCP_TMP_ITA_PATH];
+        $dest_path = $vg_TowerProjectsScpPathArray[DF_GITREPO_TMP_PATH];
+        $cmd = sprintf("/bin/cp -rfp %s %s 2>&1",
+                       $src_path,
+                       $dest_path);
+        exec($cmd,$arry_out,$return_var);
+        if($return_var !== 0) {
+            $log         = implode("\n",$arry_out);
+            $log         .= "\n".$this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2002",array($cmd));
+            $this->errorLogOut($log);
+            $this->logger->error($log);
+    
+            $result_code = false;
+            return $result_code;
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // symphony/インスタンス番号配下をx一時ディレクトリ配下にコピー
+        // src  path:  symphony data_relay_storage path(ita)/symphonyインスタンス番号
+        // dest path:  ~/ita-root/temp/ansible_driver_temp/Movement毎のディレクトリ/__ita_tmp_dir__/__ita_symphony_dir__/symphonyインスタンス番号
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if( array_key_exists(DF_SCP_SYMPHONY_ITA_PATH,$vg_TowerProjectsScpPathArray) ) {
+            $src_path  = $vg_TowerProjectsScpPathArray[DF_SCP_SYMPHONY_ITA_PATH];
+            $dest_path = dirname($vg_TowerProjectsScpPathArray[DF_GITREPO_SYMPHONY_PATH]);
+            $cmd = sprintf("/bin/cp -rfp %s %s 2>&1",
+                            $src_path,
+                            $dest_path);
+            exec($cmd,$arry_out,$return_var);
+            if($return_var !== 0) {
+                $log         = implode("\n",$arry_out);
+                $log         .= "\n".$this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2002",array($cmd));
+                $this->errorLogOut($log);
+                $this->logger->error($log);
+        
+                $result_code = false;
+                return $result_code;
+            }
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // conductor/インスタンス番号配下を一時ディレクトリ配下にコピー
+        // src  path:  conductor ata_relay_storage path(ita)/conductorインスタンス番号
+        // dest path:  ~/ita-root/temp/ansible_driver_temp/Movement毎のディレクトリ/__ita_tmp_dir__/__ita_conductor_dir__/conductorインスタンス番号
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+        if( array_key_exists(DF_SCP_CONDUCTOR_ITA_PATH,$vg_TowerProjectsScpPathArray) ) {
+            $src_path  = $vg_TowerProjectsScpPathArray[DF_SCP_CONDUCTOR_ITA_PATH];
+            $dest_path = dirname($vg_TowerProjectsScpPathArray[DF_GITREPO_CONDUCTOR_PATH]);
+            $cmd = sprintf("/bin/cp -rfp %s %s 2>&1",
+                            $src_path,
+                            $dest_path);
+            exec($cmd,$arry_out,$return_var);
+            if($return_var !== 0) {
+                $log         = implode("\n",$arry_out);
+                $log         .= "\n".$this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2002",array($cmd));
+                $this->errorLogOut($log);
+                $this->logger->error($log);
+        
+                $result_code = false;
+                return $result_code;
+            }
+        }
+
+        return $result_code;
+    } 
+
+    private function MaterialsTransferToTower($execution_no, $ifInfoRow, $TowerHostList, $srcBasePath) {
 
         $this->logger->trace(__METHOD__);
 
         global $root_dir_path;
 
-        $src_path  = $this->getMaterialsTransferSourcePath($ifInfoRow['ANSIBLE_STORAGE_PATH_LNX'],$execution_no);
-        $dest_path = $this->getMaterialsTransferDestinationPath($execution_no);
+        $tmp_TowerInfo_File = '/tmp/.ky_ansible_materials_transfer_TowerInfo_' . getmypid() . ".log";
+        @unlink($tmp_TowerInfo_File);
 
         $tmp_log_file = '/tmp/.ky_ansible_materials_transfer_logfile_' . getmypid() . ".log";
         @unlink($tmp_log_file);
@@ -424,10 +705,14 @@ class ExecuteDirector {
         $result_code = true;
         foreach($TowerHostList as $credential) {
 
-            $tmp_TowerInfo_File = '/tmp/.ky_ansible_materials_transfer_TowerInfo_' . getmypid() . ".log";
-            @unlink($tmp_TowerInfo_File);
-
-            $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
+            ///////////////////////////////////////////////////////////
+            // exastro用Towerプロジェクトディレクトリ配下(/var/lib/exastro)に資材コピー
+            // src  path: ~/ita-root/temp/ansible_driver_temp/Movement毎のディレクトリ
+            // dest path: /var/lib/exastro/ita_legacy_executions_0000000001
+            ///////////////////////////////////////////////////////////
+            $src_path  = $srcBasePath;
+            $dest_path = $this->getMaterialsTransferDestinationPath("ExastroPath",$execution_no);
+            $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
                              $credential['host_name'],
                              $credential['auth_type'],
                              $credential['username'],
@@ -436,13 +721,15 @@ class ExecuteDirector {
                              $src_path,
                              $dest_path,
                              $credential['ssh_key_file_pass'],
-                             $root_dir_path);
+                             $root_dir_path,
+                             "ITA");
        
             if(file_put_contents($tmp_TowerInfo_File, $info) === false) {
                 $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000018");
                 $this->errorLogOut($errorMessage);
                 $this->logger->error($errorMessage);
                 $result_code = false;
+                return $result_code;
             } else {
                 $cmd = sprintf("sh %s/%s %s > %s 2>&1",
                                $root_dir_path,
@@ -460,28 +747,87 @@ class ExecuteDirector {
                     $this->logger->error($errorMessage);
     
                     $result_code = false;
+                    return $result_code;
                 }
             }
 
             @unlink($tmp_log_file);
             @unlink($tmp_TowerInfo_File);
+
+            global $vg_TowerProjectsScpPathArray;
+            if($credential['node_type'] == DF_CONTROL_NODE) {
+                // 実行エンジンを判定　Towerの場合にTowerプロジェクトディレクトリ(/var/lib/awx/projects)に資材展開
+                if($this->AnsibleExecMode == DF_EXEC_MODE_TOWER) {
+                    ///////////////////////////////////////////////////////////
+                    // 制御ノードの場合にTowerプロジェクトディレクトリ配下(/var/lib/awx/projects)に資材コピー
+                    // src  path: ~/ita-root/temp/ansible_driver_temp/Movement毎のディレクトリ
+                    // dest path: Towerプロジェクトディレクトリ(/var/lib/awx/projects)
+                    ///////////////////////////////////////////////////////////
+                    $src_path  = $this->getMaterialsTransferDestinationPath("ExastroPath",$execution_no);
+                    $dest_path = $this->getMaterialsTransferDestinationPath("TowerPath",  $execution_no);
+                    $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
+                                     $credential['host_name'],
+                                     $credential['auth_type'],
+                                     $credential['username'],
+                                     $credential['password'],
+                                     $credential['ssh_key_file'],
+                                     $src_path,
+                                     $dest_path,
+                                     $credential['ssh_key_file_pass'],
+                                     $root_dir_path);
+       
+                    if(file_put_contents($tmp_TowerInfo_File, $info) === false) {
+                        $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000018");
+                        $this->errorLogOut($errorMessage);
+                        $this->logger->error($errorMessage);
+                        $result_code = false;
+                        return $result_code;
+                    } else {
+                        $cmd = sprintf("sh %s/%s %s > %s 2>&1",
+                                       $root_dir_path,
+                                       "backyards/ansible_driver/ky_ansible_materials_remotecopy.sh",
+                                       $tmp_TowerInfo_File,
+                                       $tmp_log_file);
+    
+                        exec($cmd,$arry_out,$return_var);
+                        if($return_var !== 0) {
+                            $log = file_get_contents($tmp_log_file);
+                            $this->errorLogOut($log);
+                            $this->logger->error($log);
+                            $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040035",array($credential['host_name']));
+                            $this->errorLogOut($errorMessage);
+                            $this->logger->error($errorMessage);
+            
+                            $result_code = false;
+                            return $result_code;
+                        }
+                    }
+                }
+
+                @unlink($tmp_log_file);
+                @unlink($tmp_TowerInfo_File);
+            }
         }
         return $result_code;
     } 
 
-    private function MaterialsDelete($execution_no, $TowerHostList) {
+    private function MaterialsDelete($PathId,$execution_no, $TowerHostList) {
 
         $this->logger->trace(__METHOD__);
 
         global $root_dir_path;
 
-        $dest_path = $this->getMaterialsTransferDestinationPath($execution_no);
+        $dest_path = $this->getMaterialsTransferDestinationPath($PathId,$execution_no);
 
         $tmp_log_file = '/tmp/.ky_ansible_materials_delete_logfile_' . getmypid() . ".log";
 
         $result_code = true;
         foreach($TowerHostList as $credential) {
        
+            // 実行ノードの場合、Towerプロジェクトディレクトリ配下(/var/lib/awx/projects)は無いので削除対象外
+            if(($credential['node_type'] != DF_CONTROL_NODE) && ($PathId =="TowerPath")) {
+                continue;
+            }
             $tmp_TowerInfo_File = '/tmp/.ky_ansible_materials_delete_TowerInfo_' . getmypid() . ".log";
             @unlink($tmp_TowerInfo_File);
 
@@ -511,7 +857,7 @@ class ExecuteDirector {
                 if($return_var !== 0) {
                     $log = file_get_contents($tmp_log_file);
                     $this->logger->error($log);
-                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040037",array($credential['host_name']));
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6040037",array($credential['host_name'],$dest_path));
                     $this->errorLogOut($errorMessage);
                     $this->logger->error($errorMessage);
 
@@ -520,9 +866,277 @@ class ExecuteDirector {
                 @unlink($tmp_log_file);
                 @unlink($tmp_TowerInfo_File);
             }
+
         }
         return $result_code;
-    } // MaterialsDelete
+    }
+
+    private function ResultFileTransfer($execution_no, $TowerHostList) {
+
+        $this->logger->trace(__METHOD__);
+
+        global $root_dir_path;
+
+        $tmp_TowerInfo_File = '/tmp/.ky_ansible_resultfile_transfer_TowerInfo_' . getmypid() . ".log";
+        @unlink($tmp_TowerInfo_File);
+
+        $tmp_log_file = '/tmp/.ky_ansible_resultfile_transfer_delete_logfile_' . getmypid() . ".log";
+        @unlink($tmp_log_file);
+
+        $result_code = true;
+        foreach($TowerHostList as $credential) {
+            global $vg_TowerProjectsScpPathArray;
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // ITA作業ディレクトリ配下のsymphonyディレクトリをITAに転送
+            // src  path:  /var/lib/exastro/ita_legacy_executions_0000050063/__ita_tmp_dir__/__ita_symphony_dir__/symphonyインスタンス番号
+            // dest path:  symphony data_relay_storage path(ita)/symphonyインスタンス番号
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            if( array_key_exists(DF_SCP_SYMPHONY_ITA_PATH,$vg_TowerProjectsScpPathArray) ) {
+                $src_path   = $vg_TowerProjectsScpPathArray[DF_SCP_SYMPHONY_TOWER_PATH];
+                $dest_path  = dirname($vg_TowerProjectsScpPathArray[DF_SCP_SYMPHONY_ITA_PATH]);
+                $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
+                                 $credential['host_name'],
+                                 $credential['auth_type'],
+                                 $credential['username'],
+                                 $credential['password'],
+                                 $credential['ssh_key_file'],
+                                 $src_path,
+                                 $dest_path,
+                                 $credential['ssh_key_file_pass'],
+                                 $root_dir_path,
+                                 "TOWER");
+       
+                if(file_put_contents($tmp_TowerInfo_File, $info) === false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000018");
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error($errorMessage);
+                    $result_code = false;
+                    return $result_code;
+                } else {
+                    $cmd = sprintf("sh %s/%s %s > %s 2>&1",
+                                   $root_dir_path,
+                                   "backyards/ansible_driver/ky_ansible_materials_transfer.sh",
+                                   $tmp_TowerInfo_File,
+                                   $tmp_log_file);
+
+                    exec($cmd,$arry_out,$return_var);
+                    if($return_var !== 0) {
+                        $log = file_get_contents($tmp_log_file);
+                        $this->errorLogOut($log);
+                        $this->logger->error($log);
+                        $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-50082",array($credential['host_name']));
+                        $this->errorLogOut($errorMessage);
+                        $this->logger->error($errorMessage);
+        
+                        $result_code = false;
+                        return $result_code;
+                    }
+                }
+            }
+
+            @unlink($tmp_log_file);
+            @unlink($tmp_TowerInfo_File);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // ITA作業ディレクトリ配下のconductorディレクトリをITAに転送
+            // src  path:  /var/lib/exastro/ita_legacy_executions_0000050063/__ita_tmp_dir__/__ita_conductor_dir__/conductorインスタンス番号
+            // dest path:  conductor data_relay_storage path(ita)/conductorインスタンス番号
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            if( array_key_exists(DF_SCP_CONDUCTOR_ITA_PATH,$vg_TowerProjectsScpPathArray) ) {
+                $src_path   = $vg_TowerProjectsScpPathArray[DF_SCP_CONDUCTOR_TOWER_PATH];
+                $dest_path  = dirname($vg_TowerProjectsScpPathArray[DF_SCP_CONDUCTOR_ITA_PATH]);
+                $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
+                                 $credential['host_name'],
+                                 $credential['auth_type'],
+                                 $credential['username'],
+                                 $credential['password'],
+                                 $credential['ssh_key_file'],
+                                 $src_path,
+                                 $dest_path,
+                                 $credential['ssh_key_file_pass'],
+                                 $root_dir_path,
+                                 "TOWER");
+       
+                if(file_put_contents($tmp_TowerInfo_File, $info) === false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000018");
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error($errorMessage);
+                    $result_code = false;
+                    return $result_code;
+                } else {
+                    $cmd = sprintf("sh %s/%s %s > %s 2>&1",
+                                   $root_dir_path,
+                                   "backyards/ansible_driver/ky_ansible_materials_transfer.sh",
+                                   $tmp_TowerInfo_File,
+                                   $tmp_log_file);
+
+                    exec($cmd,$arry_out,$return_var);
+                    if($return_var !== 0) {
+                        $log = file_get_contents($tmp_log_file);
+                        $this->errorLogOut($log);
+                        $this->logger->error($log);
+                        $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-50082",array($credential['host_name']));
+                        $this->errorLogOut($errorMessage);
+                        $this->logger->error($errorMessage);
+        
+                        $result_code = false;
+                        return $result_code;
+                    }
+                }
+            }
+
+            @unlink($tmp_log_file);
+            @unlink($tmp_TowerInfo_File);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // ITA作業ディレクトリ配下のoutディレクトリ(__ita_out_dir__)をITAに転送
+            // src   path: /var/lib/exastro/ita_xxmode namexx_executions_作業番号/__ita_out_dir__/*
+            // dest  path: ansible data_relay_storage path(ita)/xx mode name xx/xx mode id xx/0000050044/out
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            $src_path   = $vg_TowerProjectsScpPathArray[DF_SCP_OUT_TOWER_PATH] . "/*";
+            $dest_path  = $vg_TowerProjectsScpPathArray[DF_SCP_OUT_ITA_PATH];
+            $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
+                             $credential['host_name'],
+                             $credential['auth_type'],
+                             $credential['username'],
+                             $credential['password'],
+                             $credential['ssh_key_file'],
+                             $src_path,
+                             $dest_path,
+                             $credential['ssh_key_file_pass'],
+                             $root_dir_path,
+                             "TOWER");
+       
+            if(file_put_contents($tmp_TowerInfo_File, $info) === false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000018");
+                $this->errorLogOut($errorMessage);
+                $this->logger->error($errorMessage);
+                $result_code = false;
+                return $result_code;
+            } else {
+                $cmd = sprintf("sh %s/%s %s > %s 2>&1",
+                               $root_dir_path,
+                               "backyards/ansible_driver/ky_ansible_materials_transfer.sh",
+                               $tmp_TowerInfo_File,
+                               $tmp_log_file);
+
+                exec($cmd,$arry_out,$return_var);
+                if($return_var !== 0) {
+                    $log = file_get_contents($tmp_log_file);
+                    $this->errorLogOut($log);
+                    $this->logger->error($log);
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-50082",array($credential['host_name']));
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error($errorMessage);
+    
+                    $result_code = false;
+                    return $result_code;
+                }
+            }
+
+            @unlink($tmp_log_file);
+            @unlink($tmp_TowerInfo_File);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // ITA作業ディレクトリ配下の_parameters配下をITAに転送
+            // src   path: /var/lib/exastro/ita_xxmode namexx_executions_作業番号/_parameters
+            // dest  path: ansible data_relay_storage path(ita)/xx mode name xx/xx mode id xx/0000050044/in/_parameters
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            $src_path   = $vg_TowerProjectsScpPathArray[DF_SCP_IN_PARAMATERS_TOWER_PATH];
+            $dest_path  = dirname($vg_TowerProjectsScpPathArray[DF_SCP_IN_PARAMATERS_ITA_PATH]);
+            $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
+                             $credential['host_name'],
+                             $credential['auth_type'],
+                             $credential['username'],
+                             $credential['password'],
+                             $credential['ssh_key_file'],
+                             $src_path,
+                             $dest_path,
+                             $credential['ssh_key_file_pass'],
+                             $root_dir_path,
+                             "TOWER");
+       
+            if(file_put_contents($tmp_TowerInfo_File, $info) === false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000018");
+                $this->errorLogOut($errorMessage);
+                $this->logger->error($errorMessage);
+                $result_code = false;
+                return $result_code;
+            } else {
+                $cmd = sprintf("sh %s/%s %s > %s 2>&1",
+                               $root_dir_path,
+                               "backyards/ansible_driver/ky_ansible_materials_transfer.sh",
+                               $tmp_TowerInfo_File,
+                               $tmp_log_file);
+
+                exec($cmd,$arry_out,$return_var);
+                if($return_var !== 0) {
+                    $log = file_get_contents($tmp_log_file);
+                    $this->errorLogOut($log);
+                    $this->logger->error($log);
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-50082",array($credential['host_name']));
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error($errorMessage);
+    
+                    $result_code = false;
+                    return $result_code;
+                }
+            }
+
+            @unlink($tmp_log_file);
+            @unlink($tmp_TowerInfo_File);
+
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // Towerプロジェクトディレクトリ配下の_parameters_file配下をITAに転送
+            // src   path: /var/lib/awx/projects/ita_xxmode namexx_executions_作業番号/_parameters_file
+            // dest  path: ansible data_relay_storage path(ita)/xx mode name xx/xx mode id xx/0000050044/in/_parameters_file
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////
+            $src_path   = $vg_TowerProjectsScpPathArray[DF_SCP_IN_PARAMATERS_FILE_TOWER_PATH];
+            $dest_path  = dirname($vg_TowerProjectsScpPathArray[DF_SCP_IN_PARAMATERS_FILE_ITA_PATH]);
+            $info = sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n",
+                             $credential['host_name'],
+                             $credential['auth_type'],
+                             $credential['username'],
+                             $credential['password'],
+                             $credential['ssh_key_file'],
+                             $src_path,
+                             $dest_path,
+                             $credential['ssh_key_file_pass'],
+                             $root_dir_path,
+                             "TOWER");
+       
+            if(file_put_contents($tmp_TowerInfo_File, $info) === false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000018");
+                $this->errorLogOut($errorMessage);
+                $this->logger->error($errorMessage);
+                $result_code = false;
+                return $result_code;
+            } else {
+                $cmd = sprintf("sh %s/%s %s > %s 2>&1",
+                               $root_dir_path,
+                               "backyards/ansible_driver/ky_ansible_materials_transfer.sh",
+                               $tmp_TowerInfo_File,
+                               $tmp_log_file);
+
+                exec($cmd,$arry_out,$return_var);
+                if($return_var !== 0) {
+                    $log = file_get_contents($tmp_log_file);
+                    $this->errorLogOut($log);
+                    $this->logger->error($log);
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-50082",array($credential['host_name']));
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error($errorMessage);
+    
+                    $result_code = false;
+                    return $result_code;
+                }
+            }
+
+            @unlink($tmp_log_file);
+            @unlink($tmp_TowerInfo_File);
+        }
+        return $result_code;
+    }
 
     private function getTowerHostInfo($execution_no,$anstwr_host_id,$dataRelayStoragePath,&$TowerHostList) {
 
@@ -540,7 +1154,7 @@ class ExecuteDirector {
             "DISUSE_FLAG" => '0',
         );
 
-        $root_dir_path = $g['root_dir_path'];
+        global $root_dir_path;
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -555,9 +1169,10 @@ class ExecuteDirector {
         $chkobj = new AuthTypeParameterRequiredCheck();
 
         foreach($rows as $row) {
-            // isolated node は省く
             if(strlen($row['ANSTWR_ISOLATED_TYPE']) != 0) {
-                continue;
+                $node_type = DF_EXECUTE_NODE;
+            } else {
+                $node_type = DF_CONTROL_NODE;
             }
 
             // 認証方式に応じた必須項目の設定確認
@@ -659,6 +1274,7 @@ class ExecuteDirector {
                 "password"         => $password,
                 "ssh_key_file"     => $sshKeyFile,
                 "ssh_key_file_pass"=> $sshKeyFilePass,
+                "node_type"        => $node_type
             );
 
             $TowerHostList[] = $credential;
@@ -806,10 +1422,11 @@ class ExecuteDirector {
         return true;
     }
 
-    private function createProject($execution_no,$OrganizationId,$virtualenv_name) {
+
+    private function createProject($execution_no,$OrganizationId,$virtualenv_name,$addParam) {
         $this->logger->trace(__METHOD__);
 
-        $param = array();
+        $param = $addParam;
 
         $param['organization'] = $OrganizationId;
 
@@ -835,8 +1452,49 @@ class ExecuteDirector {
             return -1;
         }
 
-        $projectId = $response_array['responseContents']['id'];
-        return $projectId;
+        return $response_array;
+    }
+
+
+    private function createGitCredential($execution_no, $credential, $OrganizationId) {
+
+        $this->logger->trace(__METHOD__);
+
+        $param = array();
+        $param['organization'] = $OrganizationId;
+
+        $param['execution_no'] = $execution_no;
+
+        if(!empty($credential['username'])) {
+            $param['username']       = $credential['username'];
+        }
+
+        if(!empty($credential['ssh_key_data'])) {
+            $param['ssh_key_data']   = $credential['ssh_key_data'];
+        }
+
+        if(!empty($credential['ssh_key_unlock'])) {
+            $param['ssh_key_unlock'] = $credential['ssh_key_unlock'];
+        }
+
+        $this->logger->trace(var_export($param, true));
+
+        $response_array = AnsibleTowerRestApiCredentials::git_post($this->restApiCaller, $param);
+
+        $this->logger->trace(var_export($response_array, true));
+
+        if($response_array['success'] == false) {
+            $this->logger->debug($response_array['responseContents']['errorMessage']);
+            return -1;
+        }
+
+        if(array_key_exists("id", $response_array['responseContents']) == false) {
+            $this->logger->debug("No credential id.");
+            return -1;
+        }
+
+        $credentialId = $response_array['responseContents']['id'];
+        return $credentialId;
     }
 
     private function createEachCredential($execution_no, $loopCount, $credential,$OrganizationId) {
@@ -1017,7 +1675,7 @@ class ExecuteDirector {
         return $inventoryId;
     }
 
-    private function createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $vault_credentialId, $inventoryId, $runMode) {
+    private function createEachJobTemplate($execution_no, $loopCount, $projectId, $credentialId, $vault_credentialId, $inventoryId, $runMode, $execution_environment_id) {
         global $vg_parent_playbook_name;
 
         $this->logger->trace(__METHOD__);
@@ -1030,6 +1688,10 @@ class ExecuteDirector {
         $param['project'] = $projectId;
         $param['playbook'] = $vg_parent_playbook_name;
         $param['credential'] = $credentialId;
+
+        if($execution_environment_id !== false) {
+            $param['execution_environment'] = $execution_environment_id;
+        }
 
         if($vault_credentialId != -1) {
             $param['vault_credential'] = $vault_credentialId;
@@ -1192,6 +1854,24 @@ class ExecuteDirector {
         }
 
         $this->logger->trace("Clean up vault credentials finished. (execution_no: $execution_no)");
+
+        return true;
+    }
+
+    private function cleanUpGitCredential($execution_no) {
+
+        $this->logger->trace(__METHOD__);
+
+        $response_array = AnsibleTowerRestApiCredentials::deleteGit($this->restApiCaller, $execution_no);
+
+        $this->logger->trace(var_export($response_array, true));
+
+        if($response_array['success'] == false) {
+            $this->logger->debug($response_array['responseContents']['errorMessage']);
+            return false;
+        }
+
+        $this->logger->trace("Clean up git credentials finished. (execution_no: $execution_no)");
 
         return true;
     }
@@ -1898,11 +2578,15 @@ class ExecuteDirector {
         return $path;
     }
 
-    function getMaterialsTransferDestinationPath($execution_no) {
+    function getMaterialsTransferDestinationPath($PathId,$execution_no) {
         global $vg_tower_driver_name;
+        global $vg_TowerProjectPath;
+        global $vg_TowerExastroProjectPath;
 
-        $path = sprintf("/var/lib/awx/projects/ita_%s_executions_%s",$vg_tower_driver_name,addPadding($execution_no)); 
-        return $path;
+        $path = array();
+        $path["TowerPath"]   = sprintf("%s/ita_%s_executions_%s",$vg_TowerProjectPath,       $vg_tower_driver_name,addPadding($execution_no)); 
+        $path["ExastroPath"] = sprintf("%s/ita_%s_executions_%s",$vg_TowerExastroProjectPath,$vg_tower_driver_name,addPadding($execution_no)); 
+        return $path[$PathId];
     }
 
     function LogReplacement($log_data) {
@@ -1954,6 +2638,200 @@ class ExecuteDirector {
 
     function __destruct() {
     }
+
+    function createGitRepo($GitObj, $SrcFilePath) {
+
+        $GitObj->ClearLastErrorMsg();
+        $ret = $GitObj->GitRepoDirDelete();
+        if($ret === false) {
+            $log         = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2003",array($GitObj->GetLastErrorMsg()));
+            $this->errorLogOut($log);
+            $this->logger->error($log);
+    
+            return false;
+        }
+        $GitObj->ClearLastErrorMsg();
+        $ret = $GitObj->GitInit();
+        if($ret === false) {
+            $log         = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2003",array($GitObj->GetLastErrorMsg()));
+            $this->errorLogOut($log);
+            $this->logger->error($log);
+    
+            return false;
+        }
+        $GitObj->ClearLastErrorMsg();
+        $ret = $GitObj->GitAddFiles($SrcFilePath);
+        if($ret === false) {
+            $log         = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2003",array($GitObj->GetLastErrorMsg()));
+            $this->errorLogOut($log);
+            $this->logger->error($log);
+    
+            return false;
+        }
+        $GitObj->ClearLastErrorMsg();
+        $ret = $GitObj->GitCommit();
+        if($ret === false) {
+            $log         = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2003",array($GitObj->GetLastErrorMsg()));
+            $this->errorLogOut($log);
+            $this->logger->error($log);
+    
+            return false;
+        }
+        return true;
+    }
+    
+    function deleteMaterialsTransferTempDir($execution_no) {
+        global $vg_tower_driver_name;
+        $tmp_path_ary = getInputDataTempDir($execution_no, $vg_tower_driver_name);
+        $src_path     = $tmp_path_ary["DIR_NAME"];
+        // Gitリポジトリ用の一時ディレクトリを削除
+        if(file_exists($src_path)) {
+            $cmd = sprintf("/bin/rm -rf %s 2>&1",
+                            $src_path);
+            exec($cmd,$arry_out,$return_var);
+            if($return_var !== 0) {
+                $log         = implode("\n",$arry_out);
+                $log         .= "\n".$this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2002",array($cmd));
+                $this->errorLogOut($log);
+                $this->logger->error($log);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function createProjectStatusCheck($response_array) {
+
+        $this->logger->trace(__METHOD__);
+
+        $projectId = $response_array['responseContents']['id'];
+        // Git連携の状態を確認する
+        for(;;) {
+            switch($response_array['responseContents']['status']) {
+            case "new":
+            case "pending":
+            case "waiting":
+            case "running":
+                sleep(5);
+                $response_array =  AnsibleTowerRestApiProjects::get($this->restApiCaller, $projectId);
+                if($response_array['success'] == false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2006");
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error(var_export($response_array,true));
+                    return -1;
+                }
+                break;
+            case "successful":
+                return true;
+                break;
+            case "failed":
+            case "error":
+                // プロジェクト更新用のURL退避
+                $updateUurl = $response_array['responseContents']['related']['update'];
+                // Git連携に失敗した場合、エラー情報を取得する
+                $url = $response_array['responseContents']['related']['project_updates'];
+                $response_array =  AnsibleTowerRestApirPassThrough::get($this->restApiCaller, $url);
+                if($response_array['success'] == false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2006");
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error(var_export($response_array,true));
+                    return -1;
+                }
+                $url = $response_array['responseContents']['results'][0]['related']['stdout'] . "?format=txt";
+                $response_array =  AnsibleTowerRestApirPassThrough::get($this->restApiCaller, $url, true);
+                $ProjectUpdateStdout = $response_array['responseContents'];
+                if($response_array['success'] == false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2006");
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error(var_export($response_array,true));
+                    return -1;
+                }
+                // 制御ノードにコンテナイメージがロードされていないと、プロジェクト作成でGit連携が失敗する
+                // プロジェクトの更新だとコンテナイメージがロードていなくても問題ないので、プロジェクトを更新する
+                $response_array =  AnsibleTowerRestApirPassThrough::post($this->restApiCaller, $updateUurl);
+                if($response_array['success'] == false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2006");
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error(var_export($response_array,true));
+                    return -1;
+                }
+                $ret = $this->projectUpdate($response_array);
+                if($ret === true) {
+                    return true;
+                }
+                return -1;
+                break;
+            default:
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2006");
+                $this->errorLogOut($errorMessage);
+                $this->logger->error(var_export($response_array,true));
+                return -1;
+                break;
+            }
+        }
+    }
+
+    function projectUpdate($response_array) {
+        $url = $response_array['responseContents']['url'];
+        // プロジェクト更新の結果判定
+        for(;;) {
+            $response_array =  AnsibleTowerRestApirPassThrough::get($this->restApiCaller, $url);
+            if($response_array['success'] == false) {
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2006");
+                $this->errorLogOut($errorMessage);
+                $this->logger->error(var_export($response_array,true));
+                return response_array;
+            }
+            switch($response_array['responseContents']['status']) {
+            case "new":
+            case "pending":
+            case "waiting":
+            case "running":
+                sleep(5);
+                break;
+            case "successful":
+                return true;
+                break;
+            case "failed":
+            case "error":
+                $url = $response_array['responseContents']['related']['stdout'] . "?format=txt";
+                $response_array =  AnsibleTowerRestApirPassThrough::get($this->restApiCaller, $url, true);
+                $ProjectUpdateStdout = $response_array['responseContents'];
+                if($response_array['success'] == false) {
+                    $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2006");
+                    $this->errorLogOut($errorMessage);
+                    $this->logger->error(var_export($response_array,true));
+                    return -1;
+                }
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2005",array(print_r($ProjectUpdateStdout,true)));
+                $this->errorLogOut($errorMessage);
+                return -1;
+                break;
+            default:
+                $errorMessage = $this->objMTS->getSomeMessage("ITAANSIBLEH-ERR-2006");
+                $this->errorLogOut($errorMessage);
+                $this->logger->error(var_export($response_array,true));
+                return -1;
+                break;
+            }
+        }
+    }
+}
+
+function getGitSshKeyFileContent($systemId, $sshKeyFileName) {
+
+    global $root_dir_path;
+
+    $ssh_key_file_dir = $root_dir_path . "/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/";
+
+    $content = "";
+
+    $filePath = $ssh_key_file_dir . addPadding($systemId) . "/" . $sshKeyFileName;
+    $content = file_get_contents($filePath);
+
+    $content = ky_decrypt($content);
+
+    return $content;
 }
 
 function getSshKeyFileContent($systemId, $sshKeyFileName) {
@@ -1980,3 +2858,5 @@ function getAnsibleTowerSshKeyFileContent($TowerHostID, $sshKeyFileName) {
    
     return $filePath;
 }
+
+?>

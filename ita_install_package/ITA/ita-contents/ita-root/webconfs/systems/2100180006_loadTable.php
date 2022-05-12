@@ -108,6 +108,23 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $objOT->setTraceQuery($aryTraceQuery);
     $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
+    
+    //保留ステータス
+    $c = new IDColumn('PAUSE_STATUS_ID',$g['objMTS']->getSomeMessage("ITABASEH-MNU-202100"),'B_MOV_NEXT_PENDING_FLAG','MOV_NEXT_PENDING_FLAG_ID','MOV_NEXT_PENDING_FLAG_NAME','');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-203093"));//エクセル・ヘッダでの説明
+    $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
+    $objOT->setFirstSearchValueOwnerColumnID('PAUSE_STATUS_ID');
+    $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_MOV_NEXT_PENDING_FLAG_JNL',
+        'TTT_SEARCH_KEY_COLUMN_ID'=>'MOV_NEXT_PENDING_FLAG_ID',
+        'TTT_GET_TARGET_COLUMN_ID'=>'MOV_NEXT_PENDING_FLAG_NAME',
+        'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
+        'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
+        'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
+        )
+    );
+    $objOT->setTraceQuery($aryTraceQuery);
+    $c->setOutputType('print_journal_table',$objOT);
+    $table->addColumn($c);
 
     //実行ユーザ
     $c = new TextColumn('EXECUTION_USER',$g['objMTS']->getSomeMessage("ITABASEH-MNU-201110"));

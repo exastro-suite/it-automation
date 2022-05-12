@@ -413,4 +413,122 @@ class TemplateVarsStructAnalFileAccess extends FileUploadColumnFileAccessBase {
         $VarVal_list     = $php_array['VarVal_list'];
     }
 }
+class FileUploadColumnAccess {
+    protected   $menuID;
+    protected   $ColumnName;
+    protected   $lv_lasterrmsg;
+
+    function __construct($menuID,$ColumnName){
+        $this->menuID                      = $menuID;
+        $this->ColumnName                  = $ColumnName;
+        $this->lv_lasterrmsg               = array();
+    }
+
+    function SetLastError($p1,$p2,$p3){
+        $FREE_LOG = "FILE:$p1 LINE:$p2 $p3";
+        $this->lv_lasterrmsg    = array();
+        $this->lv_lasterrmsg[0] = $p3;
+        $this->lv_lasterrmsg[1] = "FILE:$p1 LINE:$p2 $p3";
+    }
+
+    function GetLastError() {
+        return $this->lv_lasterrmsg;
+    }
+
+    function CreateBaseDir($Pkey,$Jnlkey,$HistoryDirUseFlg=false) {
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+
+        $cmd_list = array();
+        $dir = sprintf("%s/uploadfiles",$root_dir_path);
+        if( ! file_exists($dir)) {
+            $cmd_list[] = sprintf("mkdir -p %s  2>&1",$dir);
+            $cmd_list[] = sprintf("chmod 0777 %s  2>&1",$dir);
+        }
+        $dir = sprintf("%s/%s",$dir,$this->menuID);
+        if( ! file_exists($dir)) {
+            $cmd_list[] = sprintf("mkdir -p %s  2>&1",$dir);
+            $cmd_list[] = sprintf("chmod 0777 %s  2>&1",$dir);
+        }
+        $dir = sprintf("%s/%s",$dir,$this->ColumnName);
+        if( ! file_exists($dir)) {
+            $cmd_list[] = sprintf("mkdir -p %s  2>&1",$dir);
+            $cmd_list[] = sprintf("chmod 0777 %s  2>&1",$dir);
+        }
+        $dir = sprintf("%s/%010d",$dir,$Pkey);
+        if( ! file_exists($dir)) {
+            $cmd_list[] = sprintf("mkdir -p %s  2>&1",$dir);
+            $cmd_list[] = sprintf("chmod 0777 %s  2>&1",$dir);
+        }
+        if($HistoryDirUseFlg === true) {
+            $dir = sprintf("%s/old",$dir,$Pkey);
+            if( ! file_exists($dir)) {
+                $cmd_list[] = sprintf("mkdir -p %s  2>&1",$dir);
+                $cmd_list[] = sprintf("chmod 0777 %s  2>&1",$dir);
+            }
+            $dir = sprintf("%s/%010d",$dir,$Jnlkey);
+            if( ! file_exists($dir)) {
+                $cmd_list[] = sprintf("mkdir -p %s  2>&1",$dir);
+                $cmd_list[] = sprintf("chmod 0777 %s  2>&1",$dir);
+            }
+        }
+        foreach($cmd_list as $cmd) {
+            exec($cmd, $output, $return_var);
+            if(0 != $return_var){
+                $logstr    = sprintf("Failed to create directory for FileUpLoadClomn.\ncommand ( %s ) \n%s\n",$cmd,implode("\n",$output));
+                $this->SetLastError(__FILE__,__LINE__,$logstr);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function getJournalFilePath($Pkey,$Jnlkey,$FileName = Null) {
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+        $file = sprintf("%s/uploadfiles/%s/%s/%010d/old/%010d/%s",
+                        $root_dir_path,
+                        $this->menuID,
+                        $this->ColumnName,
+                        $Pkey,
+                        $Jnlkey,
+                        $FileName);
+        return($file);
+    }
+
+    function getMasterFilePath($Pkey,$FileName = Null) {
+        $root_dir_temp = array();
+        $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
+        $root_dir_path = $root_dir_temp[0] . "ita-root";
+        $file = sprintf("%s/uploadfiles/%s/%s/%010d/%s",
+                        $root_dir_path,
+                        $this->menuID,
+                        $this->ColumnName,
+                        $Pkey,
+                        $FileName);
+        return($file);
+    }
+    function upLoadFileCopy($srcObj,$destObj,$srcPkey,$destPkey,$destJnlkey,$FileName) {
+        $srcFilePath        = $srcObj->getMasterFilePath($srcPkey,$FileName);
+        $destFilePath       = $destObj->getMasterFilePath($destPkey,".");
+        $destJournalPath    = $destObj->getJournalFilePath($destPkey,$destJnlkey,".");
+        $cmd = sprintf("/bin/cp -fp %s %s  2>&1",escapeshellarg($srcFilePath),escapeshellarg($destFilePath));
+        exec($cmd,$output,$return_var);
+        if($return_var != 0) {
+            $logstr    = sprintf("FileUpLoadClomn file copy failed.\ncommand (%s)\n%s\n",$cmd,implode("\n",$output));
+            $this->SetLastError(__FILE__,__LINE__,$logstr);
+            return false;
+        }
+        $cmd = sprintf("/bin/cp -fp %s %s  2>&1",escapeshellarg($srcFilePath),escapeshellarg($destJournalPath));
+        exec($cmd,$output,$return_var);
+        if($return_var != 0) {
+            $logstr    = sprintf("FileUpLoadClomn file copy failed.\ncommand (%s)\n%s\n",$cmd,implode("\n",$output));
+            $this->SetLastError(__FILE__,__LINE__,$logstr);
+            return false;
+        }
+        return true;
+    }
+}
 ?>

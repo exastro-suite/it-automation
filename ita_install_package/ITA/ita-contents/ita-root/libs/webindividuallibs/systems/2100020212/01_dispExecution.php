@@ -78,6 +78,8 @@
                         TAB_A.ANS_WINRM_FLAG_NAME,
                         TAB_A.I_VIRTUALENV_NAME,
                         TAB_A.I_ENGINE_VIRTUALENV_NAME,
+                        TAB_A.I_EXECUTION_ENVIRONMENT_NAME,
+                        TAB_A.I_ANSIBLE_CONFIG_FILE,
                         TAB_A.MULTIPLELOG_MODE,
                         TAB_A.LOGFILELIST_JSON,
                         TAB_A.CONDUCTOR_NAME,
@@ -118,6 +120,8 @@
         }
         
         require_once($g['root_dir_path'] . "/webconfs/systems/{$execution_management_dir}_loadTable.php");
+
+        require_once($g['root_dir_path'] . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
         
         $table = loadTable($execution_management_dir);
         $arrayColumn = $table->getColumns();
@@ -179,6 +183,18 @@
         $virturlenv_name = nl2br(htmlspecialchars($showTgtRow['I_VIRTUALENV_NAME']));
         $engin_virturlenv_name = nl2br(htmlspecialchars($showTgtRow['I_ENGINE_VIRTUALENV_NAME']));
 
+        $execution_environment_name = nl2br(htmlspecialchars($showTgtRow['I_EXECUTION_ENVIRONMENT_NAME']));
+
+        $strFocusColumnId = 'I_ANSIBLE_CONFIG_FILE';
+        $objColumn = $arrayColumn[$strFocusColumnId];
+        $strLaBranchPerFUC_PADRIN = $objColumn->getLAPathToFUCItemPerRow($showTgtRow);
+        if( file_exists( $strLaBranchPerFUC_PADRIN ) && !is_dir( $strLaBranchPerFUC_PADRIN ) ){
+            $ansible_cfg = '<a href="' . $objColumn->getOAPathToFUCItemPerRow($showTgtRow) . '" target="_blank">' . htmlspecialchars(nl2br($showTgtRow[$strFocusColumnId])) . '</a>';
+        }
+        else{
+            $ansible_cfg = '';
+        }
+
         // 作業対象ホストへ遷移するボタン生成
         $url = sprintf("/default/menu/01_browse.php?no=2100020209&ope_id=%s&movement_id=%s", $ope_param,$movement_param);
         $caption = $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-5010001");
@@ -234,22 +250,6 @@
                         <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000031")}</span><!-エンジン virturlenv//--></td>
                         <td>{$engin_virturlenv_name}</td>
                     </tr>
-EOD;
-        if($exec_mode == 2) {
-            $output_str .=
-<<< EOD
-                    <tr>
-                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000032")}</span><!--virturlenv//--></td>
-                        <td                                     >{$virturlenv_name}</td>
-                    </tr>
-EOD;
-        }
-        $output_str .=
-<<< EOD
-                    <tr>
-                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-103110")}</span><!--シンフォニークラス//--></td>
-                        <td                                     >{$COLUMN_43}</td>
-                    </tr>
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-103111")}</span><!--ENO コンダクタクラス//--></td>
                         <td                                     >{$COLUMN_44}</td>
@@ -259,7 +259,7 @@ EOD;
                         <td                                     >{$COLUMN_42}</td>
                     </tr>
                     <tr>
-                        <td class="likeHeader" scope="row" rowspan="5" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-104020")}</span><!--作業パターン//--></td>
+                        <td class="likeHeader" scope="row" rowspan="9" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-104020")}</span><!--作業パターン//--></td>
                         <td class="likeHeader"  scope="row" rowspan="1" colspan="2" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-104035")}</span><!--ID//--></td>
                         <td                                     >{$COLUMN_31}</td>
                     </tr>
@@ -279,6 +279,31 @@ EOD;
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="1" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-104043")}</span><!--並列実行数//--></td>
                         <td                                     >{$COLUMN_41}</td>
+                    </tr>
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000040")}</span><!--Ansible Engine利用情報//--></td>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027")}</span><!--Ansible virtualenv//--></td>
+                        <td                                     >{$engin_virturlenv_name}</td>
+                    </tr>
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000013")}</span><!--Tower利用情
+報//--></td>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029")}</span><!--tower virturlenv//--></td>
+                        <td                                     >{$virturlenv_name}</td>
+                    </tr>
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000035")}</span><!--ansible automation controller利用情報//--></td>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000036")}</span><!--実行環境//--></td>
+                        <td                                     >{$execution_environment_name}</td>
+                    </tr>
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="2" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000038")}</span><!--ansible.cfg//--></td>
+                        <td                                     >{$ansible_cfg}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="likeHeader" scope="row" rowspan="1" colspan="3" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-103110")}</span><!--シンフォニークラス//--></td>
+                        <td                                     >{$COLUMN_43}</td>
                     </tr>
                     <tr>
                         <td class="likeHeader" scope="row" rowspan="3" colspan="1" ><span class="generalBold">{$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-104060")}</span><!--オペレーション//--></td>

@@ -520,6 +520,7 @@ function conductorInstanceScram($fxVarsIntConductorInstanceId){
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -644,6 +645,7 @@ function conductorInstanceScram($fxVarsIntConductorInstanceId){
         }
         
         if( $boolExecuteContinue === true ){
+            $update_tgt_row['PAUSE_STATUS_ID']      = 2; //保留ステータスオフ
             $update_tgt_row['ABORT_EXECUTE_FLAG']   = 2; //発令済
             $update_tgt_row['LAST_UPDATE_USER']     = $g['login_id'];
             
@@ -1265,6 +1267,7 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -1293,6 +1296,7 @@ function getSingleConductorInfoFromConductorInstances($intConductorInstanceId, $
         "OPERATION_NO_UAPK"=>"",
         "I_OPERATION_NAME"=>"",
         "STATUS_ID"=>"",
+        "PAUSE_STATUS_ID"=>"",
         "EXECUTION_USER"=>"",
         "ABORT_EXECUTE_FLAG"=>"",
         "CONDUCTOR_CALL_FLAG"=>"",
@@ -1923,23 +1927,35 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
     
         $tmpNoticeInfo = json_decode($aryRowOfSymInstanceTable['I_NOTICE_INFO'],true);
         $arrNoticeInfo = $tmpNoticeInfo['NOTICE_INFO'];
+        
+        //緊急停止フラグを画面表示用に変換
+        $strAbortExecuteFlag = '';
+        if ($aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG'] == '1') {
+          $strAbortExecuteFlag = $objMTS->getSomeMessage("ITABASEH-MNU-203095");
+        }
+        else if ($aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG'] == '2') {
+          $strAbortExecuteFlag = $objMTS->getSomeMessage("ITABASEH-MNU-203096");
+        }
+
 
         //----Conductor(インスタンス)情報を固める
         $arySymphonySource = array('CONDUCTOR_INSTANCE_ID'=>$intSymphonyInstanceId
                                   ,'CONDUCTOR_CLASS_NO'=>$aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO']
+                                  ,'CONDUCTOR_NAME'=>$aryRowOfSymInstanceTable['I_CONDUCTOR_NAME'] #1825
                                   ,'STATUS_ID'=>$aryRowOfSymInstanceTable['STATUS_ID']
+                                  ,'PAUSE_STATUS'=>''
                                   ,'EXECUTION_USER'=>$aryRowOfSymInstanceTable['EXECUTION_USER']
-                                  ,'ABORT_EXECUTE_FLAG'=>$aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG']
+                                  ,'ABORT_EXECUTE_FLAG'=>$strAbortExecuteFlag
                                   ,'OPERATION_NO_IDBH'=>$aryRowOfSymInstanceTable['OPERATION_NO_UAPK']
                                   ,'OPERATION_NAME'=>$aryRowOfSymInstanceTable['I_OPERATION_NAME']
                                   ,'TIME_BOOK'=>$aryRowOfSymInstanceTable['TIME_BOOK']
                                   ,'TIME_START'=>$aryRowOfSymInstanceTable['TIME_START']
                                   ,'TIME_END'=>$aryRowOfSymInstanceTable['TIME_END']
                                   ,'EXEC_LOG'=> htmlspecialchars($aryRowOfSymInstanceTable['EXEC_LOG'])
-                                  ,'NOTICE_INFO'=> $arrNoticeInfo,
+                                  ,'NOTICE_INFO'=> $arrNoticeInfo
+                                  ,'NOTE'=> $aryRowOfSymInstanceTable['I_DESCRIPTION']
         );
         //Conductor(インスタンス)情報を固める----
-
 
         $aryRetBody = $objOLA->convertConductorClassJson($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO'],$getmode);
         if( $aryRetBody[1] !== null ){
@@ -2017,7 +2033,9 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             $aryInstanceItems['NODE_INSTANCE_NO']                 = $row['NODE_INSTANCE_NO'];
             $aryInstanceItems['NODE_TYPE_ID']                 = $row['I_NODE_TYPE_ID'];
             $aryInstanceItems['STATUS']                 = $row['STATUS_ID'];
+            $aryInstanceItems['STATUS_FILE']    = ""; #1825
             $aryInstanceItems['SKIP']                 = $row['EXE_SKIP_FLAG'];
+            $aryInstanceItems['NOTE']                 = $row['I_DESCRIPTION']; #1825
             //ステータス----
 
             if( $row['I_NODE_TYPE_ID'] == 8){
@@ -2099,7 +2117,32 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             $aryInstanceItems['TIME_END']               = $row['TIME_END'];
             
             $aryInstanceItems['OPERATION_ID']           = $row['OVRD_I_OPERATION_NO_IDBH']; 
-            $aryInstanceItems['OPERATION_NAME']         = $row['OVRD_I_OPERATION_NAME']; 
+            $aryInstanceItems['OPERATION_NAME']         = $row['OVRD_I_OPERATION_NAME'];
+
+            $update_tgt_row = $aryRowOfSymInstanceTable;
+            if($aryInstanceItems['NODE_TYPE_ID'] == '8' && $aryInstanceItems['STATUS'] == '8'){
+              $arySymphonySource['PAUSE_STATUS'] = $objMTS->getSomeMessage("ITABASEH-MNU-203094");
+            }
+            
+            //CONDUCTOR_CALLで呼び出しているConductorが一時停止の場合
+            if( $row['CONDUCTOR_INSTANCE_CALL_NO'] != "" ){
+              $currentPauseStatusId = "";
+              $sql = "SELECT PAUSE_STATUS_ID
+                      FROM   C_CONDUCTOR_INSTANCE_MNG
+                      WHERE  CONDUCTOR_INSTANCE_NO = {$row["CONDUCTOR_INSTANCE_CALL_NO"]}";
+
+              //SQL準備
+              $objQuery = $objDBCA->sqlPrepare($sql);
+              $r = $objQuery->sqlExecute();
+              while ( $row = $objQuery->resultFetch() ){
+                  $currentPauseStatusId = $row['PAUSE_STATUS_ID'];
+              }
+              
+              if($currentPauseStatusId == '1'){
+                $arySymphonySource['PAUSE_STATUS'] = $objMTS->getSomeMessage("ITABASEH-MNU-203094");
+              }
+            }
+            
             $aryMovementInsData[$aryClassItems['NODE_NAME']] = $aryInstanceItems;
 
             unset($aryInstanceItems);

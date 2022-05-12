@@ -467,7 +467,10 @@ Ansible（Legacy Role）代入値自動登録設定
 
             $strFxName = "";
 
-            $strMenuIDNumeric = $rowData['MENU_ID'];
+            $strMenuIDNumeric = null;
+            if(is_array($rowData) && array_key_exists('MENU_ID', $rowData)){
+                $strMenuIDNumeric = $rowData['MENU_ID'];
+            }
 
             $strQuery = "SELECT "
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "

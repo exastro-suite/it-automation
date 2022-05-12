@@ -181,6 +181,10 @@ function constructExecutionNo(boolCallProxy, execution_no, ary_vars, menu_id){
                 }
             }else{
                 window.alert(gchkAccessAuth["ERROR_MSG"]);
+                if (gchkAccessAuth["STATUS"]  == "redirectOrderForHADACClient"){
+                    var redirectUrl = gchkAccessAuth['ACCESS_AUTH'][1] + location.search.replace('?', '&');
+                    redirectTo(gchkAccessAuth['ACCESS_AUTH'][0], redirectUrl, gchkAccessAuth['ACCESS_AUTH'][2]);
+                }
             }
         }
         //

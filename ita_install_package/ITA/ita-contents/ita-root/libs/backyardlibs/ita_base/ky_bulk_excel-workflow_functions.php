@@ -2684,6 +2684,7 @@ function getDumpFormat($menuId, $objTable, $aryVariant){
         require_once ( ROOT_DIR_PATH . "/libs/webcommonlibs/table_control_agent/01_recCount.php");
         $aryOverride = array("Mix1_1","fakeContainer_Filter1Print","Mix1_2","fakeContainer_ND_Filter1Sub");
         $arrayResult = recCountMain($objTable, "print_table", $arrayRecCountData, $aryVariant, $arySetting, $aryOverride);
+        $objTable->setData(array());
 
         if ($arrayResult[0] == "002") {
             $result = false;

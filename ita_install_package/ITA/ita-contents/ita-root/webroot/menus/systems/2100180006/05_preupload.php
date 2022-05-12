@@ -56,6 +56,9 @@
     $conductorInsTable = "C_CONDUCTOR_INSTANCE_MNG";
 
     //Input/Resultデータ場所
+    $_GET['mode'] = 'dl';
+    //Zipファイルかどうかの識別として使用
+    $zipFileFlag = FALSE;
     $legacyDir = $root_dir_path."/uploadfiles/2100020113/".$inOrOut."/";
     $roleDir =  $root_dir_path."/uploadfiles/2100020314/".$inOrOut."/";
     $pioneerDir = $root_dir_path."/uploadfiles/2100020213/".$inOrOut."/";
@@ -72,6 +75,7 @@
 
 
     if(array_key_exists("mode",$_GET)===true && array_key_exists("conductor_instance_id",$_GET)===true){
+        $zipFileFlag = TRUE;
         $zip = new ZipArchive();
 
         // Zipファイルオープン
@@ -261,13 +265,14 @@ EOD;
             unlink($filepath.$filename);
         }
     }
-
     //-- サイト個別PHP要素、ここまで-- 
-    noRetFileWithColumnAccessAgent($objDefaultTable);
+    //Zipファイルの場合不要な処理であるため通らない
+    if($zipFileFlag == FALSE){
+        noRetFileWithColumnAccessAgent($objDefaultTable);
+    }
     //-- サイト個別PHP要素、ここから--
-    //-- サイト個別PHP要素、ここまで--
-
+    //-- サイト個別PHP要素、ここまで-- 
     // ----アクセスログ出力
-    web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-603"));
+    web_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4051",array(basename(__FILE__),$filepath.$filename)));
     // アクセスログ出力----
 ?>

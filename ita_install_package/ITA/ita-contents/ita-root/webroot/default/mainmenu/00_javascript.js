@@ -40,6 +40,10 @@ callback.prototype = {
       set_widget( result );
     },
     regist_widget_info : function( result ) {
+      if ( typeof(result) === 'string') {
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+      }
       if ( result[0] === '000') {
         $( window ).trigger('registWidgetInfoDone');
       } else {
@@ -47,16 +51,32 @@ callback.prototype = {
       }
     },
     get_movement : function( result ) {
+      if ( typeof(result) === 'string') {
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+      }
       setPieChart( result, 'movement');
     },
     get_work_info : function( result ) {
+      if ( typeof(result) === 'string') {
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+      }
       setPieChart( result, 'status');
     },
     get_work_result : function( result ) {
+      if ( typeof(result) === 'string') {
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+      }
       workHistory( result );
       setPieChart( result, 'result');
     },
     get_symphony_conductor: function( result ) {
+      if ( typeof(result) === 'string') {
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+      }
       setSymphonyConductorList( result );
     }
     // ここまでカスタマイズした場合の[callback]メソッド配置域----

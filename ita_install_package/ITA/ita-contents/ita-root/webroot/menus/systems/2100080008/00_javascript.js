@@ -21,7 +21,7 @@
 
 //////// ----コールバックファンクション ////////
 function callback() {}
-callback.prototype = {  
+callback.prototype = {
     Filter1Tbl_add_selectbox : function( result ){
         var filterAreaWrap = 'Filter1_Nakami';
         var strFilterPrintId = 'Filter1Tbl';
@@ -220,8 +220,11 @@ callback.prototype = {
                                     "fakeContainer_Update1",
                                     webStdTableHeight,
                                     webStdTableWidth );
-                    
+
                     linkDateInputHelper(strMixOuterFrameName);
+
+                    //デフォルト値の初期表示
+                    Mix1_1_default_value_initdisp();
             }
         }else if( ary_result[0] == "002" ){
             window.alert(getSomeMessage("ITAWDCC90102"));
@@ -311,12 +314,12 @@ callback.prototype = {
                     break;
                 case "201":
                     // エラーなく登録完了
-                default:                
+                default:
                     objRegiterArea.innerHTML="";
                     $(objRegiterArea).html(resultContentTag);
 
                     objAlertArea.style.display = "none";
-                    
+
                     adjustTableAuto (strMixInnerFramePrefix+'1',
                                     "sDefault",
                                     "fakeContainer_Register2",
@@ -392,14 +395,14 @@ callback.prototype = {
 
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
-            
+
             var resultSetTargetSeq = ary_result01[0];
             var resultContentTag = ary_result01[1];
-            
+
             var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
-            
+
             $(objHtmlSetArea).html(resultContentTag);
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
         }else{
@@ -423,16 +426,239 @@ callback.prototype = {
 
         if( ary_result[0] == "000" ){
             var ary_element = getArrayBySafeSeparator(ary_result[2]);
-            
+
             var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
-            
+
             var resultSetTargetSeq = ary_result01[0];
             var resultContentTag = ary_result01[1];
-            
+
             var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
-            
+
             $(objHtmlSetArea).html(resultContentTag);
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+    // 「変数名」を選択した際のイベント（更新用）
+    Mix1_1_module_vars_upd : function( result ){
+        var tableTagAreaWrap = 'Mix1_Nakami';
+        var strTableTagPrintId = 'Mix1_1';
+        var containerClassName = 'fakeContainer_Update1';
+
+        var intMaxWidth = 650;
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        checkTypicalFlagInHADACResult(ary_result);
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            var flagType = ary_result01[2];
+            var defaultValue = ary_result01[3];
+
+            var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
+
+            $(objHtmlSetArea).html(resultContentTag);
+            addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
+
+            //「代入順序」の項目設定
+            if(flagType == "NO_FLAG_VAL"){
+                textPrintToBoxes('1','Mix1_1_6'); //代入順序は入力不要
+            }else if(flagType == "MEMBER_FLAG_VAL"){
+                textPrintToBoxes('1','Mix1_1_6'); //代入順序は入力不要
+            }else if(flagType == "ASSIGN_FLAG_VAL"){
+                textPrintToBoxes('2','Mix1_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "FLAG_VAL"){
+                textPrintToBoxes('2','Mix1_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "NO_SELECT_VARS"){
+                textPrintToBoxes('3','Mix1_1_6'); //変数名が未選択
+            }else if(flagType == "NONE_VAL"){
+                textPrintToBoxes('4','Mix1_1_6');//入力不可
+            }else{
+                textPrintToBoxes('1','Mix1_1_6'); //代入順序は入力不要
+            }
+
+            //「デフォルト値」の項目設定
+            textPrintToBoxes('11','dummy_upd',defaultValue);
+
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+    // 「変数名」を選択した際のイベント（登録用）
+    Mix2_1_module_vars_reg : function( result ){
+        var tableTagAreaWrap = 'Mix2_Nakami';
+        var strTableTagPrintId = 'Mix2_1';
+        var containerClassName = 'fakeContainer_Register2';
+
+        var intMaxWidth = 650;
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        checkTypicalFlagInHADACResult(ary_result);
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            var flagType = ary_result01[2];
+            var defaultValue = ary_result01[3];
+
+            var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
+
+            $(objHtmlSetArea).html(resultContentTag);
+            addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
+
+            //「代入順序」の項目設定
+            if(flagType == "NO_FLAG_VAL"){
+                textPrintToBoxes('1','Mix2_1_6'); //代入順序は入力不要
+            }else if(flagType == "MEMBER_FLAG_VAL"){
+                textPrintToBoxes('1','Mix2_1_6'); //代入順序は入力不要
+            }else if(flagType == "ASSIGN_FLAG_VAL"){
+                textPrintToBoxes('2','Mix2_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "FLAG_VAL"){
+                textPrintToBoxes('2','Mix2_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "NO_SELECT_VARS"){
+                textPrintToBoxes('3','Mix2_1_6'); //変数名が未選択
+            }else if(flagType == "NONE_VAL"){
+                textPrintToBoxes('4','Mix2_1_6');//入力不要※HCLがONの場合
+            }else{
+                textPrintToBoxes('1','Mix2_1_6'); //代入順序は入力不要
+            }
+
+            //「デフォルト値」の項目設定
+            textPrintToBoxes('11','dummy_reg',defaultValue);
+
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+    // 「メンバ変数名」を選択した際のイベント（更新用）
+    Mix1_1_member_vars_upd : function( result ){
+        var tableTagAreaWrap = 'Mix1_Nakami';
+        var strTableTagPrintId = 'Mix1_1';
+        var containerClassName = 'fakeContainer_Update1';
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        checkTypicalFlagInHADACResult(ary_result);
+
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            var flagType = ary_result01[2];
+            var defaultValue = ary_result01[3];
+
+            //「代入順序」の項目設定
+            if(flagType == "NO_FLAG_VAL"){
+                textPrintToBoxes('1','Mix1_1_6'); //代入順序は入力不要
+            }else if(flagType == "MEMBER_FLAG_VAL"){
+                textPrintToBoxes('1','Mix1_1_6'); //代入順序は入力不要
+            }else if(flagType == "ASSIGN_FLAG_VAL"){
+                textPrintToBoxes('2','Mix1_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "FLAG_VAL"){
+                textPrintToBoxes('2','Mix1_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "NO_SELECT_VARS"){
+                textPrintToBoxes('3','Mix1_1_6'); //変数名が未選択
+            }else if(flagType == "NONE_VAL"){
+                textPrintToBoxes('4','Mix1_1_6');//入力不要※HCLがONの場合
+            }else{
+                textPrintToBoxes('1','Mix1_1_6'); //代入順序は入力不要
+            }
+
+            //「デフォルト値」の項目設定
+            textPrintToBoxes('11','dummy_upd',defaultValue);
+
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+    // 「メンバ変数名」を選択した際のイベント（登録用）
+    Mix2_1_member_vars_reg : function( result ){
+        var tableTagAreaWrap = 'Mix2_Nakami';
+        var strTableTagPrintId = 'Mix2_1';
+        var containerClassName = 'fakeContainer_Register2';
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        checkTypicalFlagInHADACResult(ary_result);
+
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            var flagType = ary_result01[2];
+            var defaultValue = ary_result01[3];
+
+            //「代入順序」の項目設定
+            if(flagType == "NO_FLAG_VAL"){
+                textPrintToBoxes('1','Mix2_1_6'); //代入順序は入力不要
+            }else if(flagType == "MEMBER_FLAG_VAL"){
+                textPrintToBoxes('1','Mix2_1_6'); //代入順序は入力不要
+            }else if(flagType == "ASSIGN_FLAG_VAL"){
+                textPrintToBoxes('2','Mix2_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "FLAG_VAL"){
+                textPrintToBoxes('2','Mix2_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "NO_SELECT_VARS"){
+                textPrintToBoxes('3','Mix2_1_6'); //変数名が未選択
+            }else if(flagType == "NONE_VAL"){
+                textPrintToBoxes('4','Mix2_1_6');//入力不要※HCLがONの場合
+            }else{
+                textPrintToBoxes('1','Mix2_1_6'); //代入順序は入力不要
+            }
+
+            //「デフォルト値」の項目設定
+            textPrintToBoxes('11','dummy_reg',defaultValue);
+
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+    //更新時デフォルト値の初期表示
+    Mix1_1_default_value_initdisp : function( result ){
+        var tableTagAreaWrap = 'Mix2_Nakami';
+        var strTableTagPrintId = 'Mix2_1';
+        var containerClassName = 'fakeContainer_Update1';
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+        if( ary_result[0] == "000" ){
+            var defaultValue = ary_result[2];
+            textPrintToBoxes('11','dummy_upd',defaultValue);
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
@@ -441,18 +667,18 @@ callback.prototype = {
     Mix1_1_duplicate : function( result ){
         var strMixOuterFrameName = 'Mix2_Nakami';
         var strMixInnerFramePrefix = 'Mix2_';
-  
+
         var ary_result = getArrayBySafeSeparator(result);
         checkTypicalFlagInHADACResult(ary_result);
-  
+
         var resultContentTag = ary_result[2];
-  
+
         var objAlertArea=$('#'+strMixOuterFrameName+' .alert_area').get()[0];
-  
+
         if( ary_result[0] == "000" ){
-  
+
             var objRegiterArea=$('#'+strMixOuterFrameName+' .table_area').get()[0];
-  
+
             switch( ary_result[1] ){
                 case "100":
                     window.alert(resultContentTag);
@@ -461,12 +687,12 @@ callback.prototype = {
                     break;
                 case "201":
                     // エラーなく登録完了
-                default:                
+                default:
                     objRegiterArea.innerHTML="";
                     $(objRegiterArea).html(resultContentTag);
-  
+
                     objAlertArea.style.display = "none";
-                    
+
                     adjustTableAuto (strMixInnerFramePrefix+'1',
                                     "sDefault",
                                     "fakeContainer_Register2",
@@ -487,11 +713,115 @@ callback.prototype = {
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
         }
-  
+
+        showForDeveloper(result);
+    },
+    // HCL更新時
+    Mix1_1_hcl_upd : function( result ){
+        var tableTagAreaWrap = 'Mix1_Nakami';
+        var strTableTagPrintId = 'Mix1_1';
+        var containerClassName = 'fakeContainer_Update1';
+        var intMaxWidth = 650;
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        checkTypicalFlagInHADACResult(ary_result);
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            var flagType = ary_result01[2];
+            var defaultValue = ary_result01[3];
+
+            var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
+
+            $(objHtmlSetArea).html(resultContentTag);
+            addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
+
+            //「代入順序」の項目設定
+            if(flagType == "NO_FLAG_VAL"){
+                textPrintToBoxes('1','Mix1_1_6'); //代入順序は入力不要
+            }else if(flagType == "MEMBER_FLAG_VAL"){
+                textPrintToBoxes('1','Mix1_1_6'); //代入順序は入力不要
+            }else if(flagType == "ASSIGN_FLAG_VAL"){
+                textPrintToBoxes('2','Mix1_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "FLAG_VAL"){
+                textPrintToBoxes('2','Mix1_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "NO_SELECT_VARS"){
+                textPrintToBoxes('3','Mix1_1_6'); //変数名が未選択
+            }else if(flagType == "NONE_VAL"){
+                textPrintToBoxes('4','Mix1_1_6');//入力不要※HCLがONの場合
+            }else{
+                textPrintToBoxes('1','Mix1_1_6'); //代入順序は入力不要
+            }
+
+            //「デフォルト値」の項目設定
+            textPrintToBoxes('11','dummy_upd',defaultValue);
+
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+
+    Mix2_1_hcl_reg : function( result ){
+        var tableTagAreaWrap = 'Mix2_Nakami';
+        var strTableTagPrintId = 'Mix2_1';
+        var containerClassName = 'fakeContainer_Register2';
+        var intMaxWidth = 650;
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        checkTypicalFlagInHADACResult(ary_result);
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            var flagType = ary_result01[2];
+            var defaultValue = ary_result01[3];
+            var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
+
+            $(objHtmlSetArea).html(resultContentTag);
+            addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
+
+            if(flagType == "NO_FLAG_VAL"){
+                textPrintToBoxes('1','Mix2_1_6'); //代入順序は入力不要
+            }else if(flagType == "MEMBER_FLAG_VAL"){
+                textPrintToBoxes('1','Mix2_1_6'); //代入順序は入力不要
+            }else if(flagType == "ASSIGN_FLAG_VAL"){
+                textPrintToBoxes('2','Mix2_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "FLAG_VAL"){
+                textPrintToBoxes('2','Mix2_1_6'); //代入順序の入力欄を表示
+            }else if(flagType == "NO_SELECT_VARS"){
+                textPrintToBoxes('3','Mix2_1_6'); //変数名が未選択
+            }else if(flagType == "NONE_VAL"){
+                textPrintToBoxes('4','Mix2_1_6');//入力不可
+            }else{
+                textPrintToBoxes('1','Mix2_1_6'); //代入順序は入力不要
+            }
+
+            //「デフォルト値」の項目設定
+            textPrintToBoxes('11','dummy_reg',defaultValue);
+
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
         showForDeveloper(result);
     }
     //作業パターン----
-    
+
     // ここまでカスタマイズした場合の[callback]メソッド配置域----
 }
 
@@ -948,7 +1278,7 @@ function Journal1Tbl_pre_search_async(inputedCode){
 function Journal1Tbl_search_async(){
     // 履歴検索実施フラグを初期化
     var journal1AreaWrap = 'Journal1_Nakami';
-    
+
     var exec_flag = true;
 
     // 検索実施フラグがtrueの場合は検索実施
@@ -977,16 +1307,170 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 function Mix1_1_pattern_upd(){
     // すべての後選択関連カラムを消す
     var rangeId = 'Mix1_1';
-    
+
     var objPattern = document.getElementById('Mix1_1_2');
     proxy.Mix1_1_pattern_upd(objPattern.value);
+
+    var objHclVars = document.getElementById('Mix1_1_4');
+    proxy.Mix1_1_module_vars_upd("",objHclVars.value); // 変数名に空が選択されたときの処理を実行
+
 }
 function Mix2_1_pattern_reg(){
     // すべての後選択関連カラムを消す
     var rangeId = 'Mix2_1';
-    
+
     var objPattern = document.getElementById('Mix2_1_2');
     proxy.Mix2_1_pattern_reg(objPattern.value);
+
+    var objHclVars = document.getElementById('Mix2_1_4');
+    proxy.Mix2_1_module_vars_reg("",objHclVars.value); // 変数名に空が選択されたときの処理を実行
+}
+
+// 「変数名」選択時のイベント
+function Mix1_1_module_vars_upd(){
+    // すべての後選択関連カラムを消す
+    var rangeId = 'Mix1_1';
+
+    var objHclVars = document.getElementById('Mix1_1_4');
+    var objModuleVars = document.getElementById('Mix1_1_3');
+    proxy.Mix1_1_module_vars_upd(objModuleVars.value, objHclVars.value);
+}
+function Mix2_1_module_vars_reg(){
+    // すべての後選択関連カラムを消す
+    var rangeId = 'Mix2_1';
+
+    var objHclVars = document.getElementById('Mix2_1_4');
+    var objModuleVars = document.getElementById('Mix2_1_3');
+    proxy.Mix2_1_module_vars_reg(objModuleVars.value, objHclVars.value);
+}
+
+// 「メンバ変数名」選択時のイベント
+function Mix1_1_member_vars_upd(){
+    // すべての後選択関連カラムを消す
+    var rangeId = 'Mix1_1';
+
+    var objModuleVars = document.getElementById('Mix1_1_3');
+    var objMemberVars = document.getElementById('Mix1_1_5');
+
+    proxy.Mix1_1_member_vars_upd(objModuleVars.value, objMemberVars.value);
+}
+function Mix2_1_member_vars_reg(){
+    // すべての後選択関連カラムを消す
+    var rangeId = 'Mix2_1';
+
+    var objModuleVars = document.getElementById('Mix2_1_3');
+    var objMemberVars = document.getElementById('Mix2_1_5');
+
+    proxy.Mix2_1_member_vars_reg(objModuleVars.value, objMemberVars.value);
+}
+function Mix1_1_default_value_initdisp(){
+    var objModuleVars = document.getElementById('Mix1_1_3'); //変数名のID
+    var objMemberVars = document.getElementById('Mix1_1_5'); //メンバ変数名のID
+    if(document.getElementById('Mix1_1_5') != null){
+        proxy.Mix1_1_default_value_initdisp(objModuleVars.value, objMemberVars.value);
+    }else{
+        proxy.Mix1_1_default_value_initdisp(objModuleVars.value, "");
+    }
+}
+
+// HCL選択時
+function Mix1_1_hcl_upd(){
+    // すべての後選択関連カラムを消す
+    var rangeId = 'Mix1_1';
+
+    var objHclVars = document.getElementById('Mix1_1_4');
+    if(document.getElementById('Mix1_1_3') != null){
+        var objModuleVars = document.getElementById('Mix1_1_3');
+        proxy.Mix1_1_hcl_upd(objHclVars.value,objModuleVars.value);
+    }else{
+        proxy.Mix1_1_hcl_upd(objHclVars.value,"");
+    }
+}
+function Mix2_1_hcl_reg(){
+    // すべての後選択関連カラムを消す
+    var rangeId = 'Mix2_1';
+    var objHclVars = document.getElementById('Mix2_1_4');
+
+    if(document.getElementById('Mix2_1_3') != null){
+        var objModuleVars = document.getElementById('Mix2_1_3');
+        proxy.Mix2_1_hcl_reg(objHclVars.value,objModuleVars.value);
+    }else{
+        proxy.Mix2_1_hcl_reg(objHclVars.value,"");
+    }
+}
+
+function textPrintToBoxes(mode,strObjIdOfSw1,defaultValue=""){
+    var objVars01 = document.getElementById(strObjIdOfSw1);
+
+    if( objVars01 === null  ){
+    }else{
+        switch (mode){
+            case "1":
+                //入力欄を初期化および非表示
+                objVars01.value = "";
+                objVars01.type = "hidden";
+                objVars01.style.display = "none";
+                //入力不要をオープン
+                var objVarsMsg01 = document.getElementById('msg1_'+strObjIdOfSw1); //入力不要
+                objVarsMsg01.style.display = "block";
+                var objVarsMgs02 = document.getElementById('msg2_'+strObjIdOfSw1); //変数名を選択してください
+                objVarsMgs02.style.display = "none";
+                var objVarsMgs03 = document.getElementById('msg3_'+strObjIdOfSw1); //入力不可
+                objVarsMgs03.style.display = "none";
+                break;
+
+            case "2":
+                //入力欄を初期化及び表示
+                objVars01.value = "";
+                objVars01.type = "text";
+                objVars01.style.display = "";
+                //メッセージを非活性
+                var objVarsMsg01 = document.getElementById('msg1_'+strObjIdOfSw1); //入力不要
+                objVarsMsg01.style.display = "none";
+                var objVarsMgs02 = document.getElementById('msg2_'+strObjIdOfSw1); //変数名を選択してください
+                objVarsMgs02.style.display = "none";
+                var objVarsMgs03 = document.getElementById('msg3_'+strObjIdOfSw1); //入力不可
+                objVarsMgs03.style.display = "none";
+                break;
+
+            case "3":
+                //入力欄を初期化および非表示
+                objVars01.value = "";
+                objVars01.type = "hidden";
+                objVars01.style.display = "none";
+                //変数名を選択してくださいをオープン
+                var objVarsMsg01 = document.getElementById('msg1_'+strObjIdOfSw1); //入力不要
+                objVarsMsg01.style.display = "none";
+                var objVarsMgs02 = document.getElementById('msg2_'+strObjIdOfSw1); //変数名を選択してください
+                objVarsMgs02.style.display = "block";
+                var objVarsMgs03 = document.getElementById('msg3_'+strObjIdOfSw1); //入力不可
+                objVarsMgs03.style.display = "none";
+
+                break;
+
+            case "4":
+                //入力欄を初期化および非表示
+                objVars01.value = "";
+                objVars01.type = "hidden";
+                objVars01.style.display = "none";
+                //入力不可をオープン
+                var objVarsMsg01 = document.getElementById('msg1_'+strObjIdOfSw1); //入力不要
+                objVarsMsg01.style.display = "none";
+                var objVarsMgs02 = document.getElementById('msg2_'+strObjIdOfSw1); //変数名を選択してください
+                objVarsMgs02.style.display = "none";
+                var objVarsMgs03 = document.getElementById('msg3_'+strObjIdOfSw1); //入力不可
+                objVarsMgs03.style.display = "block";
+                break;
+
+
+
+            case "11":
+                //デフォルト値をセット
+                var objDefaultValue = document.getElementById(strObjIdOfSw1);
+                objDefaultValue.innerHTML = defaultValue;
+                break;
+        }
+    }
 }
 
 function queryDataToFilter(){

@@ -59,6 +59,11 @@ if("" != $get_parameter){
     $nextUrl = "/common/common_auth.php{$get_parameter}";
 }
 
+//csrf対策
+if( $_POST["csrf_token"] != $_SESSION["csrf_token"] ){
+  webRequestForceQuitFromEveryWhere(403);
+  exit();
+}
 
 $nextUrl = getRequestProtocol().getRequestHost().$nextUrl;
 // リダイレクト用パラメータ保存----

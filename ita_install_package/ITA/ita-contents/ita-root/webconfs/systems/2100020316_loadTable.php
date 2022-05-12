@@ -423,7 +423,10 @@ Ansible（Legacy Role）代入値自動登録設定
 
             $strFxName = "";
 
-            $strMenuIDNumeric = $rowData['MENU_ID'];
+            $strMenuIDNumeric = null;
+            if(is_array($rowData) && array_key_exists('MENU_ID', $rowData)){
+                $strMenuIDNumeric = $rowData['MENU_ID'];
+            }
 
             $strQuery = "SELECT "
                        ." TAB_1.COLUMN_LIST_ID  KEY_COLUMN "
@@ -750,7 +753,11 @@ Ansible（Legacy Role）代入値自動登録設定
                 $aryDataSet = array();
 
                 $strFxName = "";
-                $strPatternIdNumeric = $rowData['PATTERN_ID'];
+
+                $strPatternIdNumeric = null;
+                if(is_array($rowData) && array_key_exists('PATTERN_ID', $rowData)){
+                    $strPatternIdNumeric = $rowData['PATTERN_ID'];
+                }
 
                 $strQuery = "SELECT "
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
@@ -1069,7 +1076,10 @@ Ansible（Legacy Role）代入値自動登録設定
 
                 $strFxName = "";
 
-                $strVarsLinkIdNumeric = $rowData['KEY_VARS_LINK_ID'];
+                $strVarsLinkIdNumeric = null;
+                if(is_array($rowData) && array_key_exists('KEY_VARS_LINK_ID', $rowData)){
+                    $strVarsLinkIdNumeric = $rowData['KEY_VARS_LINK_ID'];
+                }
 
                 $strQuery = "SELECT "
                            ." TAB_1.COL_SEQ_COMBINATION_ID KEY_COLUMN "
@@ -1640,7 +1650,10 @@ Ansible（Legacy Role）代入値自動登録設定
 
                 $strFxName = "";
 
-                $strPatternIdNumeric = $rowData['PATTERN_ID'];
+                $strPatternIdNumeric = null;
+                if(is_array($rowData) && array_key_exists('PATTERN_ID', $rowData)){
+                    $strPatternIdNumeric = $rowData['PATTERN_ID'];
+                }
 
                 $strQuery = "SELECT "
                            ." TAB_1.VARS_LINK_ID       KEY_COLUMN "
@@ -1956,7 +1969,11 @@ Ansible（Legacy Role）代入値自動登録設定
 
                 $strFxName = "";
 
-                $strVarsLinkIdNumeric = $rowData['VAL_VARS_LINK_ID'];
+                $strVarsLinkIdNumeric = null;
+                if(is_array($rowData) && array_key_exists('VAL_VARS_LINK_ID', $rowData)){
+                    $strVarsLinkIdNumeric = $rowData['VAL_VARS_LINK_ID'];
+                }
+
                 $strQuery = "SELECT "
                            ." TAB_1.COL_SEQ_COMBINATION_ID KEY_COLUMN "
                            .",TAB_1.COMBINATION_MEMBER     DISP_COLUMN "

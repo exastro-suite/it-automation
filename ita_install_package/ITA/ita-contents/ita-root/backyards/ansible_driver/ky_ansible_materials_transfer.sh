@@ -40,6 +40,8 @@
 ##       RAS_FILE_PASSWD: 鍵認証ファイル パスフレーズ
 ##                          パスフレーズなし: undefine
 ##       BASE_DIR:        ita-rootパス
+##       FROMTO:          転送方向
+##                          ITA: ITA->TOWER   TOWER:  TOWER->ITA 
 ##      <<exit code>>
 ##       0:   正常
 ##       他:　異常
@@ -60,6 +62,7 @@ do
     export RAS_FILE=${KEY_FILE_PATH}
     export RAS_FILE_PASSWD=${LINE[7]}
     export BASE_DIR=${LINE[8]}
+    export FROMTO=${LINE[9]}
     break
 done < ${FILE}
 ## 鍵認証ファイル パスフレーズが設定されている場合にssh-agentにパスフレーズ登録
@@ -76,12 +79,12 @@ if [ "${RAS_FILE_PASSWD}" != "undefine" ]; then
     # passphrase不正
     echo "Failed to set the passphrase of the private key file(id_ras) in ssh-agent." >> /dev/stderr
     if [ ${EXIT_CODE}  -eq 200 ]; then
-      echo "Bad passphrase, Please check the tower host list. (host:${HOST})" >> /dev/stderr
+      echo "Bad passphrase, Please check the Ansible Automation Controller host list. (host:${HOST})" >> /dev/stderr
     # passphrase不要
     elif [ ${EXIT_CODE}  -eq 201 ]; then
-      echo "No passphrase requireds, Please check the tower host list. (host:${HOST})" >> /dev/stderr
+      echo "No passphrase requireds, Please check the Ansible Automation Controller host list. (host:${HOST})" >> /dev/stderr
     else
-      echo "Bad private key file(id_ras) or passphrase, Please check the tower host list. (host:${HOST})" >> /dev/stderr
+      echo "Bad private key file(id_ras) or passphrase, Please check the Ansible Automation Controller host list. (host:${HOST})" >> /dev/stderr
     fi
     eval `ssh-agent -k` 1>/dev/null
     exit 100

@@ -80,7 +80,7 @@ function uploadZipFile(){
     // zipファイルであることを確認
     $objFinfo = new finfo(FILEINFO_MIME_TYPE);
     $ext = array_search($objFinfo->file($_FILES['zipfile']['tmp_name']),
-                                        array('zip' => 'application/x-gzip'));
+                                        array('zip' => 'application/x-gzip', 'zip2' => 'application/gzip'));
     if ($ext === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900005'));
         throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
@@ -400,7 +400,7 @@ function moveZipFile($taskNo){
 /**
  * データインポート管理テーブル更新処理
  */
-function insertTask($dp_info){
+function insertTask($dp_info, $transactionCommitFlag = TRUE){
     global $g;
 
     // トランザクション開始
@@ -581,14 +581,14 @@ function insertTask($dp_info){
         throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
     }
 
-    $res = $g['objDBCA']->transactionCommit();
-    if ($res === false) {
-        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900036',
-                                             array(basename(__FILE__), __LINE__)));
-        throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+    if ( $transactionCommitFlag == TRUE ) {
+        $res = $g['objDBCA']->transactionCommit();
+        if ($res === false) {
+            web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900036',
+                                                 array(basename(__FILE__), __LINE__)));
+            throw new DBException($g['objMTS']->getSomeMessage('ITABASEH-ERR-900002'));
+        }
     }
-    $g['objDBCA']->transactionExit();
-
     return $p_execution_utn_no;
 }
 

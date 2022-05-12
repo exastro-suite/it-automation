@@ -931,6 +931,8 @@ ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy P
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
 ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , -- Tower virtualenv path
 ANS_ENGINE_VIRTUALENV_NAME        %VARCHR%(512)                    , -- ansible virtualenv path
+ANS_EXECUTION_ENVIRONMENT_NAME    %VARCHR%(512)                    , -- AAP 実行環境
+ANS_ANSIBLE_CONFIG_FILE           %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報
@@ -966,6 +968,8 @@ ANS_PLAYBOOK_HED_DEF              %VARCHR%(512)                    , -- legacy P
 ANS_EXEC_OPTIONS                  %VARCHR%(512)                    ,
 ANS_VIRTUALENV_NAME               %VARCHR%(512)                    , -- Tower virtualenv path
 ANS_ENGINE_VIRTUALENV_NAME        %VARCHR%(512)                    , -- ansible virtualenv path
+ANS_EXECUTION_ENVIRONMENT_NAME    %VARCHR%(512)                    , -- AAP 実行環境
+ANS_ANSIBLE_CONFIG_FILE           %VARCHR%(512)                    , -- ansible.cfg アップロードカラム
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報
@@ -1119,6 +1123,7 @@ I_DESCRIPTION                     %VARCHR%(4000)             ,
 OPERATION_NO_UAPK                 %INT%                      ,
 I_OPERATION_NAME                  %VARCHR%(256)              , 
 STATUS_ID                         %INT%                      ,
+PAUSE_STATUS_ID                   %INT%                      ,
 EXECUTION_USER                    %VARCHR%(80)               ,
 ABORT_EXECUTE_FLAG                %INT%                      ,
 TIME_BOOK                         %DATETIME6%                ,
@@ -1151,6 +1156,7 @@ I_DESCRIPTION                     %VARCHR%(4000)             ,
 OPERATION_NO_UAPK                 %INT%                      ,
 I_OPERATION_NAME                  %VARCHR%(256)              ,
 STATUS_ID                         %INT%                      ,
+PAUSE_STATUS_ID                   %INT%                      ,
 EXECUTION_USER                    %VARCHR%(80)               ,
 ABORT_EXECUTE_FLAG                %INT%                      ,
 TIME_BOOK                         %DATETIME6%                ,
@@ -2585,6 +2591,7 @@ I_DESCRIPTION                     %VARCHR%(4000)             ,
 OPERATION_NO_UAPK                 %INT%                      ,
 I_OPERATION_NAME                  %VARCHR%(256)              , 
 STATUS_ID                         %INT%                      ,
+PAUSE_STATUS_ID                   %INT%                      ,
 EXECUTION_USER                    %VARCHR%(80)               ,
 ABORT_EXECUTE_FLAG                %INT%                      ,
 CONDUCTOR_CALL_FLAG               %INT%                      ,
@@ -2620,6 +2627,7 @@ I_DESCRIPTION                     %VARCHR%(4000)             ,
 OPERATION_NO_UAPK                 %INT%                      ,
 I_OPERATION_NAME                  %VARCHR%(256)              ,
 STATUS_ID                         %INT%                      ,
+PAUSE_STATUS_ID                   %INT%                      ,
 EXECUTION_USER                    %VARCHR%(80)               ,
 ABORT_EXECUTE_FLAG                %INT%                      ,
 CONDUCTOR_CALL_FLAG               %INT%                      ,

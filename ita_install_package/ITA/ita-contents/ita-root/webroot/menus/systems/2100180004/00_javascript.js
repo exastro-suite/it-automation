@@ -447,6 +447,10 @@ callback.prototype = {
     //----Conductor系メソッド
     //----Conductor再描画用-----//
     printconductorClass : function( result ){
+
+        var ary_result = getArrayBySafeSeparator(result);
+        checkTypicalFlagInHADACResult(ary_result);
+
         conductorUseList.conductorData = result;
         if ( conductorGetMode === 'starting') {
           initEditor('view');
@@ -486,6 +490,10 @@ callback.prototype = {
     },
     //----Conductor登録----//
     conductorExecute : function( result ){
+            
+      var ary_result = getArrayBySafeSeparator(result);
+      checkTypicalFlagInHADACResult(ary_result);
+
       var logType = '',
           message = '',
           trigger = '';

@@ -71,8 +71,8 @@ $ary["ITAANSIBLEH-MNU-105070"]      = "終了日時";
 $ary["ITAANSIBLEH-MNU-105080"]      = "ステータス";
 $ary["ITAANSIBLEH-MNU-105090"]      = "Playbookで使用するテンプレートファイルをメンテナンス(閲覧/登録/更新/廃止)できます。 <br><br>テンプレートファイル内の変数には接頭文字として「VAR_」を付与して下さい。<br>接頭文字が「VAR_」の変数が、代入値管理メニューにて選択可能になります。<br>(例) {{ VAR_OMCS }}";
 $ary["ITAANSIBLEH-MNU-106010"]      = "素材ID";
-$ary["ITAANSIBLEH-MNU-106020"]      = "Ansible テンプレート管理";
-$ary["ITAANSIBLEH-MNU-106030"]      = "Ansible テンプレート管理";
+$ary["ITAANSIBLEH-MNU-106020"]      = "Ansible(共通)テンプレート管理";
+$ary["ITAANSIBLEH-MNU-106030"]      = "Ansible(共通)テンプレート管理";
 $ary["ITAANSIBLEH-MNU-106040"]      = "テンプレート埋込変数名";
 $ary["ITAANSIBLEH-MNU-106045"]      = "(接頭文字TPF_)半角英数字と利用可能な記号（_）";
 $ary["ITAANSIBLEH-MNU-106050"]      = "接頭文字として必ず「TPF_」を付与して下さい。";
@@ -198,8 +198,8 @@ $ary["ITAANSIBLEH-MNU-205090"]      = "表示順序";
 $ary["ITAANSIBLEH-MNU-206010"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-206020"]      = "Ansible-LegacyのMovementをメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITAANSIBLEH-MNU-206030"]      = "MovementID";
-$ary["ITAANSIBLEH-MNU-206040"]      = "Ansible(Legacy)Movement";
-$ary["ITAANSIBLEH-MNU-206050"]      = "Ansible(Legacy)Movement";
+$ary["ITAANSIBLEH-MNU-206040"]      = "Ansible(Legacy)Movement一覧";
+$ary["ITAANSIBLEH-MNU-206050"]      = "Ansible(Legacy)Movement一覧";
 $ary["ITAANSIBLEH-MNU-206060"]      = "Movement名";
 $ary["ITAANSIBLEH-MNU-206070"]      = "[最大長]256バイト";
 $ary["ITAANSIBLEH-MNU-206080"]      = "オーケストレータ";
@@ -222,8 +222,8 @@ $ary["ITAANSIBLEH-MNU-207060"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-207070"]      = "選択";
 $ary["ITAANSIBLEH-MNU-207080"]      = "MovementにインクルードするPlaybookをメンテナンス(閲覧/登録/更新/廃止)できます。 <br>Movement実行時には複数のPlaybookをインクルード順序に従ってインクルードすることが可能です。";
 $ary["ITAANSIBLEH-MNU-207090"]      = "紐付項番";
-$ary["ITAANSIBLEH-MNU-208010"]      = "Ansible（Legacy）Movement-Playbook紐付";
-$ary["ITAANSIBLEH-MNU-208020"]      = "Ansible（Legacy）Movement-Playbook紐付";
+$ary["ITAANSIBLEH-MNU-208010"]      = "Ansible(Legacy)Movement-Playbook紐付";
+$ary["ITAANSIBLEH-MNU-208020"]      = "Ansible(Legacy)Movement-Playbook紐付";
 $ary["ITAANSIBLEH-MNU-208030"]      = "Movement";
 $ary["ITAANSIBLEH-MNU-208040"]      = "[元データ]Movement一覧";
 $ary["ITAANSIBLEH-MNU-208050"]      = "Playbook素材";
@@ -234,8 +234,8 @@ $ary["ITAANSIBLEH-MNU-208090"]      = "表示順序";
 $ary["ITAANSIBLEH-MNU-209010"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-209020"]      = "Ansible（Legacy）代入変数名管理";
 $ary["ITAANSIBLEH-MNU-209030"]      = "紐付項番";
-$ary["ITAANSIBLEH-MNU-209040"]      = "Ansible（Legacy）代入変数名管理";
-$ary["ITAANSIBLEH-MNU-209050"]      = "Ansible（Legacy）代入変数名管理";
+$ary["ITAANSIBLEH-MNU-209040"]      = "Ansible(Legacy)Movement変数紐付管理";
+$ary["ITAANSIBLEH-MNU-209050"]      = "Ansible(Legacy)Movement変数紐付管理";
 $ary["ITAANSIBLEH-MNU-209060"]      = "Movement";
 $ary["ITAANSIBLEH-MNU-209070"]      = "プルダウン選択";
 $ary["ITAANSIBLEH-MNU-209080"]      = "変数名";
@@ -255,8 +255,8 @@ $ary["ITAANSIBLEH-MNU-302030"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-302040"]      = "オペレーションごとに、対象のMovementで利用されるPlaybookやテンプレートファイル内の変数「VAR_」に代入する具体値をメンテナンス(閲覧/登録/更新/廃止)できます。
 ";
 $ary["ITAANSIBLEH-MNU-302050"]      = "項番";
-$ary["ITAANSIBLEH-MNU-302060"]      = "Ansible（Legacy）代入値管理";
-$ary["ITAANSIBLEH-MNU-302070"]      = "Ansible（Legacy）代入値管理";
+$ary["ITAANSIBLEH-MNU-302060"]      = "Ansible(Legacy)代入値管理";
+$ary["ITAANSIBLEH-MNU-302070"]      = "Ansible(Legacy)代入値管理";
 $ary["ITAANSIBLEH-MNU-302080"]      = "オペレーション";
 $ary["ITAANSIBLEH-MNU-302090"]      = "[元データ]基本コンソール/オペレーション一覧";
 $ary["ITAANSIBLEH-MNU-302095"]      = "Movement：変数";
@@ -280,8 +280,8 @@ $ary["ITAANSIBLEH-MNU-304051"]      = "代入順序";
 $ary["ITAANSIBLEH-MNU-304052"]      = "ブランクまたは正の整数\n記載あり:昇順で代入される\nブランク:単一の代入値として代入される\n混在:記載ありの代入値が昇順で代入されたのちブランクの代入値が代入される";
 $ary["ITAANSIBLEH-MNU-304060"]      = "Ansible（Legacy）変数名管理";
 $ary["ITAANSIBLEH-MNU-304070"]      = "項番";
-$ary["ITAANSIBLEH-MNU-304080"]      = "Ansible（Legacy）変数名管理";
-$ary["ITAANSIBLEH-MNU-304090"]      = "Ansible（Legacy）変数名管理";
+$ary["ITAANSIBLEH-MNU-304080"]      = "Ansible(Legacy)変数名一覧";
+$ary["ITAANSIBLEH-MNU-304090"]      = "Ansible(Legacy)変数名一覧";
 $ary["ITAANSIBLEH-MNU-305010"]      = "変数名";
 $ary["ITAANSIBLEH-MNU-305011"]      = "[最大長]256バイト";
 $ary["ITAANSIBLEH-MNU-305020"]      = "変数名説明";
@@ -290,8 +290,8 @@ $ary["ITAANSIBLEH-MNU-305040"]      = "表示順序";
 $ary["ITAANSIBLEH-MNU-305050"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-305060"]      = "OS種別ごとの対話ファイルをメンテナンス(閲覧/登録/更新/廃止)できます。<br><br>対話ファイル内の変数には接頭文字として「VAR_」を付与して下さい。<br>接頭文字が「VAR_」の変数が、代入値管理メニューにて選択可能になります。<br>(例) {{ VAR_OMCS }}<br><br>また、以下の変数は予約語となります。<br>基本コンソールの機器一覧メニューで管理している情報を代入することができます。<br>[プロトコル]<br>{{ __loginprotocol__ }}<br>[ログインユーザID]<br>{{ __loginuser__ }}<br>[ログインパスワード]<br>{{ __loginpassword__ }}<br>[ログインホスト名]<br>{{ __loginhostname__ }}";
 $ary["ITAANSIBLEH-MNU-305070"]      = "素材ID";
-$ary["ITAANSIBLEH-MNU-305080"]      = "Ansible(Pioneer)対話素材集";
-$ary["ITAANSIBLEH-MNU-305090"]      = "Ansible(Pioneer)対話素材集";
+$ary["ITAANSIBLEH-MNU-305080"]      = "Ansible(Pioneer)対話ファイル素材集";
+$ary["ITAANSIBLEH-MNU-305090"]      = "Ansible(Pioneer)対話ファイル素材集";
 $ary["ITAANSIBLEH-MNU-306010"]      = "対話種別";
 $ary["ITAANSIBLEH-MNU-306020"]      = "[元データ]対話種別リスト";
 $ary["ITAANSIBLEH-MNU-306030"]      = "OS種別";
@@ -302,8 +302,8 @@ $ary["ITAANSIBLEH-MNU-306070"]      = "表示順序";
 $ary["ITAANSIBLEH-MNU-306080"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-306090"]      = "対話種別をメンテナンス(閲覧/登録/更新/廃止)できます。 <br>Ansible-Pioneerでは、OS種別ごとの差異を対話ファイルごとに定義し、同一目的の対話ファイルを対話種別として纏めて機器差分を吸収(抽象化)します。";
 $ary["ITAANSIBLEH-MNU-307010"]      = "項番";
-$ary["ITAANSIBLEH-MNU-307020"]      = "Ansible（pioneer）対話種別リスト";
-$ary["ITAANSIBLEH-MNU-307030"]      = "Ansible（pioneer）対話種別リスト";
+$ary["ITAANSIBLEH-MNU-307020"]      = "Ansible(Pioneer)対話種別リスト";
+$ary["ITAANSIBLEH-MNU-307030"]      = "Ansible(Pioneer)対話種別リスト";
 $ary["ITAANSIBLEH-MNU-307040"]      = "対話種別名";
 $ary["ITAANSIBLEH-MNU-307050"]      = "[最大長]256バイト";
 $ary["ITAANSIBLEH-MNU-307060"]      = "表示順序";
@@ -399,8 +399,8 @@ $ary["ITAANSIBLEH-MNU-405050"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-405060"]      = "Movementにインクルードする対話種別をメンテナンス(閲覧/登録/更新/廃止)できます。 <br>Movement実行時には複数の対話種別をインクルード順序に従ってインクルードすることが可能です。
 ";
 $ary["ITAANSIBLEH-MNU-405070"]      = "紐付項番";
-$ary["ITAANSIBLEH-MNU-405080"]      = "Ansible（Pioneer）Movement-対話種別紐付";
-$ary["ITAANSIBLEH-MNU-405090"]      = "Ansible（Pioneer）Movement-対話種別紐付";
+$ary["ITAANSIBLEH-MNU-405080"]      = "Ansible(Pioneer)Movement-対話種別紐付";
+$ary["ITAANSIBLEH-MNU-405090"]      = "Ansible(Pioneer)Movement-対話種別紐付";
 $ary["ITAANSIBLEH-MNU-406010"]      = "Movement";
 $ary["ITAANSIBLEH-MNU-406020"]      = "[元データ]Movement一覧";
 $ary["ITAANSIBLEH-MNU-406030"]      = "対話種別";
@@ -423,8 +423,8 @@ $ary["ITAANSIBLEH-MNU-408010"]      = "表示順序";
 $ary["ITAANSIBLEH-MNU-408020"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-408030"]      = "Ansible-PioneerのMovementをメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITAANSIBLEH-MNU-408040"]      = "MovementID";
-$ary["ITAANSIBLEH-MNU-408050"]      = "Ansible(Pioneer)Movement";
-$ary["ITAANSIBLEH-MNU-408060"]      = "Ansible(Pioneer)Movement";
+$ary["ITAANSIBLEH-MNU-408050"]      = "Ansible(Pioneer)Movement一覧";
+$ary["ITAANSIBLEH-MNU-408060"]      = "Ansible(Pioneer)Movement一覧";
 $ary["ITAANSIBLEH-MNU-408070"]      = "Movement名";
 $ary["ITAANSIBLEH-MNU-408080"]      = "[最大長]256バイト";
 $ary["ITAANSIBLEH-MNU-408090"]      = "オーケストレータ";
@@ -443,8 +443,8 @@ $ary["ITAANSIBLEH-MNU-409070"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-409080"]      = "選択";
 $ary["ITAANSIBLEH-MNU-409090"]      = "Ansible（Pioneer）代入変数名管理";
 $ary["ITAANSIBLEH-MNU-501010"]      = "紐付項番";
-$ary["ITAANSIBLEH-MNU-501020"]      = "Ansible（Pioneer）代入変数名管理";
-$ary["ITAANSIBLEH-MNU-501030"]      = "Ansible（Pioneer）代入変数名管理";
+$ary["ITAANSIBLEH-MNU-501020"]      = "Ansible(Pioneer)Movement変数紐付管理";
+$ary["ITAANSIBLEH-MNU-501030"]      = "Ansible(Pioneer)Movement変数紐付管理";
 $ary["ITAANSIBLEH-MNU-501040"]      = "Movement";
 $ary["ITAANSIBLEH-MNU-501050"]      = "プルダウン選択";
 $ary["ITAANSIBLEH-MNU-501060"]      = "変数名";
@@ -454,8 +454,8 @@ $ary["ITAANSIBLEH-MNU-501090"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-502010"]      = "オペレーションごとに、対象のMovementで利用される対話ファイル内の変数「VAR_」に代入する具体値をメンテナンス(閲覧/登録/更新/廃止)できます。
 ";
 $ary["ITAANSIBLEH-MNU-502020"]      = "項番";
-$ary["ITAANSIBLEH-MNU-502030"]      = "Ansible（Pioneer）代入値管理";
-$ary["ITAANSIBLEH-MNU-502040"]      = "Ansible（Pioneer）代入値管理";
+$ary["ITAANSIBLEH-MNU-502030"]      = "Ansible(Pioneer)代入値管理";
+$ary["ITAANSIBLEH-MNU-502040"]      = "Ansible(Pioneer)代入値管理";
 $ary["ITAANSIBLEH-MNU-502050"]      = "オペレーション";
 $ary["ITAANSIBLEH-MNU-502060"]      = "[元データ]基本コンソール/オペレーション一覧";
 $ary["ITAANSIBLEH-MNU-502065"]      = "Movement：変数";
@@ -480,8 +480,8 @@ $ary["ITAANSIBLEH-MNU-503080"]      = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-503090"]      = "[オペレーション,Movement,ホスト,変数名]の組み合わせが不正です。";
 $ary["ITAANSIBLEH-MNU-504010"]      = "Ansible（Pioneer）変数名管理";
 $ary["ITAANSIBLEH-MNU-504020"]      = "項番";
-$ary["ITAANSIBLEH-MNU-504030"]      = "Ansible（Pioneer）変数名管理";
-$ary["ITAANSIBLEH-MNU-504040"]      = "Ansible（Pioneer）変数名管理";
+$ary["ITAANSIBLEH-MNU-504030"]      = "Ansible(Pioneer)変数名一覧";
+$ary["ITAANSIBLEH-MNU-504040"]      = "Ansible(Pioneer)変数名一覧";
 $ary["ITAANSIBLEH-MNU-504050"]      = "変数名";
 $ary["ITAANSIBLEH-MNU-504060"]      = "[最大長]256バイト";
 $ary["ITAANSIBLEH-MNU-504070"]      = "変数名説明";
@@ -601,16 +601,19 @@ $ary["ITAANSIBLEH-MNU-1202018"]     = "gather_facts";
 $ary["ITAANSIBLEH-MNU-1202019"]     = "[元データ]Movement一覧";
 $ary["ITAANSIBLEH-MNU-1202020"]     = "Ansibleサーバへの接続インターフェース情報をメンテナンス(閲覧/更新)できます。 <br>本メニューは必ず1レコードである必要があります。";
 $ary["ITAANSIBLEH-MNU-1202030"]     = "";
-$ary["ITAANSIBLEH-MNU-1202040"]     = "Ansibleインターフェース情報";
-$ary["ITAANSIBLEH-MNU-1202050"]     = "Ansibleインターフェース情報";
+$ary["ITAANSIBLEH-MNU-1202040"]     = "Ansible(共通)インターフェース情報";
+$ary["ITAANSIBLEH-MNU-1202050"]     = "Ansible(共通)インターフェース情報";
 $ary["ITAANSIBLEH-MNU-1202060"]     = "データリレイストレージパス(ITA)";
 $ary["ITAANSIBLEH-MNU-1202070"]     = "ITAサーバとの共有ディレクトリです。";
 $ary["ITAANSIBLEH-MNU-1202080"]     = "データリレイストレージパス(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202090"]     = "Ansible/Ansible Towerサーバとの共有ディレクトリです。";
+$ary["ITAANSIBLEH-MNU-1202090"]     = "Ansibleサーバとの共有ディレクトリです。
+実行エンジンがAnsible Core以外では使用しない情報です。";
 $ary["ITAANSIBLEH-MNU-1202095"]     = "Symphonyインスタンスデータリレイストレージパス(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202096"]     = "Symphonyインスタンスの各Movementが共有するディレクトリをAnsible/Ansible Towerサーバで共有する為のパスです。";
+$ary["ITAANSIBLEH-MNU-1202096"]     = "Symphonyインスタンスの各Movementが共有するディレクトリをAnsibleサーバで共有する為のパスです。
+実行エンジンがAnsible Core以外では使用しない情報です。";
 $ary["ITAANSIBLEH-MNU-1202097"]     = "Conductorインスタンスデータリレイストレージパス(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202098"]     = "Conductorインスタンスの各Movementが共有するディレクトリをAnsible/Ansible Towerサーバで共有する為のパスです。";
+$ary["ITAANSIBLEH-MNU-1202098"]     = "Conductorインスタンスの各Movementが共有するディレクトリをAnsibleサーバで共有する為のパスです。
+実行エンジンがAnsible Core以外では使用しない情報です。";
 $ary["ITAANSIBLEH-MNU-1203010"]     = "プロトコル";
 $ary["ITAANSIBLEH-MNU-1203020"]     = "http/httpsのいずれかです。
 通常はhttps
@@ -621,17 +624,22 @@ $ary["ITAANSIBLEH-MNU-1203021"]     = "http/httpsのいずれかです。
 $ary["ITAANSIBLEH-MNU-1203030"]     = "ホスト";
 $ary["ITAANSIBLEH-MNU-1203040"]     = "Ansibleサーバのホスト名(またはIPアドレス)です。\n基本的にホスト名が推奨。";
 $ary["ITAANSIBLEH-MNU-1203041"]     = "代表ホスト";
-$ary["ITAANSIBLEH-MNU-1203042"]     = "ITAと接続するAnsible Towerのホスト名です。\nAnsible Towerホスト一覧に登録されているAnsible Towerのホストより選択します。";
+$ary["ITAANSIBLEH-MNU-1203042"]     = "ITAと接続するAnsible Automation Controllerのホスト名です。\nAnsible Automation Controllerホスト一覧に登録されているAnsible Automation Controllerのホストより選択します。";
 $ary["ITAANSIBLEH-MNU-1203050"]     = "ポート";
 $ary["ITAANSIBLEH-MNU-1203060"]     = "Ansibleサーバの接続ポートです。
 通常は
 httpの場合:80
 httpsの場合443
 です。";
-$ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Towerサーバの接続ポートです。
+$ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Automation Controllerサーバの接続ポートです。
 通常は443です。";
 $ary["ITAANSIBLEH-MNU-1203065"]     = "実行エンジン";
-$ary["ITAANSIBLEH-MNU-1203066"]     = "実行するエンジンを選択します。";
+$ary["ITAANSIBLEH-MNU-1203066"]     = "実行するエンジンを3種類から選択します。
+・Ansible Core
+・Ansible Tower
+・Ansible Automation Controller
+※Ansible TowerはAnsible Automation Pratform2.0以降でAnsible Automation Controllerに変更になりました。
+Ansible Core以外を選択した場合もansible-vaultコマンドを実行するAnsible Coreインターフェースの設定が必要です。";
 $ary["ITAANSIBLEH-MNU-1203070"]     = "Access_key_id";
 $ary["ITAANSIBLEH-MNU-1203080"]     = "Ansibleサーバ接続時の認証に使用するアクセスキーIDです。";
 $ary["ITAANSIBLEH-MNU-1203090"]     = "Secret_access_key";
@@ -643,7 +651,7 @@ Ansible:
   ansible-playbookコマンドのパラメータを設定します。
 　-i オプションはITAが設定します。
 
-Ansible Tower:
+Ansible Automation Controller:
 　以下のパラメータが設定できます。
 　　-verbosity
 　　-f FORKS,--forks=FORKS
@@ -655,7 +663,7 @@ Ansible Tower:
 　　-D,--diff
 　　--skip-tags=SKIP_TAGS
 　　--start-at-task=START_AT_TASK
-　以下はAnsible Tower独自のパラメータです。
+　以下はAnsible Automation Controller独自のパラメータです。
 　　-ufc,--use_fact_cache　　　ファクトのキャッシュの使用
 　　-as,--allow_simultaneous　 同時実行ジョブの有効化
 　　-jsc,--job_slice_count=　　JOB SLICING
@@ -685,8 +693,8 @@ $ary["ITAANSIBLEH-MNU-1205090"]     = "表示順序";
 $ary["ITAANSIBLEH-MNU-1206010"]     = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-1206020"]     = "Ansible-Legacy RoleのMovementをメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITAANSIBLEH-MNU-1206030"]     = "MovementID";
-$ary["ITAANSIBLEH-MNU-1206040"]     = "Ansible(Legacy Role)Movement";
-$ary["ITAANSIBLEH-MNU-1206050"]     = "Ansible(Legacy Role)Movement";
+$ary["ITAANSIBLEH-MNU-1206040"]     = "Ansible(Legacy Role)Movement一覧";
+$ary["ITAANSIBLEH-MNU-1206050"]     = "Ansible(Legacy Role)Movement一覧";
 $ary["ITAANSIBLEH-MNU-1206060"]     = "Movement名";
 $ary["ITAANSIBLEH-MNU-1206070"]     = "[最大長]256バイト";
 $ary["ITAANSIBLEH-MNU-1206080"]     = "オーケストレータ";
@@ -716,8 +724,8 @@ $ary["ITAANSIBLEH-MNU-1207103"]     = "収集ログ";
 $ary["ITAANSIBLEH-MNU-1207104"]     = "収集時の実行時のログをDLできます。";
 $ary["ITAANSIBLEH-MNU-1207200"]     = "収集機能で使用するRESTAPI用の接続インターフェース情報をメンテナンス(閲覧/更新)できます。<br>本メニューは必ず1レコードである必要があります。<br>RESTユーザー、RESTパスワードが未入力の場合、収集機能は実行されません。";
 $ary["ITAANSIBLEH-MNU-1207201"]     = "ID";
-$ary["ITAANSIBLEH-MNU-1207202"]     = "収集インターフェース情報";
-$ary["ITAANSIBLEH-MNU-1207203"]     = "収集インターフェース情報";
+$ary["ITAANSIBLEH-MNU-1207202"]     = "Ansible(共通)収集インターフェース情報";
+$ary["ITAANSIBLEH-MNU-1207203"]     = "Ansible(共通)収集インターフェース情報";
 $ary["ITAANSIBLEH-MNU-1207204"]     = "ホスト名";
 $ary["ITAANSIBLEH-MNU-1207205"]     = "[最大長]128バイト";
 $ary["ITAANSIBLEH-MNU-1207206"]     = "IP";
@@ -737,8 +745,8 @@ $ary["ITAANSIBLEH-MNU-1207216"]     = "ポート";
 $ary["ITAANSIBLEH-MNU-1207217"]     = "REST通信で使用するポート";
 $ary["ITAANSIBLEH-MNU-1207300"]     = "収集機能で使用する、パラメータシートと収集対象の紐づけ情報をメンテナンス(閲覧/登録/更新/廃止)できます。<br>パラメータシートーはメニュー作成で作成したもののみ対象となります。 ";
 $ary["ITAANSIBLEH-MNU-1207301"]     = "ID";
-$ary["ITAANSIBLEH-MNU-1207302"]     = "収集項目値管理";
-$ary["ITAANSIBLEH-MNU-1207303"]     = "収集項目値管理";
+$ary["ITAANSIBLEH-MNU-1207302"]     = "Ansible(共通)収集項目値管理";
+$ary["ITAANSIBLEH-MNU-1207303"]     = "Ansible(共通)収集項目値管理";
 $ary["ITAANSIBLEH-MNU-1207304"]     = "収集項目(FROM)";
 $ary["ITAANSIBLEH-MNU-1207305"]     = "パース形式";
 $ary["ITAANSIBLEH-MNU-1207306"]     = "YAML:YAML形式のファイルを解析し、パラメータを生成します。";
@@ -770,8 +778,10 @@ $ary["ITAANSIBLEH-MNU-1207315"]     = "Movement-対話種別紐付";
 $ary["ITAANSIBLEH-MNU-1207316"]     = "対話ファイル素材集";
 $ary["ITAANSIBLEH-MNU-1207317"]     = "Movement-ロール紐付";
 $ary["ITAANSIBLEH-MNU-1207318"]     = "代入値管理";
-$ary["ITAANSIBLEH-MNU-1208010"]     = "Ansible（Legacy Role）Movement-ロール紐付";
-$ary["ITAANSIBLEH-MNU-1208020"]     = "Ansible（Legacy Role）Movement-ロール紐付";
+$ary["ITAANSIBLEH-MNU-1207319"]     = "Ansible(共通)共通変数利用リスト";
+$ary["ITAANSIBLEH-MNU-1207320"]     = "Ansible(共通)共通変数利用リスト";
+$ary["ITAANSIBLEH-MNU-1208010"]     = "Ansible(Legacy Role)Movement-ロール紐付";
+$ary["ITAANSIBLEH-MNU-1208020"]     = "Ansible(Legacy Role)Movement-ロール紐付";
 $ary["ITAANSIBLEH-MNU-1208030"]     = "Movement";
 $ary["ITAANSIBLEH-MNU-1208040"]     = "[元データ]Movement一覧";
 $ary["ITAANSIBLEH-MNU-1208045"]     = "ロールパッケージ名";
@@ -788,8 +798,8 @@ $ary["ITAANSIBLEH-MNU-1209011"]     = "ロールパッケージを選択して�
 $ary["ITAANSIBLEH-MNU-1209012"]     = "[ロールパッケージ,ロール]の組み合わせが不正です。";
 $ary["ITAANSIBLEH-MNU-1209020"]     = "Ansible-Legacy RoleのMovementと変数名を紐付できます。 ";
 $ary["ITAANSIBLEH-MNU-1209030"]     = "紐付項番";
-$ary["ITAANSIBLEH-MNU-1209040"]     = "Ansible（Role）Movement変数紐付管理";
-$ary["ITAANSIBLEH-MNU-1209050"]     = "Ansible（Role）Movement変数紐付管理";
+$ary["ITAANSIBLEH-MNU-1209040"]     = "Ansible(Legacy Role)Movement変数紐付管理";
+$ary["ITAANSIBLEH-MNU-1209050"]     = "Ansible(Legacy Role)Movement変数紐付管理";
 $ary["ITAANSIBLEH-MNU-1209060"]     = "Movement";
 $ary["ITAANSIBLEH-MNU-1209070"]     = "[元データ]Movement一覧";
 $ary["ITAANSIBLEH-MNU-1209080"]     = "変数名";
@@ -799,8 +809,8 @@ $ary["ITAANSIBLEH-MNU-1301020"]     = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-1302040"]     = "オペレーションごとに、対象のMovementで利用されるRole内のPlaybookやテンプレートファイル内の変数「VAR_」に代入する具体値をメンテナンス(閲覧/登録/更新/廃止)できます。
 ";
 $ary["ITAANSIBLEH-MNU-1302050"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1302060"]     = "Ansible（Legacy Role）代入値管理";
-$ary["ITAANSIBLEH-MNU-1302070"]     = "Ansible（Legacy Role）代入値管理";
+$ary["ITAANSIBLEH-MNU-1302060"]     = "Ansible(Legacy Role)代入値管理";
+$ary["ITAANSIBLEH-MNU-1302070"]     = "Ansible(Legacy Role)代入値管理";
 $ary["ITAANSIBLEH-MNU-1302080"]     = "オペレーション";
 $ary["ITAANSIBLEH-MNU-1302090"]     = "[元データ]基本コンソール/オペレーション一覧";
 $ary["ITAANSIBLEH-MNU-1302095"]     = "Movement：変数";
@@ -838,8 +848,8 @@ $ary["ITAANSIBLEH-MNU-1304052"]     = "変数名で多段変数を指定した�
 $ary["ITAANSIBLEH-MNU-1304054"]     = "選択されたメンバー変数は、多段変数のメンバーではありません。";
 $ary["ITAANSIBLEH-MNU-1304060"]     = "Ansible-Legacy Roleの変数名をメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITAANSIBLEH-MNU-1304070"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1304080"]     = "Ansible（Legacy Role）変数名管理";
-$ary["ITAANSIBLEH-MNU-1304090"]     = "Ansible（Legacy Role）変数名管理";
+$ary["ITAANSIBLEH-MNU-1304080"]     = "Ansible(Legacy Role)変数名一覧";
+$ary["ITAANSIBLEH-MNU-1304090"]     = "Ansible(Legacy Role)変数名一覧";
 $ary["ITAANSIBLEH-MNU-1304111"]     = "変数が一般変数の場合は、メンバー変数の入力はできません。";
 $ary["ITAANSIBLEH-MNU-1304113"]     = "変数が一般変数の場合は、代入順序の入力はできません。";
 $ary["ITAANSIBLEH-MNU-1304141"]     = "変数が複数具体値変数の場合は、メンバー変数の入力はできません。";
@@ -881,8 +891,8 @@ $ary["ITAANSIBLEH-MNU-1506020"]     = "該当行のみ表示";
 $ary["ITAANSIBLEH-MNU-1509060"]     = "投入データ一式(zip)です。";
 $ary["ITAANSIBLEH-MNU-1601010"]     = "Ansible（Legacy Role）ロールと変数名の紐付を行います。";
 $ary["ITAANSIBLEH-MNU-1601020"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1601030"]     = "Ansible（Legacy Role）ロール変数名管理";
-$ary["ITAANSIBLEH-MNU-1601040"]     = "Ansible（Legacy Role）ロール変数名管理";
+$ary["ITAANSIBLEH-MNU-1601030"]     = "Ansible(Legacy Role)ロール変数名管理";
+$ary["ITAANSIBLEH-MNU-1601040"]     = "Ansible(Legacy Role)ロール変数名管理";
 $ary["ITAANSIBLEH-MNU-1601050"]     = "ロールパッケージ名";
 $ary["ITAANSIBLEH-MNU-1601060"]     = "[元データ]ロールパッケージ管理";
 $ary["ITAANSIBLEH-MNU-1601070"]     = "ロール名";
@@ -893,8 +903,8 @@ $ary["ITAANSIBLEH-MNU-1602020"]     = "表示順序";
 $ary["ITAANSIBLEH-MNU-1602030"]     = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-1603010"]     = "Ansible-Legacy Roleのロール名とロールパッケージの紐付を行います。";
 $ary["ITAANSIBLEH-MNU-1603020"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1603030"]     = "Ansible（Legacy Role）ロール名管理";
-$ary["ITAANSIBLEH-MNU-1603040"]     = "Ansible（Legacy Role）ロール名管理";
+$ary["ITAANSIBLEH-MNU-1603030"]     = "Ansible(Legacy Role)ロール名管理";
+$ary["ITAANSIBLEH-MNU-1603040"]     = "Ansible(Legacy Role)ロール名管理";
 $ary["ITAANSIBLEH-MNU-1603050"]     = "ロールパッケージ名";
 $ary["ITAANSIBLEH-MNU-1603060"]     = "[元データ]ロールパッケージ管理";
 $ary["ITAANSIBLEH-MNU-1603070"]     = "ロール名";
@@ -903,8 +913,8 @@ $ary["ITAANSIBLEH-MNU-1603090"]     = "表示順序";
 $ary["ITAANSIBLEH-MNU-1604010"]     = "表示順序の制御用";
 $ary["ITAANSIBLEH-MNU-1605010"]     = "Ansible-Legacy Roleのロールパッケージをメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITAANSIBLEH-MNU-1605020"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1605030"]     = "Ansible（Legacy Role）ロールパッケージ管理";
-$ary["ITAANSIBLEH-MNU-1605040"]     = "Ansible（Legacy Role）ロールパッケージ管理";
+$ary["ITAANSIBLEH-MNU-1605030"]     = "Ansible(Legacy Role)ロールパッケージ管理";
+$ary["ITAANSIBLEH-MNU-1605040"]     = "Ansible(Legacy Role)ロールパッケージ管理";
 $ary["ITAANSIBLEH-MNU-1605050"]     = "ロールパッケージ名";
 $ary["ITAANSIBLEH-MNU-1605060"]     = "[最大長]256バイト";
 $ary["ITAANSIBLEH-MNU-1605070"]     = "ロールパッケージファイル(ZIP形式)";
@@ -914,8 +924,8 @@ $ary["ITAANSIBLEH-MNU-1605086"]     = "変数定義解析結果";
 $ary["ITAANSIBLEH-MNU-1605090"]     = "表示順序";
 $ary["ITAANSIBLEH-MNU-1701010"]     = "Ansible-Legacy Roleのメンバー変数をメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITAANSIBLEH-MNU-1701020"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1701030"]     = "Ansible(Legacy Role)メンバー変数名管理";
-$ary["ITAANSIBLEH-MNU-1701040"]     = "Ansible(Legacy Role)メンバー変数名管理";
+$ary["ITAANSIBLEH-MNU-1701030"]     = "Ansible(Legacy Role)メンバー変数管理";
+$ary["ITAANSIBLEH-MNU-1701040"]     = "Ansible(Legacy Role)メンバー変数管理";
 $ary["ITAANSIBLEH-MNU-1702010"]     = "配列変数名";
 $ary["ITAANSIBLEH-MNU-1702020"]     = "";
 $ary["ITAANSIBLEH-MNU-1703010"]     = "メンバー変数名";
@@ -952,8 +962,8 @@ $ary["ITAANSIBLEH-MNU-1705090"]     = "最大繰返数";
 $ary["ITAANSIBLEH-MNU-1705100"]     = "";
 $ary["ITAANSIBLEH-MNU-1706010"]     = "Ansible-Legacy Roleの多段変数メンバーをメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITAANSIBLEH-MNU-1706020"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1706030"]     = "Ansible（Legacy Role）多段変数メンバー管理";
-$ary["ITAANSIBLEH-MNU-1706040"]     = "Ansible（Legacy Role）多段変数メンバー管理";
+$ary["ITAANSIBLEH-MNU-1706030"]     = "Ansible(Legacy Role)多段変数メンバー管理";
+$ary["ITAANSIBLEH-MNU-1706040"]     = "Ansible(Legacy Role)多段変数メンバー管理";
 $ary["ITAANSIBLEH-MNU-1706050"]     = "変数名";
 $ary["ITAANSIBLEH-MNU-1706060"]     = "";
 $ary["ITAANSIBLEH-MNU-1706070"]     = "親メンバー変数へのキー";
@@ -978,8 +988,8 @@ $ary["ITAANSIBLEH-MNU-1706250"]     = "代入値管理系の表示メンバー�
 $ary["ITAANSIBLEH-MNU-1706260"]     = "";
 $ary["ITAANSIBLEH-MNU-1707010"]     = "Ansible-Legacy Roleの多段変数配列組合せをメンテナンス(閲覧/登録/更新/廃止)できます。 ";
 $ary["ITAANSIBLEH-MNU-1707020"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1707030"]     = "Ansible（Legacy Role）多段変数配列組合せ";
-$ary["ITAANSIBLEH-MNU-1707040"]     = "Ansible（Legacy Role）多段変数配列組合せ";
+$ary["ITAANSIBLEH-MNU-1707030"]     = "Ansible(Legacy Role)多段変数配列組合せ管理";
+$ary["ITAANSIBLEH-MNU-1707040"]     = "Ansible(Legacy Role)多段変数配列組合せ管理";
 $ary["ITAANSIBLEH-MNU-1707050"]     = "変数名";
 $ary["ITAANSIBLEH-MNU-1707060"]     = "";
 $ary["ITAANSIBLEH-MNU-1707070"]     = "多段変数項番";
@@ -990,16 +1000,16 @@ $ary["ITAANSIBLEH-MNU-1707110"]     = "すべての列順序";
 $ary["ITAANSIBLEH-MNU-1707120"]     = "";
 $ary["ITAANSIBLEH-MNU-1800000"]     = "Playbookで使用するファイルをメンテナンス(閲覧/登録/更新/廃止)できます。 <br><br>ファイル埋込変数名には CPF_ で始まる変数名を入力して下さい。<br>この変数名をPlaybookに記述します。<br>(例)<br>　　　- copy: src={{ CPF_sample }} dest=/usr/local/src<br>　　　- unarchive src={{ CPF_sample }} dest=/usr/local/bin remote_src=yes<br>";
 $ary["ITAANSIBLEH-MNU-1800001"]     = "素材ID";
-$ary["ITAANSIBLEH-MNU-1800002"]     = "Ansible ファイル管理";
-$ary["ITAANSIBLEH-MNU-1800003"]     = "Ansible ファイル管理";
+$ary["ITAANSIBLEH-MNU-1800002"]     = "Ansible(共通)ファイル管理";
+$ary["ITAANSIBLEH-MNU-1800003"]     = "Ansible(共通)ファイル管理";
 $ary["ITAANSIBLEH-MNU-1800010"]     = "ファイル埋込変数名";
 $ary["ITAANSIBLEH-MNU-1800011"]     = "接頭文字として必ず「CPF_」を付与して下さい。";
 $ary["ITAANSIBLEH-MNU-1800020"]     = "ファイル素材";
 $ary["ITAANSIBLEH-MNU-1800021"]     = "Playbookで使用するファイルを指定して下さい。";
 $ary["ITAANSIBLEH-MNU-1900000"]     = "紐付対象メニューに登録されているオぺーションとホスト毎の項目の設定値を紐付けるMovementと変数がメンテナンス(閲覧/登録/更新/廃止)できます。<br><br>項目の設定値の登録方法には3種類あります。<br>Value型:項目の設定値を紐付けた変数の具体値として代入値管理に登録されます。<br>Key-Value型:項目の名称(Key)と設定値(Value)を紐付けた変数の具体値として代入値管理に登録されます。<br>Key型:項目の名称を紐付けた変数の具体値として代入値管理に登録されます。項目の設定値が空白の場合に代入値管理に登録されません";
 $ary["ITAANSIBLEH-MNU-1900001"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1900002"]     = "Ansible（Legacy Role）代入値自動登録設定";
-$ary["ITAANSIBLEH-MNU-1900003"]     = "Ansible（Legacy Role）代入値自動登録設定";
+$ary["ITAANSIBLEH-MNU-1900002"]     = "Ansible(Legacy Role)代入値自動登録設定";
+$ary["ITAANSIBLEH-MNU-1900003"]     = "Ansible(Legacy Role)代入値自動登録設定";
 $ary["ITAANSIBLEH-MNU-1900004"]     = "メニューグループ";
 $ary["ITAANSIBLEH-MNU-1900005"]     = "ID";
 $ary["ITAANSIBLEH-MNU-1900006"]     = "登録・更新時は当該項目は更新対象ではない。";
@@ -1051,8 +1061,8 @@ $ary["ITAANSIBLEH-MNU-1900301"]     = "パラメータシート(From)";
 $ary["ITAANSIBLEH-MNU-1900302"]     = "IaC変数(To)";
 $ary["ITAANSIBLEH-MNU-1901000"]     = "紐付対象メニューに登録されているオぺーションとホスト毎の項目の設定値を紐付けるMovementと変数がメンテナンス(閲覧/登録/更新/廃止)できます。<br><br>項目の設定値の登録方法には3種類あります。<br>Value型:項目の設定値を紐付けた変数の具体値として代入値管理に登録されます。<br>Key-Value型:項目の名称(Key)と設定値(Value)を紐付けた変数の具体値として代入値管理に登録されます。<br>Key型:項目の名称を紐付けた変数の具体値として代入値管理に登録されます。項目の設定値が空白の場合に代入値管理に登録されません";
 $ary["ITAANSIBLEH-MNU-1901001"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1901002"]     = "Ansible（Legacy）代入値自動登録設定";
-$ary["ITAANSIBLEH-MNU-1901003"]     = "Ansible（Legacy）代入値自動登録設定";
+$ary["ITAANSIBLEH-MNU-1901002"]     = "Ansible(Legacy)代入値自動登録設定";
+$ary["ITAANSIBLEH-MNU-1901003"]     = "Ansible(Legacy)代入値自動登録設定";
 $ary["ITAANSIBLEH-MNU-1901004"]     = "メニューグループ";
 $ary["ITAANSIBLEH-MNU-1901005"]     = "ID";
 $ary["ITAANSIBLEH-MNU-1901006"]     = "登録・更新時は当該項目は更新対象ではない。";
@@ -1088,8 +1098,8 @@ $ary["ITAANSIBLEH-MNU-1901301"]     = "パラメータシート(From)";
 $ary["ITAANSIBLEH-MNU-1901302"]     = "IaC変数(To)";
 $ary["ITAANSIBLEH-MNU-1902000"]     = "紐付対象メニューに登録されているオぺーションとホスト毎の項目の設定値を紐付けるMovementと変数がメンテナンス(閲覧/登録/更新/廃止)できます。<br><br>項目の設定値の登録方法には3種類あります。<br>Value型:項目の設定値を紐付けた変数の具体値として代入値管理に登録されます。<br>Key-Value型:項目の名称(Key)と設定値(Value)を紐付けた変数の具体値として代入値管理に登録されます。<br>Key型:項目の名称を紐付けた変数の具体値として代入値管理に登録されます。項目の設定値が空白の場合に代入値管理に登録されません";
 $ary["ITAANSIBLEH-MNU-1902001"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1902002"]     = "Ansible（Pioneer）代入値自動登録設定";
-$ary["ITAANSIBLEH-MNU-1902003"]     = "Ansible（Pioneer）代入値自動登録設定";
+$ary["ITAANSIBLEH-MNU-1902002"]     = "Ansible(Pioneer)代入値自動登録設定";
+$ary["ITAANSIBLEH-MNU-1902003"]     = "Ansible(Pioneer)代入値自動登録設定";
 $ary["ITAANSIBLEH-MNU-1902004"]     = "メニューグループ";
 $ary["ITAANSIBLEH-MNU-1902005"]     = "ID";
 $ary["ITAANSIBLEH-MNU-1902006"]     = "登録・更新時は当該項目は更新対象ではない。";
@@ -1155,8 +1165,8 @@ $ary["ITAANSIBLEH-MNU-1930004"]     = "メニュー";
 $ary["ITAANSIBLEH-MNU-1930005"]     = "テーブル名";
 $ary["ITAANSIBLEH-MNU-1940000"]     = "Playbookや対話ファイルで使用するグローバル変数をメンテナンス(閲覧/登録/更新/廃止)できます。";
 $ary["ITAANSIBLEH-MNU-1940001"]     = "項番";
-$ary["ITAANSIBLEH-MNU-1940002"]     = "Ansibleグローバル変数管理";
-$ary["ITAANSIBLEH-MNU-1940003"]     = "Ansible グローバル変数管理";
+$ary["ITAANSIBLEH-MNU-1940002"]     = "Ansible(共通)グローバル変数管理";
+$ary["ITAANSIBLEH-MNU-1940003"]     = "Ansible(共通)グローバル変数管理";
 $ary["ITAANSIBLEH-MNU-1940010"]     = "グローバル変数名";
 $ary["ITAANSIBLEH-MNU-1940011"]     = "接頭文字として必ず「GBL_」を付与して下さい。";
 $ary["ITAANSIBLEH-MNU-1940020"]     = "具体値";
@@ -1194,8 +1204,9 @@ $ary["ITAANSIBLEH-MNU-2000000"]     = "実行ログ";
 $ary["ITAANSIBLEH-MNU-2000001"]     = "エラーログ";
 $ary["ITAANSIBLEH-MNU-5000000"]     = "Ansible Roleで使用出来る読替変数をメンテナンス(閲覧/登録/更新/廃止)できます。";
 $ary["ITAANSIBLEH-MNU-5000001"]     = "項番";
-$ary["ITAANSIBLEH-MNU-5000002"]     = "Ansible Role 読替変数一覧";
-$ary["ITAANSIBLEH-MNU-5000003"]     = "Ansible Role 読替変数一覧";
+$ary["ITAANSIBLEH-MNU-5000002"]     = "Ansible(Legacy Role)読替変数一覧";
+$ary["ITAANSIBLEH-MNU-5000003"]     = "Ansible(Legacy Role)読替変数一覧";
+$ary["ITAANSIBLEH-MNU-5000004"]     = "Ansible-Legacy Roleの読替変数をメンテナンス(閲覧/登録/更新/廃止)できます。";
 $ary["ITAANSIBLEH-MNU-5000100"]     = "ロールパッケージ";
 $ary["ITAANSIBLEH-MNU-5000101"]     = "";
 $ary["ITAANSIBLEH-MNU-5000200"]     = "ロール";
@@ -1211,21 +1222,21 @@ $ary["ITAANSIBLEH-MNU-5010003"]     = "確認";
 $ary["ITAANSIBLEH-MNU-6000000"]     = "NULL連携";
 $ary["ITAANSIBLEH-MNU-6000001"]     = "パラメータシートの具体値がNULL(空白)の場合、代入値管理への登録を有効にするかを設定します。\n空白:Ansible共通インターフェース情報のNULL連携に従う。\n有効:NULLデータを登録する。\n無効:NULLデータは登録しない。";
 $ary["ITAANSIBLEH-MNU-6000002"]     = "代入値自動登録設定でパラメータシートの具体値がNULL(空白)の場合に、代入値管理への登録を有効にするかのデフォルトを設定します。\n有効:NULLデータを登録する。\n無効:NULLデータは登録しない。";
-$ary["ITAANSIBLEH-MNU-907342701"]   = "AnsibleTower インスタンスグループリスト";
-$ary["ITAANSIBLEH-MNU-907350509"]   = "Ansible Towerに作成される一時オブジェクトを削除するかを選択します。";
-$ary["ITAANSIBLEH-MNU-907352702"]   = "インスタンスグループ名";
-$ary["ITAANSIBLEH-MNU-907352703"]   = "AnsibleTowerで設定されているインスタンスグループIDです。";
-$ary["ITAANSIBLEH-MNU-907362701"]   = "AnsibleTower インスタンスグループリスト";
+$ary["ITAANSIBLEH-MNU-907342701"]   = "未使用";
+$ary["ITAANSIBLEH-MNU-907350509"]   = "Ansible Automation Controllerに作成される一時オブジェクトを削除するかを選択します。";
+$ary["ITAANSIBLEH-MNU-907352702"]   = "未使用";
+$ary["ITAANSIBLEH-MNU-907352703"]   = "未使用";
+$ary["ITAANSIBLEH-MNU-907362701"]   = "未使用";
 $ary["ITAANSIBLEH-MNU-907390509"]   = "実行時データ削除";
 $ary["ITAANSIBLEH-MNU-907392701"]   = "項番";
 $ary["ITAANSIBLEH-MNU-907392702"]   = "インスタンスグループ名";
 $ary["ITAANSIBLEH-MNU-907392703"]   = "インスタンスグループID";
 $ary["ITAANSIBLEH-MNU-9010000000"]  = "認証トークン";
-$ary["ITAANSIBLEH-MNU-9010000001"]  = "ITAからRestAPIでAnsible Towerに接続するユーザーの認証トークンです。";
+$ary["ITAANSIBLEH-MNU-9010000001"]  = "ITAからRestAPIでAnsible Automation Controllerに接続するユーザーの認証トークンです。";
 $ary["ITAANSIBLEH-MNU-9010000002"]  = "組織名";
-$ary["ITAANSIBLEH-MNU-9010000003"]  = "Ansible Towerに登録されている組織名を入力します。";
-$ary["ITAANSIBLEH-MNU-9010000004"]  = "Ansible Engine インターフェース";
-$ary["ITAANSIBLEH-MNU-9010000005"]  = "Ansible Tower インターフェース";
+$ary["ITAANSIBLEH-MNU-9010000003"]  = "Ansible Automation Controllerに登録されている組織名を入力します。";
+$ary["ITAANSIBLEH-MNU-9010000004"]  = "Ansible Core インターフェース";
+$ary["ITAANSIBLEH-MNU-9010000005"]  = "Ansible Automation Controller インターフェース";
 $ary["ITAANSIBLEH-MNU-9010000006"]  = "Legacy";
 $ary["ITAANSIBLEH-MNU-9010000007"]  = "Legacy Role";
 $ary["ITAANSIBLEH-MNU-9010000008"]  = "ヘッダーセクション";
@@ -1237,7 +1248,7 @@ Ansible:
     gather_facts: no
     become: yes
 
-Ansible Tower:
+Ansible Automation Controller:
   - hosts: all
     gather_facts: no
     become: yes
@@ -1249,7 +1260,7 @@ Ansible:
   ansible-playbookコマンドのパラメータを設定します。
 　-i オプションはITAが設定します。
 
-Ansible Tower:
+Ansible Automation Controller:
 　以下のパラメータが設定できます。
 　　-verbosity
 　　-f FORKS,--forks=FORKS
@@ -1261,7 +1272,7 @@ Ansible Tower:
 　　-D,--diff
 　　--skip-tags=SKIP_TAGS
 　　--start-at-task=START_AT_TASK
-　以下はAnsible Tower独自のパラメータです。
+　以下はAnsible Automation Controller独自のパラメータです。
 　　-ufc,--use_fact_cache　　　ファクトのキャッシュの使用
 　　-as,--allow_simultaneous　 同時実行ジョブの有効化
 　　-jsc,--job_slice_count=　　JOB SLICING
@@ -1274,19 +1285,19 @@ Ansible:
     gather_facts: no
     become: yes
 
-Ansible Tower:
+Ansible Automation Controller:
   - hosts: all
     gather_facts: no
     become: yes
 winrm接続の場合は「become: yes」は省略されます。";
-$ary["ITAANSIBLEH-MNU-9010000013"]  = "Tower利用情報";
+$ary["ITAANSIBLEH-MNU-9010000013"]  = "Ansible Tower利用情報";
 $ary["ITAANSIBLEH-MNU-9010000014"]  = "virtualenv";
-$ary["ITAANSIBLEH-MNU-9010000015"]  = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。\n実行したいansible実行環境を選択します。\n未選択の場合はTowerインストール時にインストールされたansible実行環境を使用します。";
+$ary["ITAANSIBLEH-MNU-9010000015"]  = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。\n実行したいansible実行環境を選択します。\n未選択の場合はAnsible Automation Controllerインストール時にインストールされたansible実行環境を使用します。";
 $ary["ITAANSIBLEH-MNU-9010000016"]  = "virtualenv";
 $ary["ITAANSIBLEH-MNU-9010000017"]  = "virtualenvで構築されているansible実行環境をディレクトリで表示しています。";
 $ary["ITAANSIBLEH-MNU-9010000018"]  = "必須項目です。(項目:{})";
 $ary["ITAANSIBLEH-MNU-9010000019"]  = "ホスト一覧";
-$ary["ITAANSIBLEH-MNU-9010000020"]  = "Ansible Towerのホスト一覧です。\nクラスタ構成の場合、クラスタを構成しているAnsible Towerのホスト情報を登録します。";
+$ary["ITAANSIBLEH-MNU-9010000020"]  = "Ansible Automation Controllerのホスト一覧です。\nクラスタ構成の場合、クラスタを構成しているAnsible Automation Controllerのホスト情報を登録します。";
 $ary["ITAANSIBLEH-MNU-9010000021"]  = "Proxy";
 $ary["ITAANSIBLEH-MNU-9010000022"]  = "Address";
 $ary["ITAANSIBLEH-MNU-9010000023"]  = "Proxyサーバのアドレス";
@@ -1299,21 +1310,32 @@ virtualenv環境が存在しなかったりvirtualenv環境内にansibleがイ�
 未入力の場合はansibleサーバーにインストールされているansibleで作業実行を行います。
 [最大長 512バイト]";
 $ary["ITAANSIBLEH-MNU-9010000029"]  = "virtualenv";
-$ary["ITAANSIBLEH-MNU-9010000030"]  = "AnsibleTowerサーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。
+$ary["ITAANSIBLEH-MNU-9010000030"]  = "Ansible Automation Controllerサーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。
 virtualenvで構築したansible実行環境で作業実行したい場合に、virtualenvのフルパスを選択して下さい。
-未選択の場合はTowerインストール時にインストールされたansible環境で作業実行を行います。";
+未選択の場合はAnsible Automation Controllerインストール時にインストールされたansible環境で作業実行を行います。";
 $ary["ITAANSIBLEH-MNU-9010000031"]  = "Ansible engin virtualenv パス";
-$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible tower virtualenv パス";
+$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible Automation Controller virtualenv パス";
 $ary["ITAANSIBLEH-MNU-9010000033"]  = "Ansibleサーバ内にvirtualenvで構築したansible実行環境のフルパスが表示されています。";
-$ary["ITAANSIBLEH-MNU-9010000034"]  = "AnsibleTowerサーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。";
-$ary["ITAANSIBLEH-MNU-9010001000"]  = "Ansible Towerのホスト情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>クラスタ構成の場合、クラスタを構成しているAnsible Towerのホスト情報を登録する必要があります。";
+$ary["ITAANSIBLEH-MNU-9010000034"]  = "Ansible Automation Controllerサーバの/var/lib/awx/venv配下にvirtualenvで構築したansible実行環境のフルパスが表示されています。";
+$ary["ITAANSIBLEH-MNU-9010000035"]  = "Ansible Automation Controller利用情報";
+$ary["ITAANSIBLEH-MNU-9010000036"]  = "実行環境";
+$ary["ITAANSIBLEH-MNU-9010000037"]  = "Ansible Automation Controllerサーバに構築されている実行環境が表示されています。
+作業実行する実行環境を選択して下さい。
+未選択の場合は、デフォルト「Default execution environment」が使用されます。";
+$ary["ITAANSIBLEH-MNU-9010000038"]  = "ansible.cfg";
+$ary["ITAANSIBLEH-MNU-9010000039"]  = "作業実行時に使用するansible.cfgをアップロードします。
+未アップロードの場合は、デフォルトが使用されます。
+また、ロールパッケージ管理でアップロードされているzipファイルにansible.cfgが含まれている場合は、アップロードしたansible.cfgで上書きされます。";
+$ary["ITAANSIBLEH-MNU-9010000040"]  = "Ansible Core利用情報";
+$ary["ITAANSIBLEH-MNU-9010001000"]  = "Ansible Automation Controllerのホスト情報をメンテナンス(閲覧/登録/更新/廃止)できます。<BR>クラスター構成で構築されている場合、クラスター内のホップノードを除いたノード情報を登録して下さい。
+クラスター構成でない場合は、対象ノード(1台)の情報を登録して下さい。";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "項番";
-$ary["ITAANSIBLEH-MNU-9010001002"]  = "AnsibleTowerホスト一覧";
-$ary["ITAANSIBLEH-MNU-9010001003"]  = "AnsibleTowerホスト一覧";
+$ary["ITAANSIBLEH-MNU-9010001002"]  = "Ansible(共通)AACホスト一覧";
+$ary["ITAANSIBLEH-MNU-9010001003"]  = "Ansible(共通)AACホスト一覧";
 $ary["ITAANSIBLEH-MNU-9010001010"]  = "ホスト";
-$ary["ITAANSIBLEH-MNU-9010001011"]  = "Ansible Towerのホスト名(またはIPアドレス)です。";
+$ary["ITAANSIBLEH-MNU-9010001011"]  = "Ansible Automation Controllerのホスト名(またはIPアドレス)です。";
 $ary["ITAANSIBLEH-MNU-9010001020"]  = "認証方式";
-$ary["ITAANSIBLEH-MNU-9010001021"]  = "sshでAnsible Towerに接続する場合の認証方式を選択します。
+$ary["ITAANSIBLEH-MNU-9010001021"]  = "sshでAnsible Automation Controllerに接続する場合の認証方式を選択します。
 ・パスワード認証
 　ユーザーとパスワードの入力が必須です。
 ・鍵認証（パスフレーズなし）
@@ -1323,7 +1345,7 @@ $ary["ITAANSIBLEH-MNU-9010001021"]  = "sshでAnsible Towerに接続する場合�
 ・鍵認証（鍵交換済み）
 　ssh秘密鍵ファイルのアップロードは必要ありません。";
 $ary["ITAANSIBLEH-MNU-9010001030"]  = "ユーザー";
-$ary["ITAANSIBLEH-MNU-9010001031"]  = "sshでAnsible Towerに接続する場合のユーザー名です。プロジェクトパス(/var/lib/awx/projects)への書込み権限が必要です。";
+$ary["ITAANSIBLEH-MNU-9010001031"]  = "sshでAnsible Automation Controllerに接続する場合のユーザー名です。プロジェクトパス(/var/lib/awx/projects)への書込み権限が必要です。";
 $ary["ITAANSIBLEH-MNU-9010001040"]  = "パスワード";
 $ary["ITAANSIBLEH-MNU-9010001041"]  = "パスワード認証する場合のパスワードです。";
 $ary["ITAANSIBLEH-MNU-9010001050"]  = "ssh秘密鍵ファイル";
@@ -1335,7 +1357,21 @@ $ary["ITAANSIBLEH-MNU-9010001053"]  = "ssh秘密鍵ファイルに設定され�
 $ary["ITAANSIBLEH-MNU-9010001054"]  = "ansible-vaultで暗号化されたssh秘密鍵ファイル";
 $ary["ITAANSIBLEH-MNU-9010001055"]  = "ssh鍵認証情報";
 $ary["ITAANSIBLEH-MNU-9010001060"]  = "isolated Tower";
-$ary["ITAANSIBLEH-MNU-9010001061"]  = "isolated Towerは●を選択します。";
+$ary["ITAANSIBLEH-MNU-9010001061"]  = "対象ノードがAnsible Towerのisolated node／Ansible Automation Controllerのexecution nodeの場合に「●」を選択します。";
 $ary["ITAANSIBLEH-MNU-9010002000"]  = "Sensitive設定";
 $ary["ITAANSIBLEH-MNU-9010002010"]  = "「ON」の場合、登録後に具体値が表示されなくなります。";
+$ary["ITAANSIBLEH-MNU-1200010000"] = "SCM管理 Git連携先情報";
+$ary["ITAANSIBLEH-MNU-1200010100"] = "ホスト名";
+$ary["ITAANSIBLEH-MNU-1200010101"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルでログインする為のホスト名(またはIPアドレス)を入力します。
+Ansible driverのバックヤード機能がインストールされているホストにAnsible Automation Controllerと連携するGitリポジトリが作成されます。
+実行エンジンがAnsible Automation Controllerの場合に必須入力です。";
+$ary["ITAANSIBLEH-MNU-1200010200"] = "Linux アカウント";
+$ary["ITAANSIBLEH-MNU-1200010300"] = "ユーザー";
+$ary["ITAANSIBLEH-MNU-1200010301"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルで接続する為のユーザを入力します。
+実行エンジンがAnsible Automation Controllerの場合に必須入力です。";
+$ary["ITAANSIBLEH-MNU-1200010400"] = "ssh秘密鍵ファイル";
+$ary["ITAANSIBLEH-MNU-1200010401"] = "Ansible Automation Controllerから連携先のGitリポジトリへsshプロトコルの鍵認証で接続する為の公開鍵ファイルを入力します。
+実行エンジンがAnsible Automation Controllerの場合に必須入力です。";
+$ary["ITAANSIBLEH-MNU-1200010500"] = "パスフレーズ";
+$ary["ITAANSIBLEH-MNU-1200010501"] = "ssh秘密鍵ファイルに設定されているパスフレーズを入力します。";
 ?>

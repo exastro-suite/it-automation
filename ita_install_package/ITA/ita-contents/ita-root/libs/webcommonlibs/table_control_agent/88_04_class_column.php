@@ -9790,43 +9790,56 @@ class FileUploadColumn extends Column{
 			$editTgtRow = $aryVariant['edit_target_row'];
 			$oldFile = array_key_exists($strColId, $editTgtRow)?$editTgtRow[$strColId]:"";
 
-			if( array_key_exists("del_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_flag_'.$strColMark] == "on" && $oldFile != "" ){
-				//----ファイル削除オーダーがあった場合
-				$boolActionFlag = true;
-				$properFileName = "";
-				//ファイル削除オーダーがあった場合----
-			}
-			else if($tmpFile != "" && $orgFile != ""){
-				//----処理オーダー（事前アップロード）があった場合
-				if( $orgFile == $exeQueryData[$strColId] ){
-					$boolActionFlag = true;
-					$properFileName = $this->makeFileName($orgFile, $exeQueryData, $reqOrgData);
-				}
-				else{
-					$boolRet = false;
-					$intErrorType = 2;
-					$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-20004",$this->getColLabel(true));
-				}
-				//処理オーダー（事前アップロード）があった場合----
-			}
-			else{
-				if( array_key_exists($strColId, $exeQueryData) === true && array_key_exists($strColId, $editTgtRow) === true )
-				{
-					if( $exeQueryData[$strColId] == $editTgtRow[$strColId] ){
-						//----すでにテーブルにある値と同じ場合
-						//すでにテーブルにある値と同じ場合----
-					}
-					else{
-						//----(ファイル事前ULなしで、不正なクエリが送信された場合）
-						$boolRet = false;
-						$intErrorType = 2;
-						$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-20005",$this->getColLabel(true));
-						//(ファイル事前ULなしで、不正なクエリが送信された場合）----
-					}
-				}
-				$boolActionFlag = false;
-				//処理オーダーがなかった場合----
-			}
+            $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
+
+            //---複製ボタン押下時 
+            if( $modeValue=="DTUP_singleRecRegister" ){
+			    if( array_key_exists("del_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_flag_'.$strColMark] == "on" ){
+                    //----ファイル削除オーダーがあった場合
+                    $boolActionFlag = true;
+                    $properFileName = "";
+                    //ファイル削除オーダーがあった場合----
+                }	
+            }
+            else{
+			    if( array_key_exists("del_flag_".$strColMark, $reqOrgData) === true && $reqOrgData['del_flag_'.$strColMark] == "on" && $oldFile != "" ){
+				    //----ファイル削除オーダーがあった場合
+				    $boolActionFlag = true;
+				    $properFileName = "";
+				    //ファイル削除オーダーがあった場合----
+			    }
+			    else if($tmpFile != "" && $orgFile != ""){
+				    //----処理オーダー（事前アップロード）があった場合
+				    if( $orgFile == $exeQueryData[$strColId] ){
+                        $boolActionFlag = true;
+                        $properFileName = $this->makeFileName($orgFile, $exeQueryData, $reqOrgData);
+                    }
+				    else{
+				    	$boolRet = false;
+				    	$intErrorType = 2;
+				    	$strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-20004",$this->getColLabel(true));
+				    }
+				    //処理オーダー（事前アップロード）があった場合----
+			    }
+			    else{
+				    if( array_key_exists($strColId, $exeQueryData) === true && array_key_exists($strColId, $editTgtRow) === true )
+				    {
+					    if( $exeQueryData[$strColId] == $editTgtRow[$strColId] ){
+					    	//----すでにテーブルにある値と同じ場合
+					    	//すでにテーブルにある値と同じ場合----
+					    }
+					    else{
+						    //----(ファイル事前ULなしで、不正なクエリが送信された場合）
+						    $boolRet = false;
+						    $intErrorType = 2;
+						    $strErrMsg = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-20005",$this->getColLabel(true));
+						    //(ファイル事前ULなしで、不正なクエリが送信された場合）----
+				    	}
+			    	}
+				    $boolActionFlag = false;
+				    //処理オーダーがなかった場合----
+			    }
+            }
 
 			if( $boolActionFlag === true ){
 				$exeQueryData[$strColId] = $properFileName;

@@ -285,7 +285,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
                 $strFxName = "";
 
-                $RepoRowID = $rowData['REPO_ROW_ID'];
+                $RepoRowID = null;
+                if(is_array($rowData) && array_key_exists('REPO_ROW_ID', $rowData)){
+                    $RepoRowID = $rowData['REPO_ROW_ID'];
+                }
 
                 $strQuery = " SELECT
                                  TAB_1.MATL_ROW_ID     KEY_COLUMN
@@ -980,7 +983,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
             $strFxName = "";
 
-            $MatlTypeRowId = $rowData['MATL_TYPE_ROW_ID'];
+            $MatlTypeRowId = null;
+            if(is_array($rowData) && array_key_exists('MATL_TYPE_ROW_ID', $rowData)){
+                $MatlTypeRowId = $rowData['MATL_TYPE_ROW_ID'];
+            }
+
             switch($MatlTypeRowId) {
             case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_LEGACY:      //Playbook素材集
                  $ExtSimIdstr = sprintf("AND TAB_1.ITA_EXT_STM_ID in ('%s')",TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_LEGACY);

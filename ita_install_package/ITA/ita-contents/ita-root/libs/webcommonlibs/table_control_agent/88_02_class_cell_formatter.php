@@ -2542,7 +2542,7 @@ class LinkButtonTabBFmt extends TabBFmt {
 			}
 		}
 
-		if($rowData["DISUSE_FLAG"] == "1" ){
+		if(is_array($rowData) && array_key_exists("DISUSE_FLAG",  $rowData) && $rowData["DISUSE_FLAG"] == "1" ){
 			$linkable = "disabled";
 		}
 
@@ -4240,7 +4240,7 @@ class FileUploadTabBFmt extends InputTabBFmt {
 					}
 					
 				}else{
-					//$strAnchorTag="ファイル({$fileName})が見つかません。";
+					//$strAnchorTag="ファイル({$fileName})が見つかりません。";
 					$strAnchorTag = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12102",$fileName);
 				}
 				//必須項目の場合
@@ -4389,6 +4389,7 @@ EOD;
 			$fileNameTmp = "";
 
 			list($fileName,$tmpBoolKeyExist)=isSetInArrayNestThenAssign($rowData,array($strColId),"");
+
 			
 			if( 1 <= strlen($fileName) && $fileEncrypt == false ){
 
@@ -4417,7 +4418,7 @@ EOD;
 					file_put_contents($fnFilePath,$fileName);
 
 				}else{
-					//$strAnchorTag="ファイル({$fileName})が見つかません。";
+					//$strAnchorTag="ファイル({$fileName})が見つかりません。";
 					$strAnchorTag = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-12102",$fileName);
 				}
 				//必須項目の場合
@@ -4427,8 +4428,8 @@ EOD;
 {$g['objMTS']->getSomeMessage("ITAWDCH-STD-631")}: <br />
 {$strAnchorTag}
 EOD;
-			}else{
-				$current =
+                }else{
+                    $current =
 <<<EOD
 {$g['objMTS']->getSomeMessage("ITAWDCH-STD-631")}: <br />
 {$strAnchorTag}
@@ -4448,23 +4449,25 @@ else{
 }
 </script>
 EOD;
-			}
-			//
-			//ファイルがアップロードされている場合----
-		}
-		//Sequenceが指定されていない場合は、もはや存在しなくなったので、分岐機能を削除----
-	}
+                }
+    			//
+                //ファイルがアップロードされている場合----
+            }else if( $fileEncrypt == true ){
+                $fileName = "";
+            }
+            //Sequenceが指定されていない場合は、もはや存在しなくなったので、分岐機能を削除----
+        }
 
-	if( $boolProcessContinue === true ){
-		$strConfSetFilesizeNumeric = $this->getMaxFileSize();
+        if( $boolProcessContinue === true ){
+            $strConfSetFilesizeNumeric = $this->getMaxFileSize();
 
-		if( 1 > strlen($strConfSetFilesizeNumeric) ){
-			$strConfSetFilesizeNumeric = 20000000;
-		}
+            if( 1 > strlen($strConfSetFilesizeNumeric) ){
+                $strConfSetFilesizeNumeric = 20000000;
+            }
 
-		$strActionUrl = $this->getActionUrl();
+            $strActionUrl = $this->getActionUrl();
 
-		$strTagInnerBody =
+            $strTagInnerBody =
 <<<EOD
 {$current}<iframe id="{$strIdOfIframe}" name="{$strNameOfIframe}" style="display:none" >
 </iframe><form id="{$strIdOfForm}" action="{$strActionUrl}" method="POST" encoding="multipart/form-data" enctype="multipart/form-data" target="{$strIdOfIframe}"><input type="hidden" id="{$strIdOfFSTOfTmpFile}" name="{$strNameOfFSTOfTmpFile}" value="{$fileNameTmp}" /><input type="hidden" id="{$strIdOfFSTOfFileId}" name="{$strNameOfFSTOfFileId}" value="{$fileName}" /><input type="hidden" name="MAX_FILE_SIZE" value="{$strConfSetFilesizeNumeric}" /><input type="hidden" name="{$strNameOfFromFormatterId}" value="{$this->strFormatterId}" /><span name="filewrapper"><input type="file" name="file" id="{$strIdOfForm}_file"/></span></form><input type="button" id="{$strIdOfInputButton}" name="1" value="{$g['objMTS']->getSomeMessage("ITAWDCH-STD-634")}" onclick="

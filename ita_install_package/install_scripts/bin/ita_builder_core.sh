@@ -209,16 +209,16 @@ yum_repository() {
             # Check Creating repository
             if [ "${REPOSITORY}" != "yum_all" ]; then
                case "${LINUX_OS}" in
-                    "CentOS7") create_repo_check remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
+                    "CentOS7") create_repo_check remi-php74 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
                     "RHEL7") 
                         if [ "${CLOUD_REPO}" == "RHEL7_RHUI2" ]; then
-                            create_repo_check remi-php72 rhui-rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                            create_repo_check remi-php74 rhui-rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         elif [ "${CLOUD_REPO}" == "RHEL7_RHUI2_AWS" ]; then
-                            create_repo_check remi-php72 rhui-REGION-rhel-server-optional >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                            create_repo_check remi-php74 rhui-REGION-rhel-server-optional >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         elif [ "${CLOUD_REPO}" == "RHEL7_RHUI3" ]; then
-                            create_repo_check remi-php72 rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                            create_repo_check remi-php74 rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         else
-                            create_repo_check remi-php72 rhel-7-server-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
+                            create_repo_check remi-php74 rhel-7-server-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         fi
                     ;;
                     "CentOS8") create_repo_check powertools >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
@@ -618,12 +618,25 @@ configure_php() {
     echo "${CLOUD_REPO}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     # enable yum repository
     if [ "${REPOSITORY}" != "yum_all" ]; then
+        if [ "${LINUX_OS}" == "CentOS7" -o "${LINUX_OS}" == "RHEL7" ]; then
+            yum-config-manager --disable remi-php72 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        fi
+
         if [ "${CLOUD_REPO}" != "physical" ]; then
             yum_repository ${YUM_REPO_PACKAGE["php_cloud"]}
         else
             yum_repository ${YUM_REPO_PACKAGE["php"]}
         fi
     fi
+
+    # Install php package.
+    if [ "$exec_mode" == 3 ]; then
+        if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+            dnf module -y reset php >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            dnf module -y install php:7.4 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        fi
+    fi
+
     # Install some packages.
     yum_install ${YUM_PACKAGE["php"]}
     # Check installation php packages
@@ -655,6 +668,7 @@ configure_php() {
     echo "----------Installation[php-yaml]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ "${exec_mode}" == "3" ]; then
         pecl channel-update pecl.php.net >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pecl uninstall  ${PHP_TAR_GZ_PACKAGE["yaml"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
         echo "" | pecl install ${PHP_TAR_GZ_PACKAGE["yaml"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
     else
         echo "" | pecl install ${PHP_TAR_GZ_PACKAGE["yaml"]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -777,23 +791,60 @@ configure_ansible() {
 
 }
 
+# Terraform
+configure_terraform() {
+    
+    # Install some pip packages.
+    if [ "${exec_mode}" == "3" ]; then
+        pip3 install --upgrade pip requests >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        for key in ${PIP_PACKAGE["terraform"]}; do
+            echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            pip3 install $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Installation failed[$key]"
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+        done
+    else
+        for key in ${PIP_PACKAGE["terraform"]}; do
+            echo "----------Installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            pip3 install --ignore-installed --no-index --find-links=${PIP_PACKAGE_DOWNLOAD_DIR["terraform"]} $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Installation failed pip packages."
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+        done
+    fi
+
+    # Check installation some pip packages.
+    for key in ${PIP_PACKAGE_TERRAFORM["remote"]}; do
+        echo "----------Check Installed packages[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        pip3 list --format=columns 2>> "$ITA_BUILDER_LOG_FILE" | grep $key >> "$ITA_BUILDER_LOG_FILE" 2>&1
+            if [ $? -ne 0 ]; then
+                log "ERROR:Package not installed [$key]"
+                ERR_FLG="false"
+                func_exit_and_delete_file
+            fi
+    done
+
+}
+
 
 # ITA
 configure_ita() {
     # Creating a sudo configuration file
     cat << EOS > /etc/sudoers.d/it-automation
-daemon       ALL=(ALL)  NOPASSWD:ALL
 apache       ALL=(ALL)  NOPASSWD:ALL
 EOS
 
     #Check create a sudo configuration file
     if [ -e /etc/sudoers.d/it-automation ]; then
-        grep -E "^\s*daemon\s+ALL=\(ALL\)\s+NOPASSWD:ALL\s*" /etc/sudoers.d/it-automation >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        local daemon_txt=`echo $?`
         grep -E "^\s*apache\s+ALL=\(ALL\)\s+NOPASSWD:ALL\s*" /etc/sudoers.d/it-automation >> "$ITA_BUILDER_LOG_FILE" 2>&1
         local apache_txt=`echo $?`
 
-        if [ $daemon_txt -ne 0 ] || [ $apache_txt -ne 0 ]; then
+        if [ $apache_txt -ne 0 ]; then
             log 'ERROR:Failed to create configuration text in /etc/sudoers.d/it-automation.'
             ERR_FLG="false"
             func_exit_and_delete_file
@@ -856,7 +907,7 @@ make_ita() {
     log "php install and setting"
     configure_php
         
-    if [ "$cicd_for_iac" == "yes" ]; then
+    if [ "$ansible_driver" == "yes" ] || [ "$cicd_for_iac" == "yes" ]; then
         log "git install and setting"
         configure_git
     fi
@@ -864,6 +915,11 @@ make_ita() {
     if [ "$ansible_driver" == "yes" ]; then
         log "ansible install and setting"
         configure_ansible
+    fi
+
+    if [ "$terraform_driver" == "yes" ]; then
+        log "packages for terraform install and setting"
+        configure_terraform
     fi
 
     log "Running the ITA installer"
@@ -918,6 +974,12 @@ download() {
         yumdownloader --resolve --destdir ${YUM_ALL_PACKAGE_DOWNLOAD_DIR} "${MARIADB_PACKAGE_NAMES[@]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
     download_check
+
+    # Download php.
+    if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
+        dnf module -y reset php >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        dnf module install --downloadonly --resolve --downloaddir=${YUM_ALL_PACKAGE_DOWNLOAD_DIR} php:7.4 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
 
     # Download packages.
     for key in ${!YUM_PACKAGE[@]}; do
@@ -1052,8 +1114,8 @@ if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
         func_exit_and_delete_file
     fi
 
-    if [ "${cobbler_driver}" != 'yes' -a "${cobbler_driver}" != 'no' ]; then
-       log "ERROR:cobbler_driver should be set to yes or no"
+    if [ "${terraform_driver}" != 'yes' -a "${terraform_driver}" != 'no' ]; then
+       log "ERROR:terraform_driver should be set to yes or no"
        ERR_FLG="false"
        func_exit_and_delete_file
     fi
@@ -1169,18 +1231,18 @@ YUM_REPO_PACKAGE_MARIADB=(
 declare -A YUM_REPO_PACKAGE_PHP;
 YUM_REPO_PACKAGE_PHP=(
     ["RHEL8"]="--set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms"
-    ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-optional-rpms"
+    ["RHEL7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74 --enable rhel-7-server-optional-rpms"
     ["CentOS8"]="--set-enabled dummy"
-    ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72"
+    ["CentOS7"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74"
     ["yum_all"]=""
 )
 
 declare -A YUM_REPO_PACKAGE_PHP_CLOUD;
 YUM_REPO_PACKAGE_PHP_CLOUD=(
     ["RHEL8_RHUI"]="--set-enabled codeready-builder-for-rhel-8-rhui-rpms"
-    ["RHEL7_RHUI2"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-rhel-7-server-rhui-optional-rpms"
-    ["RHEL7_RHUI2_AWS"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhui-REGION-rhel-server-optional"
-    ["RHEL7_RHUI3"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php72 --enable rhel-7-server-rhui-optional-rpms"
+    ["RHEL7_RHUI2"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74 --enable rhui-rhel-7-server-rhui-optional-rpms"
+    ["RHEL7_RHUI2_AWS"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74 --enable rhui-REGION-rhel-server-optional"
+    ["RHEL7_RHUI3"]="http://rpms.remirepo.net/enterprise/remi-release-7.rpm --enable remi-php74 --enable rhel-7-server-rhui-optional-rpms"
     ["physical"]=""
 )
 
@@ -1285,6 +1347,7 @@ declare -A PIP_PACKAGE_DOWNLOAD_DIR;
 PIP_PACKAGE_DOWNLOAD_DIR=(
     ["pip"]="${DOWNLOAD_DIR["pip"]}/pip"
     ["ansible"]="${DOWNLOAD_DIR["pip"]}/ansible"
+    ["terraform"]="${DOWNLOAD_DIR["pip"]}/terraform"
 )
 
 #-----------------------------------------------------------
@@ -1304,11 +1367,19 @@ PIP_PACKAGE_ANSIBLE=(
     ["local"]=`list_pip_package ${PIP_PACKAGE_DOWNLOAD_DIR["ansible"]}`
 )
 
+# pip package (for terraform)
+declare -A PIP_PACKAGE_TERRAFORM;
+PIP_PACKAGE_TERRAFORM=(
+    ["remote"]="python-hcl2"
+    ["local"]=`list_pip_package ${PIP_PACKAGE_DOWNLOAD_DIR["terraform"]}`
+)
+
 # all pip packages
 declare -A PIP_PACKAGE;
 PIP_PACKAGE=(
     ["pip"]=${PIP_PACKAGE_PIP[${MODE}]}
     ["ansible"]=${PIP_PACKAGE_ANSIBLE[${MODE}]}
+    ["terraform"]=${PIP_PACKAGE_TERRAFORM[${MODE}]}
 )
 
 

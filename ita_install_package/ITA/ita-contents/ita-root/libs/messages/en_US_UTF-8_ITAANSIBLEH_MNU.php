@@ -71,8 +71,8 @@ $ary["ITAANSIBLEH-MNU-105070"]      = "End date/time";
 $ary["ITAANSIBLEH-MNU-105080"]      = "Status";
 $ary["ITAANSIBLEH-MNU-105090"]      = "You can perform maintenance (view/register/update/discard) the template file in the Playbook. <br><br>Assign “VAR_\" as a prefix string for the variable of template file. <br>  Variables with prefix string \"VAR_\" can be selected from substitution value list. <br>(Example) {{ VAR_OMCS }}";
 $ary["ITAANSIBLEH-MNU-106010"]      = "Template ID";
-$ary["ITAANSIBLEH-MNU-106020"]      = "Ansible template list";
-$ary["ITAANSIBLEH-MNU-106030"]      = "Ansible template list";
+$ary["ITAANSIBLEH-MNU-106020"]      = "Ansible Common template list";
+$ary["ITAANSIBLEH-MNU-106030"]      = "Ansible Common template list";
 $ary["ITAANSIBLEH-MNU-106040"]      = "Template embedded variable name";
 $ary["ITAANSIBLEH-MNU-106045"]      = "(Prefix string TPF_) Alphanumeric characters and available symbols (_)";
 $ary["ITAANSIBLEH-MNU-106050"]      = "Make sure to assign \"TPF_\" as a prefix string.";
@@ -100,8 +100,8 @@ $ary["ITAANSIBLEH-MNU-106080"]      = "Display order";
 $ary["ITAANSIBLEH-MNU-106090"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-108020"]      = "You can view execution list (execution history). <br>When you click “Check execution status”, you transition to Check execution status menu.";
 $ary["ITAANSIBLEH-MNU-108030"]      = "Execution No.";
-$ary["ITAANSIBLEH-MNU-108040"]      = "Legacy Operation tracking list";
-$ary["ITAANSIBLEH-MNU-108050"]      = "Legacy Operation tracking list";
+$ary["ITAANSIBLEH-MNU-108040"]      = "Legacy Execution list";
+$ary["ITAANSIBLEH-MNU-108050"]      = "Legacy Execution list";
 $ary["ITAANSIBLEH-MNU-108060"]      = "Check execution status";
 $ary["ITAANSIBLEH-MNU-108065"]      = "Execution type";
 $ary["ITAANSIBLEH-MNU-108066"]      = "The following execution type states exist. 
@@ -222,8 +222,8 @@ $ary["ITAANSIBLEH-MNU-207060"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-207070"]      = "Select";
 $ary["ITAANSIBLEH-MNU-207080"]      = "You can perform maintenance (view/register/update/discard) for Playbook to be included in Movement. <br> It is possible to include multiple Playbook in the include order at the time of executing Movement.";
 $ary["ITAANSIBLEH-MNU-207090"]      = "Associated item No.";
-$ary["ITAANSIBLEH-MNU-208010"]      = "Movement playbook link";
-$ary["ITAANSIBLEH-MNU-208020"]      = "Movement playbook link";
+$ary["ITAANSIBLEH-MNU-208010"]      = "Legacy Movement playbook link";
+$ary["ITAANSIBLEH-MNU-208020"]      = "Legacy Movement playbook link";
 $ary["ITAANSIBLEH-MNU-208030"]      = "Movement";
 $ary["ITAANSIBLEH-MNU-208040"]      = "[Original data] Movement list";
 $ary["ITAANSIBLEH-MNU-208050"]      = "Playbook files";
@@ -234,8 +234,8 @@ $ary["ITAANSIBLEH-MNU-208090"]      = "Display order";
 $ary["ITAANSIBLEH-MNU-209010"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-209020"]      = "Ansible(Legacy) Substitution variable name list";
 $ary["ITAANSIBLEH-MNU-209030"]      = "Associated item No.";
-$ary["ITAANSIBLEH-MNU-209040"]      = "Legacy Substitution var name";
-$ary["ITAANSIBLEH-MNU-209050"]      = "Legacy Substitution var name";
+$ary["ITAANSIBLEH-MNU-209040"]      = "Legacy Movement variable association list";
+$ary["ITAANSIBLEH-MNU-209050"]      = "Legacy Movement variable association list";
 $ary["ITAANSIBLEH-MNU-209060"]      = "Movement";
 $ary["ITAANSIBLEH-MNU-209070"]      = "Dropdown menu";
 $ary["ITAANSIBLEH-MNU-209080"]      = "Variable name";
@@ -280,8 +280,8 @@ $ary["ITAANSIBLEH-MNU-304051"]      = "Substitution order";
 $ary["ITAANSIBLEH-MNU-304052"]      = "Blank or positive integer\n Description available: Substituted in ascending order \n Blank: Substituted as single substitution value \n Mixed: After the substitution values with description are substituted in ascending order, blank substitution values are substituted.";
 $ary["ITAANSIBLEH-MNU-304060"]      = "Ansible (Legacy) Variable name list";
 $ary["ITAANSIBLEH-MNU-304070"]      = "Item No.";
-$ary["ITAANSIBLEH-MNU-304080"]      = "Legacy var name list";
-$ary["ITAANSIBLEH-MNU-304090"]      = "Legacy var name list";
+$ary["ITAANSIBLEH-MNU-304080"]      = "Legacy Variable name list";
+$ary["ITAANSIBLEH-MNU-304090"]      = "Legacy Variable name list";
 $ary["ITAANSIBLEH-MNU-305010"]      = "Variable name";
 $ary["ITAANSIBLEH-MNU-305011"]      = "[Maximum length] 256 byte";
 $ary["ITAANSIBLEH-MNU-305020"]      = "Variable name description";
@@ -290,8 +290,8 @@ $ary["ITAANSIBLEH-MNU-305040"]      = "Display order";
 $ary["ITAANSIBLEH-MNU-305050"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-305060"]      = "You can perform maintenance (view/register/update/discard) for the dialog file for each OS type. <br><br>Assign “VAR_\" as a prefix string for variable in dialog file. <br> Variables with prefix string \"VAR_\" can be selected from substitution value list menu. <br>(Example) {{ VAR_OMCS }}\<br><br> The following are reserved word. <br>You can substitute the information that is managed by the Device list menu of Basic Console. <br>[Protocol]<br>{{ __loginprotocol__ }}<br>[Login user ID]<br>{{ __loginuser__ }}<br>[Login password]<br>{{ __loginpassword__ }}<br>[Login host name]<br>{{ __loginhostname__ }}";
 $ary["ITAANSIBLEH-MNU-305070"]      = "Dialog ID";
-$ary["ITAANSIBLEH-MNU-305080"]      = "Pioneer Dialog file files";
-$ary["ITAANSIBLEH-MNU-305090"]      = "Pioneer Dialog file files";
+$ary["ITAANSIBLEH-MNU-305080"]      = "Pioneer Dialog files";
+$ary["ITAANSIBLEH-MNU-305090"]      = "Pioneer Dialog files";
 $ary["ITAANSIBLEH-MNU-306010"]      = "Dialog type";
 $ary["ITAANSIBLEH-MNU-306020"]      = "[Original data] Dialog type list";
 $ary["ITAANSIBLEH-MNU-306030"]      = "OS type";
@@ -302,16 +302,16 @@ $ary["ITAANSIBLEH-MNU-306070"]      = "Display order";
 $ary["ITAANSIBLEH-MNU-306080"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-306090"]      = "You can perform maintenance (view/register/update/discard) for the dialog type. <br> Ansible-Pioneer defines the differences for each OS type in each dialog file, and combines the same purpose dialog file as dialog type to remove (abstract) the device difference.";
 $ary["ITAANSIBLEH-MNU-307010"]      = "Item No.";
-$ary["ITAANSIBLEH-MNU-307020"]      = "Pioneer dialog type list";
-$ary["ITAANSIBLEH-MNU-307030"]      = "Pioneer dialog type list";
+$ary["ITAANSIBLEH-MNU-307020"]      = "Pioneer Dialog type list";
+$ary["ITAANSIBLEH-MNU-307030"]      = "Pioneer Dialog type list";
 $ary["ITAANSIBLEH-MNU-307040"]      = "Dialog type name";
 $ary["ITAANSIBLEH-MNU-307050"]      = "[Maximum length] 256 byte";
 $ary["ITAANSIBLEH-MNU-307060"]      = "Display order";
 $ary["ITAANSIBLEH-MNU-307070"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-308090"]      = "You can view the execution list (execution history). <br>When you click “Check execution status”, you transition to Check execution status menu.";
 $ary["ITAANSIBLEH-MNU-309010"]      = "Execution No.";
-$ary["ITAANSIBLEH-MNU-309020"]      = "Pioneer Operation tracking list";
-$ary["ITAANSIBLEH-MNU-309030"]      = "Pioneer Operation tracking list";
+$ary["ITAANSIBLEH-MNU-309020"]      = "Pioneer Execution list";
+$ary["ITAANSIBLEH-MNU-309030"]      = "Pioneer Execution list";
 $ary["ITAANSIBLEH-MNU-309040"]      = "Check execution status";
 $ary["ITAANSIBLEH-MNU-309045"]      = "Execution type";
 $ary["ITAANSIBLEH-MNU-309046"]      = "The following execution type states exist. 
@@ -399,8 +399,8 @@ $ary["ITAANSIBLEH-MNU-405050"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-405060"]      = "You can perform maintenance (view/register/update/discard) for the dialog type to be included in Movement. <br>It is possible to include multiple dialog types in the include order at the time of executing Movement.
 ";
 $ary["ITAANSIBLEH-MNU-405070"]      = "Associated item No.";
-$ary["ITAANSIBLEH-MNU-405080"]      = "Movement dialogue type link";
-$ary["ITAANSIBLEH-MNU-405090"]      = "Movement dialogue type link";
+$ary["ITAANSIBLEH-MNU-405080"]      = "Pioneer Movement dialogue type link";
+$ary["ITAANSIBLEH-MNU-405090"]      = "Pioneer Movement dialogue type link";
 $ary["ITAANSIBLEH-MNU-406010"]      = "Movement";
 $ary["ITAANSIBLEH-MNU-406020"]      = "[Original data] Movement list";
 $ary["ITAANSIBLEH-MNU-406030"]      = "Dialog type";
@@ -411,8 +411,8 @@ $ary["ITAANSIBLEH-MNU-406070"]      = "Display order";
 $ary["ITAANSIBLEH-MNU-406080"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-406090"]      = "You can perform maintenance (view/register/update/discard) for Movement and host that are associated with operation.";
 $ary["ITAANSIBLEH-MNU-407010"]      = "Item No.";
-$ary["ITAANSIBLEH-MNU-407020"]      = "Pioneer target host";
-$ary["ITAANSIBLEH-MNU-407030"]      = "Pioneer target host";
+$ary["ITAANSIBLEH-MNU-407020"]      = "Pioneer Target host";
+$ary["ITAANSIBLEH-MNU-407030"]      = "Pioneer Target host";
 $ary["ITAANSIBLEH-MNU-407040"]      = "Operation";
 $ary["ITAANSIBLEH-MNU-407050"]      = "[Original data] Basic console/Operation list";
 $ary["ITAANSIBLEH-MNU-407060"]      = "Movement";
@@ -443,8 +443,8 @@ $ary["ITAANSIBLEH-MNU-409070"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-409080"]      = "Select";
 $ary["ITAANSIBLEH-MNU-409090"]      = "Ansible(Pioneer) Substitution variable name list";
 $ary["ITAANSIBLEH-MNU-501010"]      = "Associated item No.";
-$ary["ITAANSIBLEH-MNU-501020"]      = "Pioneer Substitution var name";
-$ary["ITAANSIBLEH-MNU-501030"]      = "Pioneer Substitution var name";
+$ary["ITAANSIBLEH-MNU-501020"]      = "Pioneer Movement variable association list";
+$ary["ITAANSIBLEH-MNU-501030"]      = "Pioneer Movement variable association list";
 $ary["ITAANSIBLEH-MNU-501040"]      = "Movement";
 $ary["ITAANSIBLEH-MNU-501050"]      = "Dropdown menu";
 $ary["ITAANSIBLEH-MNU-501060"]      = "Variable name";
@@ -480,8 +480,8 @@ $ary["ITAANSIBLEH-MNU-503080"]      = "Controls display order";
 $ary["ITAANSIBLEH-MNU-503090"]      = "The combination of [operation, Movement, host, variable name] is not valid.";
 $ary["ITAANSIBLEH-MNU-504010"]      = "Ansible(Pioneer) Variable name list";
 $ary["ITAANSIBLEH-MNU-504020"]      = "Item No.";
-$ary["ITAANSIBLEH-MNU-504030"]      = "Pioneer var name list";
-$ary["ITAANSIBLEH-MNU-504040"]      = "Pioneer var name list";
+$ary["ITAANSIBLEH-MNU-504030"]      = "Pioneer Variable name list";
+$ary["ITAANSIBLEH-MNU-504040"]      = "Pioneer Variable name list";
 $ary["ITAANSIBLEH-MNU-504050"]      = "Variable name";
 $ary["ITAANSIBLEH-MNU-504060"]      = "[Maximum length] 256 byte";
 $ary["ITAANSIBLEH-MNU-504070"]      = "Variable name description";
@@ -540,8 +540,8 @@ $ary["ITAANSIBLEH-MNU-1103100"]     = "Execution user";
 $ary["ITAANSIBLEH-MNU-1103110"]     = "Caller symphony";
 $ary["ITAANSIBLEH-MNU-1108020"]     = "You can view execution list (execution history). <br>When you click “Check execution status”, you transition to Check execution status menu.";
 $ary["ITAANSIBLEH-MNU-1108030"]     = "Execution No.";
-$ary["ITAANSIBLEH-MNU-1108040"]     = "Role Operation tracking list";
-$ary["ITAANSIBLEH-MNU-1108050"]     = "Role Operation tracking list";
+$ary["ITAANSIBLEH-MNU-1108040"]     = "Role Execution list";
+$ary["ITAANSIBLEH-MNU-1108050"]     = "Role Execution list";
 $ary["ITAANSIBLEH-MNU-1108060"]     = "Check execution status";
 $ary["ITAANSIBLEH-MNU-1108065"]     = "Execution type";
 $ary["ITAANSIBLEH-MNU-1108066"]     = "The following execution type states exist.
@@ -601,16 +601,19 @@ $ary["ITAANSIBLEH-MNU-1202018"]     = "gather_facts";
 $ary["ITAANSIBLEH-MNU-1202019"]     = "[Original data] Movement list";
 $ary["ITAANSIBLEH-MNU-1202020"]     = "You can perform maintenance (view/update) for the connection interface information on Ansible server. <br>This menu should be one record.";
 $ary["ITAANSIBLEH-MNU-1202030"]     = "";
-$ary["ITAANSIBLEH-MNU-1202040"]     = "Ansible Interface information";
-$ary["ITAANSIBLEH-MNU-1202050"]     = "Ansible Interface information";
+$ary["ITAANSIBLEH-MNU-1202040"]     = "Ansible Common Interface information";
+$ary["ITAANSIBLEH-MNU-1202050"]     = "Ansible Common Interface information";
 $ary["ITAANSIBLEH-MNU-1202060"]     = "Data relay storage path (ITA)";
 $ary["ITAANSIBLEH-MNU-1202070"]     = "This is a shared directory with ITA server.";
 $ary["ITAANSIBLEH-MNU-1202080"]     = "Data relay storage path (Ansible)";
-$ary["ITAANSIBLEH-MNU-1202090"]     = "This is a shared directory with Ansible or Ansible Tower server.";
+$ary["ITAANSIBLEH-MNU-1202090"]     = "This is the Ansible server shared directory.
+This information is not used if the execution engine is not set to Ansible Core.";
 $ary["ITAANSIBLEH-MNU-1202095"]     = "Symphony instance data relay storage path(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202096"]     = "Path for the Ansible or Ansible Tower server to share the directory shared by each Movement of the Symphony instance.";
+$ary["ITAANSIBLEH-MNU-1202096"]     = "This path is used to share the Symphony instance Movements' shared directory within Ansible Server.
+This information is not used if the execution engine is not set to Ansible Core.";
 $ary["ITAANSIBLEH-MNU-1202097"]     = "Conductor instance data relay storage path(Ansible)";
-$ary["ITAANSIBLEH-MNU-1202098"]     = "Path for the Ansible or Ansible Tower server to share the directory shared by each Movement of the Conductor instance.";
+$ary["ITAANSIBLEH-MNU-1202098"]     = "This path is used to share the Conductor instance Movements' shared directory within Ansible Server.
+This information is not used if the execution engine is not set to Ansible Core.";
 $ary["ITAANSIBLEH-MNU-1203010"]     = "Protocol";
 $ary["ITAANSIBLEH-MNU-1203020"]     = "Enter http or https.\nrecommended value is https.";
 $ary["ITAANSIBLEH-MNU-1203021"]     = "Enter http or https.\nrecommended value is https.";
@@ -621,10 +624,15 @@ $ary["ITAANSIBLEH-MNU-1203042"]     = "The host name of the ansible tower that c
 $ary["ITAANSIBLEH-MNU-1203050"]     = "Port";
 $ary["ITAANSIBLEH-MNU-1203060"]     = "Ansible server connection port.
 Normal is 80 for http and 443 for https.";
-$ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Tower server connection port.
+$ary["ITAANSIBLEH-MNU-1203061"]     = "Ansible Automation Controller server connection port.
 Normal is 443.";
 $ary["ITAANSIBLEH-MNU-1203065"]     = "execution engine";
-$ary["ITAANSIBLEH-MNU-1203066"]     = "Select the execution engine.";
+$ary["ITAANSIBLEH-MNU-1203066"]     = "Select the execution engine.
+・Ansible Core
+・Ansible Tower
+・Ansible Automation Controller
+※Ansible Tower changed to Ansible Automation Controller in Ansible Automation Platform 2.0.
+Configuring the Ansible Core interface is required in order to use ansible-vault commands, even if Ansible Core is not selected as the execution engine.";
 $ary["ITAANSIBLEH-MNU-1203070"]     = "Access_key_id";
 $ary["ITAANSIBLEH-MNU-1203080"]     = "Access Key ID that is used for authentication to connect with the Ansible server.";
 $ary["ITAANSIBLEH-MNU-1203090"]     = "Secret_access_key";
@@ -636,7 +644,7 @@ Ansible:
 　Set the parameters of nible-playbook command.
 　ITA sets -i option.
 
-Ansible Tower:
+Ansible Automation Controller:
 　Options that can be set
 　　-verbosity
 　　-f FORKS,--forks=FORKS
@@ -647,7 +655,7 @@ Ansible Tower:
 　　-D,--diff
 　　--skip-tags=SKIP_TAGS
 　　--start-at-task=START_AT_TASK
-  Ansible Tower only parameters
+　Ansible Automation Controller only parameters
 　　-ufc,--use_fact_cache　　　
 　　-as,--allow_simultaneous　
 　　-jsc,--job_slice_count
@@ -665,8 +673,8 @@ $ary["ITAANSIBLEH-MNU-1204060"]     = "Display order";
 $ary["ITAANSIBLEH-MNU-1204070"]     = "Controls display order";
 $ary["ITAANSIBLEH-MNU-1204080"]     = "You can perform maintenance (view/register/update/discard) for Movement and host that are associated with operation.";
 $ary["ITAANSIBLEH-MNU-1204090"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1205010"]     = "Role target host";
-$ary["ITAANSIBLEH-MNU-1205020"]     = "Role target host";
+$ary["ITAANSIBLEH-MNU-1205010"]     = "Role Target host";
+$ary["ITAANSIBLEH-MNU-1205020"]     = "Role Target host";
 $ary["ITAANSIBLEH-MNU-1205030"]     = "Operation";
 $ary["ITAANSIBLEH-MNU-1205040"]     = "[Original data] Basic console/Operation list";
 $ary["ITAANSIBLEH-MNU-1205050"]     = "Movement";
@@ -708,8 +716,8 @@ $ary["ITAANSIBLEH-MNU-1207103"]     = "Collection log";
 $ary["ITAANSIBLEH-MNU-1207104"]     = "You can download the run-time log at the time of collection.";
 $ary["ITAANSIBLEH-MNU-1207200"]     = "You can maintain (view / update) the connection interface information for the REST API used by the collection function. <br> This menu must be one record. <br>If the REST user and REST password are not entered, the collection function will not be executed.";
 $ary["ITAANSIBLEH-MNU-1207201"]     = "ID";
-$ary["ITAANSIBLEH-MNU-1207202"]     = "Collection interface information";
-$ary["ITAANSIBLEH-MNU-1207203"]     = "Collection interface information";
+$ary["ITAANSIBLEH-MNU-1207202"]     = "Ansible Common Collection interface information";
+$ary["ITAANSIBLEH-MNU-1207203"]     = "Ansible Common Collection interface information";
 $ary["ITAANSIBLEH-MNU-1207204"]     = "hostname";
 $ary["ITAANSIBLEH-MNU-1207205"]     = "[Maximum length] 128 bytes";
 $ary["ITAANSIBLEH-MNU-1207206"]     = "IP";
@@ -729,8 +737,8 @@ $ary["ITAANSIBLEH-MNU-1207216"]     = "port";
 $ary["ITAANSIBLEH-MNU-1207217"]     = "Port used for REST communication";
 $ary["ITAANSIBLEH-MNU-1207300"]     = "You can maintain (view / register / update / abolish) the association information between the parameter sheet and the collection target used in the collection function. <br> The parameter sheet is only applicable to the one created by creating the menu.";
 $ary["ITAANSIBLEH-MNU-1207301"]     = "ID";
-$ary["ITAANSIBLEH-MNU-1207302"]     = "Collected item value list";
-$ary["ITAANSIBLEH-MNU-1207303"]     = "Collected item value list";
+$ary["ITAANSIBLEH-MNU-1207302"]     = "Ansible Common Collected item value list";
+$ary["ITAANSIBLEH-MNU-1207303"]     = "Ansible Common Collected item value list";
 $ary["ITAANSIBLEH-MNU-1207304"]     = "Collected items(FROM)";
 $ary["ITAANSIBLEH-MNU-1207305"]     = "Perth format";
 $ary["ITAANSIBLEH-MNU-1207306"]     = "YAML: Parses a YAML-formatted file and generates parameters.";
@@ -762,8 +770,10 @@ $ary["ITAANSIBLEH-MNU-1207315"]     = "Movement dialogue type link";
 $ary["ITAANSIBLEH-MNU-1207316"]     = "Dialogue file material collection";
 $ary["ITAANSIBLEH-MNU-1207317"]     = "Movement role link";
 $ary["ITAANSIBLEH-MNU-1207318"]     = "Substitution value management";
-$ary["ITAANSIBLEH-MNU-1208010"]     = "Movement role link";
-$ary["ITAANSIBLEH-MNU-1208020"]     = "Movement role link";
+$ary["ITAANSIBLEH-MNU-1207319"]     = "Ansible Common Common variable use list";
+$ary["ITAANSIBLEH-MNU-1207320"]     = "Ansible Common Common variable use list";
+$ary["ITAANSIBLEH-MNU-1208010"]     = "Role Movement role link";
+$ary["ITAANSIBLEH-MNU-1208020"]     = "Role Movement role link";
 $ary["ITAANSIBLEH-MNU-1208030"]     = "Movement";
 $ary["ITAANSIBLEH-MNU-1208040"]     = "[Original data] Movement list";
 $ary["ITAANSIBLEH-MNU-1208045"]     = "Role package name";
@@ -780,8 +790,8 @@ $ary["ITAANSIBLEH-MNU-1209011"]     = "Select role package";
 $ary["ITAANSIBLEH-MNU-1209012"]     = "The combination of [role package, role] is not valid.";
 $ary["ITAANSIBLEH-MNU-1209020"]     = "You can link Movement of Ansible-Legacy Role with a variable name. ";
 $ary["ITAANSIBLEH-MNU-1209030"]     = "Associated item No.";
-$ary["ITAANSIBLEH-MNU-1209040"]     = "Role Movement var association";
-$ary["ITAANSIBLEH-MNU-1209050"]     = "Role Movement var association";
+$ary["ITAANSIBLEH-MNU-1209040"]     = "Role Movement variable association list";
+$ary["ITAANSIBLEH-MNU-1209050"]     = "Role Movement variable association list";
 $ary["ITAANSIBLEH-MNU-1209060"]     = "Movement";
 $ary["ITAANSIBLEH-MNU-1209070"]     = "[Original data] Movement list";
 $ary["ITAANSIBLEH-MNU-1209080"]     = "Variable name";
@@ -830,8 +840,8 @@ $ary["ITAANSIBLEH-MNU-1304052"]     = "If nested variable is specified in the va
 $ary["ITAANSIBLEH-MNU-1304054"]     = "The selected Member variables are not members of nested variables.";
 $ary["ITAANSIBLEH-MNU-1304060"]     = "You can perform maintenance (view/register/update/discard) for variable name of Ansible-Legacy Role. ";
 $ary["ITAANSIBLEH-MNU-1304070"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1304080"]     = "Role variable name list";
-$ary["ITAANSIBLEH-MNU-1304090"]     = "Role variable name list";
+$ary["ITAANSIBLEH-MNU-1304080"]     = "Role Variable name list";
+$ary["ITAANSIBLEH-MNU-1304090"]     = "Role Variable name list";
 $ary["ITAANSIBLEH-MNU-1304111"]     = "In case of generic variable, you cannot enter member variable.";
 $ary["ITAANSIBLEH-MNU-1304113"]     = "In case of generic variable, you cannot enter substitution order.";
 $ary["ITAANSIBLEH-MNU-1304141"]     = "In case variables are array-type variable, you cannot enter member variables.";
@@ -873,8 +883,8 @@ $ary["ITAANSIBLEH-MNU-1506020"]     = "Display only corresponding lines";
 $ary["ITAANSIBLEH-MNU-1509060"]     = "Populated data set (zip).";
 $ary["ITAANSIBLEH-MNU-1601010"]     = "Associate Ansible(Legacy Role) role and variable name.";
 $ary["ITAANSIBLEH-MNU-1601020"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1601030"]     = "Role role variable name list";
-$ary["ITAANSIBLEH-MNU-1601040"]     = "Role role variable name list";
+$ary["ITAANSIBLEH-MNU-1601030"]     = "Role Role variable name list";
+$ary["ITAANSIBLEH-MNU-1601040"]     = "Role Role variable name list";
 $ary["ITAANSIBLEH-MNU-1601050"]     = "Role package name";
 $ary["ITAANSIBLEH-MNU-1601060"]     = "[Original data] Role package list";
 $ary["ITAANSIBLEH-MNU-1601070"]     = "Role name";
@@ -885,8 +895,8 @@ $ary["ITAANSIBLEH-MNU-1602020"]     = "Display order";
 $ary["ITAANSIBLEH-MNU-1602030"]     = "Controls display order";
 $ary["ITAANSIBLEH-MNU-1603010"]     = "Associate role name and role package of Ansible-Legacy Role.";
 $ary["ITAANSIBLEH-MNU-1603020"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1603030"]     = "Role role name list";
-$ary["ITAANSIBLEH-MNU-1603040"]     = "Role role name list";
+$ary["ITAANSIBLEH-MNU-1603030"]     = "Role Role name list";
+$ary["ITAANSIBLEH-MNU-1603040"]     = "Role Role name list";
 $ary["ITAANSIBLEH-MNU-1603050"]     = "Role package name";
 $ary["ITAANSIBLEH-MNU-1603060"]     = "[Original data] Role package list";
 $ary["ITAANSIBLEH-MNU-1603070"]     = "Role name";
@@ -895,8 +905,8 @@ $ary["ITAANSIBLEH-MNU-1603090"]     = "Display order";
 $ary["ITAANSIBLEH-MNU-1604010"]     = "Controls display order";
 $ary["ITAANSIBLEH-MNU-1605010"]     = "You can perform maintenance (view/register/update/discard) for role packages of Ansible-Legacy Role. ";
 $ary["ITAANSIBLEH-MNU-1605020"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1605030"]     = "Role role package list";
-$ary["ITAANSIBLEH-MNU-1605040"]     = "Role role package list";
+$ary["ITAANSIBLEH-MNU-1605030"]     = "Role Role package list";
+$ary["ITAANSIBLEH-MNU-1605040"]     = "Role Role package list";
 $ary["ITAANSIBLEH-MNU-1605050"]     = "Role package name";
 $ary["ITAANSIBLEH-MNU-1605060"]     = "[Maximum length] 256 byte";
 $ary["ITAANSIBLEH-MNU-1605070"]     = "Role package file (ZIP format)";
@@ -906,16 +916,16 @@ $ary["ITAANSIBLEH-MNU-1605086"]     = "Variable definition analysis result.";
 $ary["ITAANSIBLEH-MNU-1605090"]     = "Display order";
 $ary["ITAANSIBLEH-MNU-1701010"]     = "You can perform maintenance (view/register/update/discard) for member variables of Ansible-Legacy Role. ";
 $ary["ITAANSIBLEH-MNU-1701020"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1701030"]     = "Role role member variable list";
-$ary["ITAANSIBLEH-MNU-1701040"]     = "Role role member variable list";
+$ary["ITAANSIBLEH-MNU-1701030"]     = "Role Member variable list";
+$ary["ITAANSIBLEH-MNU-1701040"]     = "Role Member variable list";
 $ary["ITAANSIBLEH-MNU-1702010"]     = "Array variable name";
 $ary["ITAANSIBLEH-MNU-1702020"]     = "";
 $ary["ITAANSIBLEH-MNU-1703010"]     = "Member variable name";
 $ary["ITAANSIBLEH-MNU-1703020"]     = "[Maximum length] 1024 byte";
 $ary["ITAANSIBLEH-MNU-1704010"]     = "You can perform maintenance (view/register/update/discard) for variable specific values of Ansible-Legacy Role. ";
 $ary["ITAANSIBLEH-MNU-1704020"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1704030"]     = "Role Var specific value list";
-$ary["ITAANSIBLEH-MNU-1704040"]     = "Role Var specific value list";
+$ary["ITAANSIBLEH-MNU-1704030"]     = "Role Variable specific value list";
+$ary["ITAANSIBLEH-MNU-1704040"]     = "Role Variable specific value list";
 $ary["ITAANSIBLEH-MNU-1704050"]     = "Role package";
 $ary["ITAANSIBLEH-MNU-1704060"]     = "";
 $ary["ITAANSIBLEH-MNU-1704070"]     = "Role";
@@ -934,8 +944,8 @@ $ary["ITAANSIBLEH-MNU-1704190"]     = "Specific value";
 $ary["ITAANSIBLEH-MNU-1704200"]     = "";
 $ary["ITAANSIBLEH-MNU-1705010"]     = "You can perform maintenance (view/register/update/discard) for Nested variable maximum iteration counts of Ansible-Legacy Role. ";
 $ary["ITAANSIBLEH-MNU-1705020"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1705030"]     = "Nested variable list";
-$ary["ITAANSIBLEH-MNU-1705040"]     = "Nested variable list";
+$ary["ITAANSIBLEH-MNU-1705030"]     = "Role Nested variable list";
+$ary["ITAANSIBLEH-MNU-1705040"]     = "Role Nested variable list";
 $ary["ITAANSIBLEH-MNU-1705050"]     = "Variable name";
 $ary["ITAANSIBLEH-MNU-1705060"]     = "";
 $ary["ITAANSIBLEH-MNU-1705070"]     = "Member variable name (iteration)";
@@ -944,8 +954,8 @@ $ary["ITAANSIBLEH-MNU-1705090"]     = "maximum iteration count";
 $ary["ITAANSIBLEH-MNU-1705100"]     = "";
 $ary["ITAANSIBLEH-MNU-1706010"]     = "You can perform maintenance (view/register/update/discard) for nested variable members of Ansible-Legacy Role. ";
 $ary["ITAANSIBLEH-MNU-1706020"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1706030"]     = "Role Nested var member list";
-$ary["ITAANSIBLEH-MNU-1706040"]     = "Role Nested var member list";
+$ary["ITAANSIBLEH-MNU-1706030"]     = "Role Nested variable member list";
+$ary["ITAANSIBLEH-MNU-1706040"]     = "Role Nested variable member list";
 $ary["ITAANSIBLEH-MNU-1706050"]     = "Variable name";
 $ary["ITAANSIBLEH-MNU-1706060"]     = "";
 $ary["ITAANSIBLEH-MNU-1706070"]     = "Key of parent member variable";
@@ -970,8 +980,8 @@ $ary["ITAANSIBLEH-MNU-1706250"]     = "Display member variable name of substitut
 $ary["ITAANSIBLEH-MNU-1706260"]     = "";
 $ary["ITAANSIBLEH-MNU-1707010"]     = "You can perform maintenance (view/register/update/discard) for nested variable array combination of Ansible-Legacy Role. ";
 $ary["ITAANSIBLEH-MNU-1707020"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1707030"]     = "Role nested var array comb list";
-$ary["ITAANSIBLEH-MNU-1707040"]     = "Role nested var array comb list";
+$ary["ITAANSIBLEH-MNU-1707030"]     = "Role Nested variable array combination list";
+$ary["ITAANSIBLEH-MNU-1707040"]     = "Role Nested variable array combination list";
 $ary["ITAANSIBLEH-MNU-1707050"]     = "Variable name";
 $ary["ITAANSIBLEH-MNU-1707060"]     = "";
 $ary["ITAANSIBLEH-MNU-1707070"]     = "Nested variable item No.";
@@ -982,16 +992,16 @@ $ary["ITAANSIBLEH-MNU-1707110"]     = "All column order";
 $ary["ITAANSIBLEH-MNU-1707120"]     = "";
 $ary["ITAANSIBLEH-MNU-1800000"]     = "You can perform maintenance (view/register/update/discard) for files used in the Playbook. <br><br> In file embedded variable name, enter a variable name that starts with \"CPF_\". <br> This variable name is written in a Playbook. <br>(Example)<br>　　　- copy: src={{ CPF_sample }} dest=/usr/local/src<br>　　　- unarchive src={{ CPF_sample }} dest=/usr/local/bin remote_src=yes<br>";
 $ary["ITAANSIBLEH-MNU-1800001"]     = "File ID";
-$ary["ITAANSIBLEH-MNU-1800002"]     = "Ansible file list";
-$ary["ITAANSIBLEH-MNU-1800003"]     = "Ansible file list";
+$ary["ITAANSIBLEH-MNU-1800002"]     = "Ansible Common File list";
+$ary["ITAANSIBLEH-MNU-1800003"]     = "Ansible Common File list";
 $ary["ITAANSIBLEH-MNU-1800010"]     = "File embedded variable name";
 $ary["ITAANSIBLEH-MNU-1800011"]     = "Make sure to assign \"CPF_\" as prefix string.";
 $ary["ITAANSIBLEH-MNU-1800020"]     = "Files";
 $ary["ITAANSIBLEH-MNU-1800021"]     = "Specify the file to be used by playbook.";
 $ary["ITAANSIBLEH-MNU-1900000"]     = "You can perform maintenance (view/register/update/discard) of operations registered in the associated menu, and Movement and variables associated with the setting value of item for each host. <br><br> There are three methods to register the setting value of item. <br> Value type: Setting value of item is registered in the substitution value list as a specific value of associated variable. <br>Key-Value type: Name (Key) and setting value (Value) of item are registered in the substitution value list as a specific value of associated variable. <br> Key type: Item name is registered in the substitution value list as a specific value of associated variable. When the setting value of the item is blank, it is not registered in the substitution value list";
 $ary["ITAANSIBLEH-MNU-1900001"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1900002"]     = "Role Substitut val-auto-reg";
-$ary["ITAANSIBLEH-MNU-1900003"]     = "Role Substitut val-auto-reg";
+$ary["ITAANSIBLEH-MNU-1900002"]     = "Role Substitution val auto-reg setting";
+$ary["ITAANSIBLEH-MNU-1900003"]     = "Role Substitution val auto-reg setting";
 $ary["ITAANSIBLEH-MNU-1900004"]     = "Menu group";
 $ary["ITAANSIBLEH-MNU-1900005"]     = "ID";
 $ary["ITAANSIBLEH-MNU-1900006"]     = "This item is not subject to updates when registering/updating.";
@@ -1043,8 +1053,8 @@ $ary["ITAANSIBLEH-MNU-1900301"]     = "Parameter sheet(From)";
 $ary["ITAANSIBLEH-MNU-1900302"]     = "IaC variable(To)";
 $ary["ITAANSIBLEH-MNU-1901000"]     = "You can perform maintenance (view/register/update/discard) of operations registered in the associated menu, and Movement and variables associated with the setting value of item for each host. <br><br>There are three methods to register the setting value of item. <br>Value type: Setting value of item is registered in the substitution value list as a specific value of associated variable. <br>Key-Value type: Name (Key) and setting value (Value) of item are registered in the substitution value list as a specific value of associated variable. <br> Key type: Item name is registered in the substitution value list as a specific value of associated variable. When the setting value of the item is blank, it is not registered in the substitution value list";
 $ary["ITAANSIBLEH-MNU-1901001"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1901002"]     = "Legacy Substitut val-auto-reg";
-$ary["ITAANSIBLEH-MNU-1901003"]     = "Legacy Substitut val-auto-reg";
+$ary["ITAANSIBLEH-MNU-1901002"]     = "Legacy Substitution val auto-reg setting";
+$ary["ITAANSIBLEH-MNU-1901003"]     = "Legacy Substitution val auto-reg setting";
 $ary["ITAANSIBLEH-MNU-1901004"]     = "Menu group";
 $ary["ITAANSIBLEH-MNU-1901005"]     = "ID";
 $ary["ITAANSIBLEH-MNU-1901006"]     = "This item is not subject to updates when registering/updating.";
@@ -1080,8 +1090,8 @@ $ary["ITAANSIBLEH-MNU-1901301"]     = "Parameter sheet(From)";
 $ary["ITAANSIBLEH-MNU-1901302"]     = "IaC variable(To)";
 $ary["ITAANSIBLEH-MNU-1902000"]     = "You can perform maintenance (view/register/update/discard) of operations registered in the associated menu, and Movement and variables associated with the setting value of item for each host. <br><br>There are three methods to register the setting value of item. <br>Value type: Setting value of item is registered in the substitution value list as a specific value of associated variable. <br>Key-Value type: Name (Key) and setting value (Value) of item are registered in the substitution value list as a specific value of associated variable. <br>Key type: Item name is registered in the substitution value list as a specific value of associated variable. When the setting value of the item is blank, it is not registered in the substitution value list";
 $ary["ITAANSIBLEH-MNU-1902001"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1902002"]     = "Pioneer Substitut val-auto-reg";
-$ary["ITAANSIBLEH-MNU-1902003"]     = "Pioneer Substitut val-auto-reg";
+$ary["ITAANSIBLEH-MNU-1902002"]     = "Pioneer Substitution val auto-reg setting";
+$ary["ITAANSIBLEH-MNU-1902003"]     = "Pioneer Substitution val auto-reg setting";
 $ary["ITAANSIBLEH-MNU-1902004"]     = "Menu group";
 $ary["ITAANSIBLEH-MNU-1902005"]     = "ID";
 $ary["ITAANSIBLEH-MNU-1902006"]     = "This item is not subject to updates when registering/updating.";
@@ -1147,8 +1157,8 @@ $ary["ITAANSIBLEH-MNU-1930004"]     = "Menu";
 $ary["ITAANSIBLEH-MNU-1930005"]     = "Table name";
 $ary["ITAANSIBLEH-MNU-1940000"]     = "You can perform maintenance (view/register/update/discard) to global variables used in the Playbook and dialog files.";
 $ary["ITAANSIBLEH-MNU-1940001"]     = "Item No.";
-$ary["ITAANSIBLEH-MNU-1940002"]     = "Ansible global variable list";
-$ary["ITAANSIBLEH-MNU-1940003"]     = "Ansible global variable list";
+$ary["ITAANSIBLEH-MNU-1940002"]     = "Ansible Common Global variable list";
+$ary["ITAANSIBLEH-MNU-1940003"]     = "Ansible Common Global variable list";
 $ary["ITAANSIBLEH-MNU-1940010"]     = "Global variable name";
 $ary["ITAANSIBLEH-MNU-1940011"]     = "Make sure to assign \"GBL_\" as prefix string.";
 $ary["ITAANSIBLEH-MNU-1940020"]     = "Specific value";
@@ -1186,8 +1196,9 @@ $ary["ITAANSIBLEH-MNU-2000000"]     = "Execution log";
 $ary["ITAANSIBLEH-MNU-2000001"]     = "Error log";
 $ary["ITAANSIBLEH-MNU-5000000"]     = "You can perform maintenance (view/register/update/discard) for translation variables that can be used in ansible role.";
 $ary["ITAANSIBLEH-MNU-5000001"]     = "No.";
-$ary["ITAANSIBLEH-MNU-5000002"]     = "Ansible Role translation table";
-$ary["ITAANSIBLEH-MNU-5000003"]     = "Ansible Role translation table";
+$ary["ITAANSIBLEH-MNU-5000002"]     = "Role Reading variable list";
+$ary["ITAANSIBLEH-MNU-5000003"]     = "Role Reading variable list";
+$ary["ITAANSIBLEH-MNU-5000004"]     = "You can perform maintenance (view/register/update/discard) for translation table of Ansible-Legacy Role.";
 $ary["ITAANSIBLEH-MNU-5000100"]     = "Role package";
 $ary["ITAANSIBLEH-MNU-5000101"]     = "";
 $ary["ITAANSIBLEH-MNU-5000200"]     = "Role";
@@ -1203,21 +1214,21 @@ $ary["ITAANSIBLEH-MNU-5010003"]     = "confirmation";
 $ary["ITAANSIBLEH-MNU-6000000"]     = "NULL link";
 $ary["ITAANSIBLEH-MNU-6000001"]     = "If specific value of parameter sheet is NULL, set whether to enable Substitution value list registration.\nBlank: Follow Null linkage of Ansible common interface information.\nvalid: Register NULL data.\nInvalid: Do not register null data.";
 $ary["ITAANSIBLEH-MNU-6000002"]     = "If specific value of parameter sheet is NULL in Substitut val-auto-reg, validates registration in Substitution value list or set default.\nvalid: Register NULL data.\nInvalid: Do not register null data.";
-$ary["ITAANSIBLEH-MNU-907342701"]   = "AnsibleTowerInstanceGroupList";
+$ary["ITAANSIBLEH-MNU-907342701"]   = "non use";
 $ary["ITAANSIBLEH-MNU-907350509"]   = "Select whether to delete temporary objects created in Ansible Tower.";
-$ary["ITAANSIBLEH-MNU-907352702"]   = "Instance group name";
-$ary["ITAANSIBLEH-MNU-907352703"]   = "The instance group ID set in AnsibleTower.";
-$ary["ITAANSIBLEH-MNU-907362701"]   = "AnsibleTowerInstanceGroupList";
+$ary["ITAANSIBLEH-MNU-907352702"]   = "non use";
+$ary["ITAANSIBLEH-MNU-907352703"]   = "non use";
+$ary["ITAANSIBLEH-MNU-907362701"]   = "non use";
 $ary["ITAANSIBLEH-MNU-907390509"]   = "Delete runtime data";
 $ary["ITAANSIBLEH-MNU-907392701"]   = "No.";
 $ary["ITAANSIBLEH-MNU-907392702"]   = "Instance group name";
 $ary["ITAANSIBLEH-MNU-907392703"]   = "Instance group ID";
 $ary["ITAANSIBLEH-MNU-9010000000"]  = "Authentication token";
-$ary["ITAANSIBLEH-MNU-9010000001"]  = "A user authentication token for connecting to AnsibleTower from astrol using RestAPI. Enter the token generated by AnsibleTower.. Enter the token generated by AnsibleTower.";
+$ary["ITAANSIBLEH-MNU-9010000001"]  = "A user authentication token for connecting to Ansible Automation Controller from astrol using RestAPI. Enter the token generated by Ansible Automation Controller. Enter the token generated by Ansible Automation Controller.";
 $ary["ITAANSIBLEH-MNU-9010000002"]  = "Organization name";
-$ary["ITAANSIBLEH-MNU-9010000003"]  = "Enter the Organization name registered in AnsibleTower.";
-$ary["ITAANSIBLEH-MNU-9010000004"]  = "Ansible Engine interface";
-$ary["ITAANSIBLEH-MNU-9010000005"]  = "Ansible Tower interface";
+$ary["ITAANSIBLEH-MNU-9010000003"]  = "Enter the Organization name registered in Ansible Automation Controller.";
+$ary["ITAANSIBLEH-MNU-9010000004"]  = "Ansible Core interface";
+$ary["ITAANSIBLEH-MNU-9010000005"]  = "Ansible Automation Controller interface";
 $ary["ITAANSIBLEH-MNU-9010000006"]  = "Legacy\n";
 $ary["ITAANSIBLEH-MNU-9010000007"]  = "Legacy Role\n";
 $ary["ITAANSIBLEH-MNU-9010000008"]  = "Header section";
@@ -1229,7 +1240,7 @@ Ansible:
     gather_facts: no
     become: yes
 
-Ansible Tower:
+Ansible Automation Controller:
   - hosts: all
     gather_facts: no
     become: yes
@@ -1241,7 +1252,7 @@ Ansible:
 　Set the parameters of nible-playbook command.
 　ITA sets -i option.
 
-Ansible Tower:
+Ansible Automation Controller:
 　Options that can be set
 　　-verbosity
 　　-f FORKS,--forks=FORKS
@@ -1252,7 +1263,7 @@ Ansible Tower:
 　　-D,--diff
 　　--skip-tags=SKIP_TAGS
 　　--start-at-task=START_AT_TASK
-  Ansible Tower only parameters
+  Ansible Automation Controller only parameters
 　　-ufc,--use_fact_cache　　　
 　　-as,--allow_simultaneous　
 　　-jsc,--job_slice_count
@@ -1265,19 +1276,19 @@ Ansible:
     gather_facts: no
     become: yes
 
-Ansible Tower:
+Ansible Automation Controller:
   - hosts: all
     gather_facts: no
     become: yes
 become is omitted for winrm connection.";
-$ary["ITAANSIBLEH-MNU-9010000013"]  = "Tower Dedicated information";
+$ary["ITAANSIBLEH-MNU-9010000013"]  = "Ansible Tower Dedicated information";
 $ary["ITAANSIBLEH-MNU-9010000014"]  = "virtualenv";
-$ary["ITAANSIBLEH-MNU-9010000015"]  = "Ansible execution environment directory built with virtualenv is displayed.\nChoose the ansible execution environment you want to run.\nIf it is not choose, the ansible execution environment installed at the time of Tower installation will be used.";
+$ary["ITAANSIBLEH-MNU-9010000015"]  = "Ansible execution environment directory built with virtualenv is displayed.\nChoose the ansible execution environment you want to run.\nIf it is not choose, the ansible execution environment installed at the time of Ansible Automation Controller installation will be used.";
 $ary["ITAANSIBLEH-MNU-9010000016"]  = "virtualenv";
 $ary["ITAANSIBLEH-MNU-9010000017"]  = "Ansible execution environment directory built with virtualenv is displayed.";
 $ary["ITAANSIBLEH-MNU-9010000018"]  = "It is a required item. (Item:{})";
 $ary["ITAANSIBLEH-MNU-9010000019"]  = "Host list";
-$ary["ITAANSIBLEH-MNU-9010000020"]  = "A list of Ansible Tower hosts. \nFor cluster configuration, register the host information of ansible tower that configures the cluster.";
+$ary["ITAANSIBLEH-MNU-9010000020"]  = "A list of Ansible Automation Controller hosts. \nFor cluster configuration, register the host information of Ansible Automation Controller that configures the cluster.";
 $ary["ITAANSIBLEH-MNU-9010000021"]  = "Proxy";
 $ary["ITAANSIBLEH-MNU-9010000022"]  = "Address";
 $ary["ITAANSIBLEH-MNU-9010000023"]  = "Proxy server address";
@@ -1290,21 +1301,31 @@ If the virtualenv environment doesnt exist or does not have ansible installed, t
 If nothing is input, the operation will be run with the ansible installed in the ansible server.
 [Max length 512 bytes]";
 $ary["ITAANSIBLEH-MNU-9010000029"]  = "virtualenv";
-$ary["ITAANSIBLEH-MNU-9010000030"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible tower server's /var/lib/awx/venv.
+$ary["ITAANSIBLEH-MNU-9010000030"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible Automation Controller server's /var/lib/awx/venv.
 If you want to run operations in the ansible execution environment constructed with virtualenv, please select the full path for \"virtualenv\".
-If nothing is selelcted, the ansible environment that was installed when installing Tower will be used.";
+If nothing is selelcted, the ansible environment that was installed when installing Ansible Automation Controller will be used.";
 $ary["ITAANSIBLEH-MNU-9010000031"]  = "Ansible engin virtualenv path";
-$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible tower virtualenv path";
+$ary["ITAANSIBLEH-MNU-9010000032"]  = "Ansible Automation Controller virtualenv path";
 $ary["ITAANSIBLEH-MNU-9010000033"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible server.";
-$ary["ITAANSIBLEH-MNU-9010000034"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible tower server's /var/lib/awx/venv.";
-$ary["ITAANSIBLEH-MNU-9010001000"]  = "Maintenance (view/update) can be performe Ansible Tower host information.\ncase of cluster configuration, it is necessary to register the host information of ansible tower that constitutes the cluster.";
+$ary["ITAANSIBLEH-MNU-9010000034"]  = "This item displays the full path of the ansible execution environment constructed with the virtualenv within the Ansible Automation Controller server's /var/lib/awx/venv.";
+$ary["ITAANSIBLEH-MNU-9010000035"] = "Ansible Automation Controller dedicated information";
+$ary["ITAANSIBLEH-MNU-9010000036"] = "Execution environment";
+$ary["ITAANSIBLEH-MNU-9010000037"] = "Displays the Execution environments constructed in the Ansible Automation Controller server.
+Please select the Execution environment you want to operate.
+If nothing is selected, \"Default execution environment\" will be selected by default.";
+$ary["ITAANSIBLEH-MNU-9010000038"]  = "ansible.cfg";
+$ary["ITAANSIBLEH-MNU-9010000039"] = "Uploads the ansible.cfg file.
+If the file hasn't been uploaded, the default value will be used.
+If a zip file containing ansible.cfg is uploaded to the role package list, the uploaded ansible.cfg will be overwritten.";
+$ary["ITAANSIBLEH-MNU-9010000040"]  = "Ansible Core dedicated information";
+$ary["ITAANSIBLEH-MNU-9010001000"]  = "Maintenance (view/update) can be performe Ansible Automation Controller host information.\ncase of cluster configuration, If constructed with a cluster configuration, register the node information(excluding the hop node within the cluster). If it is not constructed with a cluster configuration, register information for the target node (for 1 node).";
 $ary["ITAANSIBLEH-MNU-9010001001"]  = "No.";
-$ary["ITAANSIBLEH-MNU-9010001002"]  = "AnsibleTowerHostList";
-$ary["ITAANSIBLEH-MNU-9010001003"]  = "AnsibleTowerHostList";
+$ary["ITAANSIBLEH-MNU-9010001002"]  = "Ansible Common (AAC)host list";
+$ary["ITAANSIBLEH-MNU-9010001003"]  = "Ansible Common (AAC)host list";
 $ary["ITAANSIBLEH-MNU-9010001010"]  = "Host";
-$ary["ITAANSIBLEH-MNU-9010001011"]  = "It is host name (or IP address) of Ansible Tower.";
+$ary["ITAANSIBLEH-MNU-9010001011"]  = "It is host name (or IP address) of Ansible Automation Controller.";
 $ary["ITAANSIBLEH-MNU-9010001020"]  = "Authentication method";
-$ary["ITAANSIBLEH-MNU-9010001021"]  = "Select the authentication method when connecting to Ansible Tower with ssh.
+$ary["ITAANSIBLEH-MNU-9010001021"]  = "Select the authentication method when connecting to Ansible Automation Controller with ssh.
 -Password authentication
  Select ● in the login password management and enter the login password.
 -Key authentication (no passphrase)
@@ -1314,7 +1335,7 @@ $ary["ITAANSIBLEH-MNU-9010001021"]  = "Select the authentication method when con
 -Key authentication (key exchanged)
  No upload of ssh private key file is required.";
 $ary["ITAANSIBLEH-MNU-9010001030"]  = "User";
-$ary["ITAANSIBLEH-MNU-9010001031"]  = "User when connecting to Ansible Tower with ssh. Write permission to the project path (/var/lib/awx/projects) is required.";
+$ary["ITAANSIBLEH-MNU-9010001031"]  = "User when connecting to Ansible Automation Controller with ssh. Write permission to the project path (/var/lib/awx/projects) is required.";
 $ary["ITAANSIBLEH-MNU-9010001040"]  = "Password";
 $ary["ITAANSIBLEH-MNU-9010001041"]  = "Password for password authentication.";
 $ary["ITAANSIBLEH-MNU-9010001050"]  = "ssh private key file";
@@ -1326,7 +1347,22 @@ $ary["ITAANSIBLEH-MNU-9010001053"]  = "Enter the passphrase set in the ssh priva
 $ary["ITAANSIBLEH-MNU-9010001054"]  = "Ansible-vault encrypted ssh private key file.";
 $ary["ITAANSIBLEH-MNU-9010001055"]  = "ssh key credentials";
 $ary["ITAANSIBLEH-MNU-9010001060"]  = "isolated Tower";
-$ary["ITAANSIBLEH-MNU-9010001061"]  = "Select ● for isolated Tower.";
+$ary["ITAANSIBLEH-MNU-9010001061"]  = "If the target node is an isolated node for Ansible Tower or an execution node for Ansible Automation Controller, select \"●\"";
 $ary["ITAANSIBLEH-MNU-9010002000"]  = "Sensitive setting";
 $ary["ITAANSIBLEH-MNU-9010002010"]  = "If \"ON\", the specific value will not be displayed after registration.";
+$ary["ITAANSIBLEH-MNU-1200010000"] = "SCM Management Git link destination inforamtion";
+$ary["ITAANSIBLEH-MNU-1200010100"] = "Host name";
+$ary["ITAANSIBLEH-MNU-1200010101"] = "Input the Host name (or IP Address) needed in order to login to the Git repository from the Ansible Automation Controller with ssh protocol.
+A Git repository linked with the Ansible Automation Controller will be created to the Host installed by the Ansible backyard function.
+This item is required if the selected Execution engine is \"Ansible Automation Controller\".";
+$ary["ITAANSIBLEH-MNU-1200010200"] = "Linux account";
+$ary["ITAANSIBLEH-MNU-1200010300"] = "User";
+$ary["ITAANSIBLEH-MNU-1200010301"] = "Input the User needed in order to login to the Git repository from the Ansible Automation Controller with ssh protocol.
+This item is required if the selected Execution engine is \"Ansible Automation Controller\".";
+$ary["ITAANSIBLEH-MNU-1200010400"] = "ssh secret key file";
+$ary["ITAANSIBLEH-MNU-1200010401"] = "Input the public key  needed in order to login to the Git repository from the Ansible Automation Controller with ssh protocol.
+This item is required if the selected Execution engine is \"Ansible Automation Controller\".";
+$ary["ITAANSIBLEH-MNU-1200010500"] = "Passphrase";
+$ary["ITAANSIBLEH-MNU-1200010501"] = "Input the passphrase set to the ssh secret key file.";
+
 ?>

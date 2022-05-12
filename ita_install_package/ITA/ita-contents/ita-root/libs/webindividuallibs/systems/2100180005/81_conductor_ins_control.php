@@ -257,7 +257,6 @@ function holdReleaseOneOfNodeInstances($intNodeInstanceId){
             }
             throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
         }
-
     }
     catch (Exception $e){
         // エラーフラグをON
@@ -433,7 +432,11 @@ function conductorInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSON
         switch($strCommand){
             case "INFO":
                 $aryRetBody = conductorInstancePrint($intSymphonyInstanceId);
-                 
+                #1825
+                if( isset($aryRetBody[0]['CONDUCTOR_INSTANCE_INFO']['CONDUCTOR_CLASS_NO']) ){
+                    unset($aryRetBody[0]['CONDUCTOR_INSTANCE_INFO']['CONDUCTOR_CLASS_NO']);
+                }
+
                 $intUIErrorMsgSaveIndex = 4;
                 break;
             case "CANCEL":
@@ -458,7 +461,6 @@ function conductorInstanceControlFromRest($strCalledRestVer,$strCommand,$objJSON
                         "","","",$strExpectedErrMsgBodyForUI
                     );
                 }
-
                 break;
             default:
                 $intErrorPlaceMark = 1000;

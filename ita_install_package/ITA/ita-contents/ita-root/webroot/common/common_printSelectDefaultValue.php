@@ -107,9 +107,11 @@ try {
 
     //Sessionのログインチェックをして、ユーザが一致していたら処理を継続
     $auth = null;
+    $sessiontimeoutFlag = FALSE;
     saLoginExecute($auth, $objDBCA, null, false);
     $loginCheck = $auth->checkAuth();
     if($loginCheck == false){
+        $sessiontimeoutFlag = TRUE;
         throw new Exception($objMTS->getSomeMessage("ITACREPAR-ERR-6001"));
     }
     $loginUserName = $auth->getUsername();
@@ -249,8 +251,13 @@ try {
     } else {
         error_log($e->getMessage());
     }
+    $select_default_value_list = 'failed';
     header("Content-Type: text/html; charset=utf-8");
-    echo json_encode('failed');
+    if ( $sessiontimeoutFlag == TRUE ){
+        $ErrorMsg = $objMTS->getSomeMessage("ITAWDCH-MNU-1300006");
+        $select_default_value_list=["redirectOrderForHADACClient",["0","/common/common_auth.php?login",'status'],$ErrorMsg];
+    }
+    echo json_encode($select_default_value_list);
 }
 
 ?>

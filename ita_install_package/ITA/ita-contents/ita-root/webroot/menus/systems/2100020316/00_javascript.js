@@ -671,6 +671,54 @@ callback.prototype = {
     },
     //変数名----
 
+    //セッション切れの際に二重でセッション切れメッセージが出力されるのを避けるため、Mix2_1_vars_regから派生
+    //----Value変数 登録
+    Mix2_1_vars_reg2 : function( result ){
+        var tableTagAreaWrap = 'Mix2_Nakami';
+        var strTableTagPrintId = 'Mix2_1';
+        var containerClassName = 'fakeContainer_Register2';
+
+        var intMaxWidth = 650;
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                return;
+            }
+        }
+
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+            
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+            
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            
+            var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
+            $(objHtmlSetArea).html(resultContentTag);
+            addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
+
+            if( ary_result01[2] == "NORMAL_VAR_1"){
+                textPrintToBoxes('2','Mix2_1_10');
+            }
+            else{
+                textPrintToBoxes('1','Mix2_1_10');
+            }
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+    //変数名----
+
     //----Key変数 更新
     Mix1_1_key_vars_upd : function( result ){
         var tableTagAreaWrap = 'Mix1_Nakami';
@@ -749,6 +797,53 @@ callback.prototype = {
     },
     //カラム 変数名----
 
+    //セッション切れの際に二重でセッション切れメッセージが出力されるのを避けるため、Mix2_1_key_vars_regから派生
+    //----Key変数 登録
+    Mix2_1_key_vars_reg2 : function( result ){
+        var tableTagAreaWrap = 'Mix2_Nakami';
+        var strTableTagPrintId = 'Mix2_1';
+        var containerClassName = 'fakeContainer_Register2';
+
+        var intMaxWidth = 650;
+
+        var htmlSetExcute = true;
+        var errMsgBody = '';
+
+        var ary_result = getArrayBySafeSeparator(result);
+
+        if( !(ary_result instanceof Array) ){
+            //----配列ではなかった
+            //配列ではなかった----
+        }else{
+            if( ary_result[0]=='redirectOrderForHADACClient' ){
+                return;
+            }
+        }
+
+        if( ary_result[0] == "000" ){
+            var ary_element = getArrayBySafeSeparator(ary_result[2]);
+            
+            var ary_result01 = getArrayBySafeSeparator(ary_element[0]);
+            
+            var resultSetTargetSeq = ary_result01[0];
+            var resultContentTag = ary_result01[1];
+            
+            var objHtmlSetArea = $('#'+tableTagAreaWrap+' .'+resultSetTargetSeq).get()[0];
+            $(objHtmlSetArea).html(resultContentTag);
+            addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
+
+            if( ary_result01[2] == "NORMAL_VAR_1"){
+                textPrintToBoxes('2','Mix2_1_7');
+            }
+            else{
+                textPrintToBoxes('1','Mix2_1_7');
+            }
+        }else{
+            window.alert(getSomeMessage("ITAWDCC90101"));
+        }
+        showForDeveloper(result);
+    },
+    //カラム 変数名----
 
     //----メンバー変数名
     Mix1_1_val_chlVar_upd : function( result ){
@@ -1389,9 +1484,9 @@ function Mix1_1_pattern_upd(){
 }
 function Mix2_1_pattern_reg(){
     // すべての後選択関連カラムを消す
-    proxy.Mix2_1_key_vars_reg('');
+    proxy.Mix2_1_key_vars_reg2('');
     textPrintToBoxes('10','Mix2_1_7');
-    proxy.Mix2_1_vars_reg('');
+    proxy.Mix2_1_vars_reg2('');
     textPrintToBoxes('10','Mix2_1_10');
 
     var rangeId = 'Mix2_1';

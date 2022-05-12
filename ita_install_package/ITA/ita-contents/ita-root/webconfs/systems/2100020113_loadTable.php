@@ -105,16 +105,6 @@ Ansible(Legacy)作業管理
     $c->setOutputType('print_journal_table',$objOT);
     $table->addColumn($c);
 
-    //Ansible virtualenv
-    $c = new TextColumn('I_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000031"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000033"));//エクセル・ヘッダでの説明
-    $table->addColumn($c);
-
-    //Tower virtualenv
-    $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000032"));
-    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000034"));//エクセル・ヘッダでの説明
-    $table->addColumn($c);
-
     //シンフォニークラス
     $c = new TextColumn('SYMPHONY_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108120"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-108130"));//エクセル・ヘッダでの説明
@@ -142,7 +132,7 @@ Ansible(Legacy)作業管理
     $c->getOutputType('csv')->setVisible(false);
     $cg->addColumn($c);
 
-	$objVldt = new SingleTextValidator(1,256,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('I_PATTERN_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-109020"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-109030"));//エクセル・ヘッダでの説明
     $c->setValidator($objVldt);
@@ -204,6 +194,41 @@ Ansible(Legacy)作業管理
     $cg2->addColumn($c);
 
     $cg->addColumn($cg2);
+
+    // Ansible Engine利用情報
+    $cg3 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000040") );
+        /* Ansible virtualenv path*/
+        $c = new TextColumn('I_ENGINE_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000027"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000028"));
+        $cg3->addColumn($c);
+    $cg->addColumn($cg3);
+
+    // Tower利用情報
+    $cg4 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000013") );
+
+        // virtualenv
+        $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030"));
+        $cg4->addColumn($c);
+
+    $cg->addColumn($cg4);
+
+    // ansible automation controller利用情報
+    $cg5 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000035") );
+
+        // 実行環境
+        $c = new TextColumn('I_EXECUTION_ENVIRONMENT_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000036"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000037")); //エクセル・ヘッダでの説明
+        $cg5->addColumn($c);
+
+    $cg->addColumn($cg5);
+        
+    $c = new FileUploadColumn('I_ANSIBLE_CONFIG_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000038"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000039"));//エクセル・ヘッダでの説明
+    $c->setFileHideMode(true);
+    $c->setHiddenMainTableColumn(true);
+    $cg->addColumn($c);
+
     $table->addColumn($cg);
 
     //----オペレーション
@@ -220,7 +245,7 @@ Ansible(Legacy)作業管理
     $cg->addColumn($c);
 
 
-	$objVldt = new SingleTextValidator(1,256,false);
+    $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('I_OPERATION_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-109070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-109080"));//エクセル・ヘッダでの説明
 	$c->setValidator($objVldt);

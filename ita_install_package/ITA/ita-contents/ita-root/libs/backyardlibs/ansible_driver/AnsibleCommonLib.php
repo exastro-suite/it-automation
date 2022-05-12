@@ -1495,6 +1495,66 @@ class InventryFileAddOptionContlorl {
         // 4:[ブラウザからの新規登録(SQLトランザクション無し)
         switch($ordMode) {
         case 0:
+            switch($strModeId) {
+            case "DTUP_singleRecRegister":
+            case "DTUP_singleRecUpdate":
+                $FileSet = false;
+                $StrSet  = false;
+                // ファイル削除がチェックされているか判定
+                if($AftDelFlag == "on") {
+                    $FileSet = false;
+                } else {
+                    // 新規ファイルがアップロードされているか判定
+                    if($AftUpLoadFile == "") {
+                        // 変更前にファイルがアップロードされているか判定
+                        if($BefVarsEntryFile == "") {
+                            $FileSet = false;
+                        } else {
+                            $FileSet = true;
+                        }
+                    } else {
+                        $FileSet = true;
+                    }
+                }
+                // 具体値が設定されているか判定
+                if($AftVarsEntry     == "") {
+                    // SENSITIVE設定がONか判定
+                    if($AftSensitiveFlag == 2) {
+                         // 変更前のSENSITIVE設定がONか判定
+                        if($BefSensitiveFlag == 2) {
+                            // 変更前の具体値が設定されているか判定
+                            if($BefVarsEntry == "") {
+                                $StrSet  = false;
+                            } else {
+                                $StrSet  = true;
+                            }
+                        } else {
+                            // 具体値は空白になる
+                            $StrSet  = false;
+                        }
+                    } else {
+                        $StrSet  = false;
+                    }
+                } else {
+                    $StrSet  = true;
+                }
+                if(($FileSet === true) && ($StrSet === true)) {
+                    return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                }
+                break;
+            case "DTUP_singleRecDelete":
+                if($modeValue_sub == "off") {
+                    if(($BefVarsEntry     != "") &&
+                       ($BefVarsEntryFile != "")) {
+                        $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55295");
+                        return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                    }
+                }
+                break;
+            default:
+                break;
+            }
+            break;
         case 1:
         case 2:
         case 3:
@@ -1578,4 +1638,11 @@ class InventryFileAddOptionContlorl {
         $retStrBody          = "";
         return [$retBool,$boolSystemErrorFlag,$retStrBody];
     }
+    function getInputDataTempDir($EcecuteNo, $DriverName) {
+        global $root_dir_path;
+        $ary["BASE_DIR"] = sprintf("%s/temp/ansible_driver_temp",$root_dir_path);
+        $ary["DIR_NAME"] = sprintf("%s/temp/ansible_driver_temp/%s_%010s",$root_dir_path, $DriverName, $EcecuteNo);
+        return $ary;
+    }
+
 ?>
