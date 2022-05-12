@@ -1,11 +1,82 @@
+Exastro IT Automation 1.10.0 (2022-05-XX)
+==================================================
+
+Installer
+---------------
+ * Updated to Version 1.10.0 #1761
+ * Added a restart for php-fpm if the user is using RHEL8 type OS. #1818
+ * Reworked some of the config default values when installing.(Apache) #1885
+ * Reworked some of the sudoers settings when installing. #1886
+
+General
+---------------
+ * Implemented measures for CSRF #1608
+ * Added HttpOnly to Cookies. #1609
+ * Added Samesite settings to Cookies. #1610
+ * Fixed an issue that would occur when pressing a button when the session time ran out. #1631
+ * Fixed an issue where "WARNING : PHP 7.2 have reached its "End of Life"" would be displayed. #1678
+ * Fixed an issue where any uploaded files will be displayed when they are registered with the "Delete file" box checked. #1765
+ * Made it so the log out activity will be displayed in the login output log. #1769
+ * Fixed an issue that would occur when duplicating records with ssh secret key files attached to them. #1797
+ * Reworked the Excel file names. #1892
+ * Configured Permission settings for directory creation operations. #1907
+ * Improved the Mail address validation check. #1910
+
+RestAPI
+---------------
+ * Fixed an issue where user would not be able to register icons when registering Menu groups using RestAPI. #1861
+
+Management console
+---------------
+ * Changed the Version number in the Version information menu to ".10.0". #1760
+ * Added role/menu link list data for OASE 1.6. #1866
+
+Export/Import
+---------------
+ * Fixed an issue that would occur where the menu import operation would end successfully but the records would not be registered. #1751
+ * Fixed an issue where data would be output multiple times when exporting parameter reference menus using the Excel bulk export function. #1805
+
+Conductor
+---------------
+ * Made it so operations that are paused have their status displayed in the operation list. #1120
+ * Fixed an issue where the "Emergency stop" in the Conductor Confirmation menu would not be displayed. #1817
+ * Adjusted some of the RESTAPI operation instance items. #1825
+ * Fixed an issue where pressing the "Emergency stop" button on one of the nodes in a paralell-branch would cause the other node to be stuck "Executing". #1834
+
+Ansible-Driver
+---------------
+ * Adjusted the installer settings in order to fit the Ansible Automation Controller better #1582
+ * Fixed an issue where an validation error would occur when registering specific values (Strings and files) from pressing the "Duplicate" button. #1764
+ * Fixed an issue where some of the ITA variables would not function as variables in the pioneer driver. #1766
+ * Fixed an error that would occur when running ansible to the key authentication host after the execution user was changed. #1835
+ * Improved the description in the variable translation table. #1840
+ * Fixed an issue where the backyard log would output PHP notice messages.。 #1849
+ * Fixed an issue where if the file names of files uploaded to the file list or template list contained either a space or a paranthese would cause an error when executing them.#1854
+ * Fixed an issue where connecting to a different tower after connecting to the Tower in the virtualenv settings would cause an "ID Conversion" error for any past virtualenv items. #1915
+ * [Collect function]Fixed an issue where data set in parameter sheets in the Exastro collect function would not be displayed properly. #1767
+ * [Collect function]Fixed an issue where parameter values collected from vertical menus would not be correct. #1780
+ * [Collect function]Fixed an issue where execution results would output "null" even if the RESTAPI execution was executed successfully. #1845
+ * [Collect function]Changed an issue where the REST method settings would not work and connect through IP Address. #1893
+ * [Collect function]Changed an issue where the user could not collect if the user only wanted to collect array elements. #1897
+
+Terraform-Driver
+---------------
+ * Improved how variables with multiple input values are handled. #723
+ * Improved the "HCL setting" items in the Substitute value auto-registration. #1777
+ * Fixed an issue where records would not be displayed if the user moved to the Movement list by clicking a button in the Workspaces list menu. #1808
+
+
+*******************************************************************************************************
+
+
 Exastro IT Automation 1.9.1 (2022-2-2)
 ==================================================
 
-インストーラ
+Installer
 ---------------
- * Updated to Version 1.9.0.1 #1782
+ * Updated to Version 1.9.1 #1782
 
-エクスポート/インポート
+Export/Import
 ---------------
 * Fixed an issue where a system error would occur when the "history" button in the Export/Import list" menu was pressed. #1768
 
