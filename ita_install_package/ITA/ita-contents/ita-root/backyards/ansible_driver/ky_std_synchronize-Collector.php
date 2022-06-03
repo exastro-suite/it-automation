@@ -1254,13 +1254,14 @@
                                                                         }
                                                                     }
                                                                     $insertData[$parmNO]=$value;
-                                                                    if( gettype( $value ) == "NULL" || $value == "" ) $insertNullflg[$parmNO] = 1;
+                                                                    if( gettype( $value ) == "NULL" || $value == "" ) $tmpFilternullflg[$intColmun][$parmNO] = 1;
                                                                 //項目名：リピート部分[X]
                                                                 }elseif( $tmpColname == $pramName ){
                                                                     $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
 
                                                                     $insertData[$parmNO]=$value;
-                                                                    if(gettype( $value ) == "NULL" || $value == ""  ) $insertNullflg[$parmNO] = 1;
+                                                                    $intColmun = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) )-1; 
+                                                                    if( gettype( $value ) == "NULL" || $value == "" ) $tmpFilternullflg[$intColmun][$parmNO] = 1;
                                                                 //その他
                                                                 }else{
                                                                     if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]=null;
@@ -1379,10 +1380,6 @@
                                                                             //種別、オペレーション、ホスト、代入順序　#1050,1051
                                                                             if( isset($insertData[0]) && isset($insertData[3]) && isset($insertData[9]) && isset($insertData[10]) ){
                                                                                 $tmpFilter[$intColmun] = $insertData;
-
-                                                                                if( $insertNullflg != array() ){
-                                                                                    $tmpFilternullflg[$intColmun] = $insertNullflg;
-                                                                                }
                                                                                 
                                                                                 // #449 ファイルアップロードカラム対応
                                                                                 if( $UpdateFileData != array() ){
@@ -1396,7 +1393,7 @@
 
                                                                                     $tmpFilter['UPLOAD_FILE'][$intColmun] = $UpdateFileData;
                                                                                 }
-                                                                                $intColmun++;                                                                                
+
                                                                             }
 
                                                                         }
