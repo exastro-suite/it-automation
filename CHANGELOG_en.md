@@ -1,4 +1,4 @@
-Exastro IT Automation 1.10.0 (2022-05-12)
+Exastro IT Automation 1.10.0 (2022-06-08)
 ==================================================
 
 Installer
@@ -58,6 +58,7 @@ Ansible-Driver
  * [Collect function]Fixed an issue where execution results would output "null" even if the RESTAPI execution was executed successfully. #1845
  * [Collect function]Changed an issue where the REST method settings would not work and connect through IP Address. #1893
  * [Collect function]Changed an issue where the user could not collect if the user only wanted to collect array elements. #1897
+ * [Collect function]Fixed an issue where blank (null) collection data would not be displayed correctly in parameter sheets. #1936
 
 Terraform-Driver
 ---------------
