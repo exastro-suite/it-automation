@@ -1086,7 +1086,7 @@ class CheckAnsibleRoleFiles {
         if(($in_main_yml === true) && ($main_yml===false)){
             // $ary[70003] = "main.ymlファイルがありません。(ディレクトリ:{})";
             $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-70003",
-                                                        array('./roles/' .
+                                                        array('./roles' .
                                                                $in_rolename . '/' .
                                                                $in_dirname . '/'));
             $this->SetLastError(basename(__FILE__),__LINE__,$msgstr);
@@ -1423,6 +1423,9 @@ class CheckAnsibleRoleFiles {
                 continue;
             }
             if (basename($dir) == "tasks") {
+                if($dir == $roles_dir."tasks") {
+                    continue;
+                }
                 $role_dir_list[] = preg_replace('/\/tasks$/','', $dir);
             }
         }
