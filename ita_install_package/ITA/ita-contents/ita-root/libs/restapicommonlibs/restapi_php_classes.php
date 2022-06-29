@@ -392,6 +392,7 @@ class RestAPIInfoAdmin{
             // リクエストで送られてきた情報
             $strHeaderAuthorization     = $this->aryReqHeaderData['authorization'];
             $strHeaderDate              = $this->aryReqHeaderData['date'];
+            $strHeaderDate              = escapeshellarg($strHeaderDate);
 
             $strRequestURIOnRest        = $this->strRequestURIOnRest;
 
@@ -406,7 +407,7 @@ class RestAPIInfoAdmin{
             }
             else{
                 $tmpStrStringToSignOnRest = $strHeaderDate . $strCRLF . $strRequestURIOnRest;
-                $tmpStrSignatureOnRest = shell_exec( 'echo -e -n "' . $tmpStrStringToSignOnRest . '" | openssl dgst -sha256 -binary -hmac ' . $strSecretAccessKeyOnRest . ' | openssl base64' );
+                $tmpStrSignatureOnRest = shell_exec( 'echo -e -n ' . $tmpStrStringToSignOnRest . ' | openssl dgst -sha256 -binary -hmac ' . $strSecretAccessKeyOnRest . ' | openssl base64' );
 
                 if( $tmpStrSignatureOnRest!==$aryTempData[1]."\n") {
                     //----一致しなかった
