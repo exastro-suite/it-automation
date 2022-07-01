@@ -126,7 +126,6 @@
             // Signature作成              //
             ////////////////////////////////
             $Date = date('Y/m/d H:i:s', time());
-
             $CRLF = "\r\n";
             $StringToSign = $Date . $CRLF . $RequestURI;
             $Signature = shell_exec( 'echo -e -n "' . $StringToSign . '" | openssl dgst -sha256 -binary -hmac ' . $SecretAccessKey . ' | openssl base64' );
