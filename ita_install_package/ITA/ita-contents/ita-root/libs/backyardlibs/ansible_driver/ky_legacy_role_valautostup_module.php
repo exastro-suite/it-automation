@@ -157,11 +157,15 @@
         // テーブル名と主キーの配列
         $lv_tableNameToPKeyNameList    = array();
 
+        // 縦メニューテーブルのカラム情報配列
+        $lv_tableVerticalMenuList      = array();
+
         $ret = readValAssign($lv_tableNameToMenuIdList,
                              $lv_FileUploadCloumnusetableNameToMenuIdList,
                              $lv_table_nameTOaccess_auth_flg,
                              $lv_tabColNameToValAssRowList,
-                             $lv_tableNameToPKeyNameList);
+                             $lv_tableNameToPKeyNameList,
+                             $lv_tableVerticalMenuList);
         if($ret === false) {
             $error_flag = 1;
             $errorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-90032");
@@ -220,6 +224,12 @@
                     $lva_FileUpLoadColumnFilePath_list,
                     $warning_flag);
 
+        ////////////////////////////////////////////////////////////////////////////////
+        //   縦メニューのカラムを取得する
+        ////////////////////////////////////////////////////////////////////////////////
+        GetVerticalMenuColumnList($lv_tableVerticalMenuList);
+
+
        // 不要となった配列変数を開放
        unset($lv_tableNameToSqlList);
        unset($lv_table_nameTOaccess_auth_flg);
@@ -270,6 +280,14 @@
 
         // 作業対象ホストに登録が必要な配列初期化
         $lv_phoLinkList          = array();
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //  縦メニューでまとまり全てNULLの場合、代入値管理への登録・更新を対象外とする
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        checkVerticalMenuVarsAssignData($lv_tableVerticalMenuList, $lv_varsAssList);
+        checkVerticalMenuVarsAssignData($lv_tableVerticalMenuList, $lv_arrayVarsAssList);
+
+        unset($lv_tableVerticalMenuList);
 
         ////////////////////////////////////////////////////////////////////////////////
         //   一般変数・複数具体値変数を紐付けている紐付メニューの具体値を代入値管理に登録
@@ -709,6 +727,8 @@
 //                                           [テーブル名][カラム名][]=>array("代入値自動登録設定のカラム名"=>値)
 //   &$inout_tableNameToPKeyNameList:    テーブル主キー名配列
 //                                           [テーブル名]=主キー名
+//   &$inout_tableVerticalMenuList:      縦メニューテーブルのカラム情報配列
+//                                           [テーブル名]=array() // 初期化
 // 戻り値
 //   True:正常　　False:異常
 ////////////////////////////////////////////////////////////////////////////////
@@ -716,7 +736,8 @@ function readValAssign(&$inout_tableNameToMenuIdList,
                        &$input_FileUploadCloumnusetableNameToMenuIdList,
                        &$input_table_nameTOaccess_auth_flg,
                        &$inout_tabColNameToValAssRowList,
-                       &$inout_tableNameToPKeyNameList
+                       &$inout_tableNameToPKeyNameList,
+                       &$inout_tableVerticalMenuList
                        ) {
 
     global    $db_model_ch;
@@ -750,7 +771,12 @@ function readValAssign(&$inout_tableNameToMenuIdList,
 
     $sql = $sql .     "   TBL_B.DISUSE_FLAG  AS COL_DISUSE_FLAG                       ,  \n";
     $sql = $sql .     "   TBL_A.COL_TYPE                                              ,  \n";
-   
+
+    // 縦メニュー固有情報
+    $sql = $sql .     "   TBL_F.START_COL_NAME                                        ,  \n";
+    $sql = $sql .     "   TBL_F.COL_CNT                                               ,  \n";
+    $sql = $sql .     "   TBL_F.REPEAT_CNT                                            ,  \n";
+
     // 代入値管理データ連携フラグ
     $sql = $sql .     "   TBL_A.NULL_DATA_HANDLING_FLG                                ,  \n";
 
@@ -993,8 +1019,10 @@ function readValAssign(&$inout_tableNameToMenuIdList,
     $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_D.MENU_ID)                  \n";
     $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_LIST   TBL_E ON                          \n";
     $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_E.MENU_ID)                  \n";
+    $sql = $sql .     "   LEFT JOIN F_COL_TO_ROW_MNG   TBL_F ON                          \n";
+    $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_F.TO_MENU_ID)               \n";
     $sql = $sql .     " WHERE                                                            \n";
-    $sql = $sql .     "   TBL_A.DISUSE_FLAG='0'                                          \n";
+    $sql = $sql .     "   TBL_A.DISUSE_FLAG='0' AND (TBL_F.DISUSE_FLAG='0' OR TBL_F.DISUSE_FLAG IS NULL) \n";
     $sql = $sql .     " ORDER BY TBL_A.COLUMN_ID                                         \n";
 
 
@@ -1171,6 +1199,13 @@ function readValAssign(&$inout_tableNameToMenuIdList,
             break;
         }
 
+        // 縦メニューのカラムかを判定
+        $vertical_menu = false;
+        if($row['COL_CNT'] != ""){
+            $vertical_menu = true;
+            $inout_tableVerticalMenuList[$row['TABLE_NAME']] = array();
+        }
+
         $inout_tabColNameToValAssRowList[$row['TABLE_NAME']][$row['COL_NAME']][] = 
             array(
                 'COLUMN_ID'                         => $row['COLUMN_ID'],
@@ -1201,6 +1236,10 @@ function readValAssign(&$inout_tableNameToMenuIdList,
                 // 代入値管理・作業対象ホストのアクセス許可ロールは、
                 // オペレーション・機器一覧・Movement一覧のアクセス許可ロールのAND値の設定に変更
                 'ACCESS_AUTH'                       => $row['ACCESS_AUTH'],
+                'START_COL_NAME'                    => $row['START_COL_NAME'],
+                'COL_CNT'                           => $row['COL_CNT'],
+                'REPEAT_CNT'                        => $row['REPEAT_CNT'],
+                'VERTICAL_MENU'                     => $vertical_menu,
             );
 
         // テーブルの主キー名退避
@@ -1835,7 +1874,7 @@ function makeVarsAssignData($in_table_name,
         $ret = validateValueTypeColValue($in_col_val,
                                          $in_null_data_handling_flg,
                                          $in_menu_id,$in_row_id,$in_col_list['COL_TITLE']);
-        if($ret === false) {
+        if($ret === false && $in_col_list['VERTICAL_MENU'] === false) {
             return;
         }
 
@@ -1863,7 +1902,11 @@ function makeVarsAssignData($in_table_name,
                                      $in_menu_id,
                                      $in_col_list['COLUMN_ID'],
                                      "Value",
-                                     $in_row_id);
+                                     $in_row_id,
+                                     $in_col_list['START_COL_NAME'],
+                                     $in_col_list['COL_CNT'],
+                                     $in_col_list['REPEAT_CNT'],
+                                     $in_col_list['VERTICAL_MENU']);
     }
 
     if($in_col_list['COL_TYPE'] == DF_COL_TYPE_KEY ||
@@ -1872,7 +1915,7 @@ function makeVarsAssignData($in_table_name,
         {
             //具体値が空白か判定
             $ret = validateKeyTypeColValue($in_col_val,$in_menu_id,$in_row_id,$in_col_list['COL_TITLE']);
-            if($ret === false) {
+            if($ret === false && $in_col_list['VERTICAL_MENU'] === false) {
                 // 空白の場合処理対象外
                 return;
             }
@@ -1902,7 +1945,11 @@ function makeVarsAssignData($in_table_name,
                                      $in_menu_id,
                                      $in_col_list['COLUMN_ID'],
                                      "Key",
-                                     $in_row_id);
+                                     $in_row_id,
+                                     $in_col_list['START_COL_NAME'],
+                                     $in_col_list['COL_CNT'],
+                                     $in_col_list['REPEAT_CNT'],
+                                     $in_col_list['VERTICAL_MENU']);
     }
 }
 
@@ -1962,7 +2009,11 @@ function checkAndCreateVarsAssignData($in_table_name,
                                       $in_menu_id,
                                       $in_column_id,
                                       $keyValueType,
-                                      $in_row_id) {
+                                      $in_row_id,
+                                      $in_start_col_name,
+                                      $in_col_cnt,
+                                      $in_repeat_cnt,
+                                      $in_vertical_menu){
 
     global $log_level;
     global $objMTS;
@@ -2027,7 +2078,11 @@ function checkAndCreateVarsAssignData($in_table_name,
                                      'ACCESS_AUTH'       => $in_access_auth,
                                      'SENSITIVE_FLAG'    => $in_sensitive_flg,
                                      'VAR_TYPE'          => $in_vars_attr,
-                                     'STATUS'            => $chk_status);
+                                     'STATUS'            => $chk_status,
+                                     'START_COL_NAME'    => $in_start_col_name,
+                                     'COL_CNT'           => $in_col_cnt,
+                                     'REPEAT_CNT'        => $in_repeat_cnt,
+                                     'VERTICAL_MENU'     => $in_vertical_menu);
         break;
     case GC_VARS_ATTR_M_ARRAY:         // 多次元変数
         //多次元変数
@@ -2089,7 +2144,11 @@ function checkAndCreateVarsAssignData($in_table_name,
                                            'ACCESS_AUTH'           => $in_access_auth,
                                            'SENSITIVE_FLAG'        => $in_sensitive_flg,
                                            'VAR_TYPE'              => $in_vars_attr,
-                                           'STATUS'                => $chk_status);
+                                           'STATUS'                => $chk_status,
+                                           'START_COL_NAME'        => $in_start_col_name,
+                                           'COL_CNT'               => $in_col_cnt,
+                                           'REPEAT_CNT'            => $in_repeat_cnt,
+                                           'VERTICAL_MENU'         => $in_vertical_menu);
         break;
     }
 }
@@ -4046,5 +4105,132 @@ function CreateFileUpLoadMenuColumnFileDirectory($befFileDel,$AftFileCpy,$Pkey,$
         }
     }
     return true;
+}
+function GetVerticalMenuColumnList(&$inout_tableVerticalMenuList){
+
+    foreach(array_keys($inout_tableVerticalMenuList) as $table_name){
+
+        $sql = " DESC $table_name \n";
+        $sqlUtnBody = $sql;
+        $arrayUtnBind = array();
+        $objQuery = recordSelect($sqlUtnBody, $arrayUtnBind);
+
+        while($row = $objQuery->resultFetch()) {
+            switch($row['Field']){
+            case 'ROW_ID':
+            case 'HOST_ID':
+            case 'OPERATION_ID_DISP':
+            case 'OPERATION_ID_NAME_DISP':
+            case 'OPERATION_ID':
+            case 'BASE_TIMESTAMP':
+            case 'LAST_EXECUTE_TIMESTAMP':
+            case 'OPERATION_NAME':
+            case 'OPERATION_DATE':
+            case 'ACCESS_AUTH':
+            case 'NOTE':
+            case 'DISUSE_FLAG':
+            case 'LAST_UPDATE_TIMESTAMP':
+            case 'LAST_UPDATE_USER':
+                continue 2;
+            }
+            $inout_tableVerticalMenuList[$table_name][] = $row['Field'];
+        }
+        unset($objQuery);
+    }
+}
+function checkVerticalMenuVarsAssignData($lv_tableVerticalMenuList, &$inout_varsAssList){
+
+    $chk_vertical_col = array();
+    $chk_vertical_val = array();
+
+    foreach($lv_tableVerticalMenuList as $tbl_name => $col_list){
+        foreach($col_list as $col_name){
+            foreach($inout_varsAssList as $index => $vars_ass_list){
+                // 縦メニュー以外はチェック対象外
+                if($tbl_name != $vars_ass_list['TABLE_NAME']){
+                    continue;
+                }
+
+                if($col_name != $vars_ass_list['COL_NAME']){
+                    continue;
+                }
+
+                // テーブル名とROW_IDをキーとした代入値チェック用の辞書を作成
+                if(array_key_exists($tbl_name, $chk_vertical_val) == false){
+                    $chk_vertical_val[$tbl_name] = array();
+                }
+
+                if(array_key_exists($vars_ass_list['COL_ROW_ID'], $chk_vertical_val[$tbl_name]) == false){
+                    $chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['CHK_START']  = false;
+                    $chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['NULL_VAL']   = array();
+                }
+
+
+                // リピート開始カラムをチェック
+                if($col_name == $vars_ass_list['START_COL_NAME']){
+                    $chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['CHK_START'] = true;
+
+                    if(array_key_exists($tbl_name, $chk_vertical_col) == false){
+                        $chk_vertical_col[$tbl_name]['COL_CNT']        = 0;
+                        $chk_vertical_col[$tbl_name]['REPEAT_CNT']     = 0;
+                        $chk_vertical_col[$tbl_name]['COL_CNT_MAX']    = $vars_ass_list['COL_CNT'];
+                        $chk_vertical_col[$tbl_name]['REPEAT_CNT_MAX'] = $vars_ass_list['REPEAT_CNT'];
+                    }
+                }
+
+                // リピート開始前の場合は次のカラムへ以降
+                if($chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['CHK_START'] == false){
+                    continue;
+                }
+
+                // 具体値が NULL の場合は、代入値管理登録データのインデックスを保持
+                if($vars_ass_list['VARS_ENTRY'] == ""){
+                    $chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['NULL_VAL'][] = $index;
+                }
+            }
+
+            // リピート開始前の場合は次のカラムへ以降
+            if(array_key_exists($tbl_name, $chk_vertical_col) == false){
+                continue;
+            }
+
+            // チェック完了済みカラムをカウントアップ
+            $chk_vertical_col[$tbl_name]['COL_CNT']++;
+
+            // まとまり単位のチェック完了時の場合
+            if($chk_vertical_col[$tbl_name]['COL_CNT'] >= $chk_vertical_col[$tbl_name]['COL_CNT_MAX']){
+
+                // まとまり単位の具体値が全て NULL の場合は代入値管理への登録対象外とする
+                if(array_key_exists($tbl_name, $chk_vertical_val) == true){
+                    foreach($chk_vertical_val[$tbl_name] as $row_id => $vertical_val_info){
+                        if(count($vertical_val_info['NULL_VAL']) >= $chk_vertical_col[$tbl_name]['COL_CNT_MAX']){
+                            foreach($vertical_val_info['NULL_VAL'] as $index){
+                                $inout_varsAssList[$index]['STATUS'] = false;
+                            }
+                        }
+
+                        // 保持している代入値管理登録データのインデックスをリセット
+                        unset($chk_vertical_val[$tbl_name][$row_id]['NULL_VAL']);
+                        $chk_vertical_val[$tbl_name][$row_id]['NULL_VAL'] = array();
+                    }
+                }
+
+                // リピート数をカウントアップ
+                $chk_vertical_col[$tbl_name]['REPEAT_CNT']++;
+
+                // チェック完了済みカラムのカウントをリセット
+                $chk_vertical_col[$tbl_name]['COL_CNT'] = 0;
+            }
+
+            // リピート終了済みの場合は以降のカラムはチェックしない
+            if($chk_vertical_col[$tbl_name]['REPEAT_CNT'] >= $chk_vertical_col[$tbl_name]['REPEAT_CNT_MAX']){
+                break;
+            }
+        }
+    }
+
+    unset($chk_vertical_col);
+    unset($chk_vertical_val);
+
 }
 ?>
