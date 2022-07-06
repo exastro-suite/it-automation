@@ -529,6 +529,7 @@
         $lva_vars_ass_list           = array();
         $lva_vars_ass_chk_list       = array();
         $lva_table_nameTOPkeyname_list = array();
+        $ina_table_vertical_menu_list = array();
 
         $ret = readValAssDB($vg_driver_name,
                             $lv_val_assign_tbl,
@@ -542,7 +543,8 @@
                             $lva_table_colnameTOid_list, 
                             $lva_table_col_list,         
                             $lva_error_column_id_list,
-                            $lva_table_nameTOPkeyname_list);
+                            $lva_table_nameTOPkeyname_list,
+                            $ina_table_vertical_menu_list);
         if($ret === false){
             $error_flag = 1;
      
@@ -611,6 +613,9 @@
         unset($lva_child_vars_ass_chk_list);
         unset($lva_table_nameTOaccess_auth_flg);
 
+        GetVerticalMenuColumnList($ina_table_vertical_menu_list,
+                                  $ina_vertical_menu_column_list);
+
         // メモリ最適化
         $ret = gc_mem_caches();
 
@@ -660,6 +665,100 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-70018");
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        //  縦メニューでまとまり全てNULLの場合、代入値管理への登録・更新を対象外とする
+        ///////////////////////////////////////////////////////////////////////////////////////////
+        $chk_vertical_col = array();
+        $chk_vertical_val = array();
+        foreach($ina_vertical_menu_column_list as $tbl_name => $col_list){
+            foreach($col_list as $col_name){
+                foreach($lva_vars_ass_list as $index => $vars_ass_list){
+                    // 縦メニュー以外はチェック対象外
+                    if($tbl_name != $vars_ass_list['TABLE_NAME']){
+                        continue;
+                    }
+
+                    if($col_name != $vars_ass_list['COL_NAME']){
+                        continue;
+                    }
+
+                    // テーブル名とROW_IDをキーとした代入値チェック用の辞書を作成
+                    if(array_key_exists($tbl_name, $chk_vertical_val) == false){
+                        $chk_vertical_val[$tbl_name] = array();
+                    }
+
+                    if(array_key_exists($vars_ass_list['COL_ROW_ID'], $chk_vertical_val[$tbl_name]) == false){
+                        $chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['CHK_START']  = false;
+                        $chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['NULL_VAL']   = array();
+                    }
+
+
+                    // リピート開始カラムをチェック
+                    if($col_name == $vars_ass_list['START_COL_NAME']){
+                        $chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['CHK_START'] = true;
+
+                        if(array_key_exists($tbl_name, $chk_vertical_col) == false){
+                            $chk_vertical_col[$tbl_name]['COL_CNT']        = 0;
+                            $chk_vertical_col[$tbl_name]['REPEAT_CNT']     = 0;
+                            $chk_vertical_col[$tbl_name]['COL_CNT_MAX']    = $vars_ass_list['COL_CNT'];
+                            $chk_vertical_col[$tbl_name]['REPEAT_CNT_MAX'] = $vars_ass_list['REPEAT_CNT'];
+                        }
+                    }
+
+                    // リピート開始前の場合は次のカラムへ以降
+                    if($chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['CHK_START'] == false){
+                        continue;
+                    }
+
+                    // 具体値が NULL の場合は、代入値管理登録データのインデックスを保持
+                    if($vars_ass_list['VARS_ENTRY'] == ""){
+                        $chk_vertical_val[$tbl_name][$vars_ass_list['COL_ROW_ID']]['NULL_VAL'][] = $index;
+                    }
+                }
+
+                // リピート開始前の場合は次のカラムへ以降
+                if(array_key_exists($tbl_name, $chk_vertical_col) == false){
+                    continue;
+                }
+
+                // チェック完了済みカラムをカウントアップ
+                $chk_vertical_col[$tbl_name]['COL_CNT']++;
+
+                // まとまり単位のチェック完了時の場合
+                if($chk_vertical_col[$tbl_name]['COL_CNT'] >= $chk_vertical_col[$tbl_name]['COL_CNT_MAX']){
+
+                    // まとまり単位の具体値が全て NULL の場合は代入値管理への登録対象外とする
+                    if(array_key_exists($tbl_name, $chk_vertical_val) == true){
+                        foreach($chk_vertical_val[$tbl_name] as $row_id => $vertical_val_info){
+                            if(count($vertical_val_info['NULL_VAL']) >= $chk_vertical_col[$tbl_name]['COL_CNT_MAX']){
+                                foreach($vertical_val_info['NULL_VAL'] as $index){
+                                    $lva_vars_ass_list[$index]['STATUS'] = false;
+                                }
+                            }
+
+                            // 保持している代入値管理登録データのインデックスをリセット
+                            unset($chk_vertical_val[$tbl_name][$row_id]['NULL_VAL']);
+                            $chk_vertical_val[$tbl_name][$row_id]['NULL_VAL'] = array();
+                        }
+                    }
+
+                    // リピート数をカウントアップ
+                    $chk_vertical_col[$tbl_name]['REPEAT_CNT']++;
+
+                    // チェック完了済みカラムのカウントをリセット
+                    $chk_vertical_col[$tbl_name]['COL_CNT'] = 0;
+                }
+
+                // リピート終了済みの場合は以降のカラムはチェックしない
+                if($chk_vertical_col[$tbl_name]['REPEAT_CNT'] >= $chk_vertical_col[$tbl_name]['REPEAT_CNT_MAX']){
+                    break;
+                }
+            }
+        }
+
+        unset($chk_vertical_col);
+        unset($chk_vertical_val);
 
         ////////////////////////////////////////////////////////////////////////////////
         //  一般変数を紐付けている紐付メニューの具体値を代入値管理に登録
@@ -1026,6 +1125,8 @@
     //                                   [代入値紐付主キー]=1
     //   &$ina_table_nameTOPkeyname_list:テーブル主キー名配列
     //                                   [テーブル名]=主キー名
+    //   &$ina_table_vertical_menu_list: 縦メニューテーブル名配列
+    //                                   [テーブル名]=MENU_ID
     // 戻り値
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
@@ -1041,7 +1142,8 @@
                           &$ina_table_colnameTOid_list, 
                           &$ina_table_col_list,         
                           &$ina_error_column_id_list,
-                          &$ina_table_nameTOPkeyname_list)
+                          &$ina_table_nameTOPkeyname_list,
+                          &$ina_table_vertical_menu_list)
     {
         global    $db_model_ch;
         global    $objMTS;
@@ -1076,6 +1178,9 @@
         $sql = $sql .     "   TBL_A.NULL_DATA_HANDLING_FLG                                ,  \n";
         // 該当作業パターンの作業パターン詳細の登録確認
         $sql = $sql .     "   TBL_A.PATTERN_ID                                            ,  \n";
+        $sql = $sql .     "   TBL_F.START_COL_NAME                                        ,  \n";
+        $sql = $sql .     "   TBL_F.COL_CNT                                               ,  \n";
+        $sql = $sql .     "   TBL_F.REPEAT_CNT                                            ,  \n";
         $sql = $sql .     "   (                                                              \n";
         $sql = $sql .     "     SELECT                                                       \n";
         $sql = $sql .     "       COUNT(*)                                                   \n";
@@ -1170,8 +1275,10 @@
         $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_D.MENU_ID)                  \n";
         $sql = $sql .     "   LEFT JOIN B_CMDB_MENU_LIST   TBL_E ON                          \n";
         $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_E.MENU_ID)                  \n";
+        $sql = $sql .     "   LEFT JOIN F_COL_TO_ROW_MNG   TBL_F ON                          \n";
+        $sql = $sql .     "          (TBL_A.MENU_ID        = TBL_F.TO_MENU_ID)               \n";
         $sql = $sql .     " WHERE                                                            \n";
-        $sql = $sql .     "   TBL_A.DISUSE_FLAG='0'                                          \n";
+        $sql = $sql .     "   TBL_A.DISUSE_FLAG='0' AND (TBL_F.DISUSE_FLAG='0' OR TBL_F.DISUSE_FLAG IS NULL) \n";
         $sql = $sql .     " ORDER BY TBL_A.COLUMN_ID                                         \n";
 
         $objQuery = $objDBCA->sqlPrepare($sql);
@@ -1378,6 +1485,13 @@
                 $value_sensitive_flg = DF_SENSITIVE_ON;
                 break;
             }
+
+            $vertical_menu = false;
+            if($row['COL_CNT'] != ""){
+                $vertical_menu = true;
+                $ina_table_vertical_menu_list[$row['TABLE_NAME']]=$row['MENU_ID'];
+            }
+
             // Update start 同じカラムに複数の変数を割り当てた場合の対応
             $ina_table_col_list[$row['TABLE_NAME']][$row['COL_NAME']][] =
                                array('COLUMN_ID'=>$row['COLUMN_ID'],
@@ -1406,6 +1520,10 @@
                                      'KEY_SENSITIVE_FLAG'=>$key_sensitive_flg,
                                      'VALUE_SENSITIVE_FLAG'=>$value_sensitive_flg,
                                      'ACCESS_AUTH'=>$row['ACCESS_AUTH'],
+                                     'START_COL_NAME'=>$row['START_COL_NAME'],
+                                     'COL_CNT'=>$row['COL_CNT'],
+                                     'REPEAT_CNT'=>$row['REPEAT_CNT'],
+                                     'VERTICAL_MENU'=>$vertical_menu,
                                      );
 
             // テーブルの主キー名退避
@@ -1959,7 +2077,11 @@
                                             $ina_child_vars_ass_list,
                                             $ina_child_vars_ass_chk_list,
                                             $ina_table_nameTOid_list[$table_name],
-                                            $row[DF_ITA_LOCAL_PKEY]);
+                                            $row[DF_ITA_LOCAL_PKEY],
+                                            $ina_col_list['START_COL_NAME'],
+                                            $ina_col_list['COL_CNT'],
+                                            $ina_col_list['REPEAT_CNT'],
+                                            $ina_col_list['VERTICAL_MENU']);
                             //戻り値は判定しない
                         }
                     }
@@ -2041,6 +2163,8 @@
     //   $ina_vars_ass_chk_list:        一般変数用 代入順序重複チェック配列
     //   $in_menu_id:                   紐付メニューID
     //   $in_row_id:                    紐付テーブル主キー値
+    //   $in_start_col_name:            縦メニューのリピート項目のスタートカラム名
+    //   $in_col_cnt:                   縦メニューのリピート項目数
     //
     // 戻り値
     //   true:   正常
@@ -2064,7 +2188,11 @@
                              &$ina_child_vars_ass_list,
                              &$ina_child_vars_ass_chk_list,
                              $in_menu_id,
-                             $in_row_id){
+                             $in_row_id,
+                             $in_start_col_name,
+                             $in_col_cnt,
+                             $in_repeat_cnt,
+                             $in_vertical_menu){
         global $log_level;
         global $objMTS;
         global $objDBCA;
@@ -2090,7 +2218,7 @@
             $ret = chkValueTypeColValue($in_col_val,
                                         $in_null_data_handling_flg,
                                         $in_table_name,$in_row_id,$ina_col_list['COL_TITLE']);
-            if($ret === false){
+            if($ret === false && $in_vertical_menu === false){
                 return;
             }
             // Value型カラムの場合
@@ -2120,13 +2248,17 @@
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            'Value',
-                           $in_row_id);
+                           $in_row_id,
+                           $in_start_col_name,
+                           $in_col_cnt,
+                           $in_repeat_cnt,
+                           $in_vertical_menu);
             break;
         case DF_COL_TYPE_KEY:
             // Key型カラムの場合
             //具体値が空白か判定
             $ret = chkKeyTypeColValue($in_col_val,$in_table_name,$in_row_id,$ina_col_list['COL_TITLE']);
-            if($ret === false){
+            if($ret === false && $in_vertical_menu === false){
                 // 空白の場合処理対象外
                 return;
             }
@@ -2156,14 +2288,18 @@
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            'Key',
-                           $in_row_id);
+                           $in_row_id,
+                           $in_start_col_name,
+                           $in_col_cnt,
+                           $in_repeat_cnt,
+                           $in_vertical_menu);
             break;
         case DF_COL_TYPE_KEYVAL:
             //具体値が空白か判定
             $ret = chkValueTypeColValue($in_col_val,
                                         $in_null_data_handling_flg,
                                         $in_table_name,$in_row_id,$ina_col_list['COL_TITLE']);
-            if($ret === false){
+            if($ret === false && $in_vertical_menu === false){
                 return;
             }
             // Key-Value型カラムの場合
@@ -2193,7 +2329,11 @@
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            'Value',
-                           $in_row_id);
+                           $in_row_id,
+                           $in_start_col_name,
+                           $in_col_cnt,
+                           $in_repeat_cnt,
+                           $in_vertical_menu);
                            
             // chkVarsAssDataの戻りは判定しない。
             chkVarsAssData($in_driver_name,
@@ -2221,7 +2361,11 @@
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            'Key',
-                           $in_row_id);
+                           $in_row_id,
+                           $in_start_col_name,
+                           $in_col_cnt,
+                           $in_repeat_cnt,
+                           $in_vertical_menu);
             break;
         }
     }
@@ -2286,7 +2430,11 @@
                             $in_menu_id,
                             $in_column_id,
                             $in_key_value_vars_id,
-                            $in_row_id){
+                            $in_row_id,
+                            $in_start_col_name,
+                            $in_col_cnt,
+                            $in_repeat_cnt,
+                            $in_vertical_menu){
         global $log_level;
         global $objMTS;
         global $objDBCA;
@@ -2342,7 +2490,11 @@
                                                       'ACCESS_AUTH'=>$in_access_auth,
                                                       'SENSITIVE_FLAG'=>$in_sensitive_flg,
                                                       'VAR_TYPE'=>$in_var_type,
-                                                      'STATUS'=>$chk_status);
+                                                      'STATUS'=>$chk_status,
+                                                      'START_COL_NAME'=>$in_start_col_name,
+                                                      'COL_CNT'=>$in_col_cnt,
+                                                      'REPEAT_CNT'=>$in_repeat_cnt,
+                                                      'VERTICAL_MENU'=>$in_vertical_menu);
         }
         else{
 
@@ -2396,7 +2548,11 @@
                                          'SENSITIVE_FLAG'=>$in_sensitive_flg,
                                          'ASSIGN_SEQ'=>$in_vars_assign_seq,
                                          'VAR_TYPE'=>$in_var_type,
-                                         'STATUS'=>$chk_status);
+                                         'STATUS'=>$chk_status,
+                                         'START_COL_NAME'=>$in_start_col_name,
+                                         'COL_CNT'=>$in_col_cnt,
+                                         'REPEAT_CNT'=>$in_repeat_cnt,
+                                         'VERTICAL_MENU'=>$in_vertical_menu);
         }
     }
     
@@ -4310,5 +4466,38 @@
             }
         }
         return true;
+    }
+    function GetVerticalMenuColumnList($ina_table_vertical_menu_list, &$ina_vertical_menu_column_list){
+
+        $ina_vertical_menu_column_list = array();
+        foreach($ina_table_vertical_menu_list as $table_name=>$menu_id){
+
+            $sql = " DESC $table_name \n";
+            $sqlUtnBody = $sql;
+            $arrayUtnBind = array();
+            $objQuery = recordSelect($sqlUtnBody, $arrayUtnBind);
+
+            while($row = $objQuery->resultFetch()) {
+                switch($row['Field']){
+                case 'ROW_ID':
+                case 'HOST_ID':
+                case 'OPERATION_ID_DISP':
+                case 'OPERATION_ID_NAME_DISP':
+                case 'OPERATION_ID':
+                case 'BASE_TIMESTAMP':
+                case 'LAST_EXECUTE_TIMESTAMP':
+                case 'OPERATION_NAME':
+                case 'OPERATION_DATE':
+                case 'ACCESS_AUTH':
+                case 'NOTE':
+                case 'DISUSE_FLAG':
+                case 'LAST_UPDATE_TIMESTAMP':
+                case 'LAST_UPDATE_USER':
+                    continue 2;
+                }
+                $ina_vertical_menu_column_list[$table_name][] = $row['Field'];
+            }
+            unset($objQuery);
+        }
     }
 ?>
