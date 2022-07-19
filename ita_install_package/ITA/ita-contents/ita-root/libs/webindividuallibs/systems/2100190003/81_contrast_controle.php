@@ -277,6 +277,18 @@ function gethostList( $intContrastid ){
         $bindkeyVlaue = array(
             "CONTRAST_LIST_ID" => $intContrastid,
         );
+        if(empty($bindkeyVlaue['CONTRAST_LIST_ID'])) {
+            $strResultCode = sprintf("%03d", $intErrorType);
+            $strDetailCode = sprintf("%03d", $intDetailType);
+            $strStreamOfContrastList = "[]";
+            $arrayResult = array($strResultCode,
+                                 $strDetailCode,
+                                 $strStreamOfContrastList,
+                                 $strExpectedErrMsgBodyForUI
+                                 );
+            dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+            return $arrayResult;
+        }
         $aryRetBody = execsql($strQuery,$bindkeyVlaue);
         $contrastDate = $aryRetBody;
         if( $aryRetBody[0] == null ){
@@ -527,6 +539,18 @@ function getContrastResult($strContrastListID,$arrBasetime1="",$arrBasetime2="",
         $bindkeyVlaue = array(
             "CONTRAST_LIST_ID" => $strContrastListID,
         );
+        if( empty($bindkeyVlaue['CONTRAST_LIST_ID']) ){
+            $strStreamOfContrastResult=array(array(),array());
+            $strResultCode = sprintf("%03d", "");
+            $strDetailCode = sprintf("%03d", "");
+            $arrayResult = array($strResultCode,
+                                 $strDetailCode,
+                                 $strStreamOfContrastResult,
+                                 $strExpectedErrMsgBodyForUI
+                                 );
+            dev_log($g['objMTS']->getSomeMessage("ITAWDCH-STD-4",array(__FILE__,$strFxName)),$intControlDebugLevel01);
+            return $arrayResult;
+        }
         $aryRetBody = execsql($strQuery,$bindkeyVlaue);
         $contrastDate = $aryRetBody;
 

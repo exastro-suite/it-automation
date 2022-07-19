@@ -5792,7 +5792,7 @@ function updateDivideTarget($hgMenuId, $hostMenuId){
 
         foreach($splitTargetArray as $splitTarget){
             // メニューIDが一致した場合
-            if($splitTarget['INPUT_MENU_ID'] === $hgMenuId || $splitTarget['OUTPUT_MENU_ID'] == $hostMenuId){
+            if($splitTarget['INPUT_MENU_ID'] == $hgMenuId || $splitTarget['OUTPUT_MENU_ID'] == $hostMenuId || $splitTarget['INPUT_MENU_ID'] == $hostMenuId || $splitTarget['OUTPUT_MENU_ID'] == $hgMenuId){
 
                 // 廃止する
                 $updateData = $splitTarget;

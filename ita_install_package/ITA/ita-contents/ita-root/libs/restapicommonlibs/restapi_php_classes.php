@@ -392,6 +392,12 @@ class RestAPIInfoAdmin{
             // リクエストで送られてきた情報
             $strHeaderAuthorization     = $this->aryReqHeaderData['authorization'];
             $strHeaderDate              = $this->aryReqHeaderData['date'];
+            if(preg_match('/^[0-9]{4}\/[0-9]{2}\/[0-9]{2}[\s][0-9]{2}:[0-9]{2}:[0-9]{2}$/', $strHeaderDate) != 1) {
+                $boolExeContinue                 = false;
+                $this->aryErrorInfo['Exception'] = 'Date of the HTTP header is incorrect';
+            }
+        }
+        if( $boolExeContinue === true ){
 
             $strRequestURIOnRest        = $this->strRequestURIOnRest;
 

@@ -844,12 +844,20 @@ function setInputButtonDisable(rangeId,targetClass,toValue){
 
 //---- ここからカスタマイズした場合の一般メソッド配置域
 function newOpenWindow(targetText){
-  var searchText = decodeURIComponent(escape(atob(targetText)));;
+    if(isNaN(targetText)) {
+        var searchText = escape(atob(targetText));
+    }else{
+        var searchText = targetText;
+    }
   var url = "01_browse.php?no=2100020206&filter=on&Filter1Tbl_3=" + searchText;
   window.open(url, '_blank');
 }
 function newOpenWindow2(targetText){
-  var searchText = decodeURIComponent(escape(atob(targetText)));;
+    if(isNaN(targetText)) {
+        var searchText = escape(atob(targetText));;
+    }else{
+        var searchText = targetText;
+    }
   var url = "01_browse.php?no=2100020205&filter=on&Filter1Tbl_2=" + searchText;
   window.open(url, '_blank');
 }

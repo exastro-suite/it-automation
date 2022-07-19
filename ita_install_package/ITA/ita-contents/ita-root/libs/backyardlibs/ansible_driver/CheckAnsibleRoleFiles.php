@@ -1423,6 +1423,9 @@ class CheckAnsibleRoleFiles {
                 continue;
             }
             if (basename($dir) == "tasks") {
+                if($dir == $roles_dir."tasks") {
+                    continue;
+                }
                 $role_dir_list[] = preg_replace('/\/tasks$/','', $dir);
             }
         }

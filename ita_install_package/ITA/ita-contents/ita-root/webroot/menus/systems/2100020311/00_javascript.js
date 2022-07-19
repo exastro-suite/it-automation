@@ -240,7 +240,7 @@ callback.prototype = {
                                     webStdTableWidth );
                     
                     linkDateInputHelper(strMixOuterFrameName);
-                    textPrintToBoxes('11','Mix1_1_8');
+                    textPrintToBoxes('11','Mix1_1_9');
             }
         }else if( ary_result[0] == "002" ){
             window.alert(getSomeMessage("ITAWDCC90102"));
@@ -343,7 +343,7 @@ callback.prototype = {
                                     webStdTableHeight,
                                     webStdTableWidth );
                     linkDateInputHelper(strMixOuterFrameName);
-                    textPrintToBoxes('10','Mix2_1_8');
+                    textPrintToBoxes('10','Mix2_1_9');
             }
         }else if( ary_result[0] == "002" ){
             window.alert(getSomeMessage("ITAWDCC90102"));
@@ -636,10 +636,10 @@ callback.prototype = {
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
 
             if( ary_result01[2] == "NORMAL_VAR_1"){
-                textPrintToBoxes('2','Mix1_1_8');
+                textPrintToBoxes('2','Mix1_1_9');
             }
             else{
-                textPrintToBoxes('1','Mix1_1_8');
+                textPrintToBoxes('1','Mix1_1_9');
             }
 
         }else{
@@ -682,10 +682,10 @@ callback.prototype = {
             addPullDownBox(tableTagAreaWrap, strTableTagPrintId, intMaxWidth, resultSetTargetSeq, containerClassName);
 
             if( ary_result01[2] == "NORMAL_VAR_1"){
-                textPrintToBoxes('2','Mix2_1_8');
+                textPrintToBoxes('2','Mix2_1_9');
             }
             else{
-                textPrintToBoxes('1','Mix2_1_8');
+                textPrintToBoxes('1','Mix2_1_9');
             }
 
         }else{
@@ -719,10 +719,10 @@ callback.prototype = {
             var resultContentTag = ary_result01[1];
 
             if( ary_result01[2] == "MEMBER_VAR_0" ){
-                textPrintToBoxes('1','Mix1_1_8');
+                textPrintToBoxes('1','Mix1_1_9');
             }
             else if( ary_result01[2] == "MEMBER_VAR_1"){
-                textPrintToBoxes('2','Mix1_1_8');
+                textPrintToBoxes('2','Mix1_1_9');
             }
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));
@@ -753,10 +753,10 @@ callback.prototype = {
             var resultSetTargetSeq = ary_result01[0];
             var resultContentTag = ary_result01[1];
             if( ary_result01[2] == "MEMBER_VAR_0" ){
-                textPrintToBoxes('1','Mix2_1_8');
+                textPrintToBoxes('1','Mix2_1_9');
             }
             else if( ary_result01[2] == "MEMBER_VAR_1"){
-                textPrintToBoxes('2','Mix2_1_8');
+                textPrintToBoxes('2','Mix2_1_9');
             }
         }else{
             window.alert(getSomeMessage("ITAWDCC90101"));

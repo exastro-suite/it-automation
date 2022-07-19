@@ -1269,7 +1269,7 @@ Ansible（Legacy Role）代入値管理
     $objVarBFmtReg->setFunctionForGetFADMainDataOverride($objFunction04);
 
     $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
-    $objOTForReg->setJsEvent('onChange','vars_reg');
+    $objOTForReg->setJsEvent('onChange','view_val_reg');
     $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
 
     $c->setOutputType('update_table',$objOTForUpd);
