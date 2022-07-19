@@ -1538,6 +1538,25 @@ class InventryFileAddOptionContlorl {
                 } else {
                     $StrSet  = true;
                 }
+                // Sensitive設定を「ON」且つファイルUploadがある場合、登録更新時バリテーションエラーにする
+                if($AftSensitiveFlag == "") {
+                    $sensitive = $BefSensitiveFlag;
+                } else {
+                    $sensitive = $AftSensitiveFlag;
+                }
+                if($AftDelFlag == "on") {
+                    $uploadFile = "";
+                } else {
+                    if($AftUpLoadFile == "") {
+                        $uploadFile = $BefVarsEntryFile;
+                    } else {
+                        $uploadFile = $AftUpLoadFile;
+                    }
+                }
+                // Sensitive設定を「ON」且つアップロードファイルの設定がある場合
+                if($sensitive != "" && $uploadFile != "") {
+                    return [$retBool,$boolSystemErrorFlag,"sensitive設定が「ON」でアップロードファイルを設定している場合、登録/更新できません。"];
+                }
                 if(($FileSet === true) && ($StrSet === true)) {
                     return [$retBool,$boolSystemErrorFlag,$retStrBody];
                 }
