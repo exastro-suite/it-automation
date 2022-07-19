@@ -121,6 +121,102 @@ Module素材集
 
     $table->fixColumn();
 
+    //----組み合わせバリデータ----
+    $tmpAryColumn = $table->getColumns();
+    $objLU4UColumn = $tmpAryColumn[$table->getRequiredUpdateDate4UColumnID()];
+
+    $objFunction = function($objClientValidator, $value, $strNumberForRI, $arrayRegData, $arrayVariant){
+        global $g;
+        global $root_dir_path;
+        $retBool       = true;
+        $retStrBody    = '';
+        $intErrorType  = 0;
+        $aryErrMsgBody = array();
+
+        $strModeId = "";
+        $modeValue_sub = "";
+
+        $query = "";
+
+        $boolExecuteContinue = true;
+        $boolSystemErrorFlag = false;
+        if(array_key_exists("TCA_PRESERVED", $arrayVariant)){
+            if(array_key_exists("TCA_ACTION", $arrayVariant["TCA_PRESERVED"])){
+                $aryTcaAction = $arrayVariant["TCA_PRESERVED"]["TCA_ACTION"];
+                $strModeId = $aryTcaAction["ACTION_MODE"];
+            }
+        }
+        $tmpFile        = '';
+
+        if($strModeId == "DTUP_singleRecDelete"){
+            //----更新前のレコードから、各カラムの値を取得
+            $tffile           = isset($arrayVariant['edit_target_row']['MODULE_MATTER_FILE'])?
+                                       $arrayVariant['edit_target_row']['MODULE_MATTER_FILE']:null;
+
+        }else if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
+
+            $tmpFile      = array_key_exists('tmp_file_COL_IDSOP_10',$arrayRegData)?
+                               $arrayRegData['tmp_file_COL_IDSOP_10']:null;
+            $strTempFileFullname = $root_dir_path . "/temp/file_up_column/" . $tmpFile;
+
+            $tffile           = array_key_exists('MODULE_MATTER_FILE',$arrayRegData)?
+                                    $arrayRegData['MODULE_MATTER_FILE']:null;
+            // 空更新の場合
+            if($tffile === null) {
+                $tffile           = isset($arrayVariant['edit_target_row']['MODULE_MATTER_FILE'])?
+                                           $arrayVariant['edit_target_row']['MODULE_MATTER_FILE']:null;
+            }
+        }
+
+
+        if (preg_match('/\.(tf)$/i',$tffile)){
+            $retBool = true;
+        }else{
+            $retBool = false;
+            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211800");
+        }
+
+        if($strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister"){
+            if(!empty($tmpFile)){
+                // tfファイルチェッククラス呼び出し
+                require_once ($root_dir_path . '/libs/commonlibs/common_terraform_hcl2json_parse.php');
+                $objWSRA = new CommonTerraformHCL2JSONParse($root_dir_path, $strTempFileFullname);
+                // チェック関数
+                $parseResult = $objWSRA->getParsedResult();
+
+                $retBool = $parseResult["res"];
+                // エラーの場合はエラー文の取得
+                if (!$retBool) {
+                    $retStrBody = $parseResult["err"];
+                }
+                unset($objWSRA);
+
+                // システムエラーではない
+                $boolSystemErrorFlag = false;
+            };
+        };
+
+        if( $boolSystemErrorFlag === true ){
+            $retBool = false;
+            //----システムエラー
+            $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
+        }
+        if($retBool===false){
+            $objClientValidator->setValidRule($retStrBody);
+        }
+
+        return $retBool;
+
+    };
+    $objVarVali = new VariableValidator();
+    $objVarVali->setErrShowPrefix(false);
+    $objVarVali->setFunctionForIsValid($objFunction);
+    $objVarVali->setVariantForIsValid(array());
+
+    $objLU4UColumn->addValidator($objVarVali);
+    //組み合わせバリデータ----
+
+
     $table->setGeneObject('webSetting', $arrayWebSetting);
     return $table;
 };

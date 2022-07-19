@@ -30,6 +30,8 @@
     // ドライバに対応した変数の読み込み
     require ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php");
 
+    require ($root_dir_path . "/libs/commonlibs/common_required_check.php");
+
     switch($tgt_driver_id) {
     case DF_LEGACY_DRIVER_ID:
         require ($root_dir_path . "/libs/backyardlibs/ansible_driver/ky_legacy_setenv.php");
@@ -1362,6 +1364,48 @@
                         $in_ansdrv->LocalLogPrint(basename(__FILE__),__LINE__,$ErrorMsg);
                         $prepare_err_flag = 1;
                     }
+
+                    if(strlen(trim($lv_anstwr_hostname)) == 0) {
+                        $item = $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1203041");
+                        $ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-2004",array($item));
+                        $in_ansdrv->LocalLogPrint(basename(__FILE__),__LINE__,$ErrorMsg);
+                        $prepare_err_flag = 1;
+                    }
+                    // Git関連情報 必須入力確認
+                    $chkObj  = new TowerHostListGitInterfaceParameterCheck();
+                    $ValueColumnName= 'Value';
+                    $ColumnArray = array();
+                    $ColumnArray['ANS_GIT_HOSTNAME'][$ValueColumnName]             = $in_ans_if_info['ANS_GIT_HOSTNAME'];
+                    $ColumnArray['ANS_GIT_USER'][$ValueColumnName]                 = $in_ans_if_info['ANS_GIT_USER'];
+                    $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$ValueColumnName]         = $in_ans_if_info['ANS_GIT_SSH_KEY_FILE'];
+                    $RequiredCloumnName = 'Required';
+                    $ColumnArray['ANS_GIT_HOSTNAME'][$RequiredCloumnName]          = true;
+                    $ColumnArray['ANS_GIT_USER'][$RequiredCloumnName]              = true;
+                    $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$RequiredCloumnName]      = true;
+                    $DelFlagCloumnName = 'del_flag_cloumn';
+                    $ColumnArray['ANS_GIT_HOSTNAME'][$DelFlagCloumnName]           = "";
+                    $ColumnArray['ANS_GIT_USER'][$DelFlagCloumnName]               = "";
+                    $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$DelFlagCloumnName]       = "";
+
+                    // エラーメッセージに表示するカラム名設定
+                    $MyNameCloumnName = 'CloumnName';
+                    $errormsg    = sprintf("%s/%s",   $objMTS->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010100"));
+                    $ColumnArray['ANS_GIT_HOSTNAME'][$MyNameCloumnName]     = sprintf("%s",$objMTS->getSomeMessage('ITAANSIBLEH-ERR-2004',array($errormsg)));
+                    $errormsg    = sprintf("%s/%s/%s",$objMTS->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010300"));
+                    $ColumnArray['ANS_GIT_USER'][$MyNameCloumnName]         = sprintf("%s",$objMTS->getSomeMessage('ITAANSIBLEH-ERR-2004',array($errormsg)));
+                    $errormsg    = sprintf("%s/%s/%s",$objMTS->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                                      $objMTS->getSomeMessage("ITAANSIBLEH-MNU-1200010400"));
+                    $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$MyNameCloumnName] = sprintf("%s",$objMTS->getSomeMessage('ITAANSIBLEH-ERR-2004',array($errormsg)));
+
+                    $retBool = $chkObj->ParameterCheck($lv_ans_exec_mode, $ColumnArray, $ValueColumnName, $MyNameCloumnName, $RequiredCloumnName);
+                    if($retBool !== true) {
+                        $in_ansdrv->LocalLogPrint(basename(__FILE__),__LINE__,$retBool);
+                        $prepare_err_flag = 1;
+                    }
                 }
             }
 
@@ -2163,6 +2207,29 @@
             shell_exec( $tmp_str_command );
 
             $in_utn_file_dir = $in_exe_ins_input_file_dir . "/" . $in_zip_subdir . "/" . str_pad( $in_execution_no, $intNumPadding, "0", STR_PAD_LEFT );
+
+            if( ! is_dir( $in_exe_ins_input_file_dir) ){
+                if( !mkdir( $in_exe_ins_input_file_dir, 0777,true) ){
+                    // 事前準備を中断
+                    $FREE_LOG = $objMTS->getSomeMessage($msg_code_1,array($in_execution_no));
+                    require ($root_dir_path . $log_output_php );
+
+                    return false;
+                }
+                if( !chmod( $in_exe_ins_input_file_dir, 0777 ) ){
+                    // 事前準備を中断
+                    $FREE_LOG = $objMTS->getSomeMessage($msg_code_2,array($in_execution_no));
+                    require ($root_dir_path . $log_output_php );
+                    return false;
+                }
+            } else {
+                if( !chmod( $in_exe_ins_input_file_dir, 0777 ) ){
+                    // 事前準備を中断
+                    $FREE_LOG = $objMTS->getSomeMessage($msg_code_2,array($in_execution_no));
+                    require ($root_dir_path . $log_output_php );
+                    return false;
+                }
+            }
 
             if( !is_dir( $in_utn_file_dir ) ){
                 // ここ(UTNのdir)だけは再帰的に作成する

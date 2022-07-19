@@ -51,7 +51,7 @@
     //  F0004  GetMenuData
     //  F0005  DBGetMenuData
     //  F0006  makeVarsAssData
-    //  F0007  chkVarsAssData 
+    //  F0007  chkVarsAssData
     //  F0008  addStg1VarsAssDB
     //  F0009  delVarsAssDB
     //  F0010  addStg2VarsAssDB
@@ -138,22 +138,24 @@
 
 
     $arrayConfigOfVarAss = array(
-        "JOURNAL_SEQ_NO"=>""          ,
-        "JOURNAL_ACTION_CLASS"=>""    ,
-        "JOURNAL_REG_DATETIME"=>""    ,
-        "ASSIGN_ID"=>""               ,
-        "OPERATION_NO_UAPK"=>""       ,
-        "PATTERN_ID"=>""              ,
-        "MODULE_VARS_LINK_ID"=>""     ,
-        "VARS_ENTRY"=>""              ,
-        "HCL_FLAG"=>""                ,
-        "SENSITIVE_FLAG"=>""          ,
-        "DISP_SEQ"=>""                ,
-        "DISUSE_FLAG"=>""             ,
-        "ACCESS_AUTH"=>""             ,
-        "NOTE"=>""                    ,
-        "LAST_UPDATE_TIMESTAMP"=>""   ,
-        "LAST_UPDATE_USER"=>""
+        "JOURNAL_SEQ_NO"        => "",
+        "JOURNAL_ACTION_CLASS"  => "",
+        "JOURNAL_REG_DATETIME"  => "",
+        "ASSIGN_ID"             => "",
+        "OPERATION_NO_UAPK"     => "",
+        "PATTERN_ID"            => "",
+        "MODULE_VARS_LINK_ID"   => "",
+        "VARS_ENTRY"            => "",
+        "HCL_FLAG"              => "",
+        "SENSITIVE_FLAG"        => "",
+        "ASSIGN_SEQ"            => "",
+        "MEMBER_VARS"           => "",
+        "DISP_SEQ"              => "",
+        "DISUSE_FLAG"           => "",
+        "ACCESS_AUTH"           => "",
+        "NOTE"                  => "",
+        "LAST_UPDATE_TIMESTAMP" => "",
+        "LAST_UPDATE_USER"      => ""
     );
     $arrayValueTmplOfVarAss = $arrayConfigOfVarAss;
 
@@ -209,7 +211,7 @@
     $strJnlTableMenuCol      = $strCurTableMenuCol . "_JNL";
     $strSeqOfCurTableMenuCol = $strCurTableMenuCol . "_RIC";
     $strSeqOfJnlTableMenuCol = $strCurTableMenuCol . "_JSQ";
-    
+
     ////////////////////////////////////////////////////////////////
     //----CMDB代入値紐付テーブル
     ////////////////////////////////////////////////////////////////
@@ -231,6 +233,10 @@
         "KEY_VARS_LINK_ID"=>""        ,
         "HCL_FLAG"=>""                ,
         "NULL_DATA_HANDLING_FLG"=>""  ,
+        "KEY_ASSIGN_SEQ"=>""          ,
+        "VAL_ASSIGN_SEQ"=>""          ,
+        "KEY_MEMBER_VARS"=>""         ,
+        "VAL_MEMBER_VARS"=>""         ,
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
         "ACCESS_AUTH"=>""             ,
@@ -252,6 +258,10 @@
         "KEY_VARS_LINK_ID"=>""        ,
         "HCL_FLAG"=>""                ,
         "NULL_DATA_HANDLING_FLG"=>""  ,
+        "KEY_ASSIGN_SEQ"=>""          ,
+        "VAL_ASSIGN_SEQ"=>""          ,
+        "KEY_MEMBER_VARS"=>""         ,
+        "VAL_MEMBER_VARS"=>""         ,
         "DISP_SEQ"=>""                ,
         "DISUSE_FLAG"=>""             ,
         "ACCESS_AUTH"=>""             ,
@@ -363,9 +373,9 @@
         // テーブル名配列
         $lva_table_nameTOid_list    = array();
         // テーブル名+カラム名配列
-        $lva_table_colnameTOid_list = array(); 
+        $lva_table_colnameTOid_list = array();
         // カラム情報配列
-        $lva_table_col_list         = array();         
+        $lva_table_col_list         = array();
         // 代入値紐付の登録に不備がある主キーの配列
         $lva_error_column_id_list   = array();
 
@@ -377,12 +387,12 @@
         $lva_table_nameTOPkeyname_list = array();
 
         $ret = readValAssDB($lv_val_assign_view,
-                            $lv_pattern_link_tbl,  
-                            $lv_vars_master_tbl,   
+                            $lv_pattern_link_tbl,
+                            $lv_vars_master_tbl,
                             $lv_ptn_vars_link_view,
-                            $lva_table_nameTOid_list,    
-                            $lva_table_colnameTOid_list, 
-                            $lva_table_col_list,         
+                            $lva_table_nameTOid_list,
+                            $lva_table_colnameTOid_list,
+                            $lva_table_col_list,
                             $lva_error_column_id_list,
                             $lva_table_nameTOPkeyname_list);
         if($ret === false){
@@ -515,7 +525,7 @@
                 if($log_level === "DEBUG") {
                     $OpeAccessAuthStr     = implode(",", $lva_OpeAccessAuth_list[$ope]['ACCESS_AUTH']);
                     $PatternAccessAuthStr = implode(",", $lva_PatternAccessAuth_list[$mov]['ACCESS_AUTH']);
-                    $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171320", 
+                    $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171320",
                                                          array($lva_CMDBMenu_list[$vars_ass_list['TABLE_NAME']],
                                                                $lva_CMDBMenuColumn_list[$vars_ass_list['TABLE_NAME']][$vars_ass_list['COL_NAME']],
                                                                $lva_OpeAccessAuth_list[$ope]['NAME'],
@@ -692,12 +702,12 @@
         // 例外メッセージ出力
         $FREE_LOG = $e->getMessage();
         LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-        
+
         // DBアクセス事後処理
         if ( isset($objQuery)    ) unset($objQuery);
         if ( isset($objQueryUtn) ) unset($objQueryUtn);
         if ( isset($objQueryJnl) ) unset($objQueryJnl);
-        
+
         // トランザクションが発生しそうなロジックに入ってからのexceptionの場合は
         // 念のためロールバック/トランザクション終了
         if( $objDBCA->getTransactionMode() ){
@@ -711,7 +721,7 @@
                 $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171290");
             }
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-            
+
             // トランザクション終了
             if( $objDBCA->transactionExit()=== true ){
                 $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-130002");
@@ -745,7 +755,7 @@
         if ( $log_level === 'DEBUG' ){
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-ERR-50002");
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-        }        
+        }
         exit(0);
     }
     else{
@@ -762,7 +772,7 @@
     // F0001
     // 処理内容
     //   代入値紐付からカラム情報を取得する。
-    //   
+    //
     // パラメータ
     //   $in_val_assign_view:            代入値自動登録VIEW名
     //   $in_pattern_link_tbl:           作業パターン詳細テーブル名
@@ -781,13 +791,13 @@
     // 戻り値
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
-    function readValAssDB($in_val_assign_view,    
-                          $in_pattern_link_tbl,  
-                          $in_vars_master_tbl,    
+    function readValAssDB($in_val_assign_view,
+                          $in_pattern_link_tbl,
+                          $in_vars_master_tbl,
                           $in_ptn_vars_link_view,
-                          &$ina_table_nameTOid_list,    
-                          &$ina_table_colnameTOid_list, 
-                          &$ina_table_col_list,         
+                          &$ina_table_nameTOid_list,
+                          &$ina_table_colnameTOid_list,
+                          &$ina_table_col_list,
                           &$ina_error_column_id_list,
                           &$ina_table_nameTOPkeyname_list)
     {
@@ -884,7 +894,13 @@
         $sql = $sql .     "     WHERE                                                        \n";
         $sql = $sql .     "       MODULE_PTN_LINK_ID = TBL_A.KEY_VARS_PTN_LINK_ID            \n";
         $sql = $sql .     "   ) AS UNIQUE_KEY_PTN_VARS_LINK_CNT                           ,  \n";
-        $sql = $sql .     "   TBL_A.HCL_FLAG                                                 \n";
+        $sql = $sql .     "   TBL_A.HCL_FLAG                                              ,  \n";
+        // 追記
+        $sql = $sql .     "   TBL_A.KEY_ASSIGN_SEQ                                        ,  \n";
+        $sql = $sql .     "   TBL_A.KEY_MEMBER_VARS                                       ,  \n";
+        $sql = $sql .     "   TBL_A.VAL_ASSIGN_SEQ                                        ,  \n";
+        $sql = $sql .     "   TBL_A.VAL_MEMBER_VARS                                          \n";
+        // 追記
         $sql = $sql .     " FROM                                                             \n";
         $sql = $sql .     "   $in_val_assign_view TBL_A                                      \n";
         $sql = $sql .     "   LEFT JOIN $cmdb_menu_column_tbl TBL_B ON                       \n";
@@ -989,7 +1005,7 @@
                 // 次のカラムへ
                 continue;
             }
-            
+
             // CMDB代入値紐付メニューのカラムタイトルが未登録か判定
             if(@strlen($row['COL_TITLE']) == 0){
                 if ( $log_level === 'DEBUG' ){
@@ -1079,6 +1095,10 @@
                                      'KEY_VARS_NAME'=>$row['KEY_VARS_NAME'],
                                      'VAL_VAR_TYPE'=>$val_child_var_type,
                                      'KEY_VAR_TYPE'=>$key_child_var_type,
+                                     'KEY_ASSIGN_SEQ'=>$row['KEY_ASSIGN_SEQ'],
+                                     'KEY_MEMBER_VARS'=>$row['KEY_MEMBER_VARS'],
+                                     'VAL_ASSIGN_SEQ'=>$row['VAL_ASSIGN_SEQ'],
+                                     'VAL_MEMBER_VARS'=>$row['VAL_MEMBER_VARS'],
                                      'NULL_DATA_HANDLING_FLG'=>$row['NULL_DATA_HANDLING_FLG'],
                                      'HCL_FLAG'=>$row['HCL_FLAG']
                                );
@@ -1095,13 +1115,13 @@
     // F0002
     // 処理内容
     //   設定されている変数設定確認する。
-    //   
+    //
     // パラメータ
     //   $in_col_type:            カラムタイプ Value/Key
-    //   $in_child_var_type:      配列変数区分 
+    //   $in_child_var_type:      配列変数区分
     //                            true:配列変数   false:一般変数
     //   $row:                    クエリ配列
-    //   $in_vars_link_id:        クエリ配列内のKey/Value型の変数IDキー 
+    //   $in_vars_link_id:        クエリ配列内のKey/Value型の変数IDキー
     //                            VAL_VARS_LINK_ID/KEY_VARS_LINK_ID
     //   $in_vars_name:           クエリ配列内のKey/Value型の変数名キー
     //                            VAL_VARS_NAME/KEY_VARS_NAME
@@ -1268,7 +1288,7 @@
                     if( isset($ina_error_column_id_list[$col_id])){
                         //次のカラムへ
                         continue;
-    
+
                     }
                     if($col_name_sql == ""){
                         $col_name_sql =  ", TBL_A." . $col_name . " \n";
@@ -1363,7 +1383,7 @@
                     $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171170",array($ina_table_nameTOid_list[$table_name]));
                     LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                 }
-                
+
                 $warning_flag = true;
                 //次のテーブルへ
                 continue;
@@ -1391,7 +1411,7 @@
                             $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171190",array($ina_table_nameTOid_list[$table_name],$row[DF_ITA_LOCAL_PKEY]));
                             LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
                         }
-                        
+
                         $warning_flag = true;
                         //次のデータへ
                         continue;
@@ -1419,7 +1439,7 @@
                         //再度カラムをチェック
                         if( ! isset($ina_table_col_list[$table_name][$col_name])){
                             continue;
-                        }    
+                        }
                         foreach($ina_table_col_list[$table_name][$col_name] as $ina_col_list){
                             if( isset($ina_error_column_id_list[$ina_col_list['COLUMN_ID']])){
                                 continue;
@@ -1608,6 +1628,8 @@
                            $in_operation_id,
                            $ina_col_list['PATTERN_ID'],
                            $ina_col_list['VAL_VARS_LINK_ID'],
+                           $ina_col_list['VAL_MEMBER_VARS'],
+                           $ina_col_list['VAL_ASSIGN_SEQ'],
                            $in_col_val,
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
@@ -1637,13 +1659,15 @@
                            $in_operation_id,
                            $ina_col_list['PATTERN_ID'],
                            $ina_col_list['KEY_VARS_LINK_ID'],
+                           $ina_col_list['KEY_MEMBER_VARS'],
+                           $ina_col_list['KEY_ASSIGN_SEQ'],
                            $col_name,
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            $ina_col_list['COL_CLASS'],
-                           $ina_col_list['HCL_FLAG'],
+                           "1", // HCL_FLAGを固定で1
                            'Key',
                            $in_row_id,
                            $in_access_auth);
@@ -1664,6 +1688,8 @@
                            $in_operation_id,
                            $ina_col_list['PATTERN_ID'],
                            $ina_col_list['VAL_VARS_LINK_ID'],
+                           $ina_col_list['VAL_MEMBER_VARS'],
+                           $ina_col_list['VAL_ASSIGN_SEQ'],
                            $in_col_val,
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
@@ -1674,7 +1700,7 @@
                            'Value',
                            $in_row_id,
                            $in_access_auth);
-                           
+
             // chkVarsAssDataの戻りは判定しない。
             chkVarsAssData($in_table_name,
                            $in_col_name,
@@ -1682,13 +1708,15 @@
                            $in_operation_id,
                            $ina_col_list['PATTERN_ID'],
                            $ina_col_list['KEY_VARS_LINK_ID'],
+                           $ina_col_list['KEY_MEMBER_VARS'],
+                           $ina_col_list['KEY_ASSIGN_SEQ'],
                            $col_name,
                            $ina_vars_ass_list,
                            $ina_vars_ass_chk_list,
                            $in_menu_id,
                            $ina_col_list['COLUMN_ID'],
                            $ina_col_list['COL_CLASS'],
-                           $ina_col_list['HCL_FLAG'],
+                           "1", // HCL_FLAGを固定で1
                            'Key',
                            $in_row_id,
                            $in_access_auth);
@@ -1708,6 +1736,8 @@
     //   $in_operation_id:              オペレーションID
     //   $in_patten_id:                 パターンID
     //   $in_vars_link_id:              変数ID
+    //   $in_child_vars_link_id:        メンバー変数ID
+    //   $in_vars_assign_seq:           代入順序
     //   $in_col_val:                   具体値
     //   $ina_vars_ass_list:            一般変数用 代入値登録情報配列
     //   $ina_vars_ass_chk_list:        一般変数用 代入順序重複チェック配列
@@ -1726,6 +1756,8 @@
                             $in_operation_id,
                             $in_patten_id,
                             $in_vars_link_id,
+                            $in_child_vars_link_id,
+                            $in_vars_assign_seq,
                             $in_col_val,
                             &$ina_vars_ass_list,
                             &$ina_vars_ass_chk_list,
@@ -1743,20 +1775,29 @@
         $chk_status = false;
 
         //オペ+作業+変数の組み合わせが重複していないか判断
+        // メモ：オペ＋作業＋変数＋メンバー変数＋代入順序
         if( isset($ina_vars_ass_chk_list[$in_operation_id]
                                         [$in_patten_id]
-                                        [$in_vars_link_id])){
+                                        [$in_vars_link_id]
+                                        [$in_child_vars_link_id]
+                                        [$in_vars_assign_seq]
+                                        )){
 
             // 既に登録されている
             $dup_info = $ina_vars_ass_chk_list[$in_operation_id]
                                               [$in_patten_id]
-                                              [$in_vars_link_id];
+                                              [$in_vars_link_id]
+                                              [$in_child_vars_link_id]
+                                              [$in_vars_assign_seq];
             //代入値自動登録設定の項番:{}と項番:{}のオペレーションとホストが重複しています。代入値自動登録設定の項番:{}を処理対象外にしました。(オペレーションID:{} 変数区分:{})
             $msgstr = $objMTS->getSomeMessage("ITATERRAFORM-ERR-171200",array( $dup_info['COLUMN_ID'],
                                                                              $in_column_id,
                                                                              $in_column_id,
                                                                              $in_operation_id,
-                                                                             $in_key_value_vars_id));
+                                                                             $in_key_value_vars_id,
+                                                                             $in_child_vars_link_id,
+            $in_vars_assign_seq
+                                                                            ));
             LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
         }
         else{
@@ -1765,7 +1806,9 @@
             //オペ+作業+変数の組み合わせを退避
             $ina_vars_ass_chk_list[$in_operation_id]
                                   [$in_patten_id]
-                                  [$in_vars_link_id]            = array('COLUMN_ID'=>$in_column_id);
+                                  [$in_vars_link_id]
+                                  [$in_child_vars_link_id]
+                                  [$in_vars_assign_seq]           = array('COLUMN_ID'=>$in_column_id);
 
         }
         // 代入値管理の登録に必要な情報退避
@@ -1777,17 +1820,19 @@
                                      'MODULE_VARS_LINK_ID'=>$in_vars_link_id,
                                      'VARS_ENTRY'=>$in_col_val,
                                      'VAR_TYPE'=>$in_var_type,
+                                     'MEMBER_VARS' => $in_child_vars_link_id,
+                                     'ASSIGN_SEQ' => $in_vars_assign_seq,
                                      'HCL_FLAG'=>$in_hcl_flag,
                                      'STATUS'=>$chk_status,
                                      'KEY_VALUE_VARS_ID'=>$in_key_value_vars_id,
                                      'ACCESS_AUTH'=>$in_access_auth);
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////////
     // F0008
     // 処理内容
     //   代入値管理（一般変数）を更新する。
-    //   
+    //
     // パラメータ
     //   $in_varsAssignList:              代入値管理更新情報配列
     //   $in_VarsAssignRecodes:           代入値管理の全テータ配列
@@ -1822,6 +1867,8 @@
                $ina_varsass_list['PATTERN_ID']          . "_" .
                $ina_varsass_list['MODULE_VARS_LINK_ID'] . "_" .
                $ina_varsass_list['HCL_FLAG']            . "_" .
+               $ina_varsass_list['MEMBER_VARS']         . "_" .
+               $ina_varsass_list['ASSIGN_SEQ']          . "_" .
                $ina_varsass_list['ACCESS_AUTH']         . "_" .
                "0";
 
@@ -1845,7 +1892,9 @@
                     $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-120009",
                                                   array($ina_varsass_list['OPERATION_NO_UAPK'],
                                                         $ina_varsass_list['PATTERN_ID'],
-                                                        $ina_varsass_list['MODULE_VARS_LINK_ID']
+                                                        $ina_varsass_list['MODULE_VARS_LINK_ID'],
+                                                        $ina_varsass_list['MEMBER_VARS'],
+                                                        $ina_varsass_list['ASSIGN_SEQ']
                                                   ));
                      LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
                 }
@@ -1862,7 +1911,9 @@
                     $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-120012",
                                                         array($ina_varsass_list['OPERATION_NO_UAPK'],
                                                               $ina_varsass_list['PATTERN_ID'],
-                                                              $ina_varsass_list['MODULE_VARS_LINK_ID']
+                                                              $ina_varsass_list['MODULE_VARS_LINK_ID'],
+                                                              $ina_varsass_list['MEMBER_VARS'],
+                                                              $ina_varsass_list['ASSIGN_SEQ']
                                                         ));
                     LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
                 }
@@ -1876,7 +1927,9 @@
                 $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-120008",
                                             array($ina_varsass_list['OPERATION_NO_UAPK'],
                                                   $ina_varsass_list['PATTERN_ID'],
-                                                  $ina_varsass_list['MODULE_VARS_LINK_ID']
+                                                  $ina_varsass_list['MODULE_VARS_LINK_ID'],
+                                                  $ina_varsass_list['MEMBER_VARS'],
+                                                  $ina_varsass_list['ASSIGN_SEQ']
                                             ));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
             }
@@ -1921,34 +1974,34 @@
         $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                              $action,
                                              "ASSIGN_ID",
-                                             $strCurTable, 
-                                             $strJnlTable, 
-                                             $arrayConfig, 
+                                             $strCurTable,
+                                             $strJnlTable,
+                                             $arrayConfig,
                                              $tgt_row,
                                              $temp_array );
-        
+
         $sqlUtnBody = $retArray[1];
         $arrayUtnBind = $retArray[2];
-        
+
         $sqlJnlBody = $retArray[3];
         $arrayJnlBind = $retArray[4];
-        
+
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
         $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
-        
-        if( $objQueryUtn->getStatus()===false || 
+
+        if( $objQueryUtn->getStatus()===false ||
             $objQueryJnl->getStatus()===false ){
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
 
             $FREE_LOG = $objQueryUtn->getLastError();
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
- 
+
             unset($objQueryUtn);
             unset($objQueryJnl);
             return false;
         }
-        
+
         if( $objQueryUtn->sqlBind($arrayUtnBind) != "" ||
             $objQueryJnl->sqlBind($arrayJnlBind) != "" ){
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
@@ -1961,7 +2014,7 @@
             unset($objQueryJnl);
             return false;
         }
-        
+
         $rUtn = $objQueryUtn->sqlExecute();
         if($rUtn!=true){
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
@@ -1974,7 +2027,7 @@
             unset($objQueryJnl);
             return false;
         }
-        
+
         $rJnl = $objQueryJnl->sqlExecute();
         if($rJnl!=true){
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
@@ -1996,10 +2049,10 @@
     // F0009
     // 処理内容
     //   代入値管理から不要なレコードを廃止
-    //   
+    //
     // パラメータ
     //   $ina_VarsAssignRecodes:           代入値管理の全テータ配列
-    // 
+    //
     // 戻り値
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
@@ -2044,11 +2097,11 @@
                     $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-120011",
                                                              array($tgt_row['ASSIGN_ID']));
                 }
-    
+
                 //更新処理はスキップ
                 continue;
             }
-                
+
             // 具体値にテンプレート変数が記述されているか判定
             if($db_update_flg === false) {
                // テンプレート変数が記述されていることを記録
@@ -2062,8 +2115,8 @@
                                                        array($tgt_row['ASSIGN_ID']));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
             }
-    
-    
+
+
             // 登録されていない場合は廃止レコードにする。
             ////////////////////////////////////////////////////////////////
             // ジャーナルシーケンスをロック                               //
@@ -2072,7 +2125,7 @@
             if( $retArray[1] != 0 ){
                  $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
                  LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                  return false;
             }
             ////////////////////////////////////////////////////////////////
@@ -2082,14 +2135,14 @@
             if( $retArray[1] != 0 ){
                 $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                 return false;
             }
 
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["DISUSE_FLAG"]      = '1';
             $tgt_row["LAST_UPDATE_USER"] = $db_access_user_id;
-    
+
             $temp_array = array();
             $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                                  "UPDATE",
@@ -2099,63 +2152,63 @@
                                                  $arrayConfig,
                                                  $tgt_row,
                                                  $temp_array );
-    
+
             $sqlUtnBody = $retArray[1];
             $arrayUtnBind = $retArray[2];
-    
+
             $sqlJnlBody = $retArray[3];
             $arrayJnlBind = $retArray[4];
-    
+
             $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
             $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
-    
+
             if( $objQueryUtn->getStatus()===false ||
                 $objQueryJnl->getStatus()===false ){
                 $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                 $FREE_LOG = $objQueryUtn->getLastError();
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                 unset($objQueryUtn);
                 unset($objQueryJnl);
                 return false;
             }
-    
+
             if( $objQueryUtn->sqlBind($arrayUtnBind) != "" ||
                 $objQueryJnl->sqlBind($arrayJnlBind) != "" ){
                 $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                 $FREE_LOG = $objQueryUtn->getLastError();
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                 unset($objQueryUtn);
                 unset($objQueryJnl);
                 return false;
             }
-    
+
             $rUtn = $objQueryUtn->sqlExecute();
             if($rUtn!=true){
                 $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                 $FREE_LOG = $objQueryUtn->getLastError();
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                 unset($objQueryUtn);
                 unset($objQueryJnl);
                 return false;
             }
-    
+
             $rJnl = $objQueryJnl->sqlExecute();
             if($rJnl!=true){
                 $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                 $FREE_LOG = $objQueryUtn->getLastError();
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-    
+
                 unset($objQueryUtn);
                 unset($objQueryJnl);
                 return false;
@@ -2192,12 +2245,12 @@
         }
         return true;
     }
-    
+
     ////////////////////////////////////////////////////////////////////////////////
     // F0010
     // 処理内容
     //   代入値管理（一般変数）を更新する。
-    //   
+    //
     // パラメータ
     //   $in_varsAssignList:              代入値管理更新情報配列
     //   $in_VarsAssignRecodes:           代入値管理の全テータ配列
@@ -2233,6 +2286,8 @@
         $key = $ina_varsass_list['OPERATION_NO_UAPK']   . "_" .
                $ina_varsass_list['PATTERN_ID']          . "_" .
                $ina_varsass_list['MODULE_VARS_LINK_ID'] . "_" .
+               $ina_varsass_list['MEMBER_VARS']         . "_" .
+               $ina_varsass_list['ASSIGN_SEQ']          . "_" .
                $ina_varsass_list['HCL_FLAG']            . "_" .
                $ina_varsass_list['ACCESS_AUTH']         . "_" .
                "1";
@@ -2248,7 +2303,9 @@
                  $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-120006",
                                                      array($ina_varsass_list['OPERATION_NO_UAPK'],
                                                            $ina_varsass_list['PATTERN_ID'],
-                                                           $ina_varsass_list['MODULE_VARS_LINK_ID']
+                                                           $ina_varsass_list['MODULE_VARS_LINK_ID'],
+                                                           $ina_varsass_list['MEMBER_VARS'],
+                                                           $ina_varsass_list['ASSIGN_SEQ']
                                                      ));
                  LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
             }
@@ -2269,7 +2326,9 @@
                 $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-120007",
                                                 array($ina_varsass_list['OPERATION_NO_UAPK'],
                                                       $ina_varsass_list['PATTERN_ID'],
-                                                      $ina_varsass_list['MODULE_VARS_LINK_ID']
+                                                      $ina_varsass_list['MODULE_VARS_LINK_ID'],
+                                                      $ina_varsass_list['MEMBER_VARS'],
+                                                      $ina_varsass_list['ASSIGN_SEQ']
                                                 ));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
             }
@@ -2300,6 +2359,8 @@
             }
             $tgt_row["JOURNAL_SEQ_NO"]   = $retArray[0];
             $tgt_row["VARS_ENTRY"]       = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["MEMBER_VARS"]      = $ina_varsass_list['MEMBER_VARS'];
+            $tgt_row["ASSIGN_SEQ"]       = $ina_varsass_list['ASSIGN_SEQ'];
             $tgt_row["HCL_FLAG"]         = $ina_varsass_list['HCL_FLAG'];
             $tgt_row["ACCESS_AUTH"]      = $ina_varsass_list['ACCESS_AUTH'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
@@ -2339,6 +2400,8 @@
             $tgt_row['PATTERN_ID']          = $ina_varsass_list['PATTERN_ID'];
             $tgt_row['MODULE_VARS_LINK_ID'] = $ina_varsass_list['MODULE_VARS_LINK_ID'];
             $tgt_row["VARS_ENTRY"]          = $ina_varsass_list['VARS_ENTRY'];
+            $tgt_row["MEMBER_VARS"]         = $ina_varsass_list['MEMBER_VARS'];
+            $tgt_row["ASSIGN_SEQ"]          = $ina_varsass_list['ASSIGN_SEQ'];
             $tgt_row["HCL_FLAG"]            = $ina_varsass_list['HCL_FLAG'];
             $tgt_row["ACCESS_AUTH"]         = $ina_varsass_list['ACCESS_AUTH'];
             //パスワードカラムの場合、Sensitive設定をON(2)にする
@@ -2382,34 +2445,34 @@
         $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                              $action,
                                              "ASSIGN_ID",
-                                             $strCurTable, 
-                                             $strJnlTable, 
-                                             $arrayConfig, 
+                                             $strCurTable,
+                                             $strJnlTable,
+                                             $arrayConfig,
                                              $tgt_row,
                                              $temp_array );
-        
+
         $sqlUtnBody = $retArray[1];
         $arrayUtnBind = $retArray[2];
-        
+
         $sqlJnlBody = $retArray[3];
         $arrayJnlBind = $retArray[4];
-        
+
         $objQueryUtn = $objDBCA->sqlPrepare($sqlUtnBody);
         $objQueryJnl = $objDBCA->sqlPrepare($sqlJnlBody);
-        
-        if( $objQueryUtn->getStatus()===false || 
+
+        if( $objQueryUtn->getStatus()===false ||
             $objQueryJnl->getStatus()===false ){
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
 
             $FREE_LOG = $objQueryUtn->getLastError();
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
- 
+
             unset($objQueryUtn);
             unset($objQueryJnl);
             return false;
         }
-        
+
         if( $objQueryUtn->sqlBind($arrayUtnBind) != "" ||
             $objQueryJnl->sqlBind($arrayJnlBind) != "" ){
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
@@ -2422,7 +2485,7 @@
             unset($objQueryJnl);
             return false;
         }
-        
+
         $rUtn = $objQueryUtn->sqlExecute();
         if($rUtn!=true){
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
@@ -2435,7 +2498,7 @@
             unset($objQueryJnl);
             return false;
         }
-        
+
         $rJnl = $objQueryJnl->sqlExecute();
         if($rJnl!=true){
             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-152010",array(basename(__FILE__),__LINE__));
@@ -2599,12 +2662,12 @@
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
     function getVarsAssignRecodes(&$in_VarsAssignRecodes) {
-    
+
         global    $db_model_ch;
         global    $objMTS;
         global    $objDBCA;
         global    $log_level;
-    
+
         global $db_access_user_id;
         global $strCurTableVarsAss;
         global $strJnlTableVarsAss;
@@ -2612,21 +2675,21 @@
         global $strSeqOfJnlTableVarsAss;
         global $arrayConfigOfVarAss;
         global $arrayValueTmplOfVarAss;
-    
+
         $strCurTable      = $strCurTableVarsAss; //B_TERRAFORM_VARS_ASSIGN
         $strJnlTable      = $strJnlTableVarsAss;
-    
+
         $arrayConfig      = $arrayConfigOfVarAss;
         $arrayValue       = $arrayValueTmplOfVarAss;
-    
+
         $strSeqOfCurTable = $strSeqOfCurTableVarsAss;
         $strSeqOfJnlTable = $strSeqOfJnlTableVarsAss;
-    
+
         $strPkey                = "ASSIGN_ID";
-    
+
         // 廃止レコードも含めてる。 WHERE句がないと全件とれない模様
         $temp_array = array('WHERE'=>"$strPkey<>'0'");
-    
+
         $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                              "SELECT FOR UPDATE",
                                              $strPkey,
@@ -2635,10 +2698,10 @@
                                              $arrayConfig,
                                              $arrayValue,
                                              $temp_array);
-    
+
         $sqlUtnBody = $retArray[1];
         $arrayUtnBind = $retArray[2];
-    
+
         $objQueryUtn_sel = recordSelect($sqlUtnBody, $arrayUtnBind);
         if($objQueryUtn_sel == null) {
             return false;
@@ -2649,6 +2712,8 @@
                    $row["PATTERN_ID"]          . "_" .
                    $row["MODULE_VARS_LINK_ID"] . "_" .
                    $row['HCL_FLAG']            . "_" .
+                   $row["MEMBER_VARS"]         . "_" .
+                   $row["ASSIGN_SEQ"]          . "_" .
                    $row['ACCESS_AUTH']         . "_" .
                    $row["DISUSE_FLAG"];
             $in_VarsAssignRecodes[$key] = $row;
@@ -2669,10 +2734,10 @@
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
     function SequenceTableLock($aryTgtOfSequenceLock) {
-    
+
         // デッドロック防止のために、昇順でロック
         asort($aryTgtOfSequenceLock);
-    
+
         foreach($aryTgtOfSequenceLock as $strSeqName) {
             //ジャーナルのシーケンス
             $retArray = getSequenceLockInTrz($strSeqName, "A_SEQUENCE");

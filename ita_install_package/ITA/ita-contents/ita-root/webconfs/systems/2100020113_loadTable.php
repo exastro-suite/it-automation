@@ -207,41 +207,18 @@ Ansible(Legacy)作業管理
     $cg4 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000013") );
 
         // virtualenv
-        $c = new IDColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"),'B_ANS_TWR_VIRTUALENV','VIRTUALENV_NAME','VIRTUALENV_NAME','');
+        $c = new TextColumn('I_VIRTUALENV_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000029"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000030"));
-        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
-        $objOT->setFirstSearchValueOwnerColumnID('I_VIRTUALENV_NAME');
-        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_VIRTUALENV_JNL',
-            'TTT_SEARCH_KEY_COLUMN_ID'=>'VIRTUALENV_NAME',
-            'TTT_GET_TARGET_COLUMN_ID'=>'VIRTUALENV_NAME',
-            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
-            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
-            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
-            )
-        );
-        $objOT->setTraceQuery($aryTraceQuery);
-        $c->setOutputType('print_journal_table',$objOT);
         $cg4->addColumn($c);
+
     $cg->addColumn($cg4);
 
     // ansible automation controller利用情報
     $cg5 = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000035") );
 
         // 実行環境
-        $c = new IDColumn('I_EXECUTION_ENVIRONMENT_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000036"),'B_ANS_TWR_EXECUTION_ENVIRONMENT','EXECUTION_ENVIRONMENT_NAME','EXECUTION_ENVIRONMENT_NAME','');
+        $c = new TextColumn('I_EXECUTION_ENVIRONMENT_NAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000036"));
         $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-9010000037")); //エクセル・ヘッダでの説明
-        $objOT = new TraceOutputType(new ReqTabHFmt(), new TextTabBFmt());
-        $objOT->setFirstSearchValueOwnerColumnID('I_EXECUTION_ENVIRONMENT_NAME');
-        $aryTraceQuery = array(array('TRACE_TARGET_TABLE'=>'B_ANS_TWR_EXECUTION_ENVIRONMENT_JNL',
-            'TTT_SEARCH_KEY_COLUMN_ID'=>'EXECUTION_ENVIRONMENT_NAME',
-            'TTT_GET_TARGET_COLUMN_ID'=>'EXECUTION_ENVIRONMENT_NAME',
-            'TTT_JOURNAL_SEQ_NO'=>'JOURNAL_SEQ_NO',
-            'TTT_TIMESTAMP_COLUMN_ID'=>'LAST_UPDATE_TIMESTAMP',
-            'TTT_DISUSE_FLAG_COLUMN_ID'=>'DISUSE_FLAG'
-            )
-        );
-        $objOT->setTraceQuery($aryTraceQuery);
-        $c->setOutputType('print_journal_table',$objOT);
         $cg5->addColumn($c);
 
     $cg->addColumn($cg5);

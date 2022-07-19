@@ -40,6 +40,8 @@ class AnsibleTowerRestApiProjects extends AnsibleTowerRestApiBase {
     const PREPARE_BUILD_PROJECT_NAME = "ita_executions_prepare_build";
     const CLEANUP_PREPARED_BUILD_PROJECT_NAME = "ita_executions_cleanup";
 
+    const SCMTYPE_GIT  = "git";
+
     // static only
     private function __construct() {
     }
@@ -94,16 +96,42 @@ class AnsibleTowerRestApiProjects extends AnsibleTowerRestApiBase {
         // content生成
         $content = array();
 
-            // SCM_TYPE = "" (手動) とし、local_path必須としている
-            // SCM_TYPEを他のもの選べるようにするには拡張が必要
-
-        if(!empty($param['execution_no'])) {
+        if(isset($param['scm_type'])) {
             $content['name']       = sprintf(self::IDENTIFIED_NAME_PREFIX,$vg_tower_driver_name,addPadding($param['execution_no']));
-            $content['local_path'] = sprintf(self::SCM_LOCALPATH_PREFIX,  $vg_tower_driver_name,addPadding($param['execution_no']));
+            if($param['scm_type'] == self::SCMTYPE_GIT) {
+               // SCM_TYPE = git
+               $content['scm_type']   = $param['scm_type'];
+               if(!empty($param['scm_url'])) {
+                   $content['scm_url']   = $param['scm_url'];
+               } else {
+                   // 必須のためNG返す
+                   $response_array['success'] = false;
+                   $response_array['responseContents']['errorMessage'] = "Need 'scm_url'.";
+                   return $response_array;
+               }
+               if(!empty($param['credential'])) {
+                   $content['credential']   = $param['credential'];
+               } else {
+                   // 必須のためNG返す
+                   $response_array['success'] = false;
+                   $response_array['responseContents']['errorMessage'] = "Need 'credential'.";
+                   return $response_array;
+               }
+            } else {
+               // SCM_TYPE = "" (手動) 
+               if(!empty($param['execution_no'])) {
+                   $content['local_path'] = sprintf(self::SCM_LOCALPATH_PREFIX,  $vg_tower_driver_name,addPadding($param['execution_no']));
+               } else {
+                   // 必須のためNG返す
+                   $response_array['success'] = false;
+                   $response_array['responseContents']['errorMessage'] = "Need 'execution_no'.";
+                   return $response_array;
+               }
+            }
         } else {
             // 必須のためNG返す
             $response_array['success'] = false;
-            $response_array['responseContents']['errorMessage'] = "Need 'execution_no'.";
+            $response_array['responseContents']['errorMessage'] = "Need 'scm_type'.";
             return $response_array;
         }
 

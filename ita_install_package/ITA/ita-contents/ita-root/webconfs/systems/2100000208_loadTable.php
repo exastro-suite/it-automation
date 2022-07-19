@@ -76,7 +76,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     $c->setHiddenMainTableColumn(true);
     $c->setRequired(false);
     $c->setDescription($g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070502"));
-    $objVldt = new TextValidator(0, 256, false, '/^(|[-_+=\.a-zA-Z0-9]+@[-a-zA-Z0-9\.]+)$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070503"));
+    $objVldt = new TextValidator(0, 256, false, '/^([a-zA-Z0-9_+-]+(\.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,})?$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070503"));
     $objVldt->setRegexp("/^[^\r\n]*$/s","DTiS_filterDefault");
     $c->setValidator($objVldt);
 

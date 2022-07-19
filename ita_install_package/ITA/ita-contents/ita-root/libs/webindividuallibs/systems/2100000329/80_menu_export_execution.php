@@ -194,16 +194,12 @@ function menuExportExecutionFromRest($objJSONOfReceptedData){
     $_POST["menu_list"] = $menuList;
 
     try {
-            $dirName = date('YmdHis') . mt_rand();
-            $exportMenuIdAry = makeExportDataList($dirName);
-
             // データ登録
             $taskNo = insertBulkExcelTask();
             $res = makeBulkExcelExportMenuList($taskNo);
             $resultMsg = $g['objMTS']->getSomeMessage('ITABASEH-MNU-900024', array($taskNo));
             $_SESSION['data_export_task_no'] = $taskNo;
 
-            renameExportDir($dirName, $taskNo);
             $resultFlg = true;
             $intResultCode= "000";
 

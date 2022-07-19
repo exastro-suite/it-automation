@@ -691,7 +691,7 @@
             // プロトコル
             $aryParm['protocol'] = $arycollectSVInfo['PROTOCOL'];
             // ホスト名
-            if($arycollectSVInfo['HOST_DESIGNATE_TYPE_ID'] == 0 ){
+            if($arycollectSVInfo['HOST_DESIGNATE_TYPE_ID'] == 2 ){
                 $aryParm['hostName'] =  $arycollectSVInfo['HOSTNAME'];
             }else{
                 $aryParm['hostName'] =  $arycollectSVInfo['IP_ADDRESS'];
@@ -761,9 +761,14 @@
                 $strCollectlogPath = $tmpCollectlogdir . "/" . $tmpCollectlogfile;
                 //ログ出力先チェック、ディレクトリ作成
                 if( !is_dir($tmpCollectlogdir) ){
+                    #1907　umask退避-umask設定-mkdir,umask戻し
+                    $mask = umask();
+                    umask(000);
                     if ( mkdir($tmpCollectlogdir,0777,true) ){
                         chmod($tmpCollectlogdir, 0777);
+                        umask($mask);
                     }else{
+                        umask($mask);
                         exit;
                     }
                 }
@@ -1249,13 +1254,14 @@
                                                                         }
                                                                     }
                                                                     $insertData[$parmNO]=$value;
-                                                                    if( gettype( $value ) == "NULL" || $value == "" ) $insertNullflg[$parmNO] = 1;
+                                                                    if( gettype( $value ) == "NULL" || $value == "" ) $tmpFilternullflg[$intColmun][$parmNO] = 1;
                                                                 //項目名：リピート部分[X]
                                                                 }elseif( $tmpColname == $pramName ){
                                                                     $insertData[10] = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) );
 
                                                                     $insertData[$parmNO]=$value;
-                                                                    if(gettype( $value ) == "NULL" || $value == ""  ) $insertNullflg[$parmNO] = 1;
+                                                                    $intColmun = str_replace(array('[',']'), "",  mb_eregi_replace($pramName, "", $tgtSource_key) )-1; 
+                                                                    if( gettype( $value ) == "NULL" || $value == "" ) $tmpFilternullflg[$intColmun][$parmNO] = 1;
                                                                 //その他
                                                                 }else{
                                                                     if( isset($insertData[$parmNO]) != true )$insertData[$parmNO]=null;
@@ -1374,10 +1380,6 @@
                                                                             //種別、オペレーション、ホスト、代入順序　#1050,1051
                                                                             if( isset($insertData[0]) && isset($insertData[3]) && isset($insertData[9]) && isset($insertData[10]) ){
                                                                                 $tmpFilter[$intColmun] = $insertData;
-
-                                                                                if( $insertNullflg != array() ){
-                                                                                    $tmpFilternullflg[$intColmun] = $insertNullflg;
-                                                                                }
                                                                                 
                                                                                 // #449 ファイルアップロードカラム対応
                                                                                 if( $UpdateFileData != array() ){
@@ -1391,7 +1393,7 @@
 
                                                                                     $tmpFilter['UPLOAD_FILE'][$intColmun] = $UpdateFileData;
                                                                                 }
-                                                                                $intColmun++;                                                                                
+
                                                                             }
 
                                                                         }
@@ -1930,6 +1932,15 @@ function yamlParseAnalysis($strTargetfile){
     if( $arrTargetParm  != array() ){
         foreach ($arrTargetParm as $key1 => $value1) {
             if( is_array($value1) ){
+
+                # 1897
+                foreach ($value1 as $key2 => $value2) {
+                    if( !is_array( $value2 ) ){
+                        if( is_numeric( $key2 ) ){
+                            $arrVarsList[$key1][ '['.$key2.']' ] = $value2 ;
+                        }
+                    }
+                }
 
                 $in_fastarry_f = "";
                 $in_var_name = "";

@@ -300,6 +300,16 @@ function splitHostGrp($inputTable, $outputTable, $treeArray, $hierarchy, $target
         }
         $inputDataArray = $result;
 
+        // 配列が空ではない・KY_KEYが存在しない場合はホストグループ分割対象の分割済みフラグをONにし処理を終了する
+        if(0 < count($inputDataArray)){
+            foreach($inputDataArray as $inputData){
+                if(!array_key_exists('KY_KEY', $inputData)){
+                    $result = splitTarget($targetRowId, $targetTimestamp);
+                    return $result;
+                }
+            }
+        }
+
         // オペレーションID(実施予定日_ID_オペレーション名)の順に昇順に並べ替える
         if(0 < count($inputDataArray)) {
             foreach($inputDataArray as $key => $inputData) {
@@ -1253,4 +1263,58 @@ function copyUploadFile($copyFileArray) {
         }
     }
     return true;
+}
+
+/**
+ * ホストグループ分割対象の分割済みフラグをONにする
+ * 
+ */
+function splitTarget($targetRowId, $targetTimestamp) {
+
+    global $objDBCA, $db_model_ch, $objMTS;
+    $tranStartFlg = false;
+    $copyFileArray = array();
+    
+    try{
+        $sql = "UPDATE F_SPLIT_TARGET "
+              ."SET DIVIDED_FLG = :DIVIDED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
+              ."WHERE ROW_ID = :ROW_ID AND LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP2";
+        $objDBCA->setQueryTime();
+        $aryForBind = array('DIVIDED_FLG'               => "1",
+                            'LAST_UPDATE_TIMESTAMP'     => $objDBCA->getQueryTime(),
+                            'ROW_ID'                    => $targetRowId,
+                            'LAST_UPDATE_TIMESTAMP2'    => $targetTimestamp,
+                           );
+        // SQL実行
+        $baseTable = new BaseTable($objDBCA, $db_model_ch);
+        $result = $baseTable->execQuery($sql, $aryForBind, $objQuery);
+        if(true !== $result){
+            $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+            outputLog($msg);
+            outputLog($sql);
+            throw new Exception($msg);
+        }
+        // アップロードファイルコピー
+        $result = copyUploadFile($copyFileArray);
+        if(true !== $result){
+            throw new Exception();
+        }
+        // コミット
+        $result = $objDBCA->transactionCommit();
+        if(false === $result){
+            $msg = $objMTS->getSomeMessage('ITAHOSTGROUP-ERR-5001', $result);
+            outputLog($msg);
+            throw new Exception($msg);
+        }
+        $tranStartFlg = false;
+
+        return true;
+    }
+    catch(Exception $e){
+        // ロールバック
+        if(true === $tranStartFlg){
+            $objDBCA->transactionRollback();
+        }
+        return false;
+    }
 }

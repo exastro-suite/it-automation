@@ -1927,24 +1927,35 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
     
         $tmpNoticeInfo = json_decode($aryRowOfSymInstanceTable['I_NOTICE_INFO'],true);
         $arrNoticeInfo = $tmpNoticeInfo['NOTICE_INFO'];
+        
+        //緊急停止フラグを画面表示用に変換
+        $strAbortExecuteFlag = '';
+        if ($aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG'] == '1') {
+          $strAbortExecuteFlag = $objMTS->getSomeMessage("ITABASEH-MNU-203095");
+        }
+        else if ($aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG'] == '2') {
+          $strAbortExecuteFlag = $objMTS->getSomeMessage("ITABASEH-MNU-203096");
+        }
+
 
         //----Conductor(インスタンス)情報を固める
         $arySymphonySource = array('CONDUCTOR_INSTANCE_ID'=>$intSymphonyInstanceId
                                   ,'CONDUCTOR_CLASS_NO'=>$aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO']
+                                  ,'CONDUCTOR_NAME'=>$aryRowOfSymInstanceTable['I_CONDUCTOR_NAME'] #1825
                                   ,'STATUS_ID'=>$aryRowOfSymInstanceTable['STATUS_ID']
                                   ,'PAUSE_STATUS'=>''
                                   ,'EXECUTION_USER'=>$aryRowOfSymInstanceTable['EXECUTION_USER']
-                                  ,'ABORT_EXECUTE_FLAG'=>$aryRowOfSymInstanceTable['ABORT_EXECUTE_FLAG']
+                                  ,'ABORT_EXECUTE_FLAG'=>$strAbortExecuteFlag
                                   ,'OPERATION_NO_IDBH'=>$aryRowOfSymInstanceTable['OPERATION_NO_UAPK']
                                   ,'OPERATION_NAME'=>$aryRowOfSymInstanceTable['I_OPERATION_NAME']
                                   ,'TIME_BOOK'=>$aryRowOfSymInstanceTable['TIME_BOOK']
                                   ,'TIME_START'=>$aryRowOfSymInstanceTable['TIME_START']
                                   ,'TIME_END'=>$aryRowOfSymInstanceTable['TIME_END']
                                   ,'EXEC_LOG'=> htmlspecialchars($aryRowOfSymInstanceTable['EXEC_LOG'])
-                                  ,'NOTICE_INFO'=> $arrNoticeInfo,
+                                  ,'NOTICE_INFO'=> $arrNoticeInfo
+                                  ,'NOTE'=> $aryRowOfSymInstanceTable['I_DESCRIPTION']
         );
         //Conductor(インスタンス)情報を固める----
-
 
         $aryRetBody = $objOLA->convertConductorClassJson($aryRowOfSymInstanceTable['I_CONDUCTOR_CLASS_NO'],$getmode);
         if( $aryRetBody[1] !== null ){
@@ -2022,7 +2033,9 @@ function conductorInstancePrint($fxVarsIntSymphonyInstanceId,$mode=0,$getmode=""
             $aryInstanceItems['NODE_INSTANCE_NO']                 = $row['NODE_INSTANCE_NO'];
             $aryInstanceItems['NODE_TYPE_ID']                 = $row['I_NODE_TYPE_ID'];
             $aryInstanceItems['STATUS']                 = $row['STATUS_ID'];
+            $aryInstanceItems['STATUS_FILE']    = ""; #1825
             $aryInstanceItems['SKIP']                 = $row['EXE_SKIP_FLAG'];
+            $aryInstanceItems['NOTE']                 = $row['I_DESCRIPTION']; #1825
             //ステータス----
 
             if( $row['I_NODE_TYPE_ID'] == 8){

@@ -928,10 +928,13 @@ function newOpenWindow(current_element){
   var current_id = current_element.offsetParent.id;
   var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "5";
   var searchText1 = document.getElementById(target_id).children[0].innerHTML;
+  searchText1 = encodeURIComponent(searchText1);
   var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "6";
   var searchText2 = document.getElementById(target_id).children[0].innerText;
+  searchText2 = encodeURIComponent(searchText2);
   var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "7";
   var searchText3 = document.getElementById(target_id).children[0].innerHTML;
+  searchText3 = encodeURIComponent(searchText3);
   var url = "01_browse.php?no=2100020109&filter=on&Filter1Tbl_2=" + searchText1 + "&Filter1Tbl_3=" + searchText2 + "&Filter1Tbl_4=" + searchText3;
   window.open(url, '_blank');
 }

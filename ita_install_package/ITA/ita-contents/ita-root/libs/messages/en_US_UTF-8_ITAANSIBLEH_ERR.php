@@ -28,6 +28,16 @@ $ary["ITAANSIBLEH-ERR-506"]         = "QUERY_NOT_FOUND(prg_recorder)";
 $ary["ITAANSIBLEH-ERR-507"]         = "QUERY_IS_NOT_INTEGER(prg_recorder)";
 $ary["ITAANSIBLEH-ERR-510"]         = "prg_recorder Select Error";
 $ary["ITAANSIBLEH-ERR-511"]         = "";
+$ary["ITAANSIBLEH-ERR-2000"]        = "This item is required if Ansible Automation Controller is selected as Execution engine.(item:{})";
+$ary["ITAANSIBLEH-ERR-2001"]        = "This item is not required if the selected Execution engine is not Ansible Automation Controller.(item:{})";
+$ary["ITAANSIBLEH-ERR-2002"]        = "[Update SCM operation] Failed to create operation directory for the Git repository linked to the Ansible Automation Controller.({})";
+$ary["ITAANSIBLEH-ERR-2003"]        = "{}\n[Update SCM operation] Failed to create Git repository which would be linked to the Ansible Automation Controller.";
+$ary["ITAANSIBLEH-ERR-2004"]        = "A required item in the Ansible common interface information has not been input.(item:{})";
+$ary["ITAANSIBLEH-ERR-2005"]        = "Failed to connect to the Project's Git.";
+$ary["ITAANSIBLEH-ERR-2006"]        = "Failed to acquire Project's Git link results.";
+$ary["ITAANSIBLEH-ERR-2007"]        = "The execution engine selected in the \"Ansible common interface information\" is not compatible with the Ansible Automation Controller version. (Ansible Automation Controller version:{})
+If the version is 3.x.x, select Ansible Tower for your Execution engine.
+If the version is 4.x.x, select Ansible Automation Controller for your Execution engine.";
 $ary["ITAANSIBLEH-ERR-50003"]       = "Error occurred ([FILE]{}[LINE]{}[ETC-Code]{})";
 $ary["ITAANSIBLEH-ERR-50005"]       = "[Warning] Lock the target record has failed. (Execution No.:{})";
 $ary["ITAANSIBLEH-ERR-50006"]       = "Rollback (Execution No.:{})";
@@ -557,6 +567,7 @@ $ary["ITAANSIBLEH-ERR-5000034"]     = "Server certificate file of device list ma
 $ary["ITAANSIBLEH-ERR-5000035"]     = "Failed to copy server certificate file. (Device list Item No.: {} server certificate file:{})";
 $ary["ITAANSIBLEH-ERR-5000036"]     = "Failed to Set file permission. (line:{})";
 $ary["ITAANSIBLEH-ERR-5000037"]     = "Registration method: \"String {} type\" can not be set when \"{} variable information\" is set.";
+$ary["ITAANSIBLEH-ERR-5000038"]     = "Failed to set file owner. (line:{})";
 $ary["ITAANSIBLEH-ERR-6000001"]     = "optional parameters is no value. (parameters: {})";
 $ary["ITAANSIBLEH-ERR-6000002"]     = "option parameter is duplicate. (parameters: {})";
 $ary["ITAANSIBLEH-ERR-6000003"]     = "optional parameters is invalid. (parameters: {})";
@@ -690,9 +701,10 @@ $ary["ITAANSIBLEH-ERR-6040033"]     = "[Update SCM operation] Get the Ansible Au
 $ary["ITAANSIBLEH-ERR-6040034"]     = "[Update SCM operation] Valid host information is not registered in the Ansible Automation Controller host list.";
 $ary["ITAANSIBLEH-ERR-6040035"]     = "[Update SCM operation] Failed to deploy materials to Ansible Automation Controller. (Ansible Automation Controller:{})";
 $ary["ITAANSIBLEH-ERR-6040036"]     = "[Update SCM operation] Check the list of Ansible Automation Controller hosts.";
-$ary["ITAANSIBLEH-ERR-6040037"]     = "Failed to delete the materials deployed in Ansible Automation Controller. (Ansible Automation Controller:{})";
+$ary["ITAANSIBLEH-ERR-6040037"]     = "Failed to delete the materials deployed in Ansible Automation Controller. (Ansible Automation Controller:{} path:{})";
 $ary["ITAANSIBLEH-ERR-6040038"]     = "Execution environment is not registered in the Ansible Automation Controller. (execution environment:{})";
 $ary["ITAANSIBLEH-ERR-6040039"]     = "Faild to get execution environment data from Ansible Automation Controller. (execution environment:{})";
 $ary["ITAANSIBLEH-ERR-6101010"]     = "Function to connect with REST API is not defined.";
 $ary["ITAANSIBLEH-ERR-6101100"]     = "Faild to initiate emergency stop. Check Ansible/Ansible Automation Controller state. (Execution No.:{})";
+$ary["ITAANSIBLEH-ERR-6040040"]     = "Failed to create Git authentication information.";
 ?>

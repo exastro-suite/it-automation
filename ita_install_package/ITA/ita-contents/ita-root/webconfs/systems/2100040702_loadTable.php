@@ -268,6 +268,62 @@ Ansibleインターフェース情報
     $table->addColumn($cg);
 
     //--------------------------------------------------------------
+    //-- SCM管理　Git接続情報
+    //--------------------------------------------------------------
+    $cggit  = new ColumnGroup($g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'));
+
+        //--------------------------------------------------------------
+        //-- ansibleバックヤード ホスト名・IP
+        //--------------------------------------------------------------
+        $objVldt = new SingleTextValidator(0,128,false);
+        $c = new TextColumn('ANS_GIT_HOSTNAME',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010100"));
+        $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010101"));
+        $c->setValidator($objVldt);
+        $c->setHiddenMainTableColumn(true);
+        $cggit->addColumn($c);
+
+        //--------------------------------------------------------------
+        //-- Linux アカウント
+        //--------------------------------------------------------------
+        $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010200"));
+    
+            //--------------------------------------------------------------
+            //-- Git ユーザー  必須入力:false 
+            //--------------------------------------------------------------
+            $objVldt = new SingleTextValidator(0,128,false);
+            $c = new TextColumn('ANS_GIT_USER',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010300"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010301"));
+            $c->setValidator($objVldt);
+            $c->setHiddenMainTableColumn(true);
+            $cg->addColumn($c);
+    
+            //--------------------------------------------------------------
+            //-- 秘密鍵ファイル
+            //--------------------------------------------------------------
+            $c = new FileUploadColumn('ANS_GIT_SSH_KEY_FILE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010400"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010401"));
+            $c->setMaxFileSize(4*1024*1024*1024);//単位はバイト
+            $c->setAllowSendFromFile(false);//エクセル/CSVからのアップロードを禁止する。
+            $c->setAllowUploadColmnSendRestApi(true);   //REST APIからのアップロード可否。FileUploadColumnのみ有効(default:false)
+            $c->setFileHideMode(true);
+            // ANS_GIT_SSH_KEY_FILEをアップロード時に「ky__encrypt」で暗号化する設定
+            $c->setFileEncryptFunctionName("ky_file_encrypt");
+            $cg->addColumn($c);
+
+            //--------------------------------------------------------------
+            //-- 秘密鍵ファイル パスフレーズ
+            //--------------------------------------------------------------
+            $objVldt = new SingleTextValidator(0,256,false);
+            $c = new PasswordColumn('ANS_GIT_SSH_KEY_FILE_PASSPHRASE',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010500"));
+            $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010501"));
+            $c->setEncodeFunctionName("ky_encrypt");
+            $cg->addColumn($c);
+
+        $cggit->addColumn($cg);
+
+    $table->addColumn($cggit);
+
+    //--------------------------------------------------------------
     //----データリレイストレージパス(ITA)
     //--------------------------------------------------------------
     $objVldt = new SingleTextValidator(1,256,false);
@@ -403,7 +459,7 @@ Ansibleインターフェース情報
 
         if($strModeId == "DTUP_singleRecDelete"){
             //----更新前のレコードから、各カラムの値を取得
-            $strMode        = isset($arrayVariant['edit_target_row']['ANSIBLE_EXEC_MODE'])?
+            $strExecMode    = isset($arrayVariant['edit_target_row']['ANSIBLE_EXEC_MODE'])?
                                     $arrayVariant['edit_target_row']['ANSIBLE_EXEC_MODE']:null;
             $strTwrHostID   = isset($arrayVariant['edit_target_row']['ANSTWR_HOST_ID'])?
                                     $arrayVariant['edit_target_row']['ANSTWR_HOST_ID']:null;
@@ -419,7 +475,7 @@ Ansibleインターフェース情報
             $PkeyID = $strNumberForRI;
             //更新前のレコードから、各カラムの値を取得----
         }else if( $strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister" ){
-            $strMode        = array_key_exists('ANSIBLE_EXEC_MODE',$arrayRegData)?
+            $strExecMode    = array_key_exists('ANSIBLE_EXEC_MODE',$arrayRegData)?
                                  $arrayRegData['ANSIBLE_EXEC_MODE']:null;
             $strTwrHostID   = array_key_exists('ANSTWR_HOST_ID',$arrayRegData)?
                                  $arrayRegData['ANSTWR_HOST_ID']:null;
@@ -451,7 +507,7 @@ Ansibleインターフェース情報
             $ary[] = array("VALUE"=>$strOrgName,    "MSG_CODE"=>"ITAANSIBLEH-MNU-9010000002");
             $ary[] = array("VALUE"=>$strToken,      "MSG_CODE"=>"ITAANSIBLEH-MNU-9010000000");
             // 実行エンジンがTowerの場合の、Ansible Towerインターフェースの必須入力チェック
-            if($strMode == DF_EXEC_MODE_TOWER) {
+            if($strExecMode != DF_EXEC_MODE_ANSIBLE) {
                 foreach($ary as $values) {
                     if(trim(strlen($values['VALUE'])) == 0) {
                         $msg1 = $g['objMTS']->getSomeMessage($values['MSG_CODE']);
@@ -467,8 +523,62 @@ Ansibleインターフェース情報
         }
         if($retBool===false){
             $objClientValidator->setValidRule($retStrBody);
+            return $retBool;
         }
-        return $retBool;
+
+        // SCM管理 git接続情報入力確認
+        require_once ($root_dir_path . '/libs/commonlibs/common_required_check.php' );
+
+        // 必須入力設定
+        $chkObj  = new TowerHostListGitInterfaceParameterCheck();
+        $RequiredCloumnName = 'Required';
+        $ColumnArray = array();
+        $ColumnArray['ANS_GIT_HOSTNAME'][$RequiredCloumnName]                = true;
+        $ColumnArray['ANS_GIT_USER'][$RequiredCloumnName]                    = true;
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$RequiredCloumnName]            = true;
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE_PASSPHRASE'][$RequiredCloumnName] = false;
+        // 削除チェックボタン設定
+        $DelFlagCloumnName = 'del_flag_cloumn';
+        $ColumnArray['ANS_GIT_HOSTNAME'][$DelFlagCloumnName]                 = "";
+        $ColumnArray['ANS_GIT_USER'][$DelFlagCloumnName]                     = "";
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$DelFlagCloumnName]             = "del_flag_COL_IDSOP_27";
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE_PASSPHRASE'][$DelFlagCloumnName]  = "del_password_flag_COL_IDSOP_28";
+
+        // エラーメッセージに表示するカラム名設定
+        $MyNameCloumnName = 'CloumnName';
+        $errormsg    = sprintf("%s/%s",   $g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010100"));
+        $ColumnArray['ANS_GIT_HOSTNAME'][$MyNameCloumnName]         = sprintf("%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-2000',array($errormsg)));
+        $errormsg    = sprintf("%s/%s/%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010300"));
+        $ColumnArray['ANS_GIT_USER'][$MyNameCloumnName]             = sprintf("%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-2000',array($errormsg)));
+        $errormsg    = sprintf("%s/%s/%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010400"));
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE'][$MyNameCloumnName]     = sprintf("%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-2000',array($errormsg)));
+        $errormsg    = sprintf("%s/%s/%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-MNU-1200010000'),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010200"),
+                                          $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1200010500"));
+        $ColumnArray['ANS_GIT_SSH_KEY_FILE_PASSPHRASE'][$MyNameCloumnName]  = sprintf("%s",$g['objMTS']->getSomeMessage('ITAANSIBLEH-ERR-2000',array($errormsg)));
+        $ColumnValueArray = array();
+        foreach($ColumnArray as $ColumnName=>$Type) {
+            // $arrayRegDataはUI入力ベースの情報
+            // $arrayVariant['edit_target_row']はDBに登録済みの情報
+            $ValueColumnName = 'Value';
+            $ColumnArray[$ColumnName][$ValueColumnName] = $chkObj->getColumnDataFunction($strModeId, $ColumnName, $Type, $DelFlagCloumnName, $arrayVariant, $arrayRegData);
+        }
+     
+        $retBool = $chkObj->ParameterCheck($strExecMode, $ColumnArray, $ValueColumnName, $MyNameCloumnName, $RequiredCloumnName);
+        if($retBool !== true) {
+            $retStrBody = $retBool;
+            $retBool    = false;
+            $objClientValidator->setValidRule($retStrBody);
+            return $retBool;
+        } else {
+            $retBool    = true;
+            return $retBool;
+        }
     };
 
     $objVarVali = new VariableValidator();

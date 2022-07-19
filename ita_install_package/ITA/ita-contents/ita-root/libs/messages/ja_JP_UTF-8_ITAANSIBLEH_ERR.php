@@ -28,6 +28,16 @@ $ary["ITAANSIBLEH-ERR-506"]         = "QUERY_NOT_FOUND(prg_recorder)";
 $ary["ITAANSIBLEH-ERR-507"]         = "QUERY_IS_NOT_INTEGER(prg_recorder)";
 $ary["ITAANSIBLEH-ERR-510"]         = "prg_recorder Select Error";
 $ary["ITAANSIBLEH-ERR-511"]         = "";
+$ary["ITAANSIBLEH-ERR-2000"]        = "実行エンジンでAnsible Automation Controllerを選択している場合、入力が必須な項目です。(項目:{})";
+$ary["ITAANSIBLEH-ERR-2001"]        = "実行エンジンでAnsible Automation Controller以外を選択している場合、入力が不要な項目です。(項目:{})";
+$ary["ITAANSIBLEH-ERR-2002"]        = "[SCM更新作業] Ansible Automation Controllerと連携するGitリポジトリ用作業ディレクトリの作成に失敗しました。({})";
+$ary["ITAANSIBLEH-ERR-2003"]        = "{}\n[SCM更新作業] Ansible Automation Controllerと連携するGitリポジトリの作成に失敗しました。";
+$ary["ITAANSIBLEH-ERR-2004"]        = "Ansible共通 インターフェース情報に未入力の項目があります。(項目:{})";
+$ary["ITAANSIBLEH-ERR-2005"]        = "{}\n[SCM更新作業]プロジェクトのGit連携に失敗しました。";
+$ary["ITAANSIBLEH-ERR-2006"]        = "[SCM更新作業]プロジェクトのGit連携結果が取得出来ませんでした。";
+$ary["ITAANSIBLEH-ERR-2007"]        = "Ansible共通 インターフェース情報で選択されている実行エンジンが接続先のAnsible Automation Controllerのバージョンに適合しません。(Ansible Automation Controller バージョン:{})
+バージョンが3.x.xの場合、実行エンジンでAnsible Towerを選択して下さい。
+バージョンが4.x.xの場合、実行エンジンでAnsible Automation Controllerを選択して下さい。";
 $ary["ITAANSIBLEH-ERR-50003"]       = "異常発生([FILE]{}[LINE]{}[ETC-Code]{})";
 $ary["ITAANSIBLEH-ERR-50005"]       = "確認対象レコードのロックに失敗しました。(作業No.:{})";
 $ary["ITAANSIBLEH-ERR-50006"]       = "ロールバック(作業No.:{})";
@@ -557,6 +567,7 @@ $ary["ITAANSIBLEH-ERR-5000034"]     = "システムで管理している機器�
 $ary["ITAANSIBLEH-ERR-5000035"]     = "サーバー証明書ファイルのコピーに失敗しました。(機器一覧 項番:{} File:{})";
 $ary["ITAANSIBLEH-ERR-5000036"]     = "ファイルのパーミッション設定に失敗しました。(line:{})";
 $ary["ITAANSIBLEH-ERR-5000037"]     = "登録方式:「{}型」を設定した場合、{}変数の情報は設定できません。";
+$ary["ITAANSIBLEH-ERR-5000038"]     = "ファイルのオーナー設定に失敗しました。(line:{})";
 $ary["ITAANSIBLEH-ERR-6000001"]     = "オプションパラメータに値が設定されていません。(パラメータ: {})";
 $ary["ITAANSIBLEH-ERR-6000002"]     = "オプションパラメータが重複しています。(パラメータ: {})";
 $ary["ITAANSIBLEH-ERR-6000003"]     = "オプションパラメータが不正です。(パラメータ: {})";
@@ -690,9 +701,10 @@ $ary["ITAANSIBLEH-ERR-6040033"]     = "[SCM更新作業] Ansible Automation Cont
 $ary["ITAANSIBLEH-ERR-6040034"]     = "[SCM更新作業] Ansible Automation Controllerホスト一覧に有効なホスト情報が登録されていません。";
 $ary["ITAANSIBLEH-ERR-6040035"]     = "[SCM更新作業] Ansible Automation Controllerへの資材展開に失敗しました。(Ansible Automation Controller:{})";
 $ary["ITAANSIBLEH-ERR-6040036"]     = "[SCM更新作業] Ansible Automation Controllerホスト一覧を確認して下さい。";
-$ary["ITAANSIBLEH-ERR-6040037"]     = "Ansible Automation Controllerに展開した資材の削除に失敗しました。(Ansible Automation Controller:{})";
+$ary["ITAANSIBLEH-ERR-6040037"]     = "Ansible Automation Controllerに展開した資材の削除に失敗しました。(Ansible Automation Controller:{} path:{})";
 $ary["ITAANSIBLEH-ERR-6040038"]     = "実行環境の取得に失敗しました。(実行環境:{})";
 $ary["ITAANSIBLEH-ERR-6040039"]     = "実行環境がAnsible Automation Controllerに登録されていません。(実行環境:{})";
+$ary["ITAANSIBLEH-ERR-6040040"]     = "Git 認証情報の作成に失敗しました。";
 $ary["ITAANSIBLEH-ERR-6101010"]     = "REST API接続function定義なし";
 $ary["ITAANSIBLEH-ERR-6101100"]     = "緊急停止できませんでした。Ansible/Ansible Automation Controllerの状況をご確認ください。(作業No.:{})";
 ?>

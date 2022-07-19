@@ -71,7 +71,7 @@ Organizations管理
     $c = new TextColumn('EMAIL_ADDRESS',$g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102270'));
     $c->setDescription($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102280'));//エクセル・ヘッダでの説明
     $c->setRequired(true);//登録/更新時には、入力必須
-    $objVldt = new TextValidator(1, 128, false, '/^[-_+=\.a-zA-Z0-9]+@[-a-zA-Z0-9\.]+$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070503"));
+    $objVldt = new TextValidator(1, 128, false, '/^[a-zA-Z0-9_+-]+(\.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/', $g['objMTS']->getSomeMessage("ITAWDCH-MNU-1070503"));
     $objVldt->setRegexp("/^[^\r\n]*$/s","DTiS_filterDefault");
     $c->setValidator($objVldt);
     $table->addColumn($c);

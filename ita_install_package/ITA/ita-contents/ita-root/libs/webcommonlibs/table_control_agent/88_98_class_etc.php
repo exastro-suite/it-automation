@@ -504,7 +504,7 @@ class MailSendEventStandard {
                 
                 $p_from_mail = $resultRowBody1[0][$this->getLoginUserMailColumn()];
                 
-                if(preg_match('/^[-_+=\.a-zA-Z0-9]+@[-a-zA-Z0-9\.]+$/', $p_from_mail) === 1){ 
+                if(preg_match('/^[a-zA-Z0-9_+-]+(\.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/', $p_from_mail) === 1){ 
                     //----メールアドレスの様式に合致した
                     $strRetValue =$p_from_mail;
                     //メールアドレスの様式に合致した----
@@ -538,7 +538,7 @@ class MailSendEventStandard {
         }
         
         if( $strRetValue=="" ){
-            if(preg_match('/^[-_+=\.a-zA-Z0-9]+@[-a-zA-Z0-9\.]+$/', $p_from_mail) === 1){
+            if(preg_match('/^[a-zA-Z0-9_+-]+(\.[a-zA-Z0-9_+-]+)*@([a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.)+[a-zA-Z]{2,}$/', $p_from_mail) === 1){
                 $strRetValue = $p_from_mail;
             }else{
                 web_log($g['objMTS']->getSomeMessage("ITAWDCH-ERR-25001"));

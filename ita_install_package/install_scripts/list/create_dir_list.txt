@@ -9,6 +9,7 @@
 /ita-root/logs/update_by_file
 /ita-root/logs/webaplogs
 /ita-root/repositorys
+/ita-root/repositorys/ansible_driver
 /ita-root/temp/data_download
 /ita-root/temp/data_export
 /ita-root/temp/data_import/backup
@@ -35,3 +36,8 @@
 /ita-root/webconfs/users
 /ita-root/webroot/menus/sheets
 /ita-root/webroot/menus/users
+/ita-root/uploadfiles/2100040702
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old
+/ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old/0000000001

@@ -82,6 +82,16 @@ Terraform Module変数紐付管理
     $c->setValidator($objVldt);
     $table->addColumn($c);
 
+    //タイプID
+    $c = new IDColumn('TYPE_ID', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104410"), 'B_TERRAFORM_TYPES_MASTER', 'TYPE_ID', 'TYPE_NAME', '');
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104420")); //エクセル・ヘッダでの説明
+    $table->addColumn($c);
+
+    //デフォルト値
+    $c = new TextColumn('VARS_VALUE', $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104430"));
+    $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-109510")); //エクセル・ヘッダでの説明
+    $table->addColumn($c);
+
 
     $table->fixColumn();
 

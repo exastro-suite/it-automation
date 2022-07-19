@@ -135,7 +135,7 @@ class DBAccesser {
         $temp_array = array('WHERE' => implode(" AND ", $conditionByBind));
 
         $retArray = makeSQLForUtnTableUpdate($this->dbMode,
-                                             "SELECT FOR UPDATE",
+                                             "SELECT",
                                              $pkeyCol,
                                              $strCurTable,
                                              $strJnlTable,

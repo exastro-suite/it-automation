@@ -33,7 +33,7 @@ If you're connecting to the Remote Repository through https, please select \"htt
 If you're using Local Git, please select \"Local\".";
 $ary["ITACICDFORIAC-MNU-1200010500"] = "Visibility type";
 $ary["ITACICDFORIAC-MNU-1200010501"] = "Please select a Remote Repository Visibility type.
-The Visibility type is required when \"https\" is selected for Protocol.";
+The Visibility type is required when \"private\" is selected for Protocol.";
 $ary["ITACICDFORIAC-MNU-1200010600"] = "Git Account information";
 $ary["ITACICDFORIAC-MNU-1200010700"] = "User";
 $ary["ITACICDFORIAC-MNU-1200010701"] = "Input the Git user. 
