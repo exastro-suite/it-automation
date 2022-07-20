@@ -1554,8 +1554,12 @@ class InventryFileAddOptionContlorl {
                     }
                 }
                 // Sensitive設定を「ON」且つアップロードファイルの設定がある場合
-                if($sensitive != "" && $uploadFile != "") {
+                if($sensitive == 2 && $uploadFile != "" && $StrSet = true) {
                     $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55297");
+                } else {
+                    if($sensitive == 2 && $uploadFile != "" && $StrSet = false) {
+                        $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55297");
+                    }
                 }
                 if(($FileSet === true) && ($StrSet === true)) {
                     return [$retBool,$boolSystemErrorFlag,$retStrBody];
