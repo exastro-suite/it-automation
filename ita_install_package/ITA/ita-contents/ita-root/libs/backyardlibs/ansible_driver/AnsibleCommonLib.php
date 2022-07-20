@@ -1538,6 +1538,29 @@ class InventryFileAddOptionContlorl {
                 } else {
                     $StrSet  = true;
                 }
+                // Sensitive設定を「ON」且つファイルUploadがある場合、登録更新時バリテーションエラーにする
+                if($AftSensitiveFlag == "") {
+                    $sensitive = $BefSensitiveFlag;
+                } else {
+                    $sensitive = $AftSensitiveFlag;
+                }
+                if($AftDelFlag == "on") {
+                    $uploadFile = "";
+                } else {
+                    if($AftUpLoadFile == "") {
+                        $uploadFile = $BefVarsEntryFile;
+                    } else {
+                        $uploadFile = $AftUpLoadFile;
+                    }
+                }
+                // Sensitive設定を「ON」且つアップロードファイルの設定がある場合
+                if($sensitive == 2 && $uploadFile != "" && $StrSet = true) {
+                    $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55297");
+                } else {
+                    if($sensitive == 2 && $uploadFile != "" && $StrSet = false) {
+                        $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55297");
+                    }
+                }
                 if(($FileSet === true) && ($StrSet === true)) {
                     return [$retBool,$boolSystemErrorFlag,$retStrBody];
                 }
@@ -1548,6 +1571,29 @@ class InventryFileAddOptionContlorl {
                        ($BefVarsEntryFile != "")) {
                         $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55295");
                         return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                    }
+                }
+                // Sensitive設定を「ON」且つファイルUploadがある場合、登録更新時バリテーションエラーにする
+                if($AftSensitiveFlag == "") {
+                    $sensitive = $BefSensitiveFlag;
+                } else {
+                    $sensitive = $AftSensitiveFlag;
+                }
+                if($AftUpLoadFile == "") {
+                    $uploadFile = $BefVarsEntryFile;
+                } else {
+                    $uploadFile = $AftUpLoadFile;
+                }
+                if($modeValue_sub == "off") {
+                    // Sensitive設定を「ON」且つアップロードファイルの設定がある場合
+                    if($sensitive == 2 && $uploadFile != "" && $StrSet = true) {
+                        $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55298");
+                        return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                    } else {
+                        if($sensitive == 2 && $uploadFile != "" && $StrSet = false) {
+                            $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55298");
+                            return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                        }
                     }
                 }
                 break;
@@ -1607,6 +1653,29 @@ class InventryFileAddOptionContlorl {
                 } else {
                     $StrSet  = true;
                 }
+                // Sensitive設定を「ON」且つファイルUploadがある場合、登録更新時バリテーションエラーにする
+                if($AftSensitiveFlag == "") {
+                    $sensitive = $BefSensitiveFlag;
+                } else {
+                    $sensitive = $AftSensitiveFlag;
+                }
+                if($AftDelFlag == "on") {
+                    $uploadFile = "";
+                } else {
+                    if($AftUpLoadFile == "") {
+                        $uploadFile = $BefVarsEntryFile;
+                    } else {
+                        $uploadFile = $AftUpLoadFile;
+                    }
+                }
+                // Sensitive設定を「ON」且つアップロードファイルの設定がある場合
+                if($sensitive == 2 && $uploadFile != "" && $StrSet = true) {
+                    $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55297");
+                } else {
+                    if($sensitive == 2 && $uploadFile != "" && $StrSet = false) {
+                        $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55297");
+                    }
+                }
                 if(($FileSet === true) && ($StrSet === true)) {
                     return [$retBool,$boolSystemErrorFlag,$retStrBody];
                 }
@@ -1617,6 +1686,29 @@ class InventryFileAddOptionContlorl {
                        ($BefVarsEntryFile != "")) {
                         $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55295");
                         return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                    }
+                }
+                // Sensitive設定を「ON」且つファイルUploadがある場合、登録更新時バリテーションエラーにする
+                if($AftSensitiveFlag == "") {
+                    $sensitive = $BefSensitiveFlag;
+                } else {
+                    $sensitive = $AftSensitiveFlag;
+                }
+                if($AftUpLoadFile == "") {
+                    $uploadFile = $BefVarsEntryFile;
+                } else {
+                    $uploadFile = $AftUpLoadFile;
+                }
+                if($modeValue_sub == "off") {
+                    // Sensitive設定を「ON」且つアップロードファイルの設定がある場合
+                    if($sensitive == 2 && $uploadFile != "" && $StrSet = true) {
+                        $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55298");
+                        return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                    } else {
+                        if($sensitive == 2 && $uploadFile != "" && $StrSet = false) {
+                            $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55298");
+                            return [$retBool,$boolSystemErrorFlag,$retStrBody];
+                        }
                     }
                 }
                 break;
