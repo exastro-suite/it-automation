@@ -191,6 +191,7 @@ $ary["ITAANSIBLEH-ERR-55293"]       = "Failed to copy the file set in the specif
 $ary["ITAANSIBLEH-ERR-55294"]       = "Both strings and files cannot be set as concrete values. \nIf the SENSITIVE setting is ON and character string is set, turning the SENSITIVE setting OFF will make the character string unset.";
 $ary["ITAANSIBLEH-ERR-55295"]       = "Since both the character string and the file are set in the concrete value, it cannot be restored.";
 $ary["ITAANSIBLEH-ERR-55296"]       = "Records for which a file is set as a specific value cannot be updated from Excel.";
+$ary["ITAANSIBLEH-ERR-55297"]       = "If the specific SENSITIVE setting is "ON" and the upload file is set, it cannot be registered / updated.";
 $ary["ITAANSIBLEH-ERR-56000"]       = "There are no records for Ansible interface information";
 $ary["ITAANSIBLEH-ERR-56001"]       = "The Ansible interface information records is not in a single row";
 $ary["ITAANSIBLEH-ERR-56100"]       = "DB access error ([FILE]{}[LINE]{})";

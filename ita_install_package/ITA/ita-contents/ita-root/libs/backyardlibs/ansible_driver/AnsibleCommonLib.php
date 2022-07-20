@@ -1555,7 +1555,7 @@ class InventryFileAddOptionContlorl {
                 }
                 // Sensitive設定を「ON」且つアップロードファイルの設定がある場合
                 if($sensitive != "" && $uploadFile != "") {
-                    return [$retBool,$boolSystemErrorFlag,"sensitive設定が「ON」でアップロードファイルを設定している場合、登録/更新できません。"];
+                    $retStrBody = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-55297");
                 }
                 if(($FileSet === true) && ($StrSet === true)) {
                     return [$retBool,$boolSystemErrorFlag,$retStrBody];
