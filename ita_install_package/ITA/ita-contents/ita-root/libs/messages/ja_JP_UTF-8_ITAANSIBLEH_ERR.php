@@ -192,6 +192,7 @@ $ary["ITAANSIBLEH-ERR-55294"]       = "具体値に文字列とファイルの�
 $ary["ITAANSIBLEH-ERR-55295"]       = "具体値に文字列とファイルの両方が設定されているので復活出来ません。";
 $ary["ITAANSIBLEH-ERR-55296"]       = "具体値にファイルが設定されているレコードはExcelから更新することは出来ません。";
 $ary["ITAANSIBLEH-ERR-55297"]       = "具体値のsensitive設定が「ON」でアップロードファイルを設定している場合、登録/更新できません。";
+$ary["ITAANSIBLEH-ERR-55298"]       = "具体値のsensitive設定が「ON」でアップロードファイルが設定されているので復活できません。";
 $ary["ITAANSIBLEH-ERR-56000"]       = "Ansibleインタフェース情報レコード無し";
 $ary["ITAANSIBLEH-ERR-56001"]       = "Ansibleインタフェース情報レコードが単一行でない";
 $ary["ITAANSIBLEH-ERR-56100"]       = "ＤＢアクセス異常([FILE]{}[LINE]{})";

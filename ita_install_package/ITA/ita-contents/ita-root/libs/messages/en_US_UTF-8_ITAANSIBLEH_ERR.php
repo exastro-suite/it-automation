@@ -192,6 +192,7 @@ $ary["ITAANSIBLEH-ERR-55294"]       = "Both strings and files cannot be set as c
 $ary["ITAANSIBLEH-ERR-55295"]       = "Since both the character string and the file are set in the concrete value, it cannot be restored.";
 $ary["ITAANSIBLEH-ERR-55296"]       = "Records for which a file is set as a specific value cannot be updated from Excel.";
 $ary["ITAANSIBLEH-ERR-55297"]       = "If the specific SENSITIVE setting is "ON" and the upload file is set, it cannot be registered / updated.";
+$ary["ITAANSIBLEH-ERR-55298"]       = "Since the upload file is set with the specific SENSITIVE setting set to "ON", it cannot be restored.";
 $ary["ITAANSIBLEH-ERR-56000"]       = "There are no records for Ansible interface information";
 $ary["ITAANSIBLEH-ERR-56001"]       = "The Ansible interface information records is not in a single row";
 $ary["ITAANSIBLEH-ERR-56100"]       = "DB access error ([FILE]{}[LINE]{})";
