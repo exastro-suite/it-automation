@@ -120,13 +120,14 @@ Terraform作業管理
     //*************************************************************************************************************
     $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103940") );
 
-    $c = new TextColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103950"));
+    $c = new NumColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103950"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-103960"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
     //*************************************************************************************************************
@@ -177,13 +178,14 @@ Terraform作業管理
     //*************************************************************************************************************
     //----オペレーションNo
     //*************************************************************************************************************
-    $c = new TextColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104070"));
+    $c = new NumColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104080"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
     //*************************************************************************************************************
@@ -199,13 +201,14 @@ Terraform作業管理
     //*************************************************************************************************************
     //----オペレーションID
     //*************************************************************************************************************
-    $c = new TextColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104110"));
+    $c = new NumColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104110"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORM-MNU-104120"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
     $table->addColumn($cg);

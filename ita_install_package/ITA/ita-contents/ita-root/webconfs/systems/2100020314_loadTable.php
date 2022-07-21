@@ -123,13 +123,14 @@ Ansible(Legacy)作業管理
     //----作業パターン
     $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1108085") );
 
-    $c = new TextColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1108090"));
+    $c = new NumColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1108090"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109010"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
     $objVldt = new SingleTextValidator(1,256,false);
@@ -231,13 +232,14 @@ Ansible(Legacy)作業管理
     $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109035") );
 
     //no.
-    $c = new TextColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109040"));
+    $c = new NumColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109040"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109050"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
 
@@ -250,13 +252,14 @@ Ansible(Legacy)作業管理
 
 
     // ID
-    $c = new TextColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109085"));
+    $c = new NumColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109085"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-1109086"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $c->setSubtotalFlag(false);
     $cg->addColumn($c);
     $table->addColumn($cg);
 
