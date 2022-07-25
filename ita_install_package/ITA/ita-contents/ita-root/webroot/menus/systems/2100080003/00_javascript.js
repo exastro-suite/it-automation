@@ -1138,7 +1138,12 @@ function Mix1_1_destroyWorkspaceInsRegister(obj, workspaceID, workspaceName) {
     }
 }
 function Mix1_1_newOpenWindow(currentElement,currentText){
-  var searchText = decodeURIComponent(escape(atob(currentText)));;
+    console.log(currentText);
+    if(isNaN(currentText)){
+        var searchText = escape(atob(currentText));
+    }else{
+        var searchText = currentText;
+    }
   var current_id = currentElement.offsetParent.id;
   var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "5";
   var searchText1 = document.getElementById(target_id).children[0].innerText;
@@ -1146,7 +1151,12 @@ function Mix1_1_newOpenWindow(currentElement,currentText){
   window.open(url, '_blank');
 }
 function Mix1_1_newOpenWindow2(currentElement,currentText){
-  var searchText = decodeURIComponent(escape(atob(currentText)));;
+    console.log(currentText);
+    if(isNaN(currentText)){
+        var searchText = escape(atob(currentText));
+    }else{
+        var searchText = currentText;
+    }  
   var current_id = currentElement.offsetParent.id;
   var target_id = current_id.slice(0,current_id.lastIndexOf("_") + 1) + "5";
   var searchText1 = document.getElementById(target_id).children[0].innerText;

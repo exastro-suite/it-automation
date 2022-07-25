@@ -921,7 +921,11 @@ function queryDataToFilter(){
     }
 }
 function Mix1_1_newOpenWindow(currentText){
-  var searchText = decodeURIComponent(escape(atob(currentText)));;
+    if(isNaN(currentText)){
+        var searchText = escape(atob(currentText));
+    }else{
+        var searchText = currentText;
+    }
   var url = "01_browse.php?no=2100080007&filter=on&Filter1Tbl_2=" + searchText;
   window.open(url, '_blank');
 }

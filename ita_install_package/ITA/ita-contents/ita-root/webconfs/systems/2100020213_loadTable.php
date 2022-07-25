@@ -120,13 +120,14 @@ Ansible(Pioneer)作業管理
     //----作業パターン
     $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309065") );
 
-    $c = new TextColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309070"));
+    $c = new NumColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309070"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-309080"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
     $objVldt = new SingleTextValidator(1,256,false);
@@ -215,13 +216,14 @@ Ansible(Pioneer)作業管理
     //----オペレーション
     $cg = new ColumnGroup( $g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401015") );
 
-    $c = new TextColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401020"));
+    $c = new NumColumn('OPERATION_NO_UAPK',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401020"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401030"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
     $objVldt = new SingleTextValidator(1,256,false);
@@ -231,13 +233,14 @@ Ansible(Pioneer)作業管理
     $c->setRequired(true);//登録/更新時には、入力必須
     $cg->addColumn($c);
 
-    $c = new TextColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401055"));
+    $c = new NumColumn('I_OPERATION_NO_IDBH',$g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401055"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITAANSIBLEH-MNU-401056"));//エクセル・ヘッダでの説明
     $c->getOutputType('update_table')->setVisible(false);
     $c->getOutputType('register_table')->setVisible(false);
     $c->getOutputType('delete_table')->setVisible(false);
     $c->getOutputType('excel')->setVisible(false);
     $c->getOutputType('csv')->setVisible(false);
+    $c->setSubtotalFlag(false);
     $cg->addColumn($c);
 
     $table->addColumn($cg);
