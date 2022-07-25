@@ -1,3 +1,45 @@
+Exastro IT Automation 1.10.1 (2022-07-25)
+==================================================
+
+Installer
+---------------
+ * Updated to Version 1.10.1 #1943
+
+General
+---------------
+ * Fixed an issue where an error would occur when reading scsv files in Excel. #1934
+
+RestAPI
+---------------
+ * Improved security. #1948
+
+Export/Import
+---------------
+ * Fixed an issue where the user could not import if the DB name was different #1930
+ * Fixed an issue where a file would be created under /temp/data_export/ when executing Excel bulk export through REST. #1939
+
+Menu create function
+---------------
+ * Revised how Vertical menus behave when registered to the Substitute value auto registration menu. #1941
+
+Compare function
+---------------
+ * Fixed an issue where if there is no comparison definition, the "Select target host" button will not be responsive and pressing the "Compare" button will display "Please Wait... Loading". #1950
+
+Host group
+---------------
+ * Fixed an issue where some data would be kept when changing the group of a menu. #1931
+
+Ansible-Driver
+---------------
+ * Fixed an issue where users could register movement-role links even when there is missing data in the Role package file hierarchy. #1937
+ * Fixed an issue where a deadlock would occur during the execution and substitute value auto registration update process. #1940
+ * Fixed an issue where  variable name is selected as "Blank" only the first time when duplicating multiple substitute value lists. #1942
+ * Fixed an issue where an error would occur when the "Sensitive settings" are set to "ON". #1955
+ * Fixed an issue where the user would not be able to move to Movements by pressing referencing buttons if the Movement name only contained numbers. #1962
+ * Fixed an issue where a system error would occur when using the filter search function in the Operation menu. #1981
+
+
 Exastro IT Automation 1.10.0 (2022-06-08)
 ==================================================
 
