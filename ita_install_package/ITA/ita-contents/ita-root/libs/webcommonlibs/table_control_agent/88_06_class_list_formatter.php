@@ -1060,7 +1060,12 @@ class JSONFormatter extends ListFormatter {
                     // アップロードファイルがある場合、中身を復号化する
                     if("FileUploadColumn" === get_class($objColumn)){
                         if("" != $arrayFocusRow[$intPrinteSeq]){
-                            $strUploadFile = base64_encode(file_get_contents($objColumn->getLAPathToFUCItemPerRow($objRow->getRowData())));
+                            if (file_exists($objColumn->getLAPathToFUCItemPerRow($objRow->getRowData()))){
+                                $strUploadFile = base64_encode(file_get_contents($objColumn->getLAPathToFUCItemPerRow($objRow->getRowData())));
+                            }
+                            else{
+                                $strUploadFile = "";
+                            }
                         }
                         else{
                             $strUploadFile = "";
