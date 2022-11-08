@@ -857,9 +857,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             // PasswordColumnはデータの更新がないと$arrayRegDataの設定は空になっているので
             // パスフレーズが更新されているか判定
             // 更新されていない場合は設定済みのパスフレーズ($arrayVariant['edit_target_row'])取得
+            $strPassphraseDel  = array_key_exists('del_password_flag_COL_IDSOP_19',$arrayRegData)?
+                                    $arrayRegData['del_password_flag_COL_IDSOP_19']:null;
             $strPassphrase = array_key_exists('SSH_KEY_FILE_PASSPHRASE',$arrayRegData)?
                                 $arrayRegData['SSH_KEY_FILE_PASSPHRASE']:null;
-            if($strPassphrase== "") {
+            if ($strPassphraseDel == 'on') {
+                $strPassphrase = "";
+            }else if($strPassphrase== "") {
                 $strPassphrase = isset($arrayVariant['edit_target_row']['SSH_KEY_FILE_PASSPHRASE'])?
                                        $arrayVariant['edit_target_row']['SSH_KEY_FILE_PASSPHRASE']:null;
             }
