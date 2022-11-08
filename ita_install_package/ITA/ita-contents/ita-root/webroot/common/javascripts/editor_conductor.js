@@ -115,6 +115,8 @@ function initEditor( mode ) {
     const $movementFilter = $('#movement-filter'),
           $movementIdFilter = $('#movement-filter-id');
     const movementFilter = function( inputValue, target ) {
+      //正規表現の特殊文字をエスケープする
+      inputValue = inputValue.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
       // スペースでsplit
       const valueArray = inputValue.split(/[\x20\u3000]+/),
             valueArrayLength = valueArray.length;
