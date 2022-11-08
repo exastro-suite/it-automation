@@ -1198,7 +1198,7 @@
                     }
                     //更新に足りない項目を追加
                     $strPrimaryKeyName = $objTable->getRowIdentifyColumnID();
-                    if(isset($inputArray[$strPrimaryKeyName])){
+                    if(isset($inputArray[$strPrimaryKeyName]) && $inputArray['ROW_EDIT_BY_FILE'] != $g['objMTS']->getSomeMessage("ITAWDCH-STD-12202")){
                         $tmpArraySetting = array('system_function_control'=>array('DTiSFilterCheckValid'=>array('HiddenVars'=>array('DecodeOfSelectTagStringEscape'=>false))));
                         $tmpArrayVariant['search_filter_data'] = array($arrayObjColumn[$strPrimaryKeyName]->getIDSOP() => array($aryRowFromJson[$row_i][array_search($strPrimaryKeyName, $tableHeaderId)]));
                         $tmpArrayVariant['dumpDataFromTable'] = array('vars'=>array('strOutputFileType'=>'arraysForJSON',
@@ -1206,6 +1206,9 @@
                                                                             )
                                                               );
                         $objTableTmp = loadTable($varLoadTableSetting);
+                        $aryObjColumn = $objTableTmp->getColumns();
+                        $objRIColumn = $aryObjColumn[$objTableTmp->getRowIdentifyColumnID()];
+                        $objRIColumn->setSearchType("in");
                         $aryResultOfDump = dumpDataFromTable(array('to_area_type'=>'toReturn'), $objTableTmp, $tmpArrayVariant, $tmpArraySetting,true);
                         if( $aryResultOfDump[1] !== null ){
                             //----エラー発生
@@ -1302,6 +1305,7 @@
                         }
                     }
                     //JSONモード----
+                    
                 }
 
                 //----テーブルへのアクセスを実行
