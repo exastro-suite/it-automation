@@ -1630,12 +1630,12 @@ class ExecuteDirector {
             }
 
             if(array_key_exists("ipAddress", $hostData) && !empty($hostData['ipAddress'])) {
-                $variables_array[] = "ansible_ssh_host: " . $hostData['ipAddress'];
+                $variables_array[] = "ansible_host: " . $hostData['ipAddress'];
             }
 
             if($hostData['winrm'] == 1) {
                 $variables_array[] = "ansible_connection: winrm";
-                $variables_array[] = "ansible_ssh_port: " . $hostData['winrmPort'];
+                $variables_array[] = "ansible_port: " . $hostData['winrmPort'];
                 if( isset($hostData['ansible_winrm_ca_trust_path']) ) {
                     $variables_array[] = "ansible_winrm_ca_trust_path: " . $hostData['ansible_winrm_ca_trust_path'];
                 }
