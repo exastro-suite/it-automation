@@ -2029,7 +2029,7 @@ class CreateAnsibleExecFiles {
                 // ユーザー設定
                 if($ina_hostinfolist[$host_name]['LOGIN_USER'] != self::LC_ANS_UNDEFINE_NAME)
                 {
-                    $param = "ansible_ssh_user: " . $ina_hostinfolist[$host_name]['LOGIN_USER'];
+                    $param = "ansible_user: " . $ina_hostinfolist[$host_name]['LOGIN_USER'];
                 }
 
                 // パスワード設定
@@ -2048,7 +2048,7 @@ class CreateAnsibleExecFiles {
                         if($make_vaultpass === false) {
                             return false;
                         }
-                        $pass = "ansible_ssh_pass: " . $make_vaultpass;
+                        $pass = "ansible_password: " . $make_vaultpass;
                     }
                     break;
                 }
@@ -2057,7 +2057,7 @@ class CreateAnsibleExecFiles {
                 switch($ina_hostinfolist[$host_name]['LOGIN_AUTH_TYPE']) {
                 case DF_LOGIN_AUTH_TYPE_PW_WINRM:
                     // WINRM接続プロトコルよりポート番号取得
-                    $port = "ansible_ssh_port: " . $ina_hostinfolist[$host_name]['WINRM_PORT'];
+                    $port = "ansible_port: " . $ina_hostinfolist[$host_name]['WINRM_PORT'];
                     //$port = $port . "\n" . "          ansible_connection: winrm";
                     $port .= "\n" . $indento_sp_param . "ansible_connection: winrm";
                     break;
@@ -2185,9 +2185,9 @@ class CreateAnsibleExecFiles {
             } 
             else {
                 // ホストアドレス方式がIPアドレスの場合   
-                //$host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n" . '          ansible_ssh_host: ' . $host_name . "\n";     
+                //$host_name  = '        ' . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":" . "\n" . '          ansible_host: ' . $host_name . "\n";     
                 $host_name  =   $indento_sp_host . $ina_hostinfolist[$host_name]['HOSTNAME'] . ":\n" 
-                              . $indento_sp_param . 'ansible_ssh_host: ' . $host_name . "\n";     
+                              . $indento_sp_param . 'ansible_host: ' . $host_name . "\n";     
             }
 
             // Pioneerでホスト名がlocalhostの場合に、インベントファイルに
