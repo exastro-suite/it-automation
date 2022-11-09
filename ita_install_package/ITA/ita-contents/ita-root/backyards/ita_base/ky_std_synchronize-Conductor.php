@@ -786,6 +786,7 @@
                 $intNextJobStopflg=0;
                 $intErrMovcnt=0;
                 $boolEndNodeWaitflg = false;
+                $tmpMovement = array();
                 //実行中のノード毎に繰り返し
                 foreach ($arrOfFocusMovement as $Movementkey => $rowOfFocusMovement) {
 
@@ -3333,7 +3334,38 @@
                         //NODE-Conductorインスタンスのステータス同期---
                     }
 
-
+                    # 終了時, mv(正常終了以外)-conditional時
+                    switch( $aryMovInsUpdateTgtSource["STATUS_ID"] ){
+                        case "9": // mov.正常終了
+                        case "15": // mov.警告終了
+                            //全ノードの取得、（TERMINAL-OUT）
+                            $aryRetBody = $objOLA->getInfoOfOneNodeTerminal($rowOfConductor['I_CONDUCTOR_CLASS_NO'], 0,0,1,2);#TERMINALあり
+                            //整形
+                            $arrNodeClassInfo=array();
+                            foreach ( $aryRetBody[4] as $key => $value) {
+                                $arrNodeClassInfo[$value['NODE_CLASS_NO']]=$value; 
+                            }
+                            //後続処理conditionalの場合
+                            foreach ($arrOfErrMovement as $key => $nclass) {
+                                //ノード名取得
+                                $strNextNode = $arrNodeClassInfo[$nclass['I_NODE_CLASS_NO']]['TERMINAL'][0]['CONNECTED_NODE_NAME'];
+                                //次のノードのクラス取得
+                                $arrTargetNodeClassID="";
+                                foreach ( $arrNodeClassInfo as $key => $value) {
+                                    if( $value['NODE_NAME'] == $strNextNode )$arrNextNodeClassInfo=$value; 
+                                }
+                                if($arrNextNodeClassInfo['NODE_TYPE_ID'] == 6 ){
+                                    $intNextJobStopflg=1;
+                                    $boolNextNodeReadyflg = true;
+                                    $boolEndNodeWaitflg = false;
+                                    $arySymInsUpdateTgtSource['STATUS_ID'] =  $rowOfConductor['STATUS_ID'];     //そのまま
+                                }
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    
                     //---次のノードを準備中へ
                     switch( $aryMovInsUpdateTgtSource["I_NODE_TYPE_ID"] ){                   
                         case "3":  #movement 
@@ -3370,36 +3402,37 @@
                                 $aryRetBody = getNodeInstanceTerminalInfo($objDBCA,$arySqlBind,$strFxName);
                                 $arrTargetNodeInstance = $aryRetBody[0];
 
-                                $aryMovInsUpdateTgtSourceStart=$arrTargetNodeInstance;
-    
-                                $aryMovInsUpdateTgtSourceStart['STATUS_ID'] = 2;     //準備中    
+                                if($arrTargetNodeInstance['STATUS_ID'] == 1){
+                                    $aryMovInsUpdateTgtSourceStart=$arrTargetNodeInstance;
+        
+                                    $aryMovInsUpdateTgtSourceStart['STATUS_ID'] = 2;     //準備中    
 
 
-                                $aryMovInsUpdateTgtSourceStart['LAST_UPDATE_USER'] = $db_access_user_id;
-                                $aryMovInsUpdateTgtSourceStart['TIME_START'] = "DATETIMEAUTO(6)";
+                                    $aryMovInsUpdateTgtSourceStart['LAST_UPDATE_USER'] = $db_access_user_id;
+                                    $aryMovInsUpdateTgtSourceStart['TIME_START'] = "DATETIMEAUTO(6)";
 
-                                // 更新用のテーブル定義
-                                $aryConfigForIUD = $aryConfigForMovInsIUD;
+                                    // 更新用のテーブル定義
+                                    $aryConfigForIUD = $aryConfigForMovInsIUD;
 
-                                // BIND用のベースソース
-                                $aryBaseSourceForBind = $aryMovInsUpdateTgtSourceStart;
-                                
-                                $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
-                                
-                                if( $aryRetBody !== true  ){
-                                    // 例外処理へ
-                                    $strErrStepIdInFx="00002000";
-                                    throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    // BIND用のベースソース
+                                    $aryBaseSourceForBind = $aryMovInsUpdateTgtSourceStart;
+                                    
+                                    $aryRetBody = updateNodeInstanceStatus($objDBCA,$db_model_ch,$aryConfigForIUD,$aryBaseSourceForBind,$strFxName);
+                                    
+                                    if( $aryRetBody !== true  ){
+                                        // 例外処理へ
+                                        $strErrStepIdInFx="00002000";
+                                        throw new Exception( $strErrStepIdInFx . '-([FILE]' . __FILE__ . ',[LINE]' . __LINE__ . ')' );
+                                    }
+
+                                //実行中のノードがMovement CALL　で次のノードが、Condition場合のみ、Symphnonyインスタンスのステータス
+                                    if( $arrTargetNodeInstance['I_NODE_TYPE_ID'] == 6 ){
+                                        $arySymInsUpdateTgtSource['STATUS_ID'] =  $rowOfConductor['STATUS_ID'];     //そのまま
+                                    }
                                 }
-
-                               //実行中のノードがMovement CALL　で次のノードが、Condition場合のみ、Symphnonyインスタンスのステータス
-                                if( $arrTargetNodeInstance['I_NODE_TYPE_ID'] == 6 ){
-                                    $arySymInsUpdateTgtSource['STATUS_ID'] =  $rowOfConductor['STATUS_ID'];     //そのまま
-                                }
-                        
                             }
                             // 次のノードを準備中へ---
-                            break;
+                            # break;
                         default:
                             break;
                     }
@@ -3416,6 +3449,7 @@
 
                 //---NODEとCONDUCTORインスタンスのへのステータス同期 
                 $strBeforeStatusNumeric = $rowOfConductor['STATUS_ID'];
+                $strAfterStatusNumeric = 0;
 
                 // #838 対応
                 if( $intFocusMovementSeq != 0 && count($arrOfFocusMovement) == 0 && count($arrOfErrMovement) != 0 ){
@@ -3424,21 +3458,41 @@
                     $strAfterStatusNumeric = 7;
                     $arySymInsUpdateTgtSource['STATUS_ID'] = 7;
                     //エラー1件の場合、ノードのステータス継承
-                    if( count($arrOfErrMovement) == 1 ){
-                        switch( $arrOfErrMovement[0]['STATUS_ID'] ){
-                            case "10": // mov.準備エラー
-                            case "6": // mov.異常終了
-                                $arySymInsUpdateTgtSource['STATUS_ID'] = 7;     //異常終了へ
-                                break;
-                            case "7": // mov.緊急停止
-                                $arySymInsUpdateTgtSource['STATUS_ID'] = 6;     //緊急停止へ
-                                break;
-                            case "11": // mov.想定外エラー
-                                $arySymInsUpdateTgtSource['STATUS_ID'] = 8;     //想定外エラー
-                                break;
-                            default:
-                                break;
-                        } 
+                    if( count($arrOfErrMovement) >= 1 ){
+                        //全ノードの取得、（TERMINAL-OUT）
+                        $aryRetBody = $objOLA->getInfoOfOneNodeTerminal($rowOfConductor['I_CONDUCTOR_CLASS_NO'], 0,0,1,2);#TERMINALあり
+                        //整形
+                        $arrNodeClassInfo=array();
+                        foreach ( $aryRetBody[4] as $key => $value) {
+                            $arrNodeClassInfo[$value['NODE_CLASS_NO']]=$value; 
+                        }
+                        //後続処理conditionalの場合
+                        foreach ($arrOfErrMovement as $key => $nclass) {
+                            //ノード名取得
+                            $strNextNode = $arrNodeClassInfo[$nclass['I_NODE_CLASS_NO']]['TERMINAL'][0]['CONNECTED_NODE_NAME'];
+                            foreach ( $arrNodeClassInfo as $key => $value) {
+                                if( $value['NODE_NAME'] == $strNextNode )$arrNextNodeClassInfo=$value; 
+                            }
+                            if($arrNextNodeClassInfo['NODE_TYPE_ID'] != 6 ){
+                                switch( $nclass['STATUS_ID'] ){
+                                    case "10": // mov.準備エラー
+                                    case "6": // mov.異常終了
+                                        $arySymInsUpdateTgtSource['STATUS_ID'] = 7;     //異常終了へ
+                                        break;
+                                    case "7": // mov.緊急停止
+                                        $arySymInsUpdateTgtSource['STATUS_ID'] = 6;     //緊急停止へ
+                                        break;
+                                    case "11": // mov.想定外エラー
+                                        $arySymInsUpdateTgtSource['STATUS_ID'] = 8;     //想定外エラー
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }else{
+                                $arySymInsUpdateTgtSource['STATUS_ID'] = 5;
+                            }
+                        }
+
                     }
                     
                     $arySymInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
@@ -3511,6 +3565,10 @@
 
                         //正常終了時に、ENDオプションによるステータス上書き #467
                         if( $arySymInsUpdateTgtSource['STATUS_ID'] == 5 ){
+
+                            $arySqlBind = array( 'CONDUCTOR_INSTANCE_NO' => $rowOfConductor['CONDUCTOR_INSTANCE_NO'] );
+                            $tmpMovement =  getNodeInstanceInfo($objDBCA,$db_model_ch,$arySqlBind,$aryConfigForIUD,$aryBaseSourceForBind,$aryTempForSql,$strFxName);
+                            
                             //全ENDノードの終了タイプ確認
                             foreach ($tmpMovement as $key => $value) {
                                 //ENDノード(正常終了)の終了タイプでConductorのステータス上書き(優先度:正常終了<正常終了(警告)<異常終了)
