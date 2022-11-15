@@ -663,6 +663,10 @@ min-height: 48px;
 min-width: 100%;
 width: 16px!important;
 }
+body > .select2-container {
+min-width: auto;
+width: auto!important;
+}
 
 #KIZI .menu-column-config-table textarea:focus,
 #KIZI .menu-column-config-table input[type="text"]:focus,
