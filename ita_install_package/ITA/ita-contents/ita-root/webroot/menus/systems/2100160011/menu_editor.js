@@ -656,12 +656,7 @@ return `
               <!-- 必須・一意 -->
               <tr class="single multiple number-int number-float date-time date password select file link">
                   <td colspan="2">
-                      <label class="required-label${onHover}" title="${textEntities(getSomeMessage("ITACREPAR_1271"),1)}">
-                          <input class="config-checkbox required${disbledCheckbox}" type="checkbox"${modeDisabled}${modeKeepData}${(sv('REQUIRED', false ) === true )? ` checked`: ``}><span></span>${textCode('0017')}
-                      </label>
-                      <label class="unique-label${onHover}" title="${textEntities(getSomeMessage("ITACREPAR_1272"),1)}">
-                          <input class="config-checkbox unique${disbledCheckbox}" type="checkbox"${modeDisabled}${modeKeepData}${(sv('UNIQUED', false ) === true )? ` checked`: ``}><span></span>${textCode('0018')}
-                      </label>
+                      <label class="required-label${onHover}" title="${textEntities(getSomeMessage("ITACREPAR_1271"),1)}"><input class="config-checkbox required${disbledCheckbox}" type="checkbox"${modeDisabled}${modeKeepData}${(sv('REQUIRED', false ) === true )? ` checked`: ``}><span></span>${textCode('0017')}</label><label class="unique-label${onHover}" title="${textEntities(getSomeMessage("ITACREPAR_1272"),1)}"><input class="config-checkbox unique${disbledCheckbox}" type="checkbox"${modeDisabled}${modeKeepData}${(sv('UNIQUED', false ) === true )? ` checked`: ``}><span></span>${textCode('0018')}</label>
                   </td>
               </tr>
               <!-- 説明 -->
