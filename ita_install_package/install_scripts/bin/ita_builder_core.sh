@@ -147,7 +147,7 @@ create_repo_check(){
 
 download_check() {
     DOWNLOAD_CHK=`echo $?`
-    if [ $DOWNLOAD_CHK -ne 0 ]; then
+    if [ $DOWNLOAD_CHK -ne 0 ] && [ $DOWNLOAD_CHK -ne 1 ]; then
         log "ERROR:Download of file failed"
         ERR_FLG="false"
         func_exit_and_delete_file
@@ -156,7 +156,7 @@ download_check() {
 
 error_check() {
     DOWNLOAD_CHK=`echo $?`
-    if [ $DOWNLOAD_CHK -ne 0 ]; then
+    if [ $DOWNLOAD_CHK -ne 0 ] && [ $DOWNLOAD_CHK -ne 1 ]; then
         log "ERROR:Stop installation"
         ERR_FLG="false"
         func_exit_and_delete_file
