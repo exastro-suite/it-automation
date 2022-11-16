@@ -883,7 +883,7 @@ class DateTimeValidator extends DateValidator {
 	//----第二の制約：関数[checkdate]の制約
 
 	function __construct($min='1000/01/01 00:00:00.000000', $max='9999/12/31 23:59:59.999999'){
-		parent::__construct($min, $max, '#^\d{4}/\d{1,2}/\d{1,2}(\s+\d{1,2}:\d{1,2}(:\d{1,2})?)?$#', "yyyy/mm/dd [hh:ii[:ss]]");
+		parent::__construct($min, $max, '#^\d{4}/\d{1,2}/\d{1,2}(\s{1}\d{1,2}:\d{1,2}(:\d{1,2})?)?$#', "yyyy/mm/dd [hh:ii[:ss]]");
 		$this->setMinLength(16);
 		$this->setMaxLength(19);
 		$this->setRegExp('#^\d{4}/\d{1,2}/\d{1,2}\s{1}\d{1,2}:\d{1,2}:\d{1,2}\.{1}[0-9]{6}$#',"DTiS_richFilterDefault");//filter_rich
