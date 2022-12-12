@@ -144,6 +144,7 @@ $ary["ITAWDCH-ERR-314"]             = "更新対象のレコードを特定出�
 $ary["ITAWDCH-ERR-315"]             = "更新対象のレコードが複数あります。";
 $ary["ITAWDCH-ERR-316"]             = "更新対象のレコードのアクセス許可ロールとログインユーザーのアクセス許可ロールが適合していないので,このレコードは更新出来ません。";
 $ary["ITAWDCH-ERR-317"]             = "contentパラメータのJSONの形式が不正です。";
+$ary["ITAWDCH-ERR-318"]             = "整数、小数またはプルダウン選択項目に対するLIST検索は数値を指定してください。　key= {}";
 $ary["ITAWDCH-ERR-349"]             = "WARNING:DETAIL:(FILE UPLOAD FOR COLUMN. MENU:[{}] ERROR:[{}] PARAM1:[{}]) UPLOAD ERROR. ";
 $ary["ITAWDCH-ERR-367"]             = "WARNING:DETAIL:(MAKE ADD SELECT TAG MENU:[{}] ERROR:[{}]) PROCESS ERROR. ";
 $ary["ITAWDCH-ERR-373"]             = "WARNING:DETAIL:(MAKE FILTER　SETTING TABLE TAG MENU:[{}] ERROR:[{}]) PROCESS ERROR. ";
