@@ -3044,6 +3044,10 @@ const loadMenu = function() {
     // select2
     $menuTable.find('.config-select').select2();
     
+    // DataTimePicker
+    $menuTable.find(".callDateTimePicker").datetimepicker({format:'Y/m/d H:i:s', step:5, lang:LangStream});
+    $menuTable.find(".callDateTimePicker2").datetimepicker({timepicker:false, format:'Y/m/d', lang:LangStream});
+    
     // 各種設定
     $menuTable.find('.menu-column-title-input').each( function(){
         titleInputChange( $(this) );
