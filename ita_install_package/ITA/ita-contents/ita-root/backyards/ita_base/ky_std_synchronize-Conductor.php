@@ -3521,6 +3521,11 @@
                         $intNextJobStopflg = 3; 
                         $strAfterStatusNumeric = $arySymInsUpdateTgtSource['STATUS_ID'];    
                     }
+                }elseif( count($arrOfFocusMovement) >= 1 && $intFocusMovementSeq != 0){
+                    $intNextJobStopflg = 2;
+                }elseif( count($arrOfFocusMovement) == 0 && $intFocusMovementSeq != 0  && count($arrOfErrMovement) == 0 ){
+                    $arySymInsUpdateTgtSource['STATUS_ID'] = 5;
+                    $strAfterStatusNumeric = $arySymInsUpdateTgtSource['STATUS_ID'];
                 }else{
                     //通常
                     $strAfterStatusNumeric = $arySymInsUpdateTgtSource['STATUS_ID'];                    
