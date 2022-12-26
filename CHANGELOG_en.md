@@ -1,3 +1,45 @@
+Exastro IT Automation 1.10.2 (2022-12-26)
+==================================================
+
+
+Installer
+---------------
+ * Library collection for offline installation fails #2007
+ * Updated to Version 1.10.1 #2009
+
+Basic console
+---------------
+ * A system error occurs when a passphrase is entered on the device list #1994
+ * It takes time to register and update the device list #1996
+ * When updating records in the device list, if the authentication method is "private key authentication (with passphrase)", even if the passphrase is deleted, an error does not occur #2000
+
+Conductor
+---------------
+ * I want to disable the regular expression of the Name Filter of the Conductor class edit #1967
+ * Regarding error behavior when executing multiple Movements in parallel #2006
+ * Movement processing is actually finished, but it remains running on the Conductor work confirmation screen #2008
+
+
+RestAPI
+---------------
+ * A php error statement is output in the response and json is not returned #1997
+ * PHP Notice is output when searching by specifying date and time in RANGE search #2027
+ * Uploading kym file with REST API fails #2033
+
+Menu create function
+---------------
+ * When opening a table with many columns, it takes time to load the menu creation screen #1976
+ * Regarding the reference RestAPI for the parameter sheet, when LIST is specified for the FILTER search of the body, the characters that should be the exact match condition are partially ignored and the exact match search is performed #1998
+
+Ansible-Driver
+---------------
+ * [Common to Ansible] Revised description #2001
+ * Change key in inventory file (hosts) #2004
+
+
+*******************************************************************************************************
+
+
 Exastro IT Automation 1.10.1 (2022-07-25)
 ==================================================
 
