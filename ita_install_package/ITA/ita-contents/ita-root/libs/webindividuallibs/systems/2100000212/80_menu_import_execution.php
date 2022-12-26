@@ -341,13 +341,6 @@ function decodeZipFile($objJSONOfReceptedData){
     $tmp_decodedata = base64_decode($tmpJSONOfReceptedData['zipfile']['base64']);
     file_put_contents($tmp_dir, $tmp_decodedata);
 
-    //ファイルタイプの取得、判定
-    $tmp_type = finfo_buffer(finfo_open(), $tmp_decodedata, FILEINFO_MIME_TYPE);
-    if(  $tmp_type  != "application/x-gzip"){
-        web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900005'));
-        throw new Exception($g['objMTS']->getSomeMessage('ITABASEH-ERR-900003'));
-    }
-
     // ファイル移動
     if ( rename( $tmp_dir, $uploadFilePath )  === false) {
         web_log($g['objMTS']->getSomeMessage('ITABASEH-ERR-900019',

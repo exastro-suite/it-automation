@@ -169,6 +169,19 @@
                 //----全部一覧または一部一覧の取得
                 $aryLabelListOfOpendColumn = $objListFormatter->getLabelListOfOpendColumn(true);
 
+                //一覧のカラムタイプを取得
+                $aryObjColumn = $objTable->getColumns();
+                $cls = array();
+                foreach($aryObjColumn as $objColumn) {
+                    $col_idsop = $objColumn->getIDSOP();
+                    foreach($aryLabelListOfOpendColumn as $label) {
+                        if ($col_idsop === $label) {
+                            $cls[] = get_class($objColumn);
+                        }                    
+                    }
+                }
+
+                $errKeyAry = array();
                 $aryFilterData = array();
                 foreach($tmpAryFilterData as $tmpIntKey=>$tmpVarValue01){
                     if( array_key_exists($tmpIntKey, $aryLabelListOfOpendColumn) ){
@@ -184,8 +197,16 @@
                                 $tmpAryToFilter02 = array();
                                 foreach($tmpAryRich as $tmpVarValue02){
                                     switch( gettype($tmpVarValue02) ){
-                                        case "integer":
                                         case "string":
+                                            // 検索対象がIDColumn、NumColumn、LinKIDColumn、RowIdentifyColumnの場合は数値もしくは数字の文字列による検索のみ許可する
+                                            if ($cls[$tmpIntKey] === "IDColumn" || $cls[$tmpIntKey] === "NumColumn" || $cls[$tmpIntKey] === "LinkIDColumn" || $cls[$tmpIntKey] === "RowIdentifyColumn") {
+                                                //整数または小数でない場合
+                                                if (is_numeric($tmpVarValue02) !== true) {
+                                                    $errKeyAry[] = $tmpIntKey;
+                                                    break;
+                                                }
+                                            }    
+                                        case "integer":
                                         case "NULL":
                                             if( strlen($tmpVarValue02) == 0 ){
                                                 $tmpAryToFilter02[] = "";
@@ -269,6 +290,19 @@
                         }
                         //通常(そのほか)----
                     }
+                }
+
+                //LIST内の値が正しくないものがある場合ここで処理を終了
+                if( empty($errKeyAry) !== true ) {
+                    $errKey = implode(", " ,$errKeyAry);
+                    $intResultStatusCode = 400;
+                    $aryForResultData = $g['requestByREST']['preResponsContents']['errorInfo'];
+                    $aryForResultData['Error'] = array();
+                    $aryForResultData['Error'][] = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-312");
+                    $aryForResultData['Error'][] = array(0 => $g['objMTS']->getSomeMessage("ITAWDCH-ERR-318", $errKey));
+                    $arrayRetBody = array('ResultStatusCode'=>$intResultStatusCode,
+                                          'ResultData'=>$aryForResultData);
+                    return array($arrayRetBody,$intErrorType,$aryErrMsgBody,$strErrMsg);
                 }
 
                 $tmpArrayVariant['search_filter_data'] = $aryFilterData;

@@ -1732,3 +1732,6 @@ background-color: #E5F1FF;
 .export_whole {
     font-size: 18px;
 }
+.select2-results__option {
+min-height: 18px;
+}

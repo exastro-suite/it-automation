@@ -379,21 +379,26 @@ if ( menuEditorMode === 'edit') onHover = '';
 let disbledCheckbox = '';
 if ( menuEditorMode === 'edit') disbledCheckbox = ' disabled-checkbox';
 
-// HTML
-const columnHeaderHTML = ''
+// 項目ヘッダーHTML
+const getColumnHeaderHTML = function( columnHeaderTitle = '') {
+    return ''
   + '<div class="menu-column-move" title="' + textEntities(getSomeMessage("ITACREPAR_1257"),1) + '"></div>'
   + '<div class="menu-column-title on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1256"),1) + '">'
-    + '<input class="menu-column-title-input" type="text" value=""'+modeDisabled+'>'
-    + '<span class="menu-column-title-dummy"></span>'
+    + '<input class="menu-column-title-input" type="text" value="' + columnHeaderTitle + '"'+modeDisabled+'>'
+    + '<span class="menu-column-title-dummy">' + columnHeaderTitle + '</span>'
   + '</div>'
   + '<div class="menu-column-function">'
     + '<div class="menu-column-delete on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1258"),1) + '"></div>'
     + '<div class="menu-column-copy on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1259"),1) + '"></div>'
   + '</div>';
+};
+const columnHeaderHTML = getColumnHeaderHTML();
 
+// EmptyHTML
 const columnEmptyHTML = ''
   + '<div class="column-empty"><p>Empty</p></div>';
 
+// グループ枠HTML
 const columnGroupHTML = ''
   + '<div class="menu-column-group" data-group-id="">'
     + '<div class="menu-column-group-header">'
@@ -402,7 +407,8 @@ const columnGroupHTML = ''
     + '<div class="menu-column-group-body">'
     + '</div>'
   + '</div>';
-  
+
+// リピート枠HTML
 const columnRepeatHTML = ''
   + '<div class="menu-column-repeat">'
     + '<div class="menu-column-repeat-header">'
@@ -418,29 +424,58 @@ const columnRepeatHTML = ''
     + '</div>'
   + '</div>';
 
+// 選択肢 selected
+const getSelected = function( flag ) {
+    return ( flag )? ' selected="selected"': '';
+};
+
+
 // 入力方式 select
-const selectInputMethodData = menuEditorArray.selectInputMethod,
-      selectInputMethodDataLength = selectInputMethodData.length;
-let inputMethodHTML = '';
-for ( let i = 0; i < selectInputMethodDataLength ; i++ ) {
-  inputMethodHTML += '<option value="' + selectInputMethodData[i].INPUT_METHOD_ID + '">' + selectInputMethodData[i].INPUT_METHOD_NAME + '</option>';
-}
+const getInputMethodHTML = function( selectValue = '' ) {
+    const inputMethodArray = [],
+          selectInputMethodData = menuEditorArray.selectInputMethod,
+          selectInputMethodDataLength = selectInputMethodData.length;
+
+    for ( let i = 0; i < selectInputMethodDataLength ; i++ ) {
+        const classID = selectInputMethodData[i].INPUT_METHOD_ID,
+              selected = getSelected( classID === selectValue );
+        inputMethodArray.push('<option value="' + classID + '"' + selected + '>' + 
+        selectInputMethodData[i].INPUT_METHOD_NAME + '</option>');
+    }
+    return inputMethodArray.join('');
+};
 
 // プルダウン選択 select
-const selectPulldownListData = menuEditorArray.selectPulldownList,
-      selectPulldownListDataLength = selectPulldownListData.length;
-let selectPulldownListHTML = '';
-for ( let i = 0; i < selectPulldownListDataLength ; i++ ) {
-  selectPulldownListHTML += '<option value="' + selectPulldownListData[i].LINK_ID + '">' + selectPulldownListData[i].LINK_PULLDOWN + '</option>';
-}
+const getSelectPulldownListHTML = function( selectValue = '' ) {
+    const selectPulldownAllay = [],
+          selectPulldownListData = menuEditorArray.selectPulldownList,
+          selectPulldownListDataLength = selectPulldownListData.length;
+
+    for ( let i = 0; i < selectPulldownListDataLength ; i++ ) {
+        const classID = selectPulldownListData[i].LINK_ID,
+              selected = getSelected( classID === selectValue );
+        selectPulldownAllay.push('<option value="' + classID + '"' + selected + '>' +
+        selectPulldownListData[i].LINK_PULLDOWN + '</option>');
+    }
+    return selectPulldownAllay.join('');
+};
 
 //パラメータシート参照 select
-const type3PulldownListData = menuEditorArray.selectReferenceSheetType3List,
-      type3PulldownListDataLength = type3PulldownListData.length;
-let type3PulldownListHTML = '';
-for ( let i = 0; i < type3PulldownListDataLength ; i++ ) {
-  type3PulldownListHTML += '<option value="' + type3PulldownListData[i].MENU_ID + '">' + type3PulldownListData[i].MENU_NAME_PULLDOWN + '</option>';
-}
+const getType3PulldownListHTML = function( selectValue = '' ) {
+    const type3PulldownArray = [],
+          type3PulldownListData = menuEditorArray.selectReferenceSheetType3List,
+          type3PulldownListDataLength = type3PulldownListData.length,
+          type3SelectItem = ( selectValue !== '')? menuEditorArray.referenceSheetType3ItemData[ selectValue ]: '';
+    
+    for ( let i = 0; i < type3PulldownListDataLength ; i++ ) {
+        const classID = type3PulldownListData[i].MENU_ID,
+              selected = getSelected( classID === type3SelectItem );
+        type3PulldownArray.push('<option value="' + classID + '"' + selected + '>' +
+        type3PulldownListData[i].MENU_NAME_PULLDOWN + '</option>');
+    }
+    return type3PulldownArray.join('');
+    
+};
 
 // 作成対象 select
 if ( menuEditorMode !== 'view') {
@@ -453,133 +488,201 @@ if ( menuEditorMode !== 'view') {
     $('#create-menu-type').html( selectParamTargetHTML );
 }
 
-const columnHTML = ''
-  + '<div class="menu-column" data-rowpan="1" data-item-id="" style="min-width: 180px">'
-    + '<div class="menu-column-header">'
-      + columnHeaderHTML
-    + '</div>'
-    + '<div class="menu-column-body">'
-      + '<div class="menu-column-type" title="' + textEntities(getSomeMessage("ITACREPAR_1261"),1) + '">'
-        + '<select class="menu-column-type-select"'+modeDisabled+''+modeKeepData+'>' + inputMethodHTML + '</select>'
-      + '</div>'
-      + '<div class="menu-column-config">'
-        + '<table class="menu-column-config-table" date-select-value="1">'
-          + '<tr class="multiple single link" title="' + textEntities(getSomeMessage("ITACREPAR_1262"),1) + '">'
-            + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="multiple single" title="' + textEntities(getSomeMessage("ITACREPAR_1263"),1) + '">'
-            + '<th>' + textCode('0012') + '</th>'
-            + '<td><input class="config-text regex" type="text" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1264"),1) + '">'
-            + '<th>' + textCode('0013') + '</th>'
-            + '<td><input class="config-number int-min-number" data-min="-2147483648" data-max="2147483647" type="number" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1265"),1) + '">'
-            + '<th>' + textCode('0014') + '</th>'
-            + '<td><input class="config-number int-max-number" data-min="-2147483648" data-max="2147483647"  type="number" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1266"),1) + '">'
-            + '<th>' + textCode('0013') + '</th>'
-            + '<td><input class="config-number float-min-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1267"),1) + '">'
-            + '<th>' + textCode('0014') + '</th>'
-            + '<td><input class="config-number float-max-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1268"),1) + '">'
-            + '<th>' + textCode('0015') + '</th>'
-            + '<td><input class="config-number digit-number" data-min="1" data-max="14" type="number" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="select" title="' + textEntities(getSomeMessage("ITACREPAR_1269"),1) + '">'
-            + '<th>' + textCode('0016') + '<span class="input_required">*</span></th>'
-            + '<td>'
-              + '<select class="config-select pulldown-select"'+modeDisabled+''+modeKeepData+'>' + selectPulldownListHTML + '</select>'
-            + '</td>'
-          + '</tr>'
-          + '<tr class="select reference" title="' + textEntities(getSomeMessage("ITACREPAR_1275"),1) + '">'
-            + '<th rowspan="2">' + textCode('0043') + '</th>'
-            + '<td><span type="text" class="config-text reference-item property-span" type="text" data-reference-item-id '+modeDisabled+''+modeKeepData+'></span></td>'
-          + '</tr>'
-          + '<tr class="select reference" title="' + textEntities(getSomeMessage("ITACREPAR_1275"),1) + '">'
-            + '<td><button class="reference-item-select property-button" '+modeDisabled+''+modeKeepData+'>' + textCode('0045') + '</button></td>'
-          + '</tr>'
-          + '<tr class="password" title="' + textEntities(getSomeMessage("ITACREPAR_1262"),1) + '">'
-            + '<th>' + textCode('0011') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="file" title="' + textEntities(getSomeMessage("ITACREPAR_1270"),1) + '">'
-            + '<th>' + textCode('0042') + '<span class="input_required">*</span></th>'
-            + '<td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '</tr>'
-          + '<tr class="type3" title="' + textEntities(getSomeMessage("ITACREPAR_1299"),1) + '">'
-            + '<th>' + textCode('0051') + '<span class="input_required">*</span></th>'
-            + '<td>'
-              + '<select class="config-select type3-reference-menu"'+modeDisabled+''+modeKeepData+'>' + type3PulldownListHTML + '</select>'
-            + '</td>'
-          + '</tr>'
-          + '<tr class="type3" title="' + textEntities(getSomeMessage("ITACREPAR_1299"),1) + '">'
-            + '<th>' + textCode('0052') + '<span class="input_required">*</span></th>'
-            + '<td class="type3-item-area">'
-              + '<select class="config-select type3-reference-item"'+modeDisabled+''+modeKeepData+'></select>'
-            + '</td>'
-          + '</tr>'
-          + '<tr class="single" title="' + textEntities(getSomeMessage("ITACREPAR_1289"),1) + '">'
-            + '<th>' + textCode('0050') + '</th>'
-            + '<td><input class="config-text single-default-value" type="text" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="multiple" title="' + textEntities(getSomeMessage("ITACREPAR_1289"),1) + '">'
-            + '<th>' + textCode('0050') + '</th>'
-            + '<td><textarea class="config-textarea multiple-default-value"'+modeDisabled+'></textarea></td>'
-          + '</tr>'
-          + '<tr class="number-int" title="' + textEntities(getSomeMessage("ITACREPAR_1290"),1) + '">'
-            + '<th>' + textCode('0050') + '</th>'
-            + '<td><input class="config-number int-default-value" data-min="-2147483648" data-max="2147483647" type="number" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="number-float" title="' + textEntities(getSomeMessage("ITACREPAR_1291"),1) + '">'
-            + '<th>' + textCode('0050') + '</th>'
-            + '<td><input class="config-number float-default-value" data-min="-99999999999999" data-max="99999999999999" type="number" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="date-time" title="' + textEntities(getSomeMessage("ITACREPAR_1292"),1) + '">'
-            + '<th>' + textCode('0050') + '</th>'
-            + '<td><input size="19" maxlength="19" class="config-text datetime-default-value callDateTimePicker" type="text" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="date" title="' + textEntities(getSomeMessage("ITACREPAR_1292"),1) + '">'
-            + '<th>' + textCode('0050') + '</th>'
-            + '<td><input size="10" maxlength="10" class="config-text date-default-value callDateTimePicker2" type="text" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="link" title="' + textEntities(getSomeMessage("ITACREPAR_1293"),1) + '">'
-            + '<th>' + textCode('0050') + '</th>'
-            + '<td><input class="config-text link-default-value" type="text" value=""'+modeDisabled+'></td>'
-          + '</tr>'
-          + '<tr class="select" title="' + textEntities(getSomeMessage("ITACREPAR_1294"),1) + '">'
-            + '<th>' + textCode('0050') + '</th>'
-            + '<td class="pulldown-default-area">'
-              + '<select class="config-select pulldown-default-select"'+modeDisabled+'></select>'
-            + '</td>'
-          + '</tr>'
-          + '<tr class="single multiple number-int number-float date-time date password select file link">'
-            + '<td colspan="2">'
-              + '<label class="required-label'+onHover+'" title="' + textEntities(getSomeMessage("ITACREPAR_1271"),1) + '"><input class="config-checkbox required'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0017') + '</label>'
-              + '<label class="unique-label'+onHover+'" title="' + textEntities(getSomeMessage("ITACREPAR_1272"),1) + '"><input class="config-checkbox unique'+disbledCheckbox+'" type="checkbox"'+modeDisabled+''+modeKeepData+'><span></span>' + textCode('0018') + '</label>'
-            + '</td>'
-          + '</tr>'
-          + '<tr class="all" title="' + textEntities(getSomeMessage("ITACREPAR_1273"),1) + '">'
-            + '<td colspan="2"><div class="config-textarea-wrapper"><textarea class="config-textarea explanation"'+modeDisabled+'></textarea><span>' + textCode('0019') + '</span></div></td>'
-          + '</tr>'
-          + '<tr class="all" title="' + textEntities(getSomeMessage("ITACREPAR_1274"),1) + '">'
-            + '<td colspan="2"><div class="config-textarea-wrapper"><textarea class="config-textarea note"'+modeDisabled+'></textarea><span>' + textCode('0020') + '</span></div></td>'
-          + '</tr>'
-        + '</table>'
-      + '</div>'
-    + '</div>'
-    + '<div class="column-resize"></div>'
-  + '</div>';
+const getColumnHTML = function( columnData = {}, columnID = '') {
+    const sv = function( v, f = true ) {
+        if ( columnData[v] !== undefined && columnData[v] !== null ) {
+            if ( f ) {
+                return textEntities( String( columnData[v] ) );
+            } else {
+                return columnData[v];
+            }
+        } else {
+            return '';
+        }
+    };
+    const itemType = sv('INPUT_METHOD_ID');
+    
+return `
+<div id="${columnID}" class="menu-column" data-rowpan="1" data-item-id="${sv('CREATE_ITEM_ID')}" style="min-width: 180px">
+    <div class="menu-column-header">
+        ${getColumnHeaderHTML( sv('ITEM_NAME') )}
+    </div>
+    <div class="menu-column-body">
+        <div class="menu-column-type" title="${textEntities(getSomeMessage("ITACREPAR_1261"),1)}">
+            <select class="menu-column-type-select"${modeDisabled}${modeKeepData}>
+                ${getInputMethodHTML( sv('INPUT_METHOD_ID') )}
+            </select>
+        </div>
+        <div class="menu-column-config">
+            <table class="menu-column-config-table" date-select-value="${(itemType!=='')?itemType:'1'}">
+                <!-- 最大バイト数 single -->
+                <tr class="single" title="${textEntities(getSomeMessage("ITACREPAR_1262"),1)}">
+                    <th>${textCode('0011')}<span class="input_required">*</span></th>
+                    <td><input class="config-number max-byte" type="number" data-min="1" data-max="8192" value="${sv('MAX_LENGTH')}"${modeDisabled}></td>
+                </tr>
+                <!-- 正規表現 single -->
+                <tr class="single" title="${textEntities(getSomeMessage("ITACREPAR_1263"),1)}">
+                    <th>${textCode('0012')}</th>
+                    <td><input class="config-text regex" type="text" value="${sv('PREG_MATCH')}"${modeDisabled}></td>
+                </tr>
+                <!-- 最大バイト数 multiple -->
+                <tr class="multiple" title="${textEntities(getSomeMessage("ITACREPAR_1262"),1)}">
+                    <th>${textCode('0011')}<span class="input_required">*</span></th>
+                    <td><input class="config-number multiple-max-byte" type="number" data-min="1" data-max="8192" value="${sv('MULTI_MAX_LENGTH')}"${modeDisabled}></td>
+                </tr>
+                <!-- 正規表現 multiple -->
+                <tr class="multiple" title="${textEntities(getSomeMessage("ITACREPAR_1263"),1)}">
+                    <th>${textCode('0012')}</th>
+                    <td><input class="config-text multiple-regex" type="text" value="${sv('MULTI_PREG_MATCH')}"${modeDisabled}></td>
+                </tr>
+                <!-- 最大バイト数 link -->
+                <tr class="link" title="${textEntities(getSomeMessage("ITACREPAR_1262"),1)}">
+                    <th>${textCode('0011')}<span class="input_required">*</span></th>
+                    <td><input class="config-number link-max-byte" type="number" data-min="1" data-max="8192" value="${sv('LINK_LENGTH')}"${modeDisabled}></td>
+                </tr>
+                <!-- 最小値 int -->
+                <tr class="number-int" title="${textEntities(getSomeMessage("ITACREPAR_1264"),1)}">
+                    <th>${textCode('0013')}</th>
+                    <td><input class="config-number int-min-number" data-min="-2147483648" data-max="2147483647" type="number" value="${sv('INT_MIN')}"'${modeDisabled}></td>
+                </tr>
+                <!-- 最大値 int -->
+                <tr class="number-int" title="${textEntities(getSomeMessage("ITACREPAR_1265"),1)}">
+                    <th>${textCode('0014')}</th>
+                    <td><input class="config-number int-max-number" data-min="-2147483648" data-max="2147483647"  type="number" value="${sv('INT_MAX')}"${modeDisabled}></td>
+                </tr>
+                <!-- 最小値 froat -->
+                <tr class="number-float" title="${textEntities(getSomeMessage("ITACREPAR_1266"),1)}">
+                    <th>${textCode('0013')}</th>
+                    <td><input class="config-number float-min-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value="${sv('FLOAT_MIN')}"${modeDisabled}></td>
+                </tr>
+                <!-- 最大値 froat -->
+                <tr class="number-float" title="${textEntities(getSomeMessage("ITACREPAR_1267"),1)}">
+                    <th>${textCode('0014')}</th>
+                    <td><input class="config-number float-max-number" data-min="-99999999999999" data-max="99999999999999"  type="number" value="${sv('FLOAT_MAX')}"${modeDisabled}></td>
+              </tr>
+              <!-- 桁数 -->
+              <tr class="number-float" title="${textEntities(getSomeMessage("ITACREPAR_1268"),1)}">
+                  <th>${textCode('0015')}</th>
+                  <td><input class="config-number digit-number" data-min="1" data-max="14" type="number" value="${sv('FLOAT_DIGIT')}"${modeDisabled}></td>
+              </tr>
+              <!-- プルダウン選択項目 -->
+              <tr class="select" title="${textEntities(getSomeMessage("ITACREPAR_1269"),1)}">
+                  <th>${textCode('0016')}<span class="input_required">*</span></th>
+                  <td>
+                      <select class="config-select pulldown-select"${modeDisabled}${modeKeepData}>
+                      ${getSelectPulldownListHTML( sv('OTHER_MENU_LINK_ID') )}
+                      </select>
+                  </td>
+              </tr>
+              <!-- 参照項目 -->
+              <tr class="select reference" title="${textEntities(getSomeMessage("ITACREPAR_1275"),1)}">
+                  <th rowspan="2">${textCode('0043')}</th>
+                  <td><span type="text" class="config-text reference-item property-span" type="text" data-reference-item-id${modeDisabled}${modeKeepData}></span></td>
+              </tr>
+              <!-- 参照項目ボタン -->
+              <tr class="select reference" title="${textEntities(getSomeMessage("ITACREPAR_1275"),1)}">
+                  <td><button class="reference-item-select property-button"${modeDisabled}${modeKeepData}>
+                      ${textCode('0045')}
+                  </button></td>
+              </tr>
+              <!-- 最大バイト数 パスワード -->
+              <tr class="password" title="${textEntities(getSomeMessage("ITACREPAR_1262"),1)}">
+                  <th>${textCode('0011')}<span class="input_required">*</span></th>
+                  <td><input class="config-number password-max-byte" type="number" data-min="1" data-max="8192" value="${sv('PW_MAX_LENGTH')}"${modeDisabled}></td>
+              </tr>
+              <!-- 最大バイト数 ファイル -->
+              <tr class="file" title="${textEntities(getSomeMessage("ITACREPAR_1270"),1)}">
+                  <th>${textCode('0042')}<span class="input_required">*</span></th>
+                  <td><input class="config-number file-max-size" data-min="1" data-max="4294967296"  type="number" value="${sv('UPLOAD_MAX_SIZE')}"${modeDisabled}></td>
+              </tr>
+              </tr>
+              <!-- パラメータ参照 メニュー -->
+              <tr class="type3" title="${textEntities(getSomeMessage("ITACREPAR_1299"),1)}">
+                  <th>${textCode('0051')}<span class="input_required">*</span></th>
+                  <td>
+                      <select class="config-select type3-reference-menu"${modeDisabled}${modeKeepData}>
+                          ${getType3PulldownListHTML( sv('TYPE3_REFERENCE') )}
+                      </select>
+                  </td>
+              </tr>
+              <!-- パラメータ参照 項目 -->
+              <tr class="type3" title="${textEntities(getSomeMessage("ITACREPAR_1299"),1)}">
+                  <th>${textCode('0052')}<span class="input_required">*</span></th>
+                  <td class="type3-item-area"><select data-value="${sv('TYPE3_REFERENCE')}" class="config-select type3-reference-item"${modeDisabled}${modeKeepData}>
+                  </select></td>
+              </tr>
+              <!-- 初期値 -->
+              <tr class="single" title="${textEntities(getSomeMessage("ITACREPAR_1289"),1)}">
+                  <th>${textCode('0050')}</th>
+                  <td><input class="config-text single-default-value" type="text" value="${sv('SINGLE_DEFAULT_VALUE')}"${modeDisabled}></td>
+              </tr>
+              <!-- 初期値 複数行 -->
+              <tr class="multiple" title="${textEntities(getSomeMessage("ITACREPAR_1289"),1)}">
+                  <th>${textCode('0050')}</th>
+                  <td><textarea class="config-textarea multiple-default-value"${modeDisabled}>${sv('MULTI_DEFAULT_VALUE', false )}</textarea></td>
+              </tr>
+              <!-- 初期値 int -->
+              <tr class="number-int" title="${textEntities(getSomeMessage("ITACREPAR_1290"),1)}">
+                  <th>${textCode('0050')}</th>
+                  <td><input class="config-number int-default-value" data-min="-2147483648" data-max="2147483647" type="number" value="${sv('INT_DEFAULT_VALUE')}"${modeDisabled}></td>
+              </tr>
+              <!-- 初期値 float -->
+              <tr class="number-float" title="${textEntities(getSomeMessage("ITACREPAR_1291"),1)}">
+                  <th>${textCode('0050')}</th>
+                  <td><input class="config-number float-default-value" data-min="-99999999999999" data-max="99999999999999" type="number" value="${sv('FLOAT_DEFAULT_VALUE')}"${modeDisabled}></td>
+              </tr>
+              <!-- 初期値 日時 -->
+              <tr class="date-time" title="${textEntities(getSomeMessage("ITACREPAR_1292"),1)}">
+                  <th>${textCode('0050')}</th>
+                  <td><input size="19" maxlength="19" class="config-text datetime-default-value callDateTimePicker" type="text" value="${sv('DATETIME_DEFAULT_VALUE')}"${modeDisabled}></td>
+              </tr>
+              <!-- 初期値 日付 -->
+              <tr class="date" title="${textEntities(getSomeMessage("ITACREPAR_1292"),1)}">
+                  <th>${textCode('0050')}</th>
+                  <td><input size="10" maxlength="10" class="config-text date-default-value callDateTimePicker2" type="text" value="${sv('DATE_DEFAULT_VALUE')}"${modeDisabled}></td>
+              </tr>
+              <!-- 初期値 リンク -->
+              <tr class="link" title="${textEntities(getSomeMessage("ITACREPAR_1293"),1)}">
+                  <th>${textCode('0050')}</th>
+                  <td><input class="config-text link-default-value" type="text" value="${sv('LINK_DEFAULT_VALUE')}"${modeDisabled}></td>
+              </tr>
+              <!-- 初期値 選択 -->
+              <tr class="select" title="${textEntities(getSomeMessage("ITACREPAR_1294"),1)}">
+                  <th>${textCode('0050')}</th>
+                  <td class="pulldown-default-area">
+                      <select class="config-select pulldown-default-select"${modeDisabled}></select>
+                  </td>
+              </tr>
+              <!-- 必須・一意 -->
+              <tr class="single multiple number-int number-float date-time date password select file link">
+                  <td colspan="2">
+                      <label class="required-label${onHover}" title="${textEntities(getSomeMessage("ITACREPAR_1271"),1)}"><input class="config-checkbox required${disbledCheckbox}" type="checkbox"${modeDisabled}${modeKeepData}${(sv('REQUIRED', false ) === true )? ` checked`: ``}><span></span>${textCode('0017')}</label><label class="unique-label${onHover}" title="${textEntities(getSomeMessage("ITACREPAR_1272"),1)}"><input class="config-checkbox unique${disbledCheckbox}" type="checkbox"${modeDisabled}${modeKeepData}${(sv('UNIQUED', false ) === true )? ` checked`: ``}><span></span>${textCode('0018')}</label>
+                  </td>
+              </tr>
+              <!-- 説明 -->
+              <tr class="all" title="${textEntities(getSomeMessage("ITACREPAR_1273"),1)}">
+                  <td colspan="2">
+                      <div class="config-textarea-wrapper">
+                          <textarea class="config-textarea explanation${( sv('DESCRIPTION') !== '')? ' text-in': ''}"${modeDisabled}>${sv('DESCRIPTION')}</textarea><span>${textCode('0019')}</span>
+                      </div>
+                  </td>
+              </tr>
+              <!-- 備考 -->
+              <tr class="all" title="${textEntities(getSomeMessage("ITACREPAR_1274"),1)}">
+                  <td colspan="2">
+                      <div class="config-textarea-wrapper">
+                          <textarea class="config-textarea note${( sv('NOTE') !== '')? ' text-in': ''}"${modeDisabled}>${sv('NOTE')}</textarea><span>${textCode('0020')}</span>
+                      </div>
+                  </td>
+              </tr>
+          </table>
+      </div>
+  </div>
+  <div class="column-resize"></div>
+</div>`;
+};
 
-
-
+const columnHTML = getColumnHTML();
 
 // カウンター
 let itemCounter = 1,
@@ -763,6 +866,8 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
   }
   
   titleInputChange( $addColumnInput );
+  
+  emptyCheck();
   columnHeightUpdate();
   
   if ( previewFlag === true ) {
@@ -771,17 +876,18 @@ const addColumn = function( $target, type, number, loadData, previewFlag, emptyF
   }
   
   // 追加した項目に合わせスクロールさせる
-  const editorWindowWidth = $menuEditWindow.outerWidth(),
-        tableWidth = $menuEditWindow.find('.menu-table-wrapper').width()
-  if ( editorWindowWidth < tableWidth ) {
-    $menuEditWindow.children().stop(0,0).animate({'scrollLeft': tableWidth - editorWindowWidth }, 200 );
-  }
+    const $scrollArea = $menuEditWindow.children(),
+          scrollElement = $scrollArea.get(0),
+          scrollWidth = scrollElement.scrollWidth,
+          clientWidth = scrollElement.clientWidth;
+          
+    if ( clientWidth < scrollWidth ) {
+        $scrollArea.stop(0,0).animate({'scrollLeft': scrollWidth - clientWidth }, 200 );
+    }
 
   //日付と時日時の初期値入力欄にdatetimepickerを設定
   $addColumn.find(".callDateTimePicker").datetimepicker({format:'Y/m/d H:i:s', step:5, lang:LangStream});
   $addColumn.find(".callDateTimePicker2").datetimepicker({timepicker:false, format:'Y/m/d', lang:LangStream});
-
-  emptyCheck();
 
 };
 
@@ -1529,6 +1635,24 @@ $menuEditor.on('click', '.menu-column-copy', function(){
 
     history.add();
     previewTable();
+    
+    // コピーした項目に合わせスクロールさせる
+    const $scrollArea = $menuEditWindow.children(),
+          scrollElement = $scrollArea.get(0),
+          scrollAreaWidth = $scrollArea.outerWidth(),
+          scrollLeft = $scrollArea.scrollLeft(),
+          scrollWidth = scrollElement.scrollWidth,
+          clientWidth = scrollElement.clientWidth,
+          editorLeft = scrollElement.getBoundingClientRect().left,
+          cloneLeft = $clone.get(0).getBoundingClientRect().left + scrollLeft - editorLeft,
+          cloneWidth = $clone.outerWidth(),
+          padding = 8;
+    
+    // スクロール可能か？
+    if ( clientWidth < scrollWidth && scrollLeft + scrollAreaWidth < cloneLeft + cloneWidth ) {
+        const left = ( cloneLeft + cloneWidth ) - scrollAreaWidth + padding;
+        $menuEditWindow.children().stop(0,0).animate({'scrollLeft': left }, 200 );
+    }   
   });
 });
 
@@ -2679,8 +2803,8 @@ const createRegistrationData = function( type ){
                 createMenuJSON['item'][key]['SINGLE_DEFAULT_VALUE'] = $column.find('.single-default-value').val();
                 break;
               case '2':
-                createMenuJSON['item'][key]['MULTI_MAX_LENGTH'] = $column.find('.max-byte').val();
-                createMenuJSON['item'][key]['MULTI_PREG_MATCH'] = $column.find('.regex').val();
+                createMenuJSON['item'][key]['MULTI_MAX_LENGTH'] = $column.find('.multiple-max-byte').val();
+                createMenuJSON['item'][key]['MULTI_PREG_MATCH'] = $column.find('.multiple-regex').val();
                 createMenuJSON['item'][key]['MULTI_DEFAULT_VALUE'] = $column.find('.multiple-default-value').val();
                 break;
               case '3':
@@ -2712,7 +2836,7 @@ const createRegistrationData = function( type ){
                 createMenuJSON['item'][key]['UPLOAD_MAX_SIZE'] = $column.find('.file-max-size').val();
                 break;
               case '10':
-                createMenuJSON['item'][key]['LINK_LENGTH'] = $column.find('.max-byte').val();
+                createMenuJSON['item'][key]['LINK_LENGTH'] = $column.find('.link-max-byte').val();
                 createMenuJSON['item'][key]['LINK_DEFAULT_VALUE'] = $column.find('.link-default-value').val();
                 break;
               case '11':
@@ -2826,8 +2950,8 @@ const createRegistrationData = function( type ){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const loadMenu = function() {
-    
     const loadJSON = menuEditorArray.selectMenuInfo;
+    
     // 流用新規時に引き継がない項目
     if ( menuEditorMode === 'diversion' ){
       loadJSON['menu']['CREATE_MENU_ID'] = null;
@@ -2839,153 +2963,151 @@ const loadMenu = function() {
       loadJSON['menu']['DESCRIPTION'] = null;
       loadJSON['menu']['NOTE'] = null;
     }
-
+    
     // パネル情報表示
     setPanelParameter( loadJSON );
     
-    // エディタクリア
-    $menuTable.html('');
-    
-    // エディタ表示
-    const recursionMenuTable = function( $target, column ) {
-      
-      let columns = ('columns' in column )? 'columns' : 'COLUMNS';
-      
-      const length = column[ columns ].length;
-
-      for ( let i = 0; i < length; i++ ) {
-
-        const id = column[ columns ][i],
-              type = id.substr(0,1),
-              number = id.substr(1);
-
-        if ( type === 'g' ) {
-          // グループ
-          addColumn( $target, 'group', number, loadJSON['group'][id], false, false );
-          const groupData = loadJSON['group'][id],
-                $group = $('#' + id );
-          
-          $group.attr('data-group-id', groupData['COL_GROUP_ID'] );
-          
-          recursionMenuTable( $group.children('.menu-column-group-body'), groupData );
-          
-        } else if ( type === 'r' ) {
-          // リピート
-          addColumn( $target, 'repeat', number, loadJSON['repeat'][id], false, false );
-          const repeatData = loadJSON['repeat'][id],
-                $repeat = $('#' + id );
-          
-          $repeat.find('.menu-column-repeat-number-input').val( repeatData['REPEAT_CNT'] ).change();
-          
-          recursionMenuTable( $repeat.children('.menu-column-repeat-body'), repeatData );
-          
+    const sv = function( v, f = true ) {
+        if ( v !== undefined && v !== null ) {
+            if ( f ) {
+                return textEntities( String( v ) );
+            } else {
+                return v;
+            }
         } else {
-          // 項目
-          addColumn( $target, 'item', number, loadJSON['item'][id], false );
-          const itemData = loadJSON['item'][id],
-                $item = $('#' + id );        
-
-          $item.css('min-width', itemData['min-width'] );
-
-          $item.attr('data-item-id', itemData['CREATE_ITEM_ID'] );
-          $item.find('.menu-column-type-select').val( itemData['INPUT_METHOD_ID'] ).change();
-          $item.find('.required').prop('checked', itemData['REQUIRED'] ).change();
-          $item.find('.unique').prop('checked', itemData['UNIQUED'] ).change();
-
-          let descriptionText = itemData['DESCRIPTION'] === null ? '' : itemData['DESCRIPTION'];
-          let noteText = itemData['NOTE'] === null ? '' : itemData['NOTE'];
-
-          $item.find('.explanation').val( descriptionText ).change();
-          if ( descriptionText !== '' ) $item.find('.explanation').addClass('text-in');
-          $item.find('.note').val( noteText ).change();
-          if ( noteText !== '' ) $item.find('.note').addClass('text-in');
-
-          switch ( itemData['INPUT_METHOD_ID'] ) {
-            case '1':
-              $item.find('.max-byte').val( itemData['MAX_LENGTH'] ).change();
-              $item.find('.regex').val( itemData['PREG_MATCH'] ).change();
-              $item.find('.single-default-value').val( itemData['SINGLE_DEFAULT_VALUE'] ).change();
-              break;
-            case '2':
-              $item.find('.max-byte').val( itemData['MULTI_MAX_LENGTH'] ).change();
-              $item.find('.regex').val( itemData['MULTI_PREG_MATCH'] ).change();
-              $item.find('.multiple-default-value').val( itemData['MULTI_DEFAULT_VALUE'] ).change();
-              break;
-            case '3':
-              $item.find('.int-min-number').val( itemData['INT_MIN'] ).change();
-              $item.find('.int-max-number').val( itemData['INT_MAX'] ).change();
-              $item.find('.int-default-value').val( itemData['INT_DEFAULT_VALUE'] ).change();
-              break;
-            case '4':
-              $item.find('.float-min-number').val( itemData['FLOAT_MIN'] ).change();
-              $item.find('.float-max-number').val( itemData['FLOAT_MAX'] ).change();
-              $item.find('.digit-number').val( itemData['FLOAT_DIGIT'] ).change();
-              $item.find('.float-default-value').val( itemData['FLOAT_DEFAULT_VALUE'] ).change();
-              break;
-            case '5':
-              $item.find('.datetime-default-value').val( itemData['DATETIME_DEFAULT_VALUE'] ).change();
-              break;
-            case '6':
-              $item.find('.date-default-value').val( itemData['DATE_DEFAULT_VALUE'] ).change();
-              break;
-            case '7':
-              $item.find('.pulldown-select').val( itemData['OTHER_MENU_LINK_ID'] ).change();
-              getpulldownDefaultValueList($item, itemData['PULLDOWN_DEFAULT_VALUE']); //「プルダウン選択」の初期値として選べる値を取得し、初期値に設定されているものをselectedにする。
-              $item.find('.reference-item').attr('data-reference-item-id', itemData['REFERENCE_ITEM']).change();
-              //newItemListのIDから項目名に変換
-              if(itemData['REFERENCE_ITEM'] != null){
+            return '';
+        }
+    };
+    
+    let setMenuHTML = '';
+    const recursionMenuTable = function( columns ) {
+        if ( columns ) {
+            for ( const id of columns ) {
+                const type = id.substr(0,1);
+                switch ( type ) {
+                    // グループ
+                    case 'g': {
+                        const groupData = loadJSON['group'][id];
+                        
+                        // グループ枠HTML                        
+                        setMenuHTML += ''
+                        + '<div class="menu-column-group" data-group-id="' + sv(groupData.COL_GROUP_ID) + '">'
+                          + '<div class="menu-column-group-header">'
+                            + getColumnHeaderHTML( sv(groupData.COL_GROUP_NAME) )
+                          + '</div>'
+                          + '<div class="menu-column-group-body">';
+                        
+                        recursionMenuTable( groupData.COLUMNS );
+                        
+                        setMenuHTML += '</div>'
+                        + '</div>';
+                    } break;
+                    case 'r': {
+                        const repeatData = loadJSON['repeat'][id];
+                        
+                        // リピート枠
+                        setMenuHTML += ''
+                        + '<div class="menu-column-repeat">'
+                          + '<div class="menu-column-repeat-header">'
+                            + '<div class="menu-column-move"></div>'
+                            + '<div class="menu-column-repeat-number on-hover" title="' + textEntities(getSomeMessage("ITACREPAR_1260"),1) + '">'
+                                + 'REPEAT : <input class="menu-column-repeat-number-input" data-min="2" data-max="99" value="'
+                                    + repeatData.REPEAT_CNT
+                                + '" type="number"'+modeDisabled+'></div>'
+                          + '</div>'
+                          + '<div class="menu-column-repeat-body">';
+                        
+                        recursionMenuTable( repeatData.columns );  
+                          
+                        setMenuHTML += '</div>'
+                          + '<div class="menu-column-repeat-footer">'
+                            + '<div class="menu-column-function">'
+                              + '<div class="menu-column-delete"></div>'
+                            + '</div>'
+                          + '</div>'
+                        + '</div>';                        
+                        
+                    } break;
+                    default: {
+                        const itemData = loadJSON['item'][id];
+                        setMenuHTML += getColumnHTML( itemData, id );
+                    }
+                }
+            }
+        }        
+    };
+    recursionMenuTable( loadJSON.menu.columns );
+    
+    // HTMLセット
+    $menuTable.html( setMenuHTML );
+    
+    // select2
+    $menuTable.find('.config-select').select2();
+    
+    // DataTimePicker
+    $menuTable.find(".callDateTimePicker").datetimepicker({format:'Y/m/d H:i:s', step:5, lang:LangStream});
+    $menuTable.find(".callDateTimePicker2").datetimepicker({timepicker:false, format:'Y/m/d', lang:LangStream});
+    
+    // 各種設定
+    $menuTable.find('.menu-column-title-input').each( function(){
+        titleInputChange( $(this) );
+    });
+    
+    // プルダウン選択
+    $menuTable.find('.menu-column').each(function(){
+        const $item = $( this ),
+              columnID = $item.attr('id'),
+              type = $item.find('.menu-column-config-table').attr('date-select-value'),
+              itemData = loadJSON['item'][ columnID ];
+        
+        // プルダウン選択初期値設定
+        if ( type === '7') {
+            // 選択項目
+            getpulldownDefaultValueList( $item, sv( itemData['PULLDOWN_DEFAULT_VALUE'] ) );
+            
+            // 参照項目
+            $item.find('.reference-item').attr('data-reference-item-id', itemData['REFERENCE_ITEM'] );
+            //newItemListのIDから項目名に変換
+            if( itemData['REFERENCE_ITEM'] !== null ){
                 const newItemListArray = itemData['REFERENCE_ITEM'].split(',');
                 const newItemNameListArray = [];
                 newItemListArray.forEach(function(id){
-                  let existsFlg = false;
-                  menuEditorArray.referenceItemList.forEach(function(data){
-                    if(data['ITEM_ID'] == id){
-                      newItemNameListArray.push(data['ITEM_NAME']);
-                      existsFlg = true;
+                    let existsFlg = false;
+                    menuEditorArray.referenceItemList.forEach(function(data){
+                        if(data['ITEM_ID'] == id){
+                            newItemNameListArray.push(data['ITEM_NAME']);
+                            existsFlg = true;
+                        }
+                    });
+                    //referenceItemListに存在しない参照項目はID変換失敗(ID)を表示させる。
+                    if(existsFlg == false){
+                      newItemNameListArray.push(getSomeMessage("ITACREPAR_1255", {0:id}));
                     }
-                  });
-                  //referenceItemListに存在しない参照項目はID変換失敗(ID)を表示させる。
-                  if(existsFlg == false){
-                    newItemNameListArray.push(getSomeMessage("ITACREPAR_1255", {0:id}));
-                  }
                 });
                 //重複を排除
                 let setNewItemNameList = new Set(newItemNameListArray);
                 let setNewItemNameListArray = Array.from(setNewItemNameList);
-                //カンマ区切りの文字列に変換に参照項目上に表示
+                
+                //カンマ区切りの文字列に変換し参照項目上に表示
                 var newItemNameList = setNewItemNameListArray.join(',');
-                $item.find('.reference-item').html( newItemNameList ).change();
-              }
-              break;
-            case '8':
-              $item.find('.password-max-byte').val( itemData['PW_MAX_LENGTH'] ).change();
-              break;
-            case '9':
-              $item.find('.file-max-size').val( itemData['UPLOAD_MAX_SIZE'] ).change();
-              break;
-            case '10':
-              $item.find('.max-byte').val( itemData['LINK_LENGTH'] ).change();
-              $item.find('.link-default-value').val( itemData['LINK_DEFAULT_VALUE'] ).change();
-              break;
-            case '11':
-              let type3ReferenceMenuId = menuEditorArray.referenceSheetType3ItemData[itemData['TYPE3_REFERENCE']];
-              $item.find('.type3-reference-menu').val( type3ReferenceMenuId ).change();
-              getpulldownParameterSheetReferenceList($item, itemData['TYPE3_REFERENCE']); //「プルダウン選択」の初期値として選べる値を取得し、初期値に設定されているものをselectedにする。
-              break;          }
-          //プルダウン選択の初期値を取得するイベントを設定
-          setEventPulldownDefaultValue($item);
-          //パラメータシート参照の選択項目を取得するイベントを設定
-          setEventPulldownParameterSheetReference($item);
+                $item.find('.reference-item').html( newItemNameList );
+            }            
         }
-
-      }
-    };
-    recursionMenuTable( $menuTable, loadJSON['menu'] );
-
+        
+        // パラメータ参照初期値設定
+        if ( type === '11') {
+            const selectVal = $item.find('.type3-reference-item').attr('data-value');
+            getpulldownParameterSheetReferenceList( $item, selectVal );
+        }
+        
+        setEventPulldownDefaultValue( $item );
+        setEventPulldownParameterSheetReference( $item );
+    });
+    
     history.clear();
     emptyCheck();
+    columnHeightUpdate();
     previewTable();
-
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
