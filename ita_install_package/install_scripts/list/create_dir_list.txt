@@ -6,6 +6,7 @@
 /ita-root/logs/dev_log
 /ita-root/logs/restapilogs/ansible_driver
 /ita-root/logs/terraform_out_logs
+/ita-root/logs/terraform_cli_out_logs
 /ita-root/logs/update_by_file
 /ita-root/logs/webaplogs
 /ita-root/repositorys
@@ -31,6 +32,7 @@
 /ita-root/temp/sym_ope_import/upload
 /ita-root/temp/terraform_download_temp
 /ita-root/temp/terraform_module_temp
+/ita-root/temp/terraform_cli_module_temp
 /ita-root/temp/ansible_driver_temp
 /ita-root/webconfs/sheets
 /ita-root/webconfs/users
@@ -41,3 +43,4 @@
 /ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001
 /ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old
 /ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old/0000000001
+/ita-root/terraform_cli_work

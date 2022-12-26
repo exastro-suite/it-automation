@@ -88,7 +88,6 @@ TERRAFORMインタフェース情報
     $c->setRequired(true);//登録/更新時には、入力必須
     $table->addColumn($c);
 
-////メモ：メッセージから参照
     $cg = new ColumnGroup($g['objMTS']->getSomeMessage('ITATERRAFORM-MNU-102150'));
         //************************************************************************************
         //----Proxyアドレス

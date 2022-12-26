@@ -642,8 +642,8 @@ class OrchestratorLinkAgent {
         $strPatternMasterAnsEngineVirtualEnvName  = 'ANS_ENGINE_VIRTUALENV_NAME';
         $strPatternMasterAnsExecutionEnvName      = "ANS_EXECUTION_ENVIRONMENT_NAME";
         $strPatternMasterAnsAnsibleConfFile       = "ANS_ANSIBLE_CONFIG_FILE";
-
         $strPatternMasterTerraformWorkspaceID = 'TERRAFORM_WORKSPACE_ID';
+        $strPatternMasterTerraformCLIWorkspaceID = 'TERRAFORM_CLI_WORKSPACE_ID';
 
         try{
             $objDBCA = $this->getDBConnectAgent();
@@ -736,6 +736,7 @@ class OrchestratorLinkAgent {
                   .",{$strPatternMasterOpenst_Template} OPENST_TEMPLATE "
                   .",{$strPatternMasterOpenst_Env} OPENST_ENVIRONMENT "
                   .",{$strPatternMasterTerraformWorkspaceID} TERRAFORM_WORKSPACE_ID "
+                  .",{$strPatternMasterTerraformCLIWorkspaceID} TERRAFORM_CLI_WORKSPACE_ID "
                   ."FROM   {$strPatternMasterTableId} "
                   ."WHERE  {$strWhereZone} "
                   ."ORDER  BY DISP_SEQ ASC";
@@ -2019,11 +2020,11 @@ class OrchestratorLinkAgent {
                 unset($retArray01);
                 unset($retArray02);
                 // ムーブメントインスタンス登録の実行----
-                
+
                 //保留ステータス更新
                 if($aryDataForMovement['NEXT_PENDING_FLAG'] == '1' && $register_tgt_row['RELEASED_FLAG'] == '1'){
                   $sql = "UPDATE C_SYMPHONY_INSTANCE_MNG SET PAUSE_STATUS_ID = '1' WHERE SYMPHONY_INSTANCE_NO = {$varSymphonyInstanceNo}";
-                  
+
                   $tmpRetArray01 = singleSQLCoreExecute($objDBCA, $sql, array(), $strFxName);
                   if( $tmpRetArray01[0] !== true ){
                       // エラーフラグをON
@@ -3252,14 +3253,14 @@ class OrchestratorLinkAgent {
             $arrNoticeInfo = array();
             $tmpNoticeInfo = array();
             $strNoticeList = implode( ",", array_keys( json_decode($aryRowOfSymClassTable['NOTICE_INFO'],true)  ) );
-            
+
             //通知情報取得
             $retArray = $this->getNoticeInfo($strNoticeList);
             if( $retArray[0] === true ){
                 $arrNoticeRows = $retArray[4];
                 foreach ( $arrNoticeRows as $arrNoticeRow ) {
                     $arrNoticeInfo[ $arrNoticeRow['NOTICE_ID'] ] = $arrNoticeRow['NOTICE_NAME'];
-                } 
+                }
             }
             //通知対象ステータス取得
             $retArray = $this->getInfoOfNoticeStatusList();
@@ -3267,14 +3268,14 @@ class OrchestratorLinkAgent {
                 $arrNoticeStatusRows = $retArray[4];
                 foreach ( $arrNoticeStatusRows as $arrNoticeStatusRow ) {
                     $tmpNoticeInfo["STATUS_NAME"][ $arrNoticeStatusRow['SYM_EXE_STATUS_ID'] ] = $arrNoticeStatusRow['SYM_EXE_STATUS_NAME'];
-                } 
+                }
             }
             $tmpNoticeInfo['NOTICE_INFO'] = json_decode($aryRowOfSymClassTable['NOTICE_INFO'],true);
             $tmpNoticeInfo['NOTICE_NAME'] = $arrNoticeInfo;
 
             $register_tgt_row['I_NOTICE_INFO'] = json_encode($tmpNoticeInfo,JSON_UNESCAPED_UNICODE);
 
-            //上位アクセス権継承 
+            //上位アクセス権継承
             if( array_key_exists( '__TOP_ACCESS_AUTH__' , $g ) === true ){
                 $register_tgt_row['ACCESS_AUTH'] = $g['__TOP_ACCESS_AUTH__'];
             }
@@ -5555,7 +5556,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row['DISUSE_FLAG']       = '0';
             $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
 
-            #312 
+            #312
             $register_tgt_row['NOTICE_INFO'] = "";
             if(isset($aryExecuteData['NOTICE_INFO'])){
                 //通知チェック,廃止除外
@@ -5614,7 +5615,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row['DISUSE_FLAG']       = '0';
             $register_tgt_row['LAST_UPDATE_USER']  = $g['login_id'];
 
-            #312 
+            #312
             $register_tgt_row['NOTICE_INFO'] = "";
             if(isset($aryExecuteData['NOTICE_INFO'])){
                 //通知チェック,廃止除外
@@ -6042,7 +6043,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
             $register_tgt_row['POINT_W']   = $aryDataForMovement['w'];
             $register_tgt_row['POINT_H']   = $aryDataForMovement['h'];
 
-            //ENDタイプ設定 #467 
+            //ENDタイプ設定 #467
             if( $aryDataForMovement['type'] == "end" ){
                 if( isset( $aryDataForMovement['END_TYPE'] ) === true ){
                     $register_tgt_row['END_TYPE'] = $aryDataForMovement['END_TYPE'];
@@ -6068,7 +6069,7 @@ function conductorClassRegister($fxVarsIntConductorClassId ,$fxVarsAryReceptData
 
             //#587
             if( $aryDataForMovement['type'] == "status-file-branch")$register_tgt_row['NODE_TYPE_ID']=11;
-            
+
             $register_tgt_row['ACCESS_AUTH'] = "";
             if( isset( $aryExecuteData['ACCESS_AUTH'] ) === true ){
                 $register_tgt_row['ACCESS_AUTH']=$aryExecuteData['ACCESS_AUTH'];
@@ -8142,7 +8143,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
             "LAST_UPDATE_TIMESTAMP"=>"",
             "LAST_UPDATE_USER"=>""
         );
-        
+
         $arrayMovInsValueTmpl = array(
             "JOURNAL_SEQ_NO"=>"",
             "JOURNAL_ACTION_CLASS"=>"",
@@ -8249,7 +8250,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                     $aryTmp1ForOverride['MOVEMENT_SEQ']           = $intFocusIndex + 1;
                     $tmp1StrOrcId     = $aryDataForMovement['ORCHESTRATOR_ID'];
                     $tmp1StrPatternId = $aryDataForMovement['PATTERN_ID'];
-                    
+
                     if( array_key_exists($intFocusIndex + 1, $aryOptionOrderOverride) === true ){
                         //----あるムーブメントについて指定があった場合
                         $aryTmp2ForOverride = $aryOptionOrderOverride[$intFocusIndex + 1];
@@ -8258,10 +8259,10 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                     else{
                         $aryTmp2ForOverride = array();
                     }
-                    
-                    list($tmp1StrExeSkipFlag, $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('SKIP')        , ""); 
+
+                    list($tmp1StrExeSkipFlag, $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('SKIP')        , "");
                     list($tmp1StrOvrdOpeId  , $boolTempKeyExistFlag) = isSetInArrayNestThenAssign($aryTmp2ForOverride, array('OPERATION_ID'), "");
-                    
+
                     if( $tmp1StrExeSkipFlag === "YES" ){
                         // checkedValueならスキップ
                         $tmp1StrExeSkipFlag = "checkedValue";
@@ -8272,20 +8273,20 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                     else{
                         $tmp1StrExeSkipFlag = "FORBIDDEN_VALUE";
                     }
-                    
+
                     $aryTmp1ForOverride['ORCHESTRATOR_ID']        = $tmp1StrOrcId;
                     $aryTmp1ForOverride['PATTERN_ID']             = $tmp1StrPatternId;
                     $aryTmp1ForOverride['EXE_SKIP_FLAG']          = $tmp1StrExeSkipFlag;
                     $aryTmp1ForOverride['OVRD_OPERATION_NO_IDBH'] = $tmp1StrOvrdOpeId;
                     $aryOptionOrder[] = $aryTmp1ForOverride;
-                    
+
                     unset($tmp1StrOrcId);
                     unset($tmp1StrPatternId);
                     unset($tmp1StrExeSkipFlag);
                     unset($tmp1StrOvrdOpeNo);
                     unset($aryTmp1ForOverride);
                     unset($aryTmp2ForOverride);
-                    
+
                     $intFocusIndex += 1;
                 }
                 unset($tmpAryMultiLivePatternFromMaster);
@@ -8308,7 +8309,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
             //$aryOptionOrderのカウントチェック----
-            
+
 
             // ----ムーブメントインスタンス登録処理
             $MovementErrorMsg = "";
@@ -8483,7 +8484,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                 // 各Movementの登録状態を確認する。
                 $tgtSource_row = $register_tgt_row;
                 $ret = $this->MovementValidator($tgtSource_row,$intOperationNoUAPK,$MovementErrorMsg,($intFocusIndex + 1),$aryFreeErrMsgBody);
-        
+
                 if( $ret === false ){
                     // エラーフラグをON
                     // 例外処理へ
@@ -8530,7 +8531,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
         return $retArray;
     }
 
-//----通知の取得 #312 
+//----通知の取得 #312
     function getNoticeInfo($strNoticeList,$intSearchMode=0){
         /////////////////////////////////////////////////////////////
         // 通知の取得                                //
@@ -8607,7 +8608,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
             $arrNotificationList = explode(",", $strNoticeList);
 
             foreach ($arrNotificationList as $NotificationId ) {
-                
+
                 $temp_array = array('WHERE'=>"{$strColumnIdForSearch} = :{$strColumnIdForSearch} AND DISUSE_FLAG IN ('0') {$strSelectForUpdateLock}");
 
                 $retArray = makeSQLForUtnTableUpdate($lc_db_model_ch
@@ -8623,8 +8624,8 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
 
                 $arrayUtnBind[$strColumnIdForSearch] = $NotificationId;
 
-                $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);    
-                 
+                $retArray = singleSQLCoreExecute($objDBCA, $sqlUtnBody, $arrayUtnBind, $strFxName);
+
                 if( $retArray[0]!==true ){
                     $intErrorType = $retArray[1];
                     $aryErrMsgBody = $retArray[2];
@@ -8634,7 +8635,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                     throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
                 }
                 $objQueryUtn =& $retArray[3];
- 
+
                 //----発見行だけループ
                 $intCount = 0;
                 $aryRowOfTable = array();
@@ -8671,7 +8672,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
     }
 //通知の取得----
 
-//----通知実行 #312 
+//----通知実行 #312
     function execNotice($arrNoticeRows,$arrDefinedList=array() ){
         /////////////////////////////////////////////////////////////
         // 通知実行(curl_exec)                                //
@@ -8688,7 +8689,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
 
         ////////////////////////////////
         // ルートディレクトリを取得   //
-        ////////////////////////////////       
+        ////////////////////////////////
         $root_dir_temp = array();
         $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
         $root_dir_path = $root_dir_temp[0] . "ita-root";
@@ -8745,11 +8746,11 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                         $suppressflg = 1; //抑止
                     }
                 }elseif( $suppressStartDate == "" && $suppressEndDate != "" && $nowDate < $suppressEndDate ) {
-                    //　 （抑止開始無し） ～ 抑止終了 
+                    //　 （抑止開始無し） ～ 抑止終了
                         $suppressflg = 1; //抑止
                 }elseif( $suppressStartDate != "" && $suppressEndDate == "" && $nowDate > $suppressStartDate ){
                     //  抑止開始　～ （抑止終了無し）
-                        $suppressflg = 1; //抑止       
+                        $suppressflg = 1; //抑止
                 }
 
                 //抑止フラグOFF時
@@ -8759,13 +8760,13 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                     if( isset($tmpNotice['NOTICE_NAME']) === true ){
                         $arrDefinedList['__NOTICE_NAME__'] = $tmpNotice['NOTICE_NAME'];
                     }else{
-                        $arrDefinedList['__NOTICE_NAME__'] = $objMTS->getSomeMessage("ITABASEH-STD-171005");//"不明な通知"; 
+                        $arrDefinedList['__NOTICE_NAME__'] = $objMTS->getSomeMessage("ITABASEH-STD-171005");//"不明な通知";
                     }
 
                     $strURL = $tmpNotice['FQDN'] . $arrDefinedList['___TMP_URL___'];
 
                     //作業確認URLの初期化
-                    $arrDefinedList['__JUMP_URL__'] = $strURL; 
+                    $arrDefinedList['__JUMP_URL__'] = $strURL;
 
                     //上書き禁止項目
                     $arrConstList = array(
@@ -8778,12 +8779,12 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                     );
 
                     //基本設定値
-                    $method = "POST";                
+                    $method = "POST";
                     $Notificationurl = $tmpNotice['NOTICE_URL'];
                     $str_header = $tmpNotice['HEADER'];
                     $arr_header = json_decode($str_header);
                     if( is_array($arr_header) !== true ){
-                        $arr_header = array( 
+                        $arr_header = array(
                             "Content-Type: application/json"
                         );
                     }
@@ -8827,7 +8828,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                         if( array_search($curlkey, $arrConstList) === false ){
                             if($curlval === null || $curlval === "" ){
                             }else{
-                                $arrCurlPptList[$curlkey] =  $curlval;        
+                                $arrCurlPptList[$curlkey] =  $curlval;
                             }
                         }else{
                             if(strpos($curlkey,'__FORCED__') !== false){
@@ -8842,8 +8843,8 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                     //curl_setopt設定
                     foreach ($arrCurlPptList as $curlkey => $curlval) {
                         if($curlval === null || $curlval === "" ){
-                        }else{  
-                            curl_setopt($curl, constant($curlkey), $curlval );    
+                        }else{
+                            curl_setopt($curl, constant($curlkey), $curlval );
                         }
                     }
                     //CURL実行
@@ -8859,7 +8860,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                         "RETURN_MSG" => $restApiResponse,
                         "OPTION"  => $arrCurlPptList,
                         "RESSULT" => $aryRowOfexecNotification[$tmpNotice['NOTICE_ID']],
-                        
+
                     );
                     error_log(print_r( date('Y-m-d H:i:s') . " " . $subject . "\n", true), 3, $logPath );
 
@@ -8889,7 +8890,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
     }
 //通知実行----
 
-//----通知取得、実行 #312 
+//----通知取得、実行 #312
     function getExecNotice($aryConInsInfo,$strNoticeList,$strNoticeStatusList){
         /////////////////////////////////////////////////////////////
         // 通知の取得、実行                                //
@@ -8927,7 +8928,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
 
             //通知処理設定
             $arrNoticeRows = $aryRetBody[4];
-            
+
             //通知用予約変数：値の設定（デフォルト空）
             $arrDefinedList = array(
                 "__CONDUCTOR_INSTANCE_ID__" => "",  //ConductorインスタンスID
@@ -8956,9 +8957,9 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
             if( isset($aryConInsInfo['TIME_BOOK'])             === true ) $arrDefinedList['__TIME_BOOK__']              = date('Y/m/d H:i:s',  strtotime($aryConInsInfo['TIME_BOOK']));
             if( isset($aryConInsInfo['TIME_START'])            === true ) $arrDefinedList['__TIME_START__']             = date('Y/m/d H:i:s',  strtotime($aryConInsInfo['TIME_START']));
             if( isset($aryConInsInfo['TIME_END'])              === true ) $arrDefinedList['__TIME_END__']               = date('Y/m/d H:i:s',  strtotime($aryConInsInfo['TIME_END']));
-            
-            if( isset($aryConInsInfo['CONDUCTOR_INSTANCE_NO']) === true ){                            
-                ###URL　作業確認URLのFQDN    
+
+            if( isset($aryConInsInfo['CONDUCTOR_INSTANCE_NO']) === true ){
+                ###URL　作業確認URLのFQDN
                 $arrDefinedList['___TMP_URL___'] = "/default/menu/01_browse.php?no=2100180005&conductor_instance_id=".$aryConInsInfo['CONDUCTOR_INSTANCE_NO'];
 
             //通知実行
@@ -8990,7 +8991,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
 //通知取得、実行----
 
 
-//----通知一覧を取得する #312 
+//----通知一覧を取得する #312
     function getInfoOfNoticeList(){
         /////////////////////////////////////////////////////////////
         // 通知一覧を取得                                //
@@ -9064,7 +9065,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
     }
 //通知一覧を取得する----
 
-//----ステータスス一覧を取得する #312 
+//----ステータスス一覧を取得する #312
     function getInfoOfNoticeStatusList($getmode=""){
         /////////////////////////////////////////////////////////////
         // ステータス一覧を取得                                //
@@ -9089,7 +9090,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
             $objMTS = $this->getMessageTemplateStorage();
             $lc_db_model_ch = $objDBCA->getModelChannel();
             $objRBAC = new RoleBasedAccessControl($objDBCA);
-            
+
             if( $getmode == "" ){
                 $arrStatusList = array(3,4,5,11,6,7,8); //実行中,実行中(遅延),正常終了,警告終了,緊急停止,異常終了,想定外エラー
                 $strStatusList = implode(",", $arrStatusList);
@@ -9106,18 +9107,18 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                            ." WHERE TAB_A.DISUSE_FLAG='0' "
                            ."";
                     if( $getmode == "" ){
-                        $sql .=" AND TAB_A.SYM_EXE_STATUS_ID = {$tmpstatusid} ";;               
+                        $sql .=" AND TAB_A.SYM_EXE_STATUS_ID = {$tmpstatusid} ";;
                     }
 
                     $objQuery = $objDBCA->sqlPrepare($sql);
                     $r = $objQuery->sqlExecute();
-                    
+
                     while($row = $objQuery->resultFetch()) {
                         $rows[] = $row;
                     }
-                }                
+                }
             }else{
-            
+
                 // 表示データをSELECT
                 $sql =  " SELECT "
                        ." * "
@@ -9132,7 +9133,7 @@ function checkCallLoopValidator( $intConductorclass,$arrOperationList=array() ){
                 while($row = $objQuery->resultFetch()) {
                     $rows[] = $row;
                 }
-                            
+
             }
 
             unset($objQuery);
@@ -9169,6 +9170,11 @@ function getStatusFileInfo(){
                 ),
         10 => array(
                     "table" => "B_TERRAFORM_IF_INFO",
+                    "column"   => "",
+                    "path"   => "",
+                ),
+        11 => array(
+                    "table" => "B_TERRAFORM_CLI_IF_INFO",
                     "column"   => "",
                     "path"   => "",
                 ),

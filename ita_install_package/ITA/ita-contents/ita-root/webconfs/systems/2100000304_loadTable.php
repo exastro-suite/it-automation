@@ -110,7 +110,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
             $strQuery = "UPDATE A_PROC_LOADED_LIST "
                        ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                       ."WHERE ROW_ID IN (2100020002,2100020004,2100020006,2100080002) ";
+                       ."WHERE ROW_ID IN (2100020002,2100020004,2100020006,2100080002,2100080004) ";
 
             $aryForBind = array();
 
@@ -164,7 +164,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                     return $objOutputType->getBody()->getData($rowData,$aryVariant);
                 };
             }
-            
+
             $objTTBF = new TextTabBFmt();
             $objTTHF = new TabHFmt();//new SortedTabHFmt();
             $objTTBF->setSafingHtmlBeforePrintAgent(false);
@@ -172,7 +172,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $objOutputType->setFunctionForGetBodyTag($objFunctionB);
             $objOutputType->setVisible(true);
             $objRadioColumn->setOutputType("print_table", $objOutputType);
-            
+
             $table->getFormatter('print_table')->setGeneValue("linkExcelHidden",true);
             $table->getFormatter('print_table')->setGeneValue("linkCSVFormShow",false);
         }

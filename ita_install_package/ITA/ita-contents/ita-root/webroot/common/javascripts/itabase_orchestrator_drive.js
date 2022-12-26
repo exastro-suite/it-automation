@@ -19,47 +19,47 @@ function initProcess(pageMode){
         case "instanceConstructWithPlanExecute":
             varInitedFlag1 = false;
             varInitedFlag2 = false;
-            
+
             var filter1AreaWrap = 'Filter1_Nakami';
             var filter2AreaWrap = 'Filter2_Nakami';
-            
+
             webPrintRowConfirm = parseInt(document.getElementById('sysWebRowConfirm').innerHTML);
             webPrintRowLimit = parseInt(document.getElementById('sysWebRowLimit').innerHTML);
-            
+
             webStdTableWidth = document.getElementById('webStdTableWidth').innerHTML;
             webStdTableHeight = document.getElementById('webStdTableHeight').innerHTML;
-            
+
             // しばらくお待ち下さいを出す
             var objTableArea = $('#'+filter1AreaWrap+' .table_area').get()[0];
             objTableArea.innerHTML = "<div class=\"wait_msg\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
             proxy.Filter1Tbl_reload(0);
-            
+
             // しばらくお待ち下さいを出す
             var objTableArea = $('#'+filter2AreaWrap+' .table_area').get()[0];
             objTableArea.innerHTML = "<div class=\"wait_msg\" >"+getSomeMessage("ITAWDCC10102")+"</div>";
             proxy.Filter2Tbl_reload(0);
-            
+
             // フィルタ部分を隠す
             show('Filter1_Midashi'   ,'Filter1_Nakami'   );
             show('Filter2_Midashi'   ,'Filter2_Nakami'   );
-            
+
             // ボタン「実行」を配置する
             //drawCommandButtons('instanceConstruct',0);
             drawCommandButtons(pageMode,0);
-            
+
             break;
     }
 }
 
 function activateExecuteButton(){
     var strCommandAreaWrap = 'orchestratorInfoFooter';
-    
+
     var strOperationNoArea = 'print_operation_no_uapk';;
     var objOperationNoArea = document.getElementById(strOperationNoArea);
-    
+
     var strPatternNoArea = 'print_pattern_id';
     var objPatternNoArea = document.getElementById(strPatternNoArea);
-    
+
     if( objPatternNoArea.innerHTML != '' && objOperationNoArea.innerHTML != '' ){
         // ボタンを活性化する
         setInputButtonDisable(strCommandAreaWrap,'disableAfterPush',false);
@@ -77,13 +77,13 @@ function printOperationInfo(boolCallProxy, operation_no_uapk, operation_no_idbh,
     else{
         var objOperationNoArea = document.getElementById(strOperationNoArea);
         objOperationNoArea.innerHTML = operation_no_uapk;
-        
+
         var objOperationIdArea = document.getElementById(strOperationIdArea);
         objOperationIdArea.innerHTML = operation_no_idbh;//aryOperationInfo[0];
-        
+
         var objOperationNameArea = document.getElementById(strOperationNameArea);
         objOperationNameArea.innerHTML = '<span class="inLineTitle" title="' + operation_name + '">' + operation_name + '</span>';
-        
+
         activateExecuteButton();
     }
 }
@@ -153,25 +153,25 @@ function constructExecutionNo(boolCallProxy, execution_no, ary_vars, menu_id){
                str_confirm_message = getSomeMessage("ITABASEC010701");
                break;
             case 2: //"ドライラン"
-               if(menu_id == "2100080010"){
+               if(menu_id == "2100080010" || menu_id == "2100200010"){
                     //TerraformはPlan確認
                     str_confirm_message = getSomeMessage("ITABASEC010710");
                }else{
                     str_confirm_message = getSomeMessage("ITABASEC010705");
                }
-               
+
                break;
             default:
                confirm_flag = false;
                break;
         }
-        
+
         if( pattern_id != '' && operation_no != '' ){
 
         }else{
             confirm_flag = false;
         }
-        
+
         if( confirm_flag === true ){
             // オペレーションとMovementのアクセス許可ロールの適合を判定
             chkAccessAuth(operation_no,pattern_id);

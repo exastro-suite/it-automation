@@ -87,7 +87,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     unset($tmpAryColumn);
 
     $table->setJsEventNamePrefix(true);
-    
+
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel($g['objMTS']->getSomeMessage("ITABASEH-MNU-107090"));
     // エクセルのシート名
@@ -153,7 +153,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $objOT->setTraceQuery($aryTraceQuery);
             $c->setOutputType('print_journal_table',$objOT);
             $cg->addColumn($c);
-            
+
 
             /* 親Playbookのヘッダーセクション */
             $objVldt = new MultiTextValidator(0,512,false);
@@ -267,6 +267,25 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
             $c->setJournalKeyIDOfMaster('WORKSPACE_ID');
             $c->setJournalDispIDOfMaster('ORGANIZATION_WORKSPACE');
+            $c->setRequired(true);//登録/更新時には、入力必須
+            $cg->addColumn($c);
+
+        $table->addColumn($cg);
+    }
+
+    // Terraform-CLI利用情報
+    $wanted_filename = "ita_terraformcli-driver";
+    if( file_exists($root_dir_path."/libs/release/".$wanted_filename) ) {
+        $cg = new ColumnGroup($g['objMTS']->getSomeMessage("ITABASEH-MNU-111040"));
+
+            $c = new IDColumn('TERRAFORM_CLI_WORKSPACE_ID', $g['objMTS']->getSomeMessage("ITABASEH-MNU-111050"),'B_TERRAFORM_CLI_WORKSPACES','WORKSPACE_ID','WORKSPACE_NAME','');
+            $c->setDescription($g['objMTS']->getSomeMessage("ITABASEH-MNU-111060"));//エクセル・ヘッダでの説明
+            $c->setHiddenMainTableColumn(true);//コンテンツのソースがヴューの場合、登録/更新の対象とする際に、trueとすること。setDBColumn(true)であることも必要。
+            $c->setJournalTableOfMaster('B_TERRAFORM_CLI_WORKSPACES_JNL');
+            $c->setJournalSeqIDOfMaster('JOURNAL_SEQ_NO');
+            $c->setJournalLUTSIDOfMaster('LAST_UPDATE_TIMESTAMP');
+            $c->setJournalKeyIDOfMaster('WORKSPACE_ID');
+            $c->setJournalDispIDOfMaster('WORKSPACE_NAME');
             $c->setRequired(true);//登録/更新時には、入力必須
             $cg->addColumn($c);
 

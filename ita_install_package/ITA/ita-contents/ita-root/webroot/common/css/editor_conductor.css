@@ -1027,7 +1027,7 @@ opacity: 0.75;
 #KIZI .end-status-select-list {
 position: relative;
 margin: 0; padding: 0;
-list-style: none;  
+list-style: none;
 }
 #KIZI .end-status-select-item {
 overflow: hidden;
@@ -1168,6 +1168,10 @@ transform: translate(-50%,-50%) rotate(-45deg);
 .node-terraform .node-type  { background-color: #5c4ee5; }
 .add-node.terraform,
 .node-terraform .node-circle .node-gem { background-color: #5c4ee5; }
+
+.node-terraform-cli .node-type  { background-color: #5c4ee5; }
+.add-node.terraform-cli,
+.node-terraform-cli .node-circle .node-gem { background-color: #5c4ee5; }
 
 /* Running */
 #editor[data-editor-mode="checking"] .node {

@@ -181,6 +181,7 @@ class TD_C_PATTERN_PER_ORCH  extends TDBase {
     const C_EXT_STM_ID_PIONEER        = 4;  //Ansible Pioneer
     const C_EXT_STM_ID_ROLE           = 5;  //Ansible Legacy Role
     const C_EXT_STM_ID_TERRAFORM      = 10; //Terraform
+    const C_EXT_STM_ID_TERRAFORM_CLI  = 11; //Terraform-CLI
 
     public  $PKColumnName;
     public  $tblColumndefine;
@@ -287,8 +288,9 @@ class TD_B_CICD_MATERIAL_TYPE_NAME  extends TDBase {
     const C_MATL_TYPE_ROW_ID_ROLE         = 3;  //ロールパッケージ管理
     const C_MATL_TYPE_ROW_ID_CONTENT      = 4;  //ファイル管理
     const C_MATL_TYPE_ROW_ID_TEMPLATE     = 5;  //テンプレート管理
-    const C_MATL_TYPE_ROW_ID_MODULE       = 6;  //Module素材
-    const C_MATL_TYPE_ROW_ID_POLICY       = 7;  //Policy管理
+    const C_MATL_TYPE_ROW_ID_MODULE       = 6;  //Module素材(Terraform)
+    const C_MATL_TYPE_ROW_ID_POLICY       = 7;  //Policy管理(Teraform)
+    const C_MATL_TYPE_ROW_ID_CLI_MODULE   = 8;  //Module素材(Terraform-CLI)
 
     public  $PKColumnName;
     public  $tblColumndefine;
@@ -433,7 +435,7 @@ class TD_T_CICD_SYNC_STATUS  extends TDBase {
 // リモートリポジトリ管理ベースのリレーション先結合
 ///////////////////////////////////////////////////
 class TQ_REPO_LIST_ALL_JOIN {
-    function getSql($ansible_driver,$terraform_driver) {
+    function getSql($ansible_driver,$terraform_driver,$terraform_cli_driver) {
         $OS_TYPE_COLUMN       = "";
         $DIALOG_TYPE_COLUMN   = "";
         $OS_TYPE_JOIN         = "";

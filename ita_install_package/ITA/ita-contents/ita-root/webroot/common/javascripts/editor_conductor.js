@@ -25,7 +25,7 @@ let conductorEditorMode = '';
 
 // Editorの初期設定
 function initEditor( mode ) {
-    
+
     conductorUseList.orchestratorName = {
       '0': 'Unknown',
       '3': 'Ansible Legacy',
@@ -34,17 +34,18 @@ function initEditor( mode ) {
       '6': 'Cobbler',
       '8': 'DSC',
       '9': 'OpenStack',
-      '10': 'Terraform'
+      '10': 'Terraform',
+      '11': 'Terraform-CLI'
     };
 
     conductorMode( mode );
-    
+
     // Movementリストを作成
     const $movementList = $('#movement-list'),
           $movementListRows = $('#movement-list-rows'),
           movementList = conductorUseList.movementList,
           movementLength = movementList.length;
-    
+
     // Orchestratorリストを作成
     const orchestratorList = new Array();
     for ( let i = 0; i < movementLength; i++ ) {
@@ -66,7 +67,7 @@ function initEditor( mode ) {
     }
     $movementList.prepend('<style>' + orchestratorListStyle + '</style>');
     $('#orchestrator-list').html( orchestratorListHTML );
-    
+
     // Movementリストをソートする
     // [0: {PATTERN_ID: "1", ORCHESTRATOR_ID: "3", PATTERN_NAME: "Ansible", ThemeColor: "orange"}]
     // name（対象）,sort（asc or desc）,type（string or number）
@@ -110,7 +111,7 @@ function initEditor( mode ) {
         $movementIdFilter.trigger('input');
       }
     };
-    
+
     // Movement Filter
     const $movementFilter = $('#movement-filter'),
           $movementIdFilter = $('#movement-filter-id');
@@ -120,7 +121,7 @@ function initEditor( mode ) {
       // スペースでsplit
       const valueArray = inputValue.split(/[\x20\u3000]+/),
             valueArrayLength = valueArray.length;
-    
+
       // IDだった場合
       if ( target === '.movement-list-id') {
         for ( let i = 0; i < valueArrayLength; i++ ) {
@@ -158,7 +159,7 @@ function initEditor( mode ) {
     $movementIdFilter.on('input', function(){
       movementFilter($(this).val(), '.movement-list-id');
     });
-    
+
     // ソート
     $movementList.find('.movement-list-sort').on('click', function(){
       const $sort = $( this ),
@@ -169,12 +170,12 @@ function initEditor( mode ) {
       $sort.addClass( sort );
       sortMovementList( sortTarget, sort, sortType );
     });
-    
+
     // デフォルトはID昇順
     $movementList.attr('data-filter', 'name');
     $movementList.find('.movement-list-id .movement-list-sort').addClass('asc');
     sortMovementList('PATTERN_ID', 'asc', 'number');
-    
+
     // Filter Setting画面
     const $filterSetting = $('#movement-filter-setting');
     // Filter設定オープン
@@ -193,12 +194,12 @@ function initEditor( mode ) {
         $('#orchestrator' + orchestratorList[i] ).prop('checked', flag );
       }
     });
-    
+
     // Filter設定キャンセル
     $('#movement-filter-cancel').on('click', function(){
       $filterSetting.hide();
     });
-    
+
     // Filter設定決定
     $('#movement-filter-ok').on('click', function(){
       const inputType = $filterSetting.find('[name="filter-target"]:checked').attr('id');
@@ -214,9 +215,9 @@ function initEditor( mode ) {
       }
       $filterSetting.hide();
     });
-    
+
     // Editor実行
-    conductorEditor();  
+    conductorEditor();
 }
 
 function conductorFooterButtonDisabled( disabledFlag ) {
@@ -232,7 +233,7 @@ function conductorMode( mode, config ) {
     'data-editor-mode': conductorEditorMode,
     'data-editor-config': config
   });
-  $('#editor-mode').text( conductorEditorMode.toUpperCase() ); 
+  $('#editor-mode').text( conductorEditorMode.toUpperCase() );
 }
 
 function conductorEditor() {
@@ -248,7 +249,7 @@ editor.readText.set();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   コンダクターエディタ初期設定
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Conductor,Operation, Movement IDから名前を返す
@@ -276,7 +277,7 @@ const listIdName = function( type, id ) {
       idKey = 'ROLE_ID';
       nameKey = 'ROLE_NAME';
     }
-    
+
     if ( list !== undefined ) {
       const listLength = list.length;
       for ( let i = 0; i < listLength; i++ ) {
@@ -289,10 +290,10 @@ const listIdName = function( type, id ) {
           return name;
         }
       }
-      return undefined; 
+      return undefined;
     }
   } else {
-    return undefined;  
+    return undefined;
   }
 };
 
@@ -492,7 +493,7 @@ const setInitialConductorData = function() {
     for ( let i = 0; i < roleLength; i++ ) {
       if ( conductorUseList.roleList[i]['DEFAULT'] === 'checked') {
         roleDefault.push( conductorUseList.roleList[i]['ROLE_ID'] );
-      } 
+      }
     }
     conductorData['conductor']['ACCESS_AUTH'] = roleDefault.join(',');
   }
@@ -502,7 +503,7 @@ setInitialConductorData();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   キャンバス共通
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 let g_canvasVisibleArea, g_canvas, g_artBoard,
@@ -522,7 +523,7 @@ const setSize = function ( $obj ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  指定位置にキャンバスを移動する
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const canvasPosition = function( positionX, positionY, scaling, duration ) {
@@ -554,7 +555,7 @@ const canvasPosition = function( positionX, positionY, scaling, duration ) {
         'transform': 'translate(0,0) scale(' + scaling + ')'
       });
     }
-    
+
     $canvas.removeAttr('data-scale');
 
     if ( scaling <= 0.1 ) {
@@ -566,7 +567,7 @@ const canvasPosition = function( positionX, positionY, scaling, duration ) {
     } else if ( scaling <= 0.75 ) {
       $canvas.attr('data-scale','75');
     }
-    
+
     g_canvas_p.x = positionX;
     g_canvas_p.y = positionY;
     editorValue.scaling = scaling;
@@ -576,17 +577,17 @@ const canvasPosition = function( positionX, positionY, scaling, duration ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  キャンバスのポジションをリセット
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const canvasPositionReset = function( duration ) {
-    
+
     if ( duration === undefined ) duration = 0.3;
-    
+
     g_canvasVisibleArea = setSize( $canvasVisibleArea );
     g_canvas = setSize( $canvas );
     g_artBoard = setSize( $artBoard );
-    
+
     g_artBoard_p = {
       'x' : Math.round( ( g_canvas.w / 2 ) - ( g_artBoard.w / 2 ) ),
       'y' : Math.round( ( g_canvas.h / 2 ) - ( g_artBoard.h / 2 ) )
@@ -595,7 +596,7 @@ const canvasPositionReset = function( duration ) {
       'left' : g_artBoard_p.x,
       'top' : g_artBoard_p.y
     });
-    
+
     let resetX, resetY;
     if ( $('#node-1.conductor-start').length ) {
       // Start nodeがある場合は基準にする
@@ -609,7 +610,7 @@ const canvasPositionReset = function( duration ) {
       resetY = Math.round( - ( g_canvas.h / 2 ) + ( g_canvasVisibleArea.h / 2 ) );
     }
     canvasPosition( resetX, resetY, 1, duration );
-    
+
 }
 
 // 各種サイズをセット
@@ -639,21 +640,21 @@ $window.on('resize.editor', function(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   右クリックでキャンバスを移動する
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 $canvasVisibleArea.on({
     'mousedown.canvas': function( e ) {
 
       if ( e.buttons === 2 ) {
-      
+
         e.preventDefault();
-        
+
         editor.actionMode.set('canvas-move');
 
         const mouseDownPositionX = e.pageX,
               mouseDownPositionY = e.pageY;
-              
+
         let moveX = 0,
             moveY = 0;
 
@@ -662,7 +663,7 @@ $canvasVisibleArea.on({
 
             moveX = e.pageX - mouseDownPositionX;
             moveY = e.pageY - mouseDownPositionY;
-            
+
             $canvas.css({
               'transform' : 'translate3d(' + moveX + 'px,' + moveY + 'px,0) scale(' + editorValue.scaling + ')'
             });
@@ -675,10 +676,10 @@ $canvasVisibleArea.on({
           'mouseup.canvas': function(){
             $( this ).off('mousemove.canvas mouseup.canvas');
             editor.actionMode.clear();
-            
+
             g_canvas_p.x = g_canvas_p.x + moveX;
             g_canvas_p.y = g_canvas_p.y + moveY;
-            
+
             $canvas.css({
               'left' : g_canvas_p.x,
               'top' : g_canvas_p.y,
@@ -686,7 +687,7 @@ $canvasVisibleArea.on({
             });
           }
         });
-        
+
       }
     },
     'contextmenu': function( e ) {
@@ -698,7 +699,7 @@ $canvasVisibleArea.on({
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   キャンバスの拡縮
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const scalingArray = [
@@ -712,7 +713,7 @@ const canvasScaling = function( zoomType, positionX, positionY ){
 
     if ( positionX === undefined ) positionX = g_canvas_p.x / 2 / editorValue.scaling;
     if ( positionY === undefined ) positionY = g_canvas_p.y / 2 / editorValue.scaling;
-    
+
     let scaling = editorValue.scaling,
         scalingNum = scalingArray.indexOf( scaling );
 
@@ -747,7 +748,7 @@ const canvasScaling = function( zoomType, positionX, positionY ){
             commonY = ( ( g_canvas.h * scaling ) - ( g_canvas.h * editorValue.oldScaling ) ) / 2,
             adjustX = ( ( g_canvas.w / 2 ) - positionX ) * Math.abs( scaling - editorValue.oldScaling ),
             adjustY = ( ( g_canvas.h / 2 ) - positionY ) * Math.abs( scaling - editorValue.oldScaling );
-      
+
       if ( zoomType === 'in') {
         positionX= Math.round( g_canvas_p.x - commonX + adjustX );
         positionY = Math.round( g_canvas_p.y - commonY + adjustY );
@@ -757,9 +758,9 @@ const canvasScaling = function( zoomType, positionX, positionY ){
       }
 
       canvasPosition( positionX, positionY, scaling, 0 );
-      
+
     }
-  
+
 }
 
 // マウスホイールで拡縮
@@ -767,7 +768,7 @@ const mousewheelevent = ('onwheel' in document ) ? 'wheel' : ('onmousewheel' in 
 $canvasVisibleArea.on( mousewheelevent, function( e ){
 
     e.preventDefault();
-    
+
     if ( e.buttons === 0 ) {
 
       const mousePositionX = Math.floor( ( e.pageX - $( this ).offset().left - g_canvas_p.x ) / editorValue.scaling ),
@@ -784,7 +785,7 @@ $canvasVisibleArea.on( mousewheelevent, function( e ){
         }
 
       }
-    
+
     }
 
 });
@@ -792,14 +793,14 @@ $canvasVisibleArea.on( mousewheelevent, function( e ){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   全体表示
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const nodeViewAll = function( duration ) {
-  
+
   const canvasWidth = $canvasVisibleArea.width(),
         canvasHeight = $canvasVisibleArea.height();
-        
+
   // 端の座標を求める
   let x1, y1, x2, y2;
   for ( let key in conductorData ) {
@@ -830,7 +831,7 @@ const nodeViewAll = function( duration ) {
       if ( y2 < nodeY2 || y2 === undefined ) y2 = nodeY2;
     }
   }
-  
+
   // センター座標と表示倍率
   const adjustPosition = 32, // 端Padding
         viewWidth = x2 - x1 + ( adjustPosition * 2 ),
@@ -840,7 +841,7 @@ const nodeViewAll = function( duration ) {
         scalingVertical = Math.floor( canvasWidth / viewWidth * 1000 ) / 1000,
         scalingHorizontal = Math.floor( canvasHeight / viewHeight * 1000 ) / 1000,
         scaling = ( scalingVertical < scalingHorizontal ) ? scalingVertical : scalingHorizontal;
-  
+
   // 全体を表示する
   canvasPosition(
     Math.floor( ( -centerX - g_artBoard_p.x ) * scaling ) + ( $canvasVisibleArea.width() / 2 ),
@@ -856,13 +857,13 @@ const nodeViewAll = function( duration ) {
     window.console.log(  'Center X : ' + centerX + ' , Center Y : ' + centerY );
     window.console.log(  'Vertical Scaling : ' + scalingVertical + ' , Horizontal Scaling : ' + scalingHorizontal );
   }
-  
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   マウス位置
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 $canvasVisibleArea.add( $('#editor-panel') ).on({
@@ -873,7 +874,7 @@ $canvasVisibleArea.add( $('#editor-panel') ).on({
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   SVGエリアの作成
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const xmlns = 'http://www.w3.org/2000/svg',
@@ -882,7 +883,7 @@ const xmlns = 'http://www.w3.org/2000/svg',
       $selectBox = $( document.createElementNS( xmlns, 'rect') );
 
 const setSvgArea = function() {
-  
+
     $svgArea.get(0).setAttribute('viewBox', '0 0 ' + g_artBoard.w + ' ' + g_artBoard.h );
     $selectArea.get(0).setAttribute('viewBox', '0 0 ' + g_artBoard.w + ' ' + g_artBoard.h );
 
@@ -904,16 +905,16 @@ setSvgArea();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   線（Edge,Line）削除
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const removeEdge = function( edgeID, removeSpeed ) {
-  
+
   if ( removeSpeed === undefined ) removeSpeed = 200;
-  
+
   const $edge = $('#' + edgeID ),
         edge = conductorData[ edgeID ];
-  
+
   // 結線情報を削除
   if ( 'inTerminal' in edge ) {
     $('#' + edge.inTerminal ).removeClass('connected connect-a');
@@ -926,17 +927,17 @@ const removeEdge = function( edgeID, removeSpeed ) {
     delete conductorData[ edge.outNode ].terminal[ edge.outTerminal ].targetNode;
   }
   delete conductorData[ edgeID ];
-  
+
   if ( initialValue.debug === true ) {
     window.console.log( 'REMOVE EDGE ID : ' + edgeID );
   }
-  
+
   editor.actionMode.set('editor-pause');
   $edge.animate({'opacity' : 0 }, removeSpeed, function(){
     $( this ).remove();
     editor.actionMode.clear();
   });
-  
+
 };
 
 // 線をクリックで削除する（Editモードのみ）
@@ -948,14 +949,14 @@ $artBoard.on({
       removeEdge( edgeID );
       updateConductorData();
     }
-  } 
+  }
 }, '.svg-select-line');
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   線（Edge,Line）作成
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const newSVG = function( svgID ) {
     // SVG ID
@@ -984,36 +985,36 @@ const newSVG = function( svgID ) {
 
     // SVGエリアに追加
     $svgArea.append( $svgGroup.append( $svgLineBack, $svgLineOutside, $svgLineInside, $svgLine, $svgSelectLine ) );
-      
+
     return $svgGroup;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   線（Edge,Line）位置更新
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const edgeUpdate = function( edgeID ) {
 
     const inNodeID = conductorData[ edgeID ].inNode,
           outNodeID = conductorData[ edgeID ].outNode;
-                
+
     const inTerminal = conductorData[ inNodeID ].terminal[ conductorData[ edgeID ].inTerminal ],
           outTerminal = conductorData[ outNodeID ].terminal[ conductorData[ edgeID ].outTerminal ];
-                
+
     const inX = Number( inTerminal.x ),
           inY = Number( inTerminal.y ),
           outX = Number( outTerminal.x ),
           outY = Number( outTerminal.y );
-                      
+
     $('#' + edgeID ).find('path').attr('d', svgDrawPosition( outX, outY, inX, inY ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   線（Edge,Line）ホバー
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Editモードのみホバーでクラス付与
@@ -1040,7 +1041,7 @@ $canvasVisibleArea.on({
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   結線済みの線の更新
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const connectEdgeUpdate = function( nodeID ) {
@@ -1056,7 +1057,7 @@ const connectEdgeUpdate = function( nodeID ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   SVG 座標
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // SVG命令文
@@ -1072,66 +1073,66 @@ const svgOrder = function( order, position ) {
 const svgDrawPosition = function( startX, startY, endX, endY ) {
 
     let drawPositionArray = [];
-    
+
     // 中間点
     const centerX = Math.round( ( startX + endX ) / 2 ),
           centerY = Math.round( ( startY + endY ) / 2 );
-            
+
     // 対象との距離
     const xRange = startX - endX,
           yRange = startY - endY;
-    
+
     // 対象との絶対距離
     const xAbsoluteRange = Math.abs( xRange ),
           yAbsoluteRange = Math.abs( yRange );
-    
+
     // Terminalからの直線距離
     let terminalStraightLineRange = 8;
-    
+
     // 直線距離X座標
     const startStraightLineX = startX + terminalStraightLineRange,
           endStraightLineX = endX - terminalStraightLineRange;
-    
+
     // SVG命令（共通）
     const moveStart = svgOrder('M', [[ startX, startY]] ),
           startLine = svgOrder('L', [[ startStraightLineX, startY]] ),
-          moveEnd = svgOrder('L', [[ endX, endY]] );          
-    
+          moveEnd = svgOrder('L', [[ endX, endY]] );
+
     if ( yAbsoluteRange > 32 && xRange > -96 ) {
       // Back Line
       let curvetoRangeX = Math.round( xAbsoluteRange / 3 ),
           curvetoStartY1 = Math.round( startY - yRange / 20 ),
           curvetoEndY1 = Math.round( endY + yRange / 20 ),
           curvetoStartY2 = Math.round( startY - yRange / 3 );
-          
+
       if ( curvetoRangeX < 32 ) curvetoRangeX = 32;
       if ( curvetoRangeX > 128 ) curvetoRangeX = 128;
       if ( yAbsoluteRange < 128 && xRange > 0 ) {
         let adjustY = ( yRange > 0 ) ? yRange - 128: yRange + 128;
         curvetoStartY2 = curvetoStartY2 + Math.round( adjustY / 3 );
       }
-      
+
       if ( xAbsoluteRange > 256 && yAbsoluteRange < 256 ) {
       // Straight S Line
       const curvetoStart = svgOrder('C', [[ startStraightLineX + 96, startY],[ startStraightLineX + 96, centerY ],[ startStraightLineX, centerY ]] ),
             centerLine = svgOrder('L',[[ endStraightLineX, centerY ]]),
             curvetoEnd = svgOrder('C', [[ endStraightLineX - 96, centerY ],[ endStraightLineX - 96, endY ],[ endStraightLineX, endY ]]);
-      
+
       drawPositionArray = [ moveStart, startLine, curvetoStart, centerLine, curvetoEnd, moveEnd ];
-      
+
       } else {
       // S Line
       const curvetoStartX = startStraightLineX + curvetoRangeX,
             curvetoStart = svgOrder('C', [[ curvetoStartX, curvetoStartY1],[ curvetoStartX, curvetoStartY2 ],[ centerX, centerY ]] ),
             curvetoEnd = svgOrder('S', [[ endStraightLineX - curvetoRangeX, curvetoEndY1 ],[ endStraightLineX, endY ]]);
-      
+
       drawPositionArray = [ moveStart, startLine, curvetoStart, curvetoEnd, moveEnd ];
       }
-      
+
     } else {
-    
+
       if ( xRange > 0 ) {
-        
+
         let curvetoRangeX = Math.round( xAbsoluteRange / 3 );
         if ( curvetoRangeX < 32 ) curvetoRangeX = 32;
         if ( curvetoRangeX > 128 ) curvetoRangeX = 128;
@@ -1140,9 +1141,9 @@ const svgDrawPosition = function( startX, startY, endX, endY ) {
               curvetoStartX = startStraightLineX + curvetoRangeX,
               curvetoStart = svgOrder('C', [[ curvetoStartX, startY],[ curvetoStartX, startY + centerAdjust ],[ centerX, centerY + centerAdjust ]] ),
               curvetoEnd = svgOrder('S', [[ endStraightLineX - curvetoRangeX, endY ],[ endStraightLineX, endY ]]);
-                    
+
         drawPositionArray = [ moveStart, startLine, curvetoStart, curvetoEnd, moveEnd ];
-      
+
       } else {
 
         let curvetoQX = startStraightLineX + Math.round( yAbsoluteRange / 3 );
@@ -1162,7 +1163,7 @@ const svgDrawPosition = function( startX, startY, endX, endY ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   ノード位置とターミナルの座標確定
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 位置情報登録
@@ -1171,14 +1172,14 @@ const nodeSet = function( $node, x, y ){
     const nodeID = $node.attr('id'),
           w = $node.width(),
           h = $node.height();
-    
+
     // x と y が未定義なら位置情報を更新しない
     if ( x !== undefined && y !== undefined ) {
-      
+
       // 念のため数値化
       x = Number( x );
       y = Number( y );
-    
+
       // アートボードの中か？
       if ( x < 1 ) x = 0;
       if ( x + w > g_artBoard.w ) x = g_artBoard.w - w;
@@ -1194,9 +1195,9 @@ const nodeSet = function( $node, x, y ){
 
       conductorData[ nodeID ].x = x;
       conductorData[ nodeID ].y = y;
-    
+
     }
-    
+
     conductorData[ nodeID ].w = w;
     conductorData[ nodeID ].h = h;
 
@@ -1207,7 +1208,7 @@ const nodeSet = function( $node, x, y ){
             terminalID = $terminal.attr('id'),
             terminalWidth = $terminal.outerWidth() / 2,
             terminalHeight = $terminal.outerHeight() / 2;
-      
+
       // 未定義なら初期化
       if ( conductorData[ nodeID ].terminal[ terminalID ] === undefined ) {
         conductorData[ nodeID ].terminal[ terminalID ] = {};
@@ -1217,10 +1218,10 @@ const nodeSet = function( $node, x, y ){
           conductorData[ nodeID ].terminal[ terminalID ].type = 'out';
         }
       }
-      
+
       const nodeType = conductorData[ nodeID ].type,
             terminalType = conductorData[ nodeID ].terminal[ terminalID ].type;
-      
+
       // 分岐ノードの情報をセット
       if (
         ( nodeType === 'conditional-branch' && terminalType === 'out' ) ||
@@ -1240,7 +1241,7 @@ const nodeSet = function( $node, x, y ){
           conductorData[ nodeID ].terminal[ terminalID ].case = branchCount++;
         }
       }
-      
+
       conductorData[ nodeID ].terminal[ terminalID ].id = terminalID;
       conductorData[ nodeID ].terminal[ terminalID ].x =
         Math.round( Number( conductorData[ nodeID ].x ) + $terminal.position().left / editorValue.scaling + terminalWidth );
@@ -1248,7 +1249,7 @@ const nodeSet = function( $node, x, y ){
         Math.round( Number( conductorData[ nodeID ].y ) + $terminal.position().top / editorValue.scaling + terminalHeight );
 
     });
-    
+
 };
 
 // ノードジェムのテキストが溢れているか確認し調整する
@@ -1267,11 +1268,11 @@ const nodeGemCheck = function( $node ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   ノードを指定位置に移動する
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const nodeMoveSet = function( nodeID, x, y, position ) {
-  
+
   if ( position === undefined ) position = 'absolute';
   if ( position === 'relative' ) {
     if ( Array.isArray( nodeID ) ) {
@@ -1294,7 +1295,7 @@ const nodeMoveSet = function( nodeID, x, y, position ) {
       const nodeEdgeLength = nodeEdgeArray.length;
       for ( let i = 0; i < nodeEdgeLength; i++ ) {
         edgeUpdate( nodeEdgeArray[i] );
-      }      
+      }
     } else {
       const moveX = Number( conductorData[ nodeID ].x ) + x,
             moveY = Number( conductorData[ nodeID ].y ) + y;
@@ -1311,7 +1312,7 @@ const nodeMoveSet = function( nodeID, x, y, position ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   ノード初期設定
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Counter
@@ -1439,7 +1440,7 @@ const createNodeHTML = function( nodeID ) {
       // IDからオーケストラと名前を設定する
       if ( movementData !== undefined ) {
         conductorData[ nodeID ]['ORCHESTRATOR_ID'] = movementData[1];
-        conductorData[ nodeID ]['Name'] = movementData[0];     
+        conductorData[ nodeID ]['Name'] = movementData[0];
       } else {
         // 見つからない場合
         conductorData[ nodeID ]['ORCHESTRATOR_ID'] = 0;
@@ -1447,14 +1448,14 @@ const createNodeHTML = function( nodeID ) {
       }
       nodeType = conductorUseList.orchestratorName[ conductorData[ nodeID ]['ORCHESTRATOR_ID'] ];
       if ( nodeType === undefined ) nodeType = 'Unknown';
-      nodeName = conductorData[ nodeID ]['Name'];   
+      nodeName = conductorData[ nodeID ]['Name'];
       nodeClass.push('node-' + nodeType.toLocaleLowerCase().replace(/\s/g, '-') );
     } else {
       nodeCircle = nodeText[ nodeData.type ][0];
       nodeType = nodeText[ nodeData.type ][1];
       nodeName = nodeText[ nodeData.type ][2];
     }
-    
+
     if ( nodeData.type === 'end') {
       const endStatus = endType[conductorData[ nodeID ].END_TYPE][1],
             endID = endType[conductorData[ nodeID ].END_TYPE][0];
@@ -1508,7 +1509,7 @@ const createNodeHTML = function( nodeID ) {
           + '<span class="status-file-result"><span class="status-file-result-inner"></span></span>'
         + '</div>';
     }
-    
+
     // Node body END
     nodeHTML += '</div>';
 
@@ -1535,9 +1536,9 @@ const createNodeHTML = function( nodeID ) {
       for ( let i = 0; i < terminalLength; i++ ) {
         let conditionList = nodeData.terminal[ terminalIDList[ i ] ].condition,
             caseNumber = nodeData.terminal[ terminalIDList[ i ] ].case;
-        
+
         if ( caseNumber === undefined ) caseNumber = 'undefined' + i;
-        
+
         if ( conditionList !== undefined && Number( conditionList[0] ) === 9999 ) {
           caseNumberHTML[ caseNumber ] = '<div class="node-sub default">';
         } else if ( nodeData.terminal[ terminalIDList[ i ] ].case === 'else') {
@@ -1546,7 +1547,7 @@ const createNodeHTML = function( nodeID ) {
           caseNumberHTML[ caseNumber ] = '<div class="node-sub">';
         }
         caseNumberHTML[ caseNumber ] += '<div class="branch-cap branch-in"></div>';
-        
+
         // ムーブメント結果条件
         if ( nodeData.type === 'conditional-branch' ) {
           const conditionLength = conditionList.length;
@@ -1564,10 +1565,10 @@ const createNodeHTML = function( nodeID ) {
         if ( nodeData.type === 'status-file-branch' ) {
           if ( conditionList === undefined ) conditionList = [''];
           caseNumberHTML[ caseNumber ] += statuFileBranchBodyHTML( caseNumber, (caseNumber === 'else')? true: false, conditionList.join('') );
-        }        
+        }
         caseNumberHTML[ caseNumber ] += createTerminalHTML('out', terminalIDList[ i ] ) + '</div>';
       }
-      
+
       for ( const html in caseNumberHTML ) {
         nodeHTML += caseNumberHTML[html];
       }
@@ -1603,7 +1604,7 @@ const createNodeHTML = function( nodeID ) {
         selectOperationID = nodeData['OPERATION_NO_IDBH'];
         selectOperationName = listIdName('operation', selectOperationID );
       }
-      
+
       if ( skipFlag ) {
         nodeCheckedType = ' checked';
         nodeClass.push('skip');
@@ -1642,7 +1643,7 @@ const initialNode = function( nodeType, movementID ){
       'id' : nodeID,
       'terminal' : {}
     }
-    
+
     // Start, Merge 以外
     typeCheck = ['start', 'merge'];
     if ( typeCheck.indexOf( nodeType ) === -1 ) {
@@ -1652,7 +1653,7 @@ const initialNode = function( nodeType, movementID ){
         'type' : 'in'
       }
     }
-    
+
     // Merge
     typeCheck = ['merge'];
     if ( typeCheck.indexOf( nodeType ) !== -1 ) {
@@ -1667,7 +1668,7 @@ const initialNode = function( nodeType, movementID ){
         'type' : 'in'
       }
     }
-    
+
     // Branch
     typeCheck = ['parallel-branch', 'conditional-branch', 'status-file-branch'];
     if ( typeCheck.indexOf( nodeType ) !== -1 ) {
@@ -1689,7 +1690,7 @@ const initialNode = function( nodeType, movementID ){
         conductorData[ nodeID ]['terminal'][ outTerminalID2 ]['case'] = 'else';
       }
     }
-      
+
     typeCheck = ['end', 'parallel-branch', 'conditional-branch', 'status-file-branch'];
     if ( typeCheck.indexOf( nodeType ) === -1 ) {
       const outTerminalID = 'terminal-' + terminalCounter();
@@ -1698,52 +1699,52 @@ const initialNode = function( nodeType, movementID ){
         'type' : 'out'
       }
     }
-    
+
     if ( nodeType === 'movement' && movementID !== undefined ) {
       conductorData[ nodeID ]['PATTERN_ID'] = movementID;
       conductorData[ nodeID ]['SKIP_FLAG'] = 0;
-      conductorData[ nodeID ]['OPERATION_NO_IDBH'] = null;      
+      conductorData[ nodeID ]['OPERATION_NO_IDBH'] = null;
     }
-    
+
     if ( nodeType === 'call' ) {
       conductorData[ nodeID ]['SKIP_FLAG'] = 0;
       conductorData[ nodeID ]['CALL_CONDUCTOR_ID'] = null;
       conductorData[ nodeID ]['OPERATION_NO_IDBH'] = null;
     }
-    
+
     if ( nodeType === 'call_s' ) {
       conductorData[ nodeID ]['SKIP_FLAG'] = 0;
       conductorData[ nodeID ]['CALL_SYMPHONY_ID'] = null;
       conductorData[ nodeID ]['OPERATION_NO_IDBH'] = null;
     }
-    
+
     if ( nodeType === 'end' ) {
       conductorData[ nodeID ]['END_TYPE'] = '5';
     }
 
     return createNodeHTML( nodeID );
-    
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   分岐線追加・更新
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const branchLine = function( nodeID, setMode ) {
-  
+
   const branchType = conductorData[ nodeID ].type;
 
   const $branchNode = $('#' + nodeID ),
         $branchSVG = $branchNode.find('svg');
-  
+
   // 一旦リセット
   $branchSVG.css('height', 8 ).attr('height', 8 ).empty();
-  
+
   // サイズ決定
   const width = 40,
         height = $branchNode.height() + 2;
-        
+
   $branchSVG.attr({
     'width' : width,
     'height' : height
@@ -1752,13 +1753,13 @@ const branchLine = function( nodeID, setMode ) {
     'height' : height
   }).get(0)
   .setAttribute('viewBox', '0 0 ' + width + ' ' + height );
-  
+
   const terminalHeight = $branchNode.find('.node-main').height() - 16,
         terminalPosition = ( height - terminalHeight ) / 2,
         lineInterval = $branchNode.find('.node-sub').length + 1;
 
   $branchNode.find('.node-sub').each( function( index ){
-  
+
     const $subNode = $( this ).find('.node-terminal'),
           terminalID = $subNode.attr('id'),
           $branchLine = $( document.createElementNS( xmlns, 'path') ),
@@ -1766,16 +1767,16 @@ const branchLine = function( nodeID, setMode ) {
           $branchOutLine = $( document.createElementNS( xmlns, 'path') ),
           $branchBackLine = $( document.createElementNS( xmlns, 'path') ),
           endY = terminalPosition + ( terminalHeight / lineInterval * ( index + 1 ) );
-    
+
     let startY;
     if ( setMode === 'drop' ) {
       startY = $subNode.position().top + ( $subNode.height() / 2 ) + 1;
     } else {
       startY = Math.round( $subNode.position().top / editorValue.scaling ) + ( $subNode.height() / 2 ) + 1;
     }
-    
+
     let order;
-    
+
     // 追加
     $branchSVG.prepend( $branchBackLine );
     $branchSVG.append( $branchOutLine, $branchInLine, $branchLine );
@@ -1791,25 +1792,25 @@ const branchLine = function( nodeID, setMode ) {
     } else {
       order = svgOrder('M',[[width,startY]]) + svgOrder('C',[[width-30,startY],[30,endY],[0,endY]]);
     }
-    
+
     $branchLine.attr('d', order );
     $branchInLine.attr('d', order );
     $branchOutLine.attr('d', order );
     $branchBackLine.attr('d', order );
   });
-    
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   ノード分岐追加・削除
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const statuFileBranchBodyHTML = function( index, elseFlag, value ){
   if ( index === undefined ) index = 2;
   if ( value === undefined ) value = '';
   value = $('<div/>', {'text': value }).html();
-  
+
   let html = '<div class="node-body">';
   if ( elseFlag === true ) {
     html += '<div class="branch-if-type branch-if-else">else</div>';
@@ -1825,7 +1826,7 @@ const addBranch = function( nodeID ) {
     const $branchNode = $('#' + nodeID );
     let branchType = '',
         nodeHTML = '<div class="node-sub">';
-    
+
     if ( $branchNode.is('.function-conditional') ) {
       branchType = 'conditional';
       nodeHTML += ''
@@ -1853,7 +1854,7 @@ const addBranch = function( nodeID ) {
           + '<div class="merge-cap merge-out"></div>';
     }
     nodeHTML += '</div>';
-    
+
     if ( branchType !== '' ) {
       // 条件分岐は最大6分岐までにする
       const branchLength = $branchNode.find('.node-sub').length;
@@ -1867,12 +1868,12 @@ const addBranch = function( nodeID ) {
         } else {
           $branchNode.find('.node-' + branchType ).append( nodeHTML );
         }
-        
+
         const beforeNodeData = $.extend( true, {}, conductorData[ nodeID ] );
         nodeSet( $branchNode );
         const afterNodeData = $.extend( true, {}, conductorData[ nodeID ] );
         conductorHistory.branch( beforeNodeData, afterNodeData );
-        
+
         panelChange( nodeID );
         branchLine( nodeID );
         connectEdgeUpdate( nodeID );
@@ -1894,14 +1895,14 @@ const removeBranch = function( nodeID, terminalID ) {
     } else if ( $branchNode.is('.function-merge') ) {
       branchType = 'merge';
     }
-    
+
     if ( branchType !== '' ) {
       const branchNum = $branchNode.find('.node-sub').length,
             connectNum = $branchNode.find('.node-sub .connected').length;
-      
+
       // 分岐は最低２つ
       if ( branchNum > 2 ) {
-      
+
         // 未接続の分岐があるか？
         if ( branchNum !== connectNum ) {
 
@@ -1938,7 +1939,7 @@ const removeBranch = function( nodeID, terminalID ) {
 
           delete conductorData[ nodeID ].terminal[ terminalID ];
           $targetTerminal.remove();
-          
+
           branchLine( nodeID );
           const beforeNodeData = $.extend( true, {}, conductorData[ nodeID ] );
           nodeSet( $branchNode );
@@ -1955,72 +1956,72 @@ const removeBranch = function( nodeID, terminalID ) {
         } else {
           message('0004');
         }
-      
+
       } else {
         message('0003');
       }
-      
+
     }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   リストからノード追加（ドラッグアンドドロップ）
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 let nodeAddFlag = false;
 $('.node-table').on('mousedown', 'tbody tr', function( e ){
 
   if ( e.button === 0 && nodeAddFlag === false && conductorEditorMode === 'edit') {
-  
+
   // 選択を解除する
   getSelection().removeAllRanges();
   nodeAddFlag = true;
-  
+
   // 選択したNodeからデータを取得
   const $nodeData = $( this ).find('.add-node');
-  
+
   let addNodeType, addMovementID = '';
-  
+
   if ( $nodeData.is('.function') ) {
     addNodeType = $nodeData.attr('data-function-type');
   } else {
     addNodeType = 'movement';
     addMovementID = $nodeData.attr('data-id');
   }
-  
+
   // 分岐ノード一覧
   const branchNode = [
     'conditional-branch',
     'parallel-branch',
     'status-file-branch',
     'merge',
-  ]; 
-  
+  ];
+
   // モード変更
   editor.actionMode.set('node-move');
-  
+
   const $node = initialNode( addNodeType, addMovementID ),
         nodeID = $node.attr('id'),
         mouseDownPositionX = e.pageX,
         mouseDownPositionY = e.pageY;
-  
+
   $editor.append( $node );
-  
+
   // 要素の追加を待つ
   $node.ready( function(){
-  
-    nodeGemCheck( $node );  
+
+    nodeGemCheck( $node );
     nodeInterruptCheck( nodeID );
-    
+
     // 分岐ノードの線を描画
     if ( branchNode.indexOf( addNodeType ) !== -1 ) {
       branchLine( nodeID, 'drop');
     }
-          
+
     let nodeDragTop = $node.height() / 2,
         nodeDragLeft = 72;
-    
+
     $node.addClass('drag current').css({
       'left' : Math.round( e.pageX - $window.scrollLeft() - nodeDragLeft ),
       'top' : Math.round( e.pageY - $window.scrollTop() - nodeDragTop ),
@@ -2039,36 +2040,36 @@ $('.node-table').on('mousedown', 'tbody tr', function( e ){
       },
       'mouseup.dragNode': function( e ){
         $( this ).off('mousemove.dragNode mouseup.dragNode');
-        
+
         editor.actionMode.clear();
-        
+
         // Canvasの上にいるか
         if ( $canvasVisibleArea.is('.hover') ) {
-          
+
           // Node を アートボードにセットする
           nodeDragTop = nodeDragTop * editorValue.scaling;
           nodeDragLeft = nodeDragLeft * editorValue.scaling;
-          
+
           const artBordPsitionX = ( g_artBoard_p.x * editorValue.scaling ) + g_canvasVisibleArea.l + g_canvas_p.x,
                 artBordPsitionY = ( g_artBoard_p.y * editorValue.scaling ) + g_canvasVisibleArea.t + g_canvas_p.y;
           let nodeX = Math.round( ( e.pageX - artBordPsitionX - nodeDragLeft ) / editorValue.scaling ),
               nodeY = Math.round( ( e.pageY - artBordPsitionY - nodeDragTop ) / editorValue.scaling );
-          
+
           $node.appendTo( $artBoard ).removeClass('drag current').css('opacity', 'inherit');
-          
+
           nodeSet( $node, nodeX, nodeY );
-          
+
           nodeDeselect();
           nodeSelect( nodeID );
           panelChange( nodeID );
-          
+
           // 線の上にいるかチェック
           const interruptFlag = nodeInterrupt( nodeID );
-          
-          conductorHistory.nodeSet( nodeID, interruptFlag );          
+
+          conductorHistory.nodeSet( nodeID, interruptFlag );
           updateConductorData();
           nodeAddFlag = false;
-          
+
         } else {
           // キャンバス外の場合は消去
           g_NodeCounter -= 1;
@@ -2078,30 +2079,30 @@ $('.node-table').on('mousedown', 'tbody tr', function( e ){
             nodeAddFlag = false;
           });
         }
-        
+
         nodeInterruptCheckClear();
-        
+
       }
     });
   });
-  
+
   }
-  
+
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   新規ノード追加
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // キャンバスの表示されている部分から位置を設定する
 const visiblePosition = function( axis, position, width, height ) {
 
   const adjustPosition = 32; // 調整する端からの距離
-  
+
   let positionNumber = 0;
-  
+
   switch( position ) {
     case 'center':
       if ( axis === 'x' ) positionNumber = - g_canvas_p.x - g_artBoard_p.x + ( g_canvasVisibleArea.w / 2 ) - ( width / 2 );
@@ -2130,23 +2131,23 @@ const visiblePosition = function( axis, position, width, height ) {
 const newNode = function( type, x, y ){
 
   const $node = initialNode( type );
-  
+
   // アートボードにNode追加
   $artBoard.append( $node );
-  
+
   // 要素の追加を待つ
   $node.ready( function(){
-    
+
     const width = $node.width(),
           height = $node.height();
-    
+
     // x, yが数値以外の場合
     if ( x.typeof !== Number ) x = visiblePosition( 'x', x, width, height );
     if ( y.typeof !== Number ) y = visiblePosition( 'y', y, width, height );
-    
+
     // 位置情報をセット
     nodeSet( $node, x, y );
-    
+
   });
 
 }
@@ -2154,7 +2155,7 @@ const newNode = function( type, x, y ){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   ターミナルホバー
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 $canvasVisibleArea.on({
   'mouseenter' : function(){ $( this ).addClass('hover'); },
@@ -2164,7 +2165,7 @@ $canvasVisibleArea.on({
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   結線処理
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 登録済みの線を再描画する（読み込み時など）
@@ -2172,12 +2173,12 @@ const edgeDraw = function( edgeID ) {
 
   const $edge = newSVG( edgeID );
   $edge.attr('data-connected', 'connected');
-  
+
   const outNodeID = conductorData[ edgeID ].outNode,
         outTerminalID = conductorData[ edgeID ].outTerminal,
         inNodeID = conductorData[ edgeID ].inNode,
         inTermianlID = conductorData[ edgeID ].inTerminal;
-  
+
   $('#' + outTerminalID ).addClass('connected');
   $('#' + inTermianlID ).addClass('connected');
 
@@ -2185,13 +2186,13 @@ const edgeDraw = function( edgeID ) {
         outY = Number( conductorData[ outNodeID ].terminal[ outTerminalID ].y ),
         inX = Number( conductorData[ inNodeID ].terminal[ inTermianlID ].x ),
         inY = Number( conductorData[ inNodeID ].terminal[ inTermianlID ].y );
-  
+
   $edge.find('path').attr('d', svgDrawPosition( outX, outY, inX, inY ) );
 };
 
 // 登録済みの線を再描画する（Undo/Redo）
 const edgeConnect = function( edgeID ) {
-  
+
   const outNodeID = conductorData[ edgeID ].outNode,
         outTerminalID = conductorData[ edgeID ].outTerminal,
         inNodeID = conductorData[ edgeID ].inNode,
@@ -2202,7 +2203,7 @@ const edgeConnect = function( edgeID ) {
   conductorData[ outNodeID ]['terminal'][ outTerminalID ].edge = edgeID;
   conductorData[ inNodeID ]['terminal'][ inTermianlID ].targetNode = outNodeID;
   conductorData[ inNodeID ]['terminal'][ inTermianlID ].edge = edgeID;
-  
+
   edgeDraw( edgeID );
 };
 
@@ -2219,7 +2220,7 @@ const nodeConnect = function( connectEdgeID, outNodeID, outTerminalID, inNodeID,
     edgeID = connectEdgeID
   }
   $edge.attr('data-connected','connected');
-  
+
   // 登録の無いEdgeの場合登録する
   if ( !( 'edge' in conductorData ) ) {
     conductorData[ edgeID ] = {
@@ -2227,18 +2228,18 @@ const nodeConnect = function( connectEdgeID, outNodeID, outTerminalID, inNodeID,
       'id' : edgeID
     };
   }
-  
+
   const $outTerminal =  $('#' + outTerminalID ),
         $inTerminal = $('#' + inTermianlID );
   $outTerminal.add( $inTerminal ).addClass('connected');
-  
-  
+
+
   // 接続状態を紐づけする
   conductorData[ outNodeID ]['terminal'][ outTerminalID ].targetNode = inNodeID;
   conductorData[ outNodeID ]['terminal'][ outTerminalID ].edge = edgeID;
   conductorData[ inNodeID ]['terminal'][ inTermianlID ].targetNode = outNodeID;
   conductorData[ inNodeID ]['terminal'][ inTermianlID ].edge = edgeID;
-  
+
   // Edge
   conductorData[ edgeID ].outNode = outNodeID;
   conductorData[ edgeID ].outTerminal = outTerminalID;
@@ -2253,23 +2254,23 @@ const nodeConnect = function( connectEdgeID, outNodeID, outTerminalID, inNodeID,
           inY = Number( conductorData[ inNodeID ].terminal[ inTermianlID ].y );
     $edge.find('path').attr('d', svgDrawPosition( outX, outY, inX, inY ) );
   }
-  
+
   return edgeID;
 
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   接続できるターミナルチェック
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const edgeConnectCheck = function( currentNodeID, inOut ) {
     let conectCount = 0;
     for ( let nodeID in conductorData ) {
       if ( RegExp('^node-').test( nodeID ) && nodeID !== currentNodeID ) {
-        
+
         let outNodeID, inNodeID, targetTerminal;
-        
+
         if ( inOut === 'out-in') {
           outNodeID = currentNodeID;
           inNodeID = nodeID;
@@ -2279,7 +2280,7 @@ const edgeConnectCheck = function( currentNodeID, inOut ) {
           inNodeID = currentNodeID;
           targetTerminal = 'out';
         }
-        
+
         // 接続可能チェック
         if ( checkConnectType( conductorData[ outNodeID ].type, conductorData[ inNodeID ].type ) ) {
           const terminals = terminalInOutID( conductorData[ nodeID ].terminal, targetTerminal ),
@@ -2289,9 +2290,9 @@ const edgeConnectCheck = function( currentNodeID, inOut ) {
               $('#' + terminals[ i ] ).addClass('wait-connect');
               conectCount++;
             }
-          } 
+          }
         }
-        
+
       }
     }
     if ( conectCount === 0 ) message('0001');
@@ -2303,23 +2304,23 @@ const edgeConnectCheckClear = function() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   結線しているところに割り込む
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 割り込み出来る線かどうかチェックする
 const nodeInterruptCheck = function( nodeID ) {
-    
+
     // 割り込みしないノード
     const exclusionNode = ['start', 'end'];
     if ( exclusionNode.indexOf( conductorData[ nodeID].type ) !== -1 ) return false;
-    
+
     // 複数選択されていたら終了
-    if ( g_selectedNodeID.length > 1 ) return false; 
-    
+    if ( g_selectedNodeID.length > 1 ) return false;
+
     // 1つでも接続済みであれば終了
     const $node = $('#' + nodeID );
     if ( $node.find('.connected').length ) return false;
-    
+
     // 全ての線をチェック
     for ( let edgeID in conductorData ) {
       if ( RegExp('^line-').test( edgeID ) ) {
@@ -2340,15 +2341,15 @@ const nodeInterruptCheckClear = function() {
 
 // 割り込む
 const nodeInterrupt = function( nodeID ) {
-   
+
     const $hoverEdge = $('.svg-group[data-interrupt="true"].hover');
     if ( $hoverEdge.length ) {
-            
+
       const hoverEdgeID = $hoverEdge.attr('id'),
             edgeData = conductorData[ hoverEdgeID ];
-      
+
       let outTerminalID, inTerminalID;
-      
+
       const outTerminals = terminalInOutID( conductorData[ nodeID ].terminal, 'out'),
             outTerminalLength = outTerminals.length,
             inTerminals = terminalInOutID( conductorData[ nodeID ].terminal, 'in'),
@@ -2376,19 +2377,19 @@ const nodeInterrupt = function( nodeID ) {
       } else {
         inTerminalID = inTerminals[0];
       }
-      
+
       // conductorHistory用に削除するedgeをコピーしておく
       const removeEdgeData = $.extend( true, {}, conductorData[ hoverEdgeID ] );
-      
+
       // Delete Edge
       removeEdge( hoverEdgeID, 0 );
       // target Out > current Node In
       const newEdge1 = nodeConnect('new', edgeData.outNode, edgeData.outTerminal, nodeID, inTerminalID );
       // current Node Out > target In
       const newEdge2 = nodeConnect('new', nodeID, outTerminalID, edgeData.inNode, edgeData.inTerminal );
-      
+
       conductorHistory.interrupt( removeEdgeData, newEdge1, newEdge2 );
-      
+
       // 割り込みしたら True
       return true;
     } else {
@@ -2399,24 +2400,24 @@ const nodeInterrupt = function( nodeID ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   ノード選択・選択解除
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const $nodeDelete = $('#node-delete-button');
 
 const nodeSelect = function( nodeID ) {
-    
+
     // nodeIDが未指定の場合すべての要素を選択
     if ( nodeID === undefined ) {
-    
+
       for ( let key in conductorData ) {
         if ( RegExp('^node-').test( key ) ) {
           nodeSelect( key );
         }
       }
       panelChange();
-    
+
     } else {
-    
+
       const $node = $('#' + nodeID );
       $node.addClass('selected');
 
@@ -2433,12 +2434,12 @@ const nodeSelect = function( nodeID ) {
         window.console.log('----- Select node list -----' );
         window.console.log( g_selectedNodeID );
       }
-    
+
     }
-    
+
 }
 const nodeDeselect = function( nodeID ) {
-    
+
     if ( nodeID === undefined ) {
       // nodeID が未指定の場合すべての選択を解除
       g_selectedNodeID = [];
@@ -2451,7 +2452,7 @@ const nodeDeselect = function( nodeID ) {
         $('#' + nodeID ).removeClass('selected');
       }
     }
-    
+
     if ( !g_selectedNodeID.length || ( g_selectedNodeID[0] === 'node-1' && g_selectedNodeID.length === 1 ) ) {
       $nodeDelete.prop('disabled', true );
     }
@@ -2460,10 +2461,10 @@ const nodeDeselect = function( nodeID ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   ノード削除
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const nodeRemove = function( nodeID ) {
-    
+
     const nodeRemoveFunc = function( removeNodeID ) {
       // 接続している線があれば削除する
       if ( 'terminal' in  conductorData[ removeNodeID ] ) {
@@ -2486,7 +2487,7 @@ const nodeRemove = function( nodeID ) {
         // message('0006');
       }
     }
-    
+
     // 配列かどうか判定
     if ( $.isArray( nodeID ) ) {
       const nodeLength = nodeID.length;
@@ -2495,15 +2496,15 @@ const nodeRemove = function( nodeID ) {
           nodeRemoveFunc( nodeID[ i ] );
         }
       }
-    
+
     } else {
       nodeRemoveFunc( nodeID );
     }
-    
+
     // 選択を解除する
     nodeDeselect();
     panelChange();
-    
+
     updateConductorData();
 
 };
@@ -2511,13 +2512,13 @@ const nodeRemove = function( nodeID ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   キーボード操作
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 $window.on('keydown', function( e ) {
-    
+
     // Edit時のみ
     if ( conductorEditorMode === 'edit') {
-    
+
       // キャンバスの上にいるかどうか
       if ( $canvasVisibleArea.is('.hover') && editor.actionMode.check() ) {
 
@@ -2537,7 +2538,7 @@ $window.on('keydown', function( e ) {
             }
             conductorHistory.move( g_selectedNodeID, x, y );
             nodeMoveSet( g_selectedNodeID, x, y, 'relative');
-          }      
+          }
         }
         switch( e.keyCode ) {
 
@@ -2569,37 +2570,37 @@ $window.on('keydown', function( e ) {
               nodeRemove( g_selectedNodeID );
             }
             break;
-          // +  
+          // +
           case 107:
             if ( g_selectedNodeID.length === 1 ) {
               addBranch( g_selectedNodeID[ 0 ] );
             }
             break;
-          // -  
+          // -
           case 109:
             if ( g_selectedNodeID.length === 1 ) {
               removeBranch( g_selectedNodeID[ 0 ] );
             }
             break;
-          default:    
+          default:
         }
 
       }
-    
+
     }
-    
+
 });
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   キャンバスマウスダウン処理（ノードの移動、結線、複数選択）
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 接続可能チェック（接続できる＝True）
 const checkConnectType = function( outType, inType ) {
   if ( outType in connectablePattern &&
-       connectablePattern[ outType ].indexOf( inType ) !== -1 ) {    
+       connectablePattern[ outType ].indexOf( inType ) !== -1 ) {
     return false;
   } else {
     return true;
@@ -2609,10 +2610,10 @@ const checkConnectType = function( outType, inType ) {
 $canvasVisibleArea.on('mousedown', function( e ){
 
     if ( e.buttons === 1 ) {
-    
+
       // Viewモードは何もしない
       if ( conductorEditorMode === 'view') return false;
-      
+
       // Skipチェックボックス
       if ( $( e.target ).closest('.node-skip').length && conductorEditorMode !== 'checking') {
         nodeDeselect();
@@ -2623,15 +2624,15 @@ $canvasVisibleArea.on('mousedown', function( e ){
         panelChange( nodeID );
         return false;
       }
-      
+
       // Pauseボタン
       if ( $( e.target ).is('.pause-resume-button') ) {
         return false;
       }
-    
+
       // 選択を解除しておく
       getSelection().removeAllRanges();
-    
+
       const mouseDownPositionX = e.pageX,
             mouseDownPositionY = e.pageY,
             scrollFrame = Math.floor( 1000 / 60 );
@@ -2651,9 +2652,9 @@ $canvasVisibleArea.on('mousedown', function( e ){
       const move = function( callback ) {
         $( window ).on({
           'mousemove.nodeMove': function( e ){
-            
+
             moveFlag = true;
-            
+
             moveX = e.pageX - mouseDownPositionX;
             moveY = e.pageY - mouseDownPositionY;
 
@@ -2666,7 +2667,7 @@ $canvasVisibleArea.on('mousedown', function( e ){
               moveScrollSpeedX = Math.round( -positionX / adjustMoveSpeed );
               scrollDirectionX = 'left';
             } else if ( positionX > g_canvasVisibleArea.w ) {
-              moveScrollSpeedX = Math.round( ( positionX - g_canvasVisibleArea.w ) / adjustMoveSpeed ); 
+              moveScrollSpeedX = Math.round( ( positionX - g_canvasVisibleArea.w ) / adjustMoveSpeed );
               scrollDirectionX = 'right';
             } else {
               scrollDirectionX = '';
@@ -2676,7 +2677,7 @@ $canvasVisibleArea.on('mousedown', function( e ){
               moveScrollSpeedY = Math.round( -positionY / adjustMoveSpeed );
               scrollDirectionY = 'top';
             } else if ( positionY > g_canvasVisibleArea.h ) {
-              moveScrollSpeedY = Math.round( ( positionY - g_canvasVisibleArea.h ) / adjustMoveSpeed ); 
+              moveScrollSpeedY = Math.round( ( positionY - g_canvasVisibleArea.h ) / adjustMoveSpeed );
               scrollDirectionY = 'bottom';
             } else {
               scrollDirectionY = '';
@@ -2745,16 +2746,16 @@ $canvasVisibleArea.on('mousedown', function( e ){
           }
         });
       };
-      
+
       // 移動座標をセット
       const scaleMoveSet = function() {
         scaleMoveX = Math.round( ( moveX + scrollX ) / editorValue.scaling );
         scaleMoveY = Math.round( ( moveY + scrollY ) / editorValue.scaling );
       };
-    
+
       // ノードの上でマウスダウン
       if ( $( e.target ).closest('.node').length ) {
-        
+
         // Node移動、新規Edge 共通処理
         e.stopPropagation();
 
@@ -2781,18 +2782,18 @@ $canvasVisibleArea.on('mousedown', function( e ){
                 'x': Number( conductorData[ nodeID ].terminal[ terminalID ].x ),
                 'y' : Number( conductorData[ nodeID ].terminal[ terminalID ].y )
               };
-          
+
           if ( $terminal.is('.node-in') ) {
             connectMode = 'in-out';
           } else {
             connectMode = 'out-in';
           }
-          
+
           editor.actionMode.set('edge-connect');
-          
+
           // 接続可能な対象を調査
           edgeConnectCheck( nodeID, connectMode );
-          
+
           const drawLine = function( event ) {
 
             scaleMoveSet();
@@ -2804,14 +2805,14 @@ $canvasVisibleArea.on('mousedown', function( e ){
             // 接続可能なターミナルの上かチェック
             const $targetTerminal = $('.node-terminal.wait-connect.hover');
             if ( $targetTerminal.length ) {
-              
+
               nodeDeselect();
               panelChange();
-              
+
               const targetTerminalID = $targetTerminal.attr('id'),
                     $targetNode = $targetTerminal.closest('.node'),
-                    targetNodeID = $targetNode.attr('id');              
-              
+                    targetNodeID = $targetNode.attr('id');
+
               // 中心にスナップ
               end_p.x = Number( conductorData[ targetNodeID ].terminal[ targetTerminalID ].x );
               end_p.y = Number( conductorData[ targetNodeID ].terminal[ targetTerminalID ].y );
@@ -2854,7 +2855,7 @@ $canvasVisibleArea.on('mousedown', function( e ){
                 $( this ).remove();
               });
             }
-            
+
             // 線を更新
             if ( connectMode === 'out-in') {
               $path.attr('d', svgDrawPosition( start_p.x, start_p.y, end_p.x, end_p.y ) );
@@ -2872,9 +2873,9 @@ $canvasVisibleArea.on('mousedown', function( e ){
 
           // Nodeの移動
           $node.addClass('current');
-          
+
           // 選択状態かどうか
-          if ( !$node.is('.selected') ) { 
+          if ( !$node.is('.selected') ) {
             // Shiftキーが押されていれば選択を解除しない
             if ( !e.shiftKey ) {
               nodeDeselect();
@@ -2890,10 +2891,10 @@ $canvasVisibleArea.on('mousedown', function( e ){
               return false;
             }
           }
-          
+
           // 選択しているノードの数
           const selectNodeLength = g_selectedNodeID.length;
-          
+
           // 選択しているノードから移動する線をリスト化する
           const selectNodeMoveLineArray = [];
           for ( let i = 0; i < selectNodeLength; i++ ) {
@@ -2907,41 +2908,41 @@ $canvasVisibleArea.on('mousedown', function( e ){
                   selectNodeMoveLineArray.push( edgeID );
                 }
               }
-            }            
+            }
           }
           const selectNodeLineLength = selectNodeMoveLineArray.length;
-          
+
           editor.actionMode.set('node-move');
           nodeInterruptCheck( nodeID );
-          
+
           // パネル変更
           panelChange( nodeID );
-          
+
           // ノード移動処理
           const moveNode = function( event ){
 
             if ( event === 'mousemove') {
-            
+
               scaleMoveSet();
-              
+
               // 選択ノードをすべて仮移動
               $canvasVisibleArea.find('.node.selected')
                 .css('transform', 'translate3d(' + scaleMoveX + 'px,' + scaleMoveY + 'px,0)');
-              
+
               // 選択ノードに接続している線をすべて移動
               for ( let i = 0; i < selectNodeLineLength; i++ ) {
                 const moveLineID = selectNodeMoveLineArray[ i ],
                       inNodeID = conductorData[ moveLineID ].inNode,
                       outNodeID = conductorData[ moveLineID ].outNode;
-                
+
                 const inTerminal = conductorData[ inNodeID ].terminal[ conductorData[ moveLineID ].inTerminal ],
                       outTerminal = conductorData[ outNodeID ].terminal[ conductorData[ moveLineID ].outTerminal ];
-                
+
                 let inX = Number( inTerminal.x ),
                     inY = Number( inTerminal.y ),
                     outX = Number( outTerminal.x ),
                     outY = Number( outTerminal.y );
-                
+
                 // 選択中のノードなら移動させる
                 if ( g_selectedNodeID.indexOf( inNodeID ) !== -1 ) {
                   inX += scaleMoveX;
@@ -2951,14 +2952,14 @@ $canvasVisibleArea.on('mousedown', function( e ){
                   outX += scaleMoveX;
                   outY += scaleMoveY;
                 }
-                      
+
                 $('#' + selectNodeMoveLineArray[ i ] ).find('path')
                   .attr('d', svgDrawPosition( outX, outY, inX, inY ) );
               }
 
             } else if ( event === 'mouseup') {
               $node.removeClass('current').css('opacity', 'inherit');
-              
+
               // 移動しているか？
               if ( moveFlag === true ) {
                 // 選択ノード全ての位置確定
@@ -2973,11 +2974,11 @@ $canvasVisibleArea.on('mousedown', function( e ){
 
                 // 割り込み判定
                 const interruptFlag = nodeInterrupt( nodeID );
-                
+
                 conductorHistory.move( g_selectedNodeID, scaleMoveX, scaleMoveY, interruptFlag );
                 updateConductorData();
               }
-              
+
               nodeInterruptCheckClear();
             }
 
@@ -2988,7 +2989,7 @@ $canvasVisibleArea.on('mousedown', function( e ){
 
         } else {
           // Editモード以外は選択するのみ
-          if ( !$node.is('.selected') ) { 
+          if ( !$node.is('.selected') ) {
             nodeDeselect();
             nodeSelect( nodeID );
             panelChange( nodeID );
@@ -2998,20 +2999,20 @@ $canvasVisibleArea.on('mousedown', function( e ){
 
       // 線の上
       } else if ( $( e.target ).is('.svg-select-line') ) {
-      
+
         nodeDeselect();
         panelChange();
-      
+
       // その他
       } else {
-        
+
         // 全ての選択を解除
         if ( !e.shiftKey ) nodeDeselect();
         panelChange();
-        
+
         // Editモードなら範囲選択
         if ( conductorEditorMode === 'edit') {
-        
+
           editor.actionMode.set('node-select');
 
           const positionNow = {
@@ -3090,15 +3091,15 @@ $canvasVisibleArea.on('mousedown', function( e ){
                     }
                   }
                 }
-              } 
+              }
             }
           };
           move( rectDraw );
           canvasScroll( rectDraw );
         }
- 
+
       }
-    
+
     }
 
 });
@@ -3106,7 +3107,7 @@ $canvasVisibleArea.on('mousedown', function( e ){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   結線時、条件分岐がマージされてないかチェックする
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 調査開始ノードID一覧を返す
@@ -3117,7 +3118,7 @@ const conditionalBranchID = function() {
         conditionalBranchIdList.push( nodeID );
     }
   }
-  
+
   // 条件分岐以外の開始ノードを条件分岐をさかのぼって調べる
   const startNodeCheck = function( nodeID ) {
     if ( conductorData[ nodeID ].type === "merge" ) return false;
@@ -3138,7 +3139,7 @@ const conditionalBranchID = function() {
   for ( let i = 0; i < conditionalBranchength; i++ ) {
     startNodeCheck( conditionalBranchIdList[ i ] );
   }
-  
+
   return conditionalBranchIdList;
 }
 const nodeConditionalToMergeCheck = function() {
@@ -3146,7 +3147,7 @@ const nodeConditionalToMergeCheck = function() {
       mergeCheckArray = {};
   const conditionalBranches = conditionalBranchID(),
         conditionalBranchLenght = conditionalBranches.length;
-  
+
   const nodeConditionalToMergeRecursion = function( nodeID, conditionalID, parallelBranchFlag ) {
     const terminals = terminalInOutID( conductorData[ nodeID ]['terminal'], 'out'),
           terminalLength = terminals.length;
@@ -3166,7 +3167,7 @@ const nodeConditionalToMergeCheck = function() {
         nodeConditionalToMergeFlag = false;
       }
     }
-    
+
     if ( nodeConditionalToMergeFlag !== false ) {
     for ( let i = 0; i < terminalLength; i++ ) {
       const terminal = conductorData[ nodeID ]['terminal'][ terminals[i] ];
@@ -3184,25 +3185,25 @@ const nodeConditionalToMergeCheck = function() {
     }
     }
   };
-  
+
   for ( let i = 0; i < conditionalBranchLenght; i++ ) {
     nodeConditionalToMergeRecursion( conditionalBranches[ i ] );
   }
-  
+
   return nodeConditionalToMergeFlag;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   結線時ノードループ調査
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 const nodeLoopCheck = function( nodeID ) {
-  
+
   let flag = true,
       nodeArray = [],
       mergeArray = [];
-  
+
   // 重複にカウントしないノード
   const noCountNode = [
     'conditional-branch',
@@ -3210,9 +3211,9 @@ const nodeLoopCheck = function( nodeID ) {
     'status-file-branch',
     'merge'
   ];
-  
+
   if ( initialValue.debug === true ) window.console.log('----- Route check -----');
-  
+
   const nodeLoopCheckRecursion = function( next ) {
     if ( flag === true ) {
       const node = conductorData[ next ];
@@ -3225,7 +3226,7 @@ const nodeLoopCheck = function( nodeID ) {
       if ( noCountNode.indexOf( node.type ) === -1 ) {
         nodeArray.push( next );
       }
-      
+
       // ターミナルの数だけループ
       for ( let terminals in node.terminal ) {
         if ( node.terminal[ terminals ].type === 'out' && 'targetNode' in node.terminal[ terminals ] ) {
@@ -3244,20 +3245,20 @@ const nodeLoopCheck = function( nodeID ) {
           }
         }
       }
-      
+
       if ( 'merge' === node.type ) {
         mergeArray.push( next );
       }
     }
   };
   nodeLoopCheckRecursion( nodeID );
-  return flag;  
+  return flag;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   パネル関連
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const $conductorParameter = $('#conductor-parameter'),
@@ -3269,7 +3270,7 @@ $conductorParameter.find('.editor-tab-menu-item').not('[data-tab="conductor"]').
 // End node : 終了時のステータスを選択
 const endStatusSlect = function(){
   const $end = $('#end').find('.end-status-select');
-  
+
   // Radio選択HTML
   let html = '<ul class="end-status-select-list">';
   const order = [ 5, 11, 7 ],
@@ -3283,7 +3284,7 @@ const endStatusSlect = function(){
     + '</li>';
   }
   $end.html( html );
-  
+
   // 選択イベント
   $end.find('.end-status-select-radio').on('change', function(){
     // 選択されているノードが一つかどうか
@@ -3295,7 +3296,7 @@ const endStatusSlect = function(){
       $node.attr('data-end-status', endType[val][0] )
         .find('.node-name > span').text( nodeName );
       conductorData[nodeID].END_TYPE = $( this ).val();
-      
+
       // サイズを更新
       nodeSet( $node );
     }
@@ -3308,22 +3309,22 @@ const panelChange = function( nodeID ) {
 
   // 複数選択されている場合はパネルを表示しない
   if ( g_selectedNodeID.length <= 1 ) {
-    
+
     let panelType = '';
-    
+
     // nodeIDが未定義の場合はシンフォニーパネルを表示
     if ( nodeID === undefined ) {
-      
+
       nodeID = 'conductor';
       panelType = 'conductor';
-      
+
     } else if ( conductorEditorMode === 'checking') {
       // 作業確認の場合はすべてNodeとする
       panelType = 'node';
     } else {
-      
+
       const nodeType = conductorData[ nodeID ].type;
-      
+
       // 対応したパネルを表示
       switch( nodeType ) {
         case 'movement':
@@ -3348,7 +3349,7 @@ const panelChange = function( nodeID ) {
     const $panel = $('#' + panelType );
     $conductorParameter.find('.editor-tab').find('li[data-tab="' + panelType + '"]').show().click()
       .siblings().hide();
-    
+
     // Noteのチェック
     const $noteTextArea = $panel.find('.panel-note');
     const setNodeNote = function( text ) {
@@ -3367,7 +3368,7 @@ const panelChange = function( nodeID ) {
     } else {
       setNodeNote('')
     }
-    
+
     // 個別Operation表示
     const panelOperation = function( target ) {
       let operation = conductorData[ nodeID ].OPERATION_NO_IDBH;
@@ -3379,14 +3380,14 @@ const panelChange = function( nodeID ) {
       }
       $( target ).text( operation );
     }
-    
+
     // パネルごとの処理
     switch( panelType ) {
       case 'movement': {
           $('#movement-id').text( conductorData[ nodeID ].PATTERN_ID );
           $('#movement-orchestrator').text( conductorUseList.orchestratorName[ conductorData[ nodeID ].ORCHESTRATOR_ID ] );
           $('#movement-name').text( conductorData[ nodeID ].Name );
-          panelOperation('#movement-operation');          
+          panelOperation('#movement-operation');
           // Skip
           const nodeChecked = ( Number( conductorData[ nodeID ].SKIP_FLAG ) === 1 ) ? true : false;
           $('#movement-default-skip').prop('checked', nodeChecked );
@@ -3434,7 +3435,7 @@ const panelChange = function( nodeID ) {
         $('#function-type').text( conductorData[ nodeID ].type );
         break;
       case 'conditional-branch': {
-        
+
         // 分岐の数だけボックスを用意する
         const keys = Object.keys( conductorData[ nodeID ].terminal ).length - 2;
 
@@ -3443,7 +3444,7 @@ const panelChange = function( nodeID ) {
           listHTML += '<tr><th class="panel-th">Case ' + ( i + 1 ) + ' :</th><td class="panel-td"><ul class="branch-case"></ul></td></tr>';
         }
         $branchCaseList.html( listHTML );
-        
+
         // 分岐をパネルに反映する
         let terminalConditionArray = []; // 使用中の分岐
         for( let terminalID in conductorData[ nodeID ].terminal ) {
@@ -3486,7 +3487,7 @@ const panelChange = function( nodeID ) {
                   return 0;
                 }
               });
-              
+
         const terminalLength = outTerminals.length;
         let listHTML = '';
         for (let i = 0; i < terminalLength; i++ ) {
@@ -3544,7 +3545,7 @@ const panelChange = function( nodeID ) {
     $conductorParameter.find('.editor-tab').find('li[data-tab="multiple"]').show().click()
       .siblings().hide();
   }
-  
+
 }
 
 
@@ -3562,12 +3563,12 @@ const numberCompare = function( a, b, mode ) {
 $conductorParameter.find('#node-align').on('click', '.panel-button', function() {
   const alignType = $( this ).attr('id').replace('node-align-',''),
         selectLength = g_selectedNodeID.length;
-  
+
   let pointX1 = null,
       pointY1 = null,
       pointX2 = null,
       pointY2 = null;
-  
+
   // 取り消し、やり直し用の移動前移動後の座標を入れる
   const nodePosition = {
     'before': {},
@@ -3608,7 +3609,7 @@ $conductorParameter.find('#node-align').on('click', '.panel-button', function() 
         break;
     }
   }
-  
+
   // 整列する
   for ( let i = 0; i < selectLength; i++ ) {
     const nodeID = g_selectedNodeID[i],
@@ -3649,10 +3650,10 @@ $conductorParameter.find('#node-align').on('click', '.panel-button', function() 
       'y': ny
     }
   }
-  
+
   conductorHistory.align( nodePosition );
   updateConductorData();
-    
+
 });
 
 
@@ -3666,14 +3667,14 @@ $conductorParameter.find('#node-equally-spaced').on('click', '.panel-button', fu
     'before': {},
     'after': {}
   };
-  
+
   // 縦か横か？
   const dXY = ( alignType === 'vertical')? 'y': 'x',
         dWH = ( alignType === 'vertical')? 'h': 'w';
-  
+
   // 選択されているノードが2以下の場合は何もしない
   if ( g_selectedNodeID < 3 ) return false;
-  
+
   // Node
   const nodeArray = new Array( selectLength );
   for ( let i = 0; i < selectLength; i++ ) {
@@ -3698,7 +3699,7 @@ $conductorParameter.find('#node-equally-spaced').on('click', '.panel-button', fu
     return 0;
   });
   let s2 = nodeArray[ selectLength - 1 ][dXY];
-  
+
   // 一番上のノードを調べる
   nodeArray.sort( function( a, b ){
     if ( a[dXY] < b[dXY] ) return -1;
@@ -3706,9 +3707,9 @@ $conductorParameter.find('#node-equally-spaced').on('click', '.panel-button', fu
     return 0;
   });
   let s1 = nodeArray[ 0 ][dXY] + nodeArray[ 0 ][dWH];
-  
+
   let positionRange = ( s2 - s1 > 0 )? s2 - s1: 0;
-  
+
 // 分布範囲がノードの大きさより小さいかどうか
   let nodeWidth = 0;
   for ( let i = 1; i < selectLength - 1; i++ ) {
@@ -3745,10 +3746,10 @@ $conductorParameter.find('#node-equally-spaced').on('click', '.panel-button', fu
       equallySpaceSum += equallySpaceWidth;
     }
   }
-  
+
   conductorHistory.align( nodePosition );
   updateConductorData();
-  
+
 });
 
 
@@ -3790,14 +3791,14 @@ const conditionUpdate = function( nodeID ) {
     }
     $('#' + tergetTerminalID ).prev('.node-body').find('ul').html( terminalConditionHTML );
   });
-  
+
   branchLine( nodeID );
-  
+
   const beforeNodeData = $.extend( true, {}, conductorData[ nodeID ] );
   nodeSet( $('#' + nodeID ) );
   const afterNodeData = $.extend( true, {}, conductorData[ nodeID ] );
   conductorHistory.branch( beforeNodeData, afterNodeData );
-  
+
   connectEdgeUpdate( nodeID );
 
 }
@@ -3816,7 +3817,7 @@ const nodeCheckStatus = function( nodeID ) {
     $node.addClass('skip');
     conductorData[ nodeID ].SKIP_FLAG = 1;
   }
-  
+
 }
 
 // Skipチェックボックス
@@ -3840,7 +3841,7 @@ const modalTr = function( trList, idKey, nameKey ) {
 // 個別オペレーションセレクト
 const operationUpdate = function( nodeID, id, name ) {
   const $node = $('#' + nodeID );
-  if ( id !== 0 ) { 
+  if ( id !== 0 ) {
     $node.addClass('operation');
     conductorData[ nodeID ].OPERATION_NO_IDBH = id;
     $node.find('.node-operation-data').text('[' + id + ']:' + name );
@@ -3855,7 +3856,7 @@ const operationUpdate = function( nodeID, id, name ) {
 // Callコンダクターセレクト
 const callConductorUpdate = function( nodeID, id, name ) {
   const $node = $('#' + nodeID );
-  if ( id !== 0 ) { 
+  if ( id !== 0 ) {
     conductorData[ nodeID ].CALL_CONDUCTOR_ID = id;
     $node.addClass('call-select').find('.select-conductor-name-inner').text('[' + id + ']:' + name );
   } else {
@@ -3870,7 +3871,7 @@ const callConductorUpdate = function( nodeID, id, name ) {
 // Callシンフォニーセレクト
 const callSymphonyUpdate = function( nodeID, id, name ) {
   const $node = $('#' + nodeID );
-  if ( id !== 0 ) { 
+  if ( id !== 0 ) {
     conductorData[ nodeID ].CALL_SYMPHONY_ID = id;
     $node.addClass('call-select').find('.select-symphony-name-inner').text('[' + id + ']:' + name );
   } else {
@@ -3903,9 +3904,9 @@ const modalSelectList = function( type ) {
       + '</tbody>'
     + '</table>'
   + '</div>';
-  
+
   $modalBody.html( operationListHTML );
-  
+
   // 選択
   $modalBody.find('.modal-select-table').on('click', 'tr', function(){
     const $tr = $( this ),
@@ -3914,7 +3915,7 @@ const modalSelectList = function( type ) {
     $modalBody.find('tbody').find('.selected').removeClass('selected');
     $tr.addClass('selected');
   });
-  
+
   // 決定・取り消しボタン
   const $modalButton = $('.editor-modal-footer-menu-button');
   $modalButton.prop('disabled', false ).on('click', function() {
@@ -3940,25 +3941,25 @@ const modalSelectList = function( type ) {
         break;
     }
   });
-  
+
 };
 
 const modalRoleList = function() {
 
   const initRoleList = conductorData['conductor']['ACCESS_AUTH'];
-  // 決定時の処理    
+  // 決定時の処理
   const okEvent = function( newRoleList ) {
     conductorData['conductor']['ACCESS_AUTH'] = newRoleList;
     $('#conductor-edit-role').text(　getRoleListIdToName( newRoleList ) );
     editor.modalClose();
   };
-  // キャンセル時の処理    
+  // キャンセル時の処理
   const cancelEvent = function( newRoleList ) {
     editor.modalClose();
   };
-  
+
   setRoleSelectModalBody( conductorUseList.roleList, initRoleList, okEvent, cancelEvent );
-  
+
 };
 
 // 通知設定が登録済みか表示する
@@ -3980,7 +3981,7 @@ const modalNoticeList = function() {
         noticeListURL = '/default/menu/01_browse.php?no=2100180012',
         hideNoticeName = getSomeMessage("ITAWDCC92008"); // ********
   let noticelistHTML = '';
-  
+
   // チェック状態
   const noticeInfo = ( conductorEditorMode === 'checking')?
           conductorUseList.conductorStatus.CONDUCTOR_INSTANCE_INFO.NOTICE_INFO:
@@ -3991,12 +3992,12 @@ const modalNoticeList = function() {
       noticeCheckData[key] = noticeInfo[key].split(',');
     }
   }
-  
+
   // EDITモード以外の場合決定ボタンを削除
   if ( conductorEditorMode !== 'edit') {
     $modalButton.filter('[data-button-type="ok"]').remove();
   }
-  
+
   // 通知一覧が登録済みか？
   if ( noticeLength > 0 ) {
     const noticeNmaeWidth = 30,
@@ -4008,7 +4009,7 @@ const modalNoticeList = function() {
         + '<thead>'
           + '<tr>'
             + '<th class="notice-name" scope="col" style="width:' + noticeNmaeWidth + '%">' + getSomeMessage("ITABASEC020300") + '</th>';
-    
+
     for ( let i = 0; i < statusLength; i++ ) {
       const statusName = editor.textEntities( conductorUseList.noticeStatusList[i].STATUS_NAME ),
             statusID = conductorUseList.noticeStatusList[i].STATUS_ID;
@@ -4067,9 +4068,9 @@ const modalNoticeList = function() {
     noticelistHTML += '<div class="notice-blank-messege">' + getSomeMessage("ITAWDCC92175") + '<br>'
     + getSomeMessage("ITAWDCC92176") + '(<a href="' + noticeListURL + ' " target="_blank" rel="noopener noreferrer">'+  getSomeMessage("ITAWDCC92177") + '</a>)</div>';
   }
-  
+
   $modalBody.html( noticelistHTML );
-  
+
   // 決定・取り消しボタン
   $modalButton.prop('disabled', false ).on('click', function() {
     const $button = $( this ),
@@ -4099,7 +4100,7 @@ const modalNoticeList = function() {
         break;
     }
   });
-  
+
 };
 
 // Notice select
@@ -4156,14 +4157,14 @@ $conductorParameter.find('#branch-condition-move').on('mousedown', 'li', functio
         mousedownPositionY = e.pageY;
 
   let moveX, moveY;
-  
+
   editor.actionMode.set('case-drag');
-  
+
   $conductorParameter.find('.branch-case').on({
     'mouseenter' : function() { $( this ).addClass('hover'); },
     'mouseleave' : function() { $( this ).removeClass('hover'); }
   })
-  
+
   $condition.css({
     'pointer-events' : 'none',
     'display' : 'block',
@@ -4172,7 +4173,7 @@ $conductorParameter.find('#branch-condition-move').on('mousedown', 'li', functio
     'top' : ( mousedownPositionY - scrollTop - conditionHeight / 2 ) + 'px',
     'z-index' : 99999
   });
-  
+
   $window.on({
     'mousemove.conditionMove' : function( e ) {
       moveX = e.pageX - mousedownPositionX;
@@ -4197,9 +4198,9 @@ $conductorParameter.find('#branch-condition-move').on('mousedown', 'li', functio
 $conductorParameter.find('#status-file-case-list').on('input', '.status-file-input', function() {
   const $input = $( this ),
         terminalID = $input.attr('data-terminal'),
-        val = $input.val(),      
+        val = $input.val(),
         $terminal = $('#' + terminalID );
-  
+
   // 値をセット
   if ( conductorData[ g_selectedNodeID[0] ].type === 'status-file-branch') {
     conductorData[ g_selectedNodeID[0] ].terminal[terminalID].condition = [val];
@@ -4216,10 +4217,10 @@ $conductorParameter.find('.panel-textarea').on('input', function() {
 
     // 入力されたテキスト
     conductorData[ g_selectedNodeID[0] ].note = noteText;
-    
+
     // タグの無害化
     noteText = editor.textEntities( noteText );
-    
+
     if ( noteText === '' ) {
       $targetNodeNote.removeClass('note-open');
     } else {
@@ -4235,7 +4236,7 @@ $conductorParameter.find('.panel-textarea').on('input', function() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   取り消し、やり直し
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const $undoButton = $('#button-undo'),
@@ -4265,7 +4266,7 @@ const historyControl = function() {
     // 履歴追加後の履歴を削除する
     if ( workHistroy[ workCounter ] !== undefined ) {
       workHistroy.length = workCounter;
-    } 
+    }
     // 最大履歴数を超えた場合最初の履歴を削除する
     if ( workHistroy.length > maxHistroy ) {
       workHistroy.shift();
@@ -4288,7 +4289,7 @@ const branchUndoRedo = function( nodeID, nodeData ) {
   delete conductorData[ nodeID ];
   conductorData[ nodeID ] = nodeData;
   const $branchNode = createNodeHTML( nodeID );
-  
+
   $artBoard.append( $branchNode );
   nodeSet( $branchNode, conductorData[ nodeID ].x, conductorData[ nodeID ].y );
   branchLine( nodeID );
@@ -4298,8 +4299,8 @@ const branchUndoRedo = function( nodeID, nodeData ) {
       $branchNode.find('#' + terminalID ).addClass('connected');
     }
   }
-  
-  
+
+
   connectEdgeUpdate( nodeID );
 };
 
@@ -4374,7 +4375,7 @@ const conductorHistory = {
         }
       };
     }
-    historyControl(); 
+    historyControl();
   },
   // Edge接続
   'connect': function( edgeID ) {
@@ -4395,7 +4396,7 @@ const conductorHistory = {
       nodeIdCopy = $.extend( true, [], nodeID );
     } else {
       nodeIdCopy = [ nodeID ];
-    }        
+    }
     // 接続している線の一覧を作成
     let connectEdgeList = [];
     const nodeIdLength = nodeIdCopy.length;
@@ -4411,14 +4412,14 @@ const conductorHistory = {
           }
         }
       }
-    }    
+    }
     // 削除するnode, edgeをコピーする
     const removeConductorList = nodeIdCopy.concat( connectEdgeList ),
           removeConductorLength = removeConductorList.length;
     let removeConductorData = {}
     for ( let i = 0; i < removeConductorLength; i++ ) {
       removeConductorData[ removeConductorList[i] ] = $.extend( true, {}, conductorData[ removeConductorList[i] ] );
-    }    
+    }
     workHistroy[ workCounter++ ] = {
       'type': 'nodeRemove',
       'data': {
@@ -4483,7 +4484,7 @@ const conductorHistory = {
           conductorData[ undo['data']['removeEdgeID'] ] = undo['data']['removeEdgeData'];
           edgeConnect( undo['data']['removeEdgeID'] );
           break;
-      }  
+      }
 
       historyButtonCheck();
     }
@@ -4496,14 +4497,14 @@ const conductorHistory = {
 
       switch( redo['type'] ) {
         case 'nodeSet':
-          
+
           const nodeID = redo['data']['nodeData'].id;
           conductorData[ nodeID ] = redo['data']['nodeData'];
-          
+
           const $node = createNodeHTML( nodeID );
           $artBoard.append( $node );
           nodeSet( $node, conductorData[ nodeID ].x, conductorData[ nodeID ].y );
-          
+
           const nodeCheck = ['merge', 'conditional-branch', 'parallel-branch', 'status-file-branch'];
           if ( nodeCheck.indexOf( conductorData[ nodeID ].type ) !== -1 ) {
             $node.ready( function(){
@@ -4540,13 +4541,13 @@ const conductorHistory = {
           break;
       }
 
-      historyButtonCheck();  
+      historyButtonCheck();
     }
   },
   'clear': function() {
     workCounter = 0;
     workHistroy = [];
-    
+
     historyButtonCheck();
   }
 };
@@ -4554,7 +4555,7 @@ const conductorHistory = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   メニュー
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 $('.editor-header-menu').on('click', '.editor-menu-button', function(){
@@ -4562,7 +4563,7 @@ $('.editor-header-menu').on('click', '.editor-menu-button', function(){
     const $button = $( this ),
           buttonType = $button.attr('data-menu'),
           buttonDisabledTime = 300;
-    
+
     switch ( buttonType ) {
       case 'conductor-test-run':
         conductorTestRun();
@@ -4619,7 +4620,7 @@ $('.editor-header-menu').on('click', '.editor-menu-button', function(){
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   conductorデータ更新・確認
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const updateConductorData = function() {
@@ -4630,11 +4631,11 @@ const updateConductorData = function() {
         window.console.log( JSON.stringify( conductorData ) );
         window.console.groupEnd('Conductor data');
       }
-      
+
       // 変更があった場合のページ移動時処理フラグ
       editor.confirmPageMove( true );
       editorValue.setStorage = true;
-      
+
       // カウンターを更新
       conductorData['config'].nodeNumber = g_NodeCounter;
       conductorData['config'].terminalNumber = g_TerminalCounter;
@@ -4644,7 +4645,7 @@ const updateConductorData = function() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   conductorの保存と読み込み
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // カンマ区切りロールIDリストからロールNAMEリストを返す
@@ -4699,7 +4700,7 @@ const panelConductorReset = function() {
   }
   $('#conductor-class-name-view').text('');
   $('#conductor-view-role').text( getRoleListIdToName( conductorData['conductor']['ACCESS_AUTH'] ) );
-  
+
   noticeStatusUpdate();
 };
 
@@ -4737,7 +4738,7 @@ const saveConductor = function( saveConductorData ) {
         window.console.log( saveConductorData );
         window.console.log( JSON.stringify( saveConductorData ) );
         window.console.groupEnd('Set local strage');
-      }    
+      }
       editor.setLocalStorage('conductor-edit-temp', saveConductorData );
     }
 };
@@ -4772,7 +4773,7 @@ editor.readText.setInput( '.icd' ,readConductor );
 const nodeReSet = function( reSetConductorData ) {
     $editor.addClass('load-conductor');
     editor.actionMode.set('editor-pause');
-    
+
     // Nodeを再配置
     let readyCounter = 0;
     for ( let nodeID in reSetConductorData ) {
@@ -4786,7 +4787,7 @@ const nodeReSet = function( reSetConductorData ) {
         $artBoard.append( $node );
         nodeGemCheck( $node );
         nodeSet( $node, reSetConductorData[ nodeID ].x, reSetConductorData[ nodeID ].y );
-        
+
         // 分岐ノード
         const nodeCheck = ['merge', 'conditional-branch', 'parallel-branch', 'status-file-branch'];
         if ( nodeCheck.indexOf( reSetConductorData[ nodeID ].type ) !== -1 ) {
@@ -4856,7 +4857,7 @@ const nodeReSet = function( reSetConductorData ) {
 // 読む込む
 const loadConductor = function( loadConductorData, mode ) {
     conductorData = loadConductorData;
-    
+
     if ( initialValue.debug === true ) {
       window.console.group('Get conductor data');
       window.console.log('----- Get conductor data -----');
@@ -4864,8 +4865,8 @@ const loadConductor = function( loadConductorData, mode ) {
       window.console.log( JSON.stringify( conductorData ) );
       window.console.groupEnd('Get conductor data');
     }
-    
-    
+
+
     try {
       if ( mode === 'edit') {
         // 読み込みデータはIDと追い越し判定用日時はリセットする
@@ -4896,29 +4897,29 @@ const loadConductor = function( loadConductorData, mode ) {
       $('#conductor-class-name-view').text( conductorData['conductor'].conductor_name );
       $('#conductor-class-note-view').text( conductorNoteText );
       $('#conductor-view-role').text( getRoleListIdToName( conductorData['conductor'].ACCESS_AUTH ) );
-      
+
       noticeStatusUpdate();
       nodeReSet( conductorData );
       nodeViewAll( 0 );
-      
+
     } catch( e ) {
       window.console.error( e );
       editor.actionMode.clear();
       $editor.removeClass('load-conductor');
       clearConductor();
       message('1001');
-       
+
       setTimeout( function(){
         alert( getSomeMessage("ITABASEC020008") );
         var url = '/default/menu/01_browse.php?no=2100180002';
         location.href = url;
       }, 1 );
     }
-    
+
 };
 
 // Conductorデータ再取得 > 再表示する
-$window.on('conductorReset', function(){  
+$window.on('conductorReset', function(){
   selectConductor( conductorUseList.conductorData );
   if ( conductorEditorMode === 'edit') {
     conductorMode('view');
@@ -4934,10 +4935,10 @@ $window.on('conductorReset', function(){
 
 // 作業確認ポップアップイベント
 const itaPopup = function( $target, id ) {
-  
+
   const popupID = 'popup-' + id;
   let $popup;
-  
+
   // 各ノード個別の作業状況確認ポップアップ追加
   if ( $('#' + popupID ).length ) {
     $popup = $('#' + popupID );
@@ -4948,14 +4949,14 @@ const itaPopup = function( $target, id ) {
       $body.append( $popup );
     }
   }
-  
+
   // ノードの状態で表示・非表示を切り替える
   if ( $target.is('.node-jump') ) {
     $popup.css('visibility','visible');
   } else {
     $popup.css('visibility','hidden');
   }
-  
+
   if ( !$target.is('.resultPopup') ) {
     // 画面を移動しても追従するようにする
     $target.addClass('resultPopup').on({
@@ -4990,7 +4991,7 @@ const itaPopup = function( $target, id ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   作業確認　Conducotr画面とパネルの情報を更新
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 00_javascript.js( proxy.printConductorStatus( conductorInstanceID ) )
@@ -5008,9 +5009,9 @@ const conductorStatusUpdate = function( exeNumber ) {
     }
   }
   const intervalTime = tmpintervalTime;
- 
 
-  
+
+
   // 最初（exeNumberが0）だけ実行する処理
   if ( exeNumber === 0 ) {
     // proxy.printConductorStatusでTrigger
@@ -5039,26 +5040,26 @@ const conductorStatusUpdate = function( exeNumber ) {
   if ( g_selectedNodeID.length >= 1 ) {
     panelChange( g_selectedNodeID[0] );
   }
-  
+
   const panelConducotrInfoLength = panelConducotrInfo.length;
-  
+
   for ( let i = 0; i < panelConducotrInfoLength; i++ ) {
     if ( panelConducotrInfo[ i ][ 1 ] === null ) panelConducotrInfo[ i ][ 1 ] = '';
     $( panelConducotrInfo[ i ][ 0 ] ).text( panelConducotrInfo[ i ][ 1 ] );
-  }  
-  
+  }
+
   // Node情報更新
   const nodeInfo = conductorUseList.conductorStatus['NODE_INFO'],
         nodeInfoLength = nodeInfo.length;
-  
+
   // 条件分岐で選ばれなかった分岐以降を半透明にする
   const nextNodeUnused = function( edgeID ) {
 
     const nextNodeID = conductorData[ edgeID ].inNode,
           nextNodeType = conductorData[ nextNodeID ].type;
-    
+
     $('#' + edgeID ).attr('data-status','run-unused');
-    
+
     nodeUnused( nextNodeID );
 
   };
@@ -5078,11 +5079,11 @@ const conductorStatusUpdate = function( exeNumber ) {
     const inTerminal = terminalInOutID( conductorData[ nodeID ].terminal, 'in'),
           tergetNodeID = conductorData[ nodeID ].terminal[ inTerminal[0] ].targetNode;
     let   nodeStatus = nodeInfo[ tergetNodeID ].STATUS;
-    
+
     // 一部のNodeステータスをMovementステータスに合わせる
     if ( nodeStatus === '5') nodeStatus = '9';
     if ( nodeStatus === '12' || nodeStatus === '13') nodeStatus = '14';
-    
+
     // 終了しているかチェックする
     if ( ['6','7','9','10','11','14','15','9999'].indexOf( nodeStatus ) !== -1 ) {
       conductorData[ nodeID ].endStatus = true;
@@ -5115,7 +5116,7 @@ const conductorStatusUpdate = function( exeNumber ) {
       }
     }
   };
-  
+
   // Status file blanchの状態を更新する
   const statusFileBranch = function( nodeID ) {
     const $branchNode = $('#' + nodeID ),
@@ -5124,7 +5125,7 @@ const conductorStatusUpdate = function( exeNumber ) {
           prevNodeID = inTerminal.targetNode,
           prevNodeStatus = nodeInfo[ prevNodeID ].STATUS,
           prevNodeStatusFile = nodeInfo[ prevNodeID ].STATUS_FILE;
-    
+
     // 前のNodeが終了しているかチェック
     if ( ['5','9','12','13','14','15'].indexOf( prevNodeStatus ) !== -1 ) {
       conductorData[ nodeID ].endStatus = true;
@@ -5147,7 +5148,7 @@ const conductorStatusUpdate = function( exeNumber ) {
             elseTerminal = terminals.filter(function(v){
                     if ( v.case === 'else') return true;
                 });
-      
+
       // Caseの順番にStatus fileの値とConditionの値をチェックする
       let matchTerminalID = undefined;
       for ( let i = 0; i < outTerminalLength; i++ ) {
@@ -5175,11 +5176,11 @@ const conductorStatusUpdate = function( exeNumber ) {
       } else {
         $branchNode.attr('data-status-file', 'known').find('.status-file-result-inner').text( prevNodeStatusFile );
       }
-      
+
       $prevEdge.attr('data-status', 'running');
     }
   };
-  
+
   // 並列マージの状態を更新する
   const parallelMergeCheck = function( nodeID ) {
     const inTerminals = terminalInOutID( conductorData[ nodeID ].terminal, 'in'),
@@ -5194,25 +5195,25 @@ const conductorStatusUpdate = function( exeNumber ) {
         $node.addClass('running');
         $('#' + inTerminals[i] ).next().find('.merge-status').attr('data-status', 'waiting');
         $('#' + conductorData[ nodeID ].terminal[ inTerminals[i] ].edge ).attr('data-status', 'running');
-      }      
+      }
     }
     // 全て待機状態ならコンプリートにする
     if ( inTerminalLength === waitingCount ) {
       $node.find('.merge-status').attr('data-status', 'complete');
     }
   };
-  
+
   // Movement、Call、Endの状態を更新する
   const movementCheck = function( nodeID ) {
-  
+
     const nodeInfo = conductorUseList.conductorStatus['NODE_INFO'][ nodeID ],
           nodeData = conductorData[ nodeID ],
           $node = $('#' + nodeID ),
           inTerminalID = terminalInOutID( conductorData[ nodeID ]['terminal'], 'in'),
           $inEdge = $('#' + conductorData[ nodeID ]['terminal'][ inTerminalID[0] ].edge );
-    
+
     let endMessage = '';
-    
+
     // 作業結果URLがあれば追加する
     const nodeJump = function(){
       if ( nodeInfo.JUMP ) {
@@ -5223,7 +5224,7 @@ const conductorStatusUpdate = function( exeNumber ) {
         }
       }
     };
-    
+
     switch( nodeInfo.STATUS ) {
       case '1':
         itaPopup( $node.find('.node-result'), $node.attr('id') );
@@ -5271,8 +5272,8 @@ const conductorStatusUpdate = function( exeNumber ) {
     $node.find('.node-result').attr('data-result-text', endMessage );
     conductorData[ nodeID ].endStatus = true;
   };
-  
-  
+
+
   // ParallelBranchの状態をチェックする
   const parallelBranchCheck = function( nodeID ) {
     const inTerminal = terminalInOutID( conductorData[ nodeID ].terminal, 'in'),
@@ -5283,18 +5284,18 @@ const conductorStatusUpdate = function( exeNumber ) {
       $('#' + conductorData[ nodeID ].terminal[ inTerminal[0] ].edge ).attr('data-status', 'running');
     }
   };
-  
-  
+
+
   // Pauseの状態をチェックする
   const pauseCheck = function( nodeID ) {
-  
+
     const nodeInfo = conductorUseList.conductorStatus['NODE_INFO'][ nodeID ],
           nodeData = conductorData[ nodeID ],
           $node = $('#' + nodeID ),
           $pauseButton = $node.find('.pause-resume-button'),
           inTerminalID = terminalInOutID( conductorData[ nodeID ]['terminal'], 'in'),
           $inEdge = $('#' + conductorData[ nodeID ]['terminal'][ inTerminalID[0] ].edge );
-    
+
     switch( nodeInfo.STATUS ) {
       case '8':
         $node.addClass('running');
@@ -5302,7 +5303,7 @@ const conductorStatusUpdate = function( exeNumber ) {
         conductorData[ nodeID ].endStatus = true;
         $node.find('.pause-status').attr('data-status', 'pause');
         editor.log.set('notice', 'Pause => Node instance : ' + nodeInfo.NODE_INSTANCE_NO );
-        
+
         $pauseButton.prop('disabled', false ).on('click', function() {
           if ( confirm( getSomeMessage("ITABASEC020006",{0:conductorInstanceID})) ) {
             clearTimeout( pollingTimerID );
@@ -5317,12 +5318,12 @@ const conductorStatusUpdate = function( exeNumber ) {
         $inEdge.attr('data-status', 'running');
         conductorData[ nodeID ].endStatus = true;
         $node.find('.pause-status').attr('data-status', 'resume');
-        break;            
+        break;
     }
   };
-  
-  
-  
+
+
+
   const nodeStatusUpdate = function() {
     for ( let nodeID in nodeInfo ) {
       const nodeData = conductorData[ nodeID ];
@@ -5358,14 +5359,14 @@ const conductorStatusUpdate = function( exeNumber ) {
       }
     }
   };
-  
+
   // ポーリングタイマー
   const pollingTimer = function() {
     pollingTimerID = setTimeout( function(){
       proxy.printConductorStatus( conductorInstanceID );
     }, intervalTime );
   };
-  
+
   // 実行状況別
   switch( conductorInfo.STATUS_ID ) {
     case '1':
@@ -5455,11 +5456,11 @@ const conductorStatusUpdate = function( exeNumber ) {
             //実施中-
             if ( logflgList.length !== 0 ) {
               if( logflgList[ index ] == 0 ){
-                editor.log.set( editorogtype ,execlog );                
-              }                
+                editor.log.set( editorogtype ,execlog );
+              }
             }else{
             //完了時
-                editor.log.set( editorogtype ,execlog );  
+                editor.log.set( editorogtype ,execlog );
             }
           }
         });
@@ -5472,7 +5473,7 @@ const conductorStatusUpdate = function( exeNumber ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //   初期ノードセット（Start and End）
-// 
+//
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 基本初期表示
@@ -5482,7 +5483,7 @@ const InitialSetNode = function() {
   newNode('end', 'right', 'center');
   panelConductorReset();
   $('#conductor-class-id').text('Auto numbering');
-  
+
 };
 
 if ( conductorEditorMode !== 'execute') {
@@ -5506,10 +5507,10 @@ if ( conductorEditorMode !== 'execute') {
 $('#editor-footer').on('click', '.editor-menu-button ', function(){
   const $button = $( this ),
         type = $button.attr('data-menu');
-        
+
   nodeDeselect();
   panelChange();
-  
+
   if ( conductorEditorMode === 'execute') {
     if ( type === 'execute') {
       // 実行しますか？
@@ -5553,7 +5554,7 @@ $('#editor-footer').on('click', '.editor-menu-button ', function(){
         if ( window.confirm(getSomeMessage("ITAWDCC20102") )  ) {
           conductorFooterButtonDisabled( true );
           // ID変換失敗したIDを除く
-          conductorData['conductor']['ACCESS_AUTH'] = getRoleListValidID( conductorData['conductor']['ACCESS_AUTH'] );         
+          conductorData['conductor']['ACCESS_AUTH'] = getRoleListValidID( conductorData['conductor']['ACCESS_AUTH'] );
           // 更新する
           proxy.update_execute( conductorData['conductor'].id, JSON.stringify( conductorData ), conductorData['conductor'].LUT4U );
         }

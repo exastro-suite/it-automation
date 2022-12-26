@@ -21,15 +21,15 @@
 //////////////////////////////////////////////////////////////////////
 
 class CicdRestAccessAgent {
-    
+
     protected $objMTS;
 
     function __construct($objMTS=null){
-        //----変数を初期化        
+        //----変数を初期化
         $this->objMTS = $objMTS;
         //変数を初期化----
     }
-        
+
     function getMessageTemplateStorage(){
         return $this->objMTS;
     }
@@ -54,18 +54,18 @@ class CicdRestAccessAgent {
                 [2] =>  UI用メッセージ    EX) 異常時：エラーメッセージ
                 [3] =>  Array(
                             2の詳細 or その他
-                        ) 
-            )  
+                        )
+            )
 
     */
     function executeMovement( $DriverType,$OperationID,$MovementID,$runMode, $UserID,$UserPW,$Hostname,$Protocol,$PortNo ){
-        
+
         global $root_dir_path;
         global $log_output_php;
         global $log_output_dir;
         global $log_file_prefix;
         global $log_level;
-        
+
         $strExecutionNo = "";
         $intErrorType = null;
         $aryErrMsgBody = array();
@@ -74,10 +74,10 @@ class CicdRestAccessAgent {
         $strExpectedErrMsgBodyForUI = "";
 
         $arrRequestContents = array();
-        
+
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
 
-        
+
         if ( empty($root_dir_path) ){
             $root_dir_temp = array();
             $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
@@ -91,12 +91,13 @@ class CicdRestAccessAgent {
             TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_PIONEER =>     '2100020211',
             TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_ROLE =>        '2100020312',
             TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_TERRAFORM =>   '2100080009',
+            TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_TERRAFORM_CLI => '2100200009',
         );
 
         try{
 
             $objMTS = $this->getMessageTemplateStorage();
-            
+
             // 開始メッセージ
             if ( $log_level === 'DEBUG' ){
                 $FREE_LOG = " CI/CD ECECUTE RESTAPI START";#$objMTS->getSomeMessage("ITAWDCH-STD-50001");
@@ -109,7 +110,7 @@ class CicdRestAccessAgent {
                 'portNo'             => '',
                 'requestURI'         => '/default/menu/07_rest_api_ver1.php?no=',
                 'method'             => 'POST',
-                'contentType'        => 'application/json',                
+                'contentType'        => 'application/json',
                 'accessKeyId'        => '',
                 'xCommand'           => '',
                 'strParaJsonEncoded' => '',
@@ -243,7 +244,7 @@ class CicdRestAccessAgent {
             }else{
                     $intErrorType = $aryRetBody['StatusCode'];
                     $aryErrMsgBody = $aryRetBody['ResponsContents'];
-                    $strErrMsg = $aryRetBody['ResponsContents']['Exception'];  
+                    $strErrMsg = $aryRetBody['ResponsContents']['Exception'];
             }
         }
         catch (Exception $e){
@@ -299,17 +300,17 @@ class CicdRestAccessAgent {
 
                 [4] =>  Array(
                             2の詳細 or その他
-                        ) 
-            )  
+                        )
+            )
     */
     function materialsRestAccess( $materialType,$filename,$base64file,$RequestData,$filterList=array() ,$UserName, $UserID,$UserPW,$Hostname,$Protocol,$PortNo , &$NoUpdeteFlg ){
-        
+
         global $root_dir_path;
         global $log_output_php;
         global $log_output_dir;
         global $log_file_prefix;
         global $log_level;
-        
+
         $strMaterialID = "";
         $intErrorType = null;
         $aryErrMsgBody = array();
@@ -331,7 +332,7 @@ class CicdRestAccessAgent {
         $RecordLength = 0;
         $restExecFlg = 0;
         $lastUserDiffFlg = 0;
-        
+
         $NoUpdeteFlg = false;
 
         $strFxName = '([CLASS]'.__CLASS__.',[FUNCTION]'.__FUNCTION__.')';
@@ -350,7 +351,7 @@ class CicdRestAccessAgent {
         if ( empty($log_file_prefix) ){
            $log_file_prefix = basename( __FILE__, '.php' ) . "_";
         }
-        
+
         $arrTargetMenuID =array(
             TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_LEGACY   =>      '2100020104',
             TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_PIONEER  =>      '2100020205',
@@ -359,6 +360,7 @@ class CicdRestAccessAgent {
             TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_TEMPLATE =>      '2100040704',
             TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_MODULE   =>      '2100080005',
             TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY   =>      '2100080006',
+            TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE =>    '2100200004',
         );
 
 
@@ -370,6 +372,7 @@ class CicdRestAccessAgent {
             TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_TEMPLATE =>      array('FILTER_KEY'=> '3','UPLOAD'=> '4'),
             TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_MODULE   =>      array('FILTER_KEY'=> '3','UPLOAD'=> '4'),
             TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY   =>      array('FILTER_KEY'=> '3','UPLOAD'=> '4'),
+            TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE =>     array('FILTER_KEY'=> '3','UPLOAD'=> '4'),
         );
 
 
@@ -390,7 +393,7 @@ class CicdRestAccessAgent {
                 'portNo'             => '',
                 'requestURI'         => '/default/menu/07_rest_api_ver1.php?no=',
                 'method'             => 'POST',
-                'contentType'        => 'application/json',                
+                'contentType'        => 'application/json',
                 'accessKeyId'        => '',
                 'xCommand'           => '',
                 'strParaJsonEncoded' => '',
@@ -427,7 +430,7 @@ class CicdRestAccessAgent {
                 $strErrStepIdInFx="00000600";
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            
+
             if ( is_array($RequestData) !== true ) {
                 $strErrMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-5012");#"RESTAPIのパラメータが不正です。";
                 $FREE_LOG = $strErrMsg .' ([FILE]'.__FILE__.',[LINE]'.__LINE__.')';
@@ -478,7 +481,7 @@ class CicdRestAccessAgent {
                 $strErrStepIdInFx="00000900";
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            
+
             //対象メニューID取得 + ファイルアップロードカラムNo取得
             if( isset( $arrTargetMenuID[ $materialType ] ) === true ){
                 $strMenuid = $arrTargetMenuID[ $materialType ];
@@ -492,7 +495,7 @@ class CicdRestAccessAgent {
                 $strErrStepIdInFx="00001000";
                 throw new Exception( $strFxName.'-'.$strErrStepIdInFx.'-([FILE]'.__FILE__.',[LINE]'.__LINE__.')' );
             }
-            
+
             if( $materialType == TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_PIONEER ){
                 $filterlisst3="";
                 $filterlisst4="";
@@ -527,7 +530,7 @@ class CicdRestAccessAgent {
             //退避
             $aryParmEdit   = $aryParm;
             $aryParmFilter = $aryParm;
-            
+
             //RESTAPI パラメータ生成 ( FILTER )
             $aryParmFilter['xCommand']   = 'FILTER';
 
@@ -537,7 +540,7 @@ class CicdRestAccessAgent {
                    $arrRequestContents[$filterkeyNo]['LIST'] = array( $filterList[$filterkeyNo] ) ;
                 }
             }else{
-                $arrRequestContents = array( 
+                $arrRequestContents = array(
                     $filterInfo => array(
                         'LIST' => array(
                             $filename,
@@ -561,19 +564,19 @@ class CicdRestAccessAgent {
                 require ($root_dir_path . $log_output_php );
             }
 
-            /*        
-                1.レコードなし          
-                    レコード登録      
-                            
-                2.レコードあり(廃止)          
-                    素材集のレコード復活      ※復活の場合には、最終更新者はチェックしない。     
-                    資材の差分・レコード差分確認      
-                        差分あり    2-1     素材集のレコード更新  
+            /*
+                1.レコードなし
+                    レコード登録
+
+                2.レコードあり(廃止)
+                    素材集のレコード復活      ※復活の場合には、最終更新者はチェックしない。
+                    資材の差分・レコード差分確認
+                        差分あり    2-1     素材集のレコード更新
                         差分なし    2-2     未処理
-                3.レコードあり(!=廃止)            
+                3.レコードあり(!=廃止)
                     最終更新者が自分(Restユーザ)か確認。
                         不一致の場合はエラー      3-1
-                    資材の差分・レコード差分確認      
+                    資材の差分・レコード差分確認
                         差分あり     3-2    素材集のレコード更新
                         差分なし     3-3    未処理
             */
@@ -584,24 +587,24 @@ class CicdRestAccessAgent {
                 if( isset($aryRetBody['ResponsContents']['CONTENTS']['RECORD_LENGTH']) ){
                     $RecordLength = $aryRetBody['ResponsContents']['CONTENTS']['RECORD_LENGTH'];
                 }
-                
+
                 $targetNum = 0;
-                
+
                 //FILTER成功(レコードなし) [1]
                 if( $RecordLength == 0 ){
                     //レコード 0件
                     $editType = $objMTS->getSomeMessage("ITAWDCH-STD-12202"); //登録/Register
 
-                //FILTER成功(レコードあり) 
+                //FILTER成功(レコードあり)
                 }elseif( $RecordLength >= 1 ){
 
-                    $arrDataBody     = $aryRetBody['ResponsContents']['CONTENTS']['BODY']; 
+                    $arrDataBody     = $aryRetBody['ResponsContents']['CONTENTS']['BODY'];
                     $arrDataUploadFile = $aryRetBody['ResponsContents']['CONTENTS']['UPLOAD_FILE'];
 
                     $lastUpdateNo     = array_search($objMTS->getSomeMessage("ITAWDCH-STD-11901") ,  $arrDataBody[0] );//更新用の最終更新日時
                     $lastUpdateUserNo = array_search($objMTS->getSomeMessage("ITAWDCH-STD-12101") ,  $arrDataBody[0] );//最終更新者
 
-                    //対象のkey指定 
+                    //対象のkey指定
                     if( $RecordLength == 1 ){
                         $targetNum = 1;
                     }else{
@@ -611,7 +614,7 @@ class CicdRestAccessAgent {
                                 //廃止でないもの
                                 if( $tmpval[1] == "" ){
                                     $targetNum = $tmpkey;
-                                }        
+                                }
                             }
                         }
                         //すべて廃止の場合、最新を対象とする
@@ -622,9 +625,9 @@ class CicdRestAccessAgent {
 
                     //レコードあり [2]
                     if( $arrDataBody[$targetNum][1] != "" ){
-                        //レコードあり(廃止) 
+                        //レコードあり(廃止)
                          $editType = $objMTS->getSomeMessage("ITAWDCH-STD-12205");   //復活/Restore
-                        
+
                         //ファイル差分ある場合、復活 ＋ 更新（後続）処理  更新のフラグON  1:復活＋更新[2-1] / 0:復活[2-2]
                         if( $arrDataUploadFile[$targetNum][$fileUploadNo] != $base64file ){
                             $restExecFlg = 1; //復活＋更新
@@ -633,13 +636,13 @@ class CicdRestAccessAgent {
                     }else{
                         //レコードあり [3]
                         $editType = $objMTS->getSomeMessage("ITAWDCH-STD-12203");   //更新/Update
-                        
+
                         // 最終更新者に差分ある場合、復活＋更新処理のフラグON [3-1]
                         #if( $RequestData[$lastUpdateUserNo] != $arrDataBody[1][$lastUpdateUserNo] ){
                         if( $UserName != $arrDataBody[$targetNum][$lastUpdateUserNo] ){
                             $lastUserDiffFlg = 1;
                         }
-                        
+
                         //ファイル差分無しの場合SKIP  更新のフラグON  [3-3]
                         if( $arrDataUploadFile[$targetNum][$fileUploadNo] == $base64file ){
                             $restExecFlg = 2; //SKIP
@@ -674,7 +677,7 @@ class CicdRestAccessAgent {
             }else{
                     $intErrorType = $aryRetBody['StatusCode'];
                     $aryErrMsgBody = $aryRetBody['ResponsContents'];
-                    $strErrMsg = $aryRetBody['ResponsContents']['Exception']; 
+                    $strErrMsg = $aryRetBody['ResponsContents']['Exception'];
             }
 
             //EDITの実行種別の場合
@@ -685,7 +688,7 @@ class CicdRestAccessAgent {
                     //RESTPAI実行
                     if( $restExecFlg != 2 ){
                         $arrRequestContentsEdit = array();
-                        
+
                         //EDITパラメータ
                         $tmpRequestData = $RequestData;
 
@@ -713,9 +716,9 @@ class CicdRestAccessAgent {
 
                         ksort($tmpRequestData);
                         $arrRequestContentsEdit[] = $tmpRequestData;
-                        
+
                         //登録/更新時のみ
-                        if( $editType == $objMTS->getSomeMessage("ITAWDCH-STD-12202") 
+                        if( $editType == $objMTS->getSomeMessage("ITAWDCH-STD-12202")
                            ||  $editType == $objMTS->getSomeMessage("ITAWDCH-STD-12203") ){
                             $arrRequestContentsEdit['UPLOAD_FILE'][][$fileUploadNo] = $base64file;
                         }
@@ -767,7 +770,7 @@ class CicdRestAccessAgent {
                         }else{
                                 $intErrorType = $aryRetBody['StatusCode'];
                                 $aryErrMsgBody = $aryRetBody['ResponsContents'];
-                                $strErrMsg = $aryRetBody['ResponsContents']['Exception'];  
+                                $strErrMsg = $aryRetBody['ResponsContents']['Exception'];
                         }
 
                         //FILTER再取得取得
@@ -789,13 +792,13 @@ class CicdRestAccessAgent {
                                 if( isset($aryRetBody['ResponsContents']['CONTENTS']['RECORD_LENGTH']) ){
                                     $RecordLength = $aryRetBody['ResponsContents']['CONTENTS']['RECORD_LENGTH'];
                                 }
-                                
+
                                 //FILTER成功(レコードあり)
                                 if( $RecordLength >= 1 ){
-                                    $arrDataBody     = $aryRetBody['ResponsContents']['CONTENTS']['BODY']; 
+                                    $arrDataBody     = $aryRetBody['ResponsContents']['CONTENTS']['BODY'];
                                     $arrDataUploadFile = $aryRetBody['ResponsContents']['CONTENTS']['UPLOAD_FILE'];
 
-                                    //対象レコードの指定 
+                                    //対象レコードの指定
                                     if( $RecordLength == 1 ){
                                         $targetNum = 1;
                                     }else{
@@ -805,7 +808,7 @@ class CicdRestAccessAgent {
                                                 //廃止でないもの
                                                 if( $tmpval[1] == "" ){
                                                     $targetNum = $tmpkey;
-                                                }        
+                                                }
                                             }
                                         }
                                         //すべて廃止の場合、最新を対象とする
@@ -813,7 +816,7 @@ class CicdRestAccessAgent {
                                             $targetNum = $RecordLength;
                                         }
                                     }
-                                    
+
                                     //レコードあり
                                     if( $arrDataBody[$targetNum][1] == "" ){
                                         $strMaterialID = $arrDataBody[$targetNum][2];
@@ -838,7 +841,7 @@ class CicdRestAccessAgent {
 
                             ksort($tmpRequestData);
                             $arrRequestContentsEdit[] = $tmpRequestData;
-                            
+
                             //登録/更新時のみ
                             $arrRequestContentsEdit['UPLOAD_FILE'][][$fileUploadNo] = $base64file;
 
@@ -848,7 +851,7 @@ class CicdRestAccessAgent {
                             $tmpParmEdit['strParaJsonEncoded'] = json_encode($arrRequestContentsEdit,
                                                               JSON_UNESCAPED_UNICODE
                                                              );
-                            
+
                             //RESTAPI実行  ( EDIT  )
                             $aryRetBody = $this->execute_restapi( $tmpParmEdit );
                             //RESTAPI結果
@@ -888,7 +891,7 @@ class CicdRestAccessAgent {
                             }else{
                                     $intErrorType = $aryRetBody['StatusCode'];
                                     $aryErrMsgBody = $aryRetBody['ResponsContents'];
-                                    $strErrMsg = $aryRetBody['ResponsContents']['Exception'];  
+                                    $strErrMsg = $aryRetBody['ResponsContents']['Exception'];
                             }
                         }
 
@@ -900,7 +903,7 @@ class CicdRestAccessAgent {
                         $strMaterialID = $arrDataBody[$targetNum][2];
                         $intErrorType = '000';
                         $strErrMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-5014" );#"項目、ファイルに差分がないため、RESTAPI（EDIT）の実施をSKIPします。";
-                    } 
+                    }
                 }else{
                     //レコード 0/1件以外
                         $intErrorType = '002';
@@ -925,13 +928,13 @@ class CicdRestAccessAgent {
         $intErrorType = str_pad($intErrorType, 3, 0, STR_PAD_LEFT);
 
         $retArray = array($intErrorType,$editType,$strMaterialID,$strErrMsg,$aryErrMsgBody);
-        
+
         //返り値出力
         if ( $log_level === 'DEBUG' ){
             $FREE_LOG = json_encode($retArray,JSON_UNESCAPED_UNICODE );
             require ($root_dir_path . $log_output_php );
         }
-        
+
         //終了メッセージ
         if ( $log_level === 'DEBUG' ){
             $FREE_LOG = " CI/CD MATERIAL EDIT RESTAPI END ";
@@ -947,11 +950,11 @@ class CicdRestAccessAgent {
     /*
         $aryParm = array(
                     'protocol'           => '', ex) http / https
-                    'hostName'           => '', ex) hostname / XX.XX>XX.XX 
-                    'portNo'             => '', ex) 80 / 443 
+                    'hostName'           => '', ex) hostname / XX.XX>XX.XX
+                    'portNo'             => '', ex) 80 / 443
                     'requestURI'         => '', ex) /default/menu/07_rest_api_ver1.php?no=',
                     'method'             => '', ex) POST
-                    'contentType'        => '', ex) application/json                
+                    'contentType'        => '', ex) application/json
                     'accessKeyId'        => '', ex) base64_encode("userid:userpassward");
                     'xCommand'           => '', ex) INFO / FILTER / EDIT /EXECUTE /  ...etc
                     'strParaJsonEncoded' => '', ex)  json_encode( array  , JSON_UNESCAPED_UNICODE )
@@ -1069,7 +1072,7 @@ class CicdRestAccessAgent {
                 }else {
                     $respons_array['ResponsContents'] = json_decode( $ResponsContents, true );
                 }
-                
+
             } else{
                 ////////////////////////////////
                 // 返却用のArrayを編集        //
@@ -1078,7 +1081,7 @@ class CicdRestAccessAgent {
                 $respons_array['ResponsContents'] = array( "ErrorMessage" => "HTTP Socket Timeout" );
                 $respons_array['ResponsContents']['Exception'] = "HTTP Socket Timeout";
             }
-           
+
         }
 
         ////////////////////////////////
