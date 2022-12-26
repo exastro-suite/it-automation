@@ -43,10 +43,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
         $ansible_driver = true;
     }
-    $wanted_filename = "ita_terraform-driver";    
+    $wanted_filename = "ita_terraform-driver";
     $terraform_driver  = false;
     if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
         $terraform_driver = true;
+    }
+    $wanted_filename = "ita_terraform_cli-driver";
+    $terraform_cli_driver  = false;
+    if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+        $terraform_cli_driver = true;
     }
 
     $arrayWebSetting = array();
@@ -88,7 +93,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
     /////////////////////////////////////////////////////////
     // 紐付け先資材名 必須入力:true ユニーク:true
-    ///////////////////////////////////////////////////////// 
+    /////////////////////////////////////////////////////////
     $objVldt = new SingleTextValidator(1,256,false);
     $c = new TextColumn('MATL_LINK_NAME',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030100"));
     $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030101"));
@@ -108,7 +113,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         /////////////////////////////////////////////////////////
         // Excel/Rest用　リモート名+資材パス名  必須入力:true ユニーク:false
-        ///////////////////////////////////////////////////////// 
+        /////////////////////////////////////////////////////////
         $c = new IDColumn('REST_MATL_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030400"),'D_CICD_MATL_FILE_LIST','MATL_FILE_PATH_PULLKEY','MATL_FILE_PATH_PULLDOWN','', array('SELECT_ADD_FOR_ORDER'=>array('MATL_FILE_PATH_PULLDOWN'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030401"));
         $c->getOutputType('filter_table')->setVisible(false);
@@ -125,7 +130,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         /////////////////////////////////////////////////////////
         // リポジトリ名  必須入力:true ユニーク:false
-        ///////////////////////////////////////////////////////// 
+        /////////////////////////////////////////////////////////
         // Excel/Restからの場合、Excel/Restで設定されたリポジトリ名を設定
         $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
                 global    $g;
@@ -180,7 +185,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         /////////////////////////////////////////////////////////
         // 資材パス名  必須入力:true ユニーク:false
-        ///////////////////////////////////////////////////////// 
+        /////////////////////////////////////////////////////////
         // Excel/Restからの場合、Excel/Restで設定されたリポジトリ名を設定
         $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
                 global    $g;
@@ -215,11 +220,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $aryErrMsgBody = array();
                 $strErrMsg = "";
                 $aryDataSet = array();
-        
+
                 $strFxName = "";
 
                 $RepoRowID = $aryVariant['REPO_ROW_ID'];
-        
+
                 // RBAC対応 ----
                 $strQuery = " SELECT
                                  TAB_1.MATL_ROW_ID     KEY_COLUMN
@@ -232,11 +237,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                               WHERE
                                     TAB_1.DISUSE_FLAG = '0'
                                 AND TAB_2.DISUSE_FLAG = '0'
-                                AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID 
+                                AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID
                               ORDER BY DISP_COLUMN ";
-        
+
                 $aryForBind['REPO_ROW_ID'] = $RepoRowID;
-        
+
                 if( 0 < strlen($RepoRowID) ){
                     // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
                     $obj = new RoleBasedAccessControl($g['objDBCA']);
@@ -274,7 +279,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 return $retArray;
             };
             $objFunction02 = $objFunction01;
-        
+
             $objFunction03 = function($objCellFormatter, $rowData, $aryVariant){
                 global $g;
                 $retBool = false;
@@ -301,10 +306,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                               WHERE
                                     TAB_1.DISUSE_FLAG = '0'
                                 AND TAB_2.DISUSE_FLAG = '0'
-                                AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID 
+                                AND TAB_1.REPO_ROW_ID = :REPO_ROW_ID
                               ORDER BY DISP_COLUMN ";
                 $aryForBind['REPO_ROW_ID']  = $RepoRowID;
-        
+
                 if( 0 < strlen($RepoRowID) ){
                     // ログインユーザーのロール・ユーザー紐づけ情報を内部展開
                     $obj = new RoleBasedAccessControl($g['objDBCA']);
@@ -340,16 +345,16 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
                 return $aryRetBody;
             };
-        
+
         $strSetInnerText = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200035001");
         $objVarBFmtUpd = new SelectTabBFmt();
         $objVarBFmtUpd->setNoOptionMessageText($strSetInnerText);
         $objVarBFmtUpd->setFADNoOptionMessageText($strSetInnerText);
         $objVarBFmtUpd->setFunctionForGetSelectList($objFunction03);
-        
+
         $objOTForUpd = new OutputType(new ReqTabHFmt(), $objVarBFmtUpd);
         $objOTForUpd->setFunctionForGetFADSelectList($objFunction01);
-        
+
         $objVarBFmtReg = new SelectTabBFmt();
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
@@ -357,10 +362,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
         $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
         $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
-        
+
         $c->setOutputType('update_table',$objOTForUpd);
         $c->setOutputType('register_table',$objOTForReg);
-        
+
         //エクセル/CSVからのアップロードを禁止する。
         $c->setAllowSendFromFile(false);
 
@@ -368,7 +373,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->getOutputType('json')->setVisible(false);
-        
+
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
 
         // 組み合わせバリデータで必須チェック
@@ -400,14 +405,18 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         // インストールされているドライバを判断し資材タイプに紐付るViewを決定
         $chkarry               = array();
-        $chkarry[true][true]   = "B_CICD_MATERIAL_TYPE_NAME";
-        $chkarry[true][false]  = "B_CICD_MATERIAL_TYPE_NAME_ANS";
-        $chkarry[false][true]  = "B_CICD_MATERIAL_TYPE_NAME_TERRA";
-        $chkarry[false][false] = "B_CICD_MATERIAL_TYPE_NAME_NULL";
-        $view_name = $chkarry[$ansible_driver][$terraform_driver];
+        $chkarry[true][true][true]    = "B_CICD_MATERIAL_TYPE_NAME";
+        $chkarry[true][false][false]  = "B_CICD_MATERIAL_TYPE_NAME_ANS";
+        $chkarry[false][true][false]  = "B_CICD_MATERIAL_TYPE_NAME_TERRA";
+        $chkarry[false][false][true]  = "B_CICD_MATERIAL_TYPE_NAME_TERRACLI";
+        $chkarry[true][true][false]   = "B_CICD_MATERIAL_TYPE_NAME_ANS_TERRA";
+        $chkarry[true][false][true]   = "B_CICD_MATERIAL_TYPE_NAME_ANS_TERRACLI";
+        $chkarry[false][true][true]   = "B_CICD_MATERIAL_TYPE_NAME_TERRA_TERRACLI";
+        $chkarry[false][false][false] = "B_CICD_MATERIAL_TYPE_NAME_NULL";
+        $view_name = $chkarry[$ansible_driver][$terraform_driver][$terraform_cli_driver];
         /////////////////////////////////////////////////////////
         // 資材タイプ  必須入力:true ユニーク:false
-        ///////////////////////////////////////////////////////// 
+        /////////////////////////////////////////////////////////
         $c = new IDColumn('MATL_TYPE_ROW_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030600"),$view_name,'MATL_TYPE_ROW_ID','MATL_TYPE_NAME','', array('SELECT_ADD_FOR_ORDER'=>array('MATL_TYPE_ROW_ID'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030601"));
 
@@ -445,7 +454,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $c->setValidator($objVldt);
                 $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
                 $cg3->addColumn($c);
-    
+
             $cg2->addColumn($cg3);
 
 
@@ -453,7 +462,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             // Ansible-Pioneer
             /////////////////////////////////////////////////////////////
             $cg3 = new ColumnGroup($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200030700"));
-    
+
                 /////////////////////////////////////////////////////////
                 // 対話種別  必須入力:false ユニーク:false
                 /////////////////////////////////////////////////////////
@@ -473,7 +482,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $objOT->setTraceQuery($aryTraceQuery);
                 $c->setOutputType('print_journal_table',$objOT);
                 $cg3->addColumn($c);
-    
+
                 /////////////////////////////////////////////////////////
                 // OS種別  必須入力:false ユニーク:false
                 /////////////////////////////////////////////////////////
@@ -493,7 +502,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $objOT->setTraceQuery($aryTraceQuery);
                 $c->setOutputType('print_journal_table',$objOT);
                 $cg3->addColumn($c);
-    
+
             $cg2->addColumn($cg3);
         }
 
@@ -831,14 +840,19 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
         /////////////////////////////////////////////////////////
         // Excel/Rest用 Movement  必須入力:false  ユニーク:false
-        ///////////////////////////////////////////////////////// 
+        /////////////////////////////////////////////////////////
         // インストールされているドライバを判断し資材タイプに紐付るViewを決定
         $chkarry               = array();
-        $chkarry[true][true]   = "D_CICD_MATL_PATTERN_LIST_ALL";
-        $chkarry[true][false]  = "D_CICD_MATL_PATTERN_LIST_ANS";
-        $chkarry[false][true]  = "D_CICD_MATL_PATTERN_LIST_TERRA";
-        $chkarry[false][false] = "D_CICD_MATL_PATTERN_LIST_NULL";
-        $view_name = $chkarry[$ansible_driver][$terraform_driver];
+        $chkarry[true][true][true]    = "D_CICD_MATL_PATTERN_LIST_ALL";
+        $chkarry[true][false][false]  = "D_CICD_MATL_PATTERN_LIST_ANS";
+        $chkarry[false][true][false]  = "D_CICD_MATL_PATTERN_LIST_TERRA";
+        $chkarry[false][false][true]  = "D_CICD_MATL_PATTERN_LIST_TERRACLI";
+        $chkarry[true][true][false]   = "D_CICD_MATL_PATTERN_LIST_ANS_TERRA";
+        $chkarry[true][false][true]   = "D_CICD_MATL_PATTERN_LIST_ANS_TERRACLI";
+        $chkarry[false][true][true]   = "D_CICD_MATL_PATTERN_LIST_TERRA_TERRACLI";
+        $chkarry[false][false][false] = "D_CICD_MATL_PATTERN_LIST_NULL";
+
+        $view_name = $chkarry[$ansible_driver][$terraform_driver][$terraform_cli_driver];
 
         $c = new IDColumn('REST_DEL_MOVE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031700"),$view_name,'MATL_PTN_NAME_PULLKEY','MATL_PTN_NAME_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MATL_PTN_NAME_PULLDOWN'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031701"));//エクセル・ヘッダでの説明
@@ -891,7 +905,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $aryErrMsgBody = array();
             $strErrMsg = "";
             $aryDataSet = array();
-       
+
             $strFxName = "";
 
             $MatlTypeRowId = $aryVariant['MATL_TYPE_ROW_ID'];
@@ -916,6 +930,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY:      //Policy管理
                  $ExtSimIdstr = sprintf("AND TAB_1.ITA_EXT_STM_ID in ('%s')",TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_TERRAFORM);
                  break;
+            case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE:      //Module素材(Terraform-CLI)
+                    $ExtSimIdstr = sprintf("AND TAB_1.ITA_EXT_STM_ID in ('%s')",TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_TERRAFORM_CLI);
+                    break;
             default:
                  // ありえない値を設定
                  $ExtSimIdstr = "AND TAB_1.ITA_EXT_STM_ID in ('1000')";
@@ -972,7 +989,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             return $retArray;
         };
         $objFunction02 = $objFunction01;
-        
+
         $objFunction03 = function($objCellFormatter, $rowData, $aryVariant){
             global $g;
             $retBool = false;
@@ -1009,6 +1026,9 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY:      //Policy管理
                  $ExtSimIdstr = sprintf("AND TAB_1.ITA_EXT_STM_ID in ('%s')",TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_TERRAFORM);
                  break;
+            case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE:      //Module素材(Terraform-CLI)
+                    $ExtSimIdstr = sprintf("AND TAB_1.ITA_EXT_STM_ID in ('%s')",TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_TERRAFORM_CLI);
+                    break;
             default:
                  // ありえない値を設定
                  $ExtSimIdstr = "AND TAB_1.ITA_EXT_STM_ID in ('1000')";
@@ -1026,7 +1046,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                        ."     TAB_1.DISUSE_FLAG = '0' "
                        ."     $ExtSimIdstr "
                        ."ORDER BY KEY_COLUMN ";
-    
+
             $aryForBind = array();
 
             if( 0 < strlen($MatlTypeRowId) ){
@@ -1064,16 +1084,16 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $aryRetBody = array($retBool, $intErrorType, $aryErrMsgBody, $strErrMsg, $aryDataSet);
             return $aryRetBody;
         };
-    
+
         $strSetInnerText = $g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200035002");
         $objVarBFmtUpd = new SelectTabBFmt();
         $objVarBFmtUpd->setNoOptionMessageText($strSetInnerText);
         $objVarBFmtUpd->setFADNoOptionMessageText($strSetInnerText);
         $objVarBFmtUpd->setFunctionForGetSelectList($objFunction03);
-    
+
         $objOTForUpd = new OutputType(new ReqTabHFmt(), $objVarBFmtUpd);
         $objOTForUpd->setFunctionForGetFADSelectList($objFunction01);
-    
+
         $objVarBFmtReg = new SelectTabBFmt();
         $objVarBFmtReg->setSelectWaitingText($strSetInnerText);
         $objVarBFmtReg->setFADNoOptionMessageText($strSetInnerText);
@@ -1081,13 +1101,13 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $objVarBFmtReg->setFunctionForGetSelectList($objFunction03);
         $objOTForReg = new OutputType(new ReqTabHFmt(), $objVarBFmtReg);
         $objOTForReg->setFunctionForGetFADSelectList($objFunction02);
-    
+
         $c->setOutputType('update_table',$objOTForUpd);
         $c->setOutputType('register_table',$objOTForReg);
-    
+
         //コンテンツのソースがヴューの場合、登録/更新の対象とする
         $c->setHiddenMainTableColumn(true);
-    
+
         //エクセル/CSVからのアップロードを禁止する。
         $c->setAllowSendFromFile(false);
 
@@ -1095,7 +1115,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $c->getOutputType('excel')->setVisible(false);
         $c->getOutputType('csv')->setVisible(false);
         $c->getOutputType('json')->setVisible(false);
-    
+
         $c->setHiddenMainTableColumn(true);  //コンテンツのソースがヴューの場合、登録/更新の対象とする
 
         $c->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
@@ -1146,7 +1166,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $aryErrMsgBody = array();
                 $strErrMsg = "";
                 $strErrorBuf = "";
-   
+
                 $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
                 if( $modeValue=="DTUP_singleRecUpdate" ){
                     $exeQueryData[$objColumn->getID()] = "";
@@ -1195,7 +1215,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $aryErrMsgBody = array();
                 $strErrMsg = "";
                 $strErrorBuf = "";
-   
+
                 $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
                 if( $modeValue=="DTUP_singleRecUpdate" ){
                     $exeQueryData[$objColumn->getID()] = "";
@@ -1242,7 +1262,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $aryErrMsgBody = array();
                 $strErrMsg = "";
                 $strErrorBuf = "";
-   
+
                 $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
                 if( $modeValue=="DTUP_singleRecUpdate" ){
                     $exeQueryData[$objColumn->getID()] = "";
@@ -1345,10 +1365,15 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
             $ansible_driver = true;
         }
-        $wanted_filename = "ita_terraform-driver";    
+        $wanted_filename = "ita_terraform-driver";
         $terraform_driver  = false;
         if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
             $terraform_driver = true;
+        }
+        $wanted_filename = "ita_terraform_cli-driver";
+        $terraform_cli_driver  = false;
+        if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+            $terraform_cli_driver = true;
         }
 
         $getColumnDataFunction = function($strModeId,$columnName,$Type,$arrayVariant,$arrayRegData) {
@@ -1402,20 +1427,20 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         }
         if($ansible_driver === true) {
             $ColumnArray = array('MATL_LINK_NAME'=>'',
-                                 'MATL_TYPE_ROW_ID'=>'', 
+                                 'MATL_TYPE_ROW_ID'=>'',
                                  'REST_MATL_ROW_ID'=>'',
                                  'REST_DEL_MOVE_ID'=>'',
                                  'REPO_ROW_ID'=>'',
                                  'MATL_ROW_ID'=>'',
                                  'MATL_TYPE_ROW_ID'=>'',
-                                 'TEMPLATE_FILE_VARS_LIST'=>'', 
-                                 'DIALOG_TYPE_ID'=>'', 
+                                 'TEMPLATE_FILE_VARS_LIST'=>'',
+                                 'DIALOG_TYPE_ID'=>'',
                                  'OS_TYPE_ID'=>'',
                                  'DEL_OPE_ID'=>'',
                                  'DEL_MOVE_ID'=>'');
         } else {
             $ColumnArray = array('MATL_LINK_NAME'=>'',
-                                 'MATL_TYPE_ROW_ID'=>'', 
+                                 'MATL_TYPE_ROW_ID'=>'',
                                  'REST_MATL_ROW_ID'=>'',
                                  'REST_DEL_MOVE_ID'=>'',
                                  'REPO_ROW_ID'=>'',
@@ -1529,7 +1554,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                         $retStrBody = $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2070");
                         $objClientValidator->setValidRule($retStrBody);
                         return false;
-                    } 
+                    }
                     if(strlen($ColumnValueArray['MATL_ROW_ID']['COMMIT']) == 0) {
                         // 必須入力です。(項目：資材パス)
                         $retStrBody = $g['objMTS']->getSomeMessage("ITACICDFORIAC-ERR-2071");
@@ -1583,7 +1608,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                    (strlen($ColumnValueArray['REPO_ROW_ID']['COMMIT']) == 0)      ||
                    (strlen($ColumnValueArray['MATL_ROW_ID']['COMMIT']) == 0)) {
                     return true;
-                } 
+                }
                 // 資材パスと紐付先資材タイプの妥当性確認
                 $strQuery = "SELECT * FROM B_CICD_MATERIAL_LIST WHERE MATL_ROW_ID=:MATL_ROW_ID";
                 $aryForBind = array();
@@ -1598,14 +1623,14 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 } else {
                     $retStrBody = $g['objMTS']->getSomeMessage("ITAWDCH-ERR-3001");
                     $retBool = false;
-                }        
-                if($retBool===true){  
-                    // 選択されている紐付先資材タイプとインストールされているドライバーの妥当性チェック
-                    $retBool = MatlLinkColumnValidator4($ColumnValueArray['REPO_ROW_ID']['COMMIT'],$PkeyID,$ColumnValueArray['MATL_TYPE_ROW_ID']['COMMIT'],$g['objMTS'],$retStrBody,$ansible_driver,$terraform_driver);
                 }
-                if($retBool===true){  
+                if($retBool===true){
+                    // 選択されている紐付先資材タイプとインストールされているドライバーの妥当性チェック
+                    $retBool = MatlLinkColumnValidator4($ColumnValueArray['REPO_ROW_ID']['COMMIT'],$PkeyID,$ColumnValueArray['MATL_TYPE_ROW_ID']['COMMIT'],$g['objMTS'],$retStrBody,$ansible_driver,$terraform_driver,$terraform_cli_driver);
+                }
+                if($retBool===true){
                     // 入力チェック処理
-                    $retBool = MatlLinkColumnValidator1($ColumnValueArray,$ColumnValueArray['REPO_ROW_ID']['COMMIT'],$PkeyID,$g['objMTS'],$retStrBody,$ansible_driver,$terraform_driver);
+                    $retBool = MatlLinkColumnValidator1($ColumnValueArray,$ColumnValueArray['REPO_ROW_ID']['COMMIT'],$PkeyID,$g['objMTS'],$retStrBody,$ansible_driver,$terraform_driver,$terraform_cli_driver);
                 }
             }
             if($retBool === true) {

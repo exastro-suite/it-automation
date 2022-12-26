@@ -936,7 +936,7 @@ ANS_ANSIBLE_CONFIG_FILE           %VARCHR%(512)                    , -- ansible.
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報
-
+TERRAFORM_CLI_WORKSPACE_ID        %INT%                            , -- Terraform-CLI利用情報
 DISP_SEQ                          %INT%                            , -- 表示順序
 ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考
@@ -973,7 +973,7 @@ ANS_ANSIBLE_CONFIG_FILE           %VARCHR%(512)                    , -- ansible.
 OPENST_TEMPLATE                   %VARCHR%(256)                    ,
 OPENST_ENVIRONMENT                %VARCHR%(256)                    ,
 TERRAFORM_WORKSPACE_ID            %INT%                            , -- Terraform利用情報
-
+TERRAFORM_CLI_WORKSPACE_ID        %INT%                            , -- Terraform-CLI利用情報
 DISP_SEQ                          %INT%                            , -- 表示順序
 ACCESS_AUTH                       TEXT                             ,
 NOTE                              %VARCHR%(4000)                   , -- 備考

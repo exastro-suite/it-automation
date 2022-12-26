@@ -18,7 +18,7 @@
 //  【概要】
 //      CICD For IaC Git リモートリポジトリ同期処理　孫プロセス(資材紐付管理単位)
 //
-//   function 
+//   function
 //
 ///////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////
@@ -106,7 +106,7 @@
     $UIDelvExecMenuId                = "";           // 資材紐付管理　デリバリー作業メニューID
     $UIMatlUpdateStatusID            = "";           // 資材紐付管理　同期状態
     $UIMatlUpdateStatusDisplayMsg    = "";           // 資材紐付管理　同期結果メッセージ
-    $UIDelvStatusDisplayMsg          = "";           // 資材紐付管理　デリバリー結果メッセージ 
+    $UIDelvStatusDisplayMsg          = "";           // 資材紐付管理　デリバリー結果メッセージ
     $AddRepoIdMatlLinkIdStr          = "";           // ログメッセージに追加するメッセージ
     $AddMatlLinkIdStr                = "";           // ログメッセージに追加するメッセージ
 
@@ -164,7 +164,7 @@
 
         $DBobj = new LocalDBAccessClass($db_model_ch,$cmDBobj,$objDBCA,$objMTS,$db_access_user_id,$logfile,$log_level,$RepoId);
 
-        $LFCobj = new LocalFilesControl();       
+        $LFCobj = new LocalFilesControl();
 
         global  $TDMatlLinkobj;
         global  $LFCobj;
@@ -261,7 +261,7 @@
             $error_flag = 1;
 
             // 紐付資材の更新に失敗しました。(リモートリポジトリ管理 項番:{} 資材紐付管理 項番:{})
-            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2045",array($RepoId,$MatlLinkId)); 
+            $logstr    = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2045",array($RepoId,$MatlLinkId));
             $addlogstr = $ret;
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$addlogstr);
             throw new Exception( $FREE_LOG );
@@ -320,13 +320,13 @@
         }
         // commit後に資材紐付管理　同期状態・デリバリ状態更新 マーク
         $MatlLinkUpdate_Flg     = true;
-     
+
     } catch (Exception $e){
 
         // メッセージ出力
         $FREE_LOG = $e->getMessage();
         require ($root_dir_path . $log_output_php );
-        
+
         // トランザクションが発生しそうなロジックに入ってからのexceptionの場合は
         // 念のためロールバック/トランザクション終了
         if( $objDBCA->getTransactionMode() ){
@@ -371,7 +371,7 @@
             require ($root_dir_path . $log_output_php );
         }
     }
-    
+
     ////////////////////////////////
     //// 結果出力               ////
     ////////////////////////////////
@@ -382,7 +382,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-ERR-50001");
             require ($root_dir_path . $log_output_php );
         }
-        // 呼び元でexit codeをチェックしているので 0 でexit 
+        // 呼び元でexit codeをチェックしているので 0 でexit
         exit(0);
     }
     elseif( $warning_flag != 0 ){
@@ -391,7 +391,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-ERR-50002");
             require ($root_dir_path . $log_output_php );
         }
-        // 呼び元でexit codeをチェックしているので 0 でexit 
+        // 呼び元でexit codeをチェックしているので 0 でexit
         exit(0);
     }
     else{
@@ -400,7 +400,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-STD-50002");
             require ($root_dir_path . $log_output_php );
         }
-        
+
         exit(0);
     }
 
@@ -413,7 +413,7 @@
         global $UIDelvExecMenuId;
         global $DelvExecFlg;
         global $SyncStatusNameobj;
-    
+
         $UIMatlUpdateStatusDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
         if($DelvExecFlg === true) {
             $UIDelvStatusDisplayMsg       = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4001");
@@ -589,7 +589,7 @@
         global $TDMatlLinkobj;
 
         $tgtRepoListRow = array();
-        
+
         // ansible/terraformのリリースファイル有無確認(インストール状態確認)
         $wanted_filename = "ita_ansible-driver";
         $ansible_driver  = false;
@@ -601,13 +601,18 @@
         if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
             $terraform_driver = true;
         }
+        $wanted_filename = "ita_terraform_cli-driver";
+        $terraform_cli_driver  = false;
+        if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+            $terraform_cli_driver = true;
+        }
 
         // 資材紐付管理取得
         // 条件: 廃止レコード以外　自動同期が有効　
         // 同期状態は呼出元で判定
-        $Tobj = new TQ_REPO_LIST_ALL_JOIN($ansible_driver,$terraform_driver);
-        $sqlBody = $Tobj->getSql($ansible_driver,$terraform_driver);
-        $sqlBody = $sqlBody . 
+        $Tobj = new TQ_REPO_LIST_ALL_JOIN($ansible_driver,$terraform_driver,$terraform_cli_driver);
+        $sqlBody = $Tobj->getSql($ansible_driver,$terraform_driver,$terraform_cli_driver);
+        $sqlBody = $sqlBody .
                    " WHERE
                           T1.MATL_LINK_ROW_ID  =  :MATL_LINK_ROW_ID ";
 
@@ -618,7 +623,7 @@
         if($objQuery === false) {
             // 異常フラグON
             $error_flag = 1;
-            
+
             // データベースのアクセスに失敗しました。
             $logstr  = $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1005");
             $logstr .= $AddRepoIdMatlLinkIdStr;
@@ -667,6 +672,7 @@
         global $TDMatlLinkobj;
         global $ansible_driver;
         global $terraform_driver;
+        global $terraform_cli_driver;
         global $LFCobj;
         global $MatlLinkUpdate_Flg;
         global $DelvExecFlg;
@@ -756,7 +762,7 @@
         // 資材紐付管理 紐付先資材タイプとインストール状態をチェック
         /////////////////////////////////////////////////////////
         $LogStr = "";
-        $ret = MatlLinkColumnValidator4($RepoId,$MatlLinkId,$row['MATL_TYPE_ROW_ID'],$objMTS,$LogStr,$ansible_driver,$terraform_driver);
+        $ret = MatlLinkColumnValidator4($RepoId,$MatlLinkId,$row['MATL_TYPE_ROW_ID'],$objMTS,$LogStr,$ansible_driver,$terraform_driver,$terraform_cli_driver);
         if($ret === false) {
             // 異常フラグON
             $error_flag = 1;
@@ -938,6 +944,10 @@
             $ErrorMsgHeder = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2053",array($RepoId,$MatlLinkId));
             list($RequestData,$filterList) = setPolicyListAttr($row,$tgtFileName,$DefaultAccessRoleString);
             break;
+        case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE:       //Module素材(Terraform-CLI)
+            $ErrorMsgHeder = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2059",array($RepoId,$MatlLinkId));
+            list($RequestData,$filterList) = setCliModuleListAttr($row,$tgtFileName,$DefaultAccessRoleString);
+            break;
         }
 
         /////////////////////////////////////////////////////////
@@ -945,13 +955,13 @@
         /////////////////////////////////////////////////////////
         $objCRAA = new CicdRestAccessAgent($objMTS);
         $NoUpdateFlg = true;
-        $retAry = $objCRAA->materialsRestAccess($row['MATL_TYPE_ROW_ID'], 
+        $retAry = $objCRAA->materialsRestAccess($row['MATL_TYPE_ROW_ID'],
                                                 $row['MATL_LINK_NAME'],
-                                                $tgtFileBase64enc, 
-                                                $RequestData, 
-                                                $filterList, 
-                                                $row['M_USERNAME_JP'], 
-                                                $row['M_REST_USERNAME'], 
+                                                $tgtFileBase64enc,
+                                                $RequestData,
+                                                $filterList,
+                                                $row['M_USERNAME_JP'],
+                                                $row['M_REST_USERNAME'],
                                                 ky_decrypt($row['M_REST_LOGIN_PW']),
                                                 $row['M_HOSTNAME'],
                                                 $row['M_PROTOCOL'],
@@ -979,7 +989,7 @@
         } else {
             // 異常フラグON
             $error_flag = 1;
-    
+
             $LogStr  = $ErrorMsgHeder;
             $AddLogStr = var_export($retAry,true);
             $FREE_LOG  = makeLogiFileOutputString(basename(__FILE__),__LINE__,$LogStr,$AddLogStr);
@@ -1029,16 +1039,20 @@
             $ErrorMsgHeder = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2057",array($RepoId,$MatlLinkId));
             $UIDelvExecMenuId = "2100080010";
             break;
+        case TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_TERRAFORM_CLI:
+            $ErrorMsgHeder = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2060",array($RepoId,$MatlLinkId));
+            $UIDelvExecMenuId = "2100200010";
+            break;
         }
 
         /////////////////////////////////////////////////////////
         // Movement実行
         /////////////////////////////////////////////////////////
-        $retAry = $objCRAA->executeMovement($row['M_ITA_EXT_STM_ID'], 
-                                            $row['DEL_OPE_ID'], 
-                                            $row['DEL_MOVE_ID'], 
+        $retAry = $objCRAA->executeMovement($row['M_ITA_EXT_STM_ID'],
+                                            $row['DEL_OPE_ID'],
+                                            $row['DEL_MOVE_ID'],
                                             $runMode,
-                                            $row['M_REST_USERNAME'], 
+                                            $row['M_REST_USERNAME'],
                                             ky_decrypt($row['M_REST_LOGIN_PW']),
                                             $row['M_HOSTNAME'],
                                             $row['M_PROTOCOL'],
@@ -1139,6 +1153,17 @@
 
     // Policy素材
     function setPolicyListAttr($row,$tgtFileName,$DefaultAccessRoleString) {
+        $RequestData    = array();
+        $RequestData[3] = $row['MATL_LINK_NAME'];
+        $RequestData[4] = basename($tgtFileName);
+        $RequestData[5] = $DefaultAccessRoleString;
+        $FilterList     = array();
+        $FilterList[3]  = $row['MATL_LINK_NAME'];
+        return [$RequestData , $FilterList];
+    }
+
+    // Module素材(Terraform-CLI)
+    function setCliModuleListAttr($row,$tgtFileName,$DefaultAccessRoleString) {
         $RequestData    = array();
         $RequestData[3] = $row['MATL_LINK_NAME'];
         $RequestData[4] = basename($tgtFileName);

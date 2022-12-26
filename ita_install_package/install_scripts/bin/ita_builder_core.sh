@@ -85,7 +85,7 @@ copy_and_backup() {
     if [ ! -e "$dst_dir" ]; then
         mkdir -p "$dst_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
-    
+
     diff "$src" "$dstfile" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     if [ $? != 0 ]; then
         \cp -p -b --suffix=`backup_suffix` "$src" "$dst" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -99,7 +99,7 @@ yum_install() {
             echo "----------Installation[$@]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
             #Installation
             yum install -y "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        
+
             #Check installation
             for key in $@; do
                 echo "----------Check installation[$key]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -169,7 +169,7 @@ error_check() {
 yum_repository() {
     if [ $# -gt 0 ]; then
         local repo=$1
-        
+
         # no repo to be installed if the first argument starts "-".
         if [[ "$repo" =~ ^[^-] ]]; then
             if [ "$LINUX_OS" == "RHEL7" ]; then
@@ -210,7 +210,7 @@ yum_repository() {
             if [ "${REPOSITORY}" != "yum_all" ]; then
                case "${LINUX_OS}" in
                     "CentOS7") create_repo_check remi-php74 >> "$ITA_BUILDER_LOG_FILE" 2>&1 ;;
-                    "RHEL7") 
+                    "RHEL7")
                         if [ "${CLOUD_REPO}" == "RHEL7_RHUI2" ]; then
                             create_repo_check remi-php74 rhui-rhel-7-server-rhui-optional-rpms >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         elif [ "${CLOUD_REPO}" == "RHEL7_RHUI2_AWS" ]; then
@@ -229,7 +229,7 @@ yum_repository() {
                             create_repo_check codeready-builder-for-rhel-8 >> "$ITA_BUILDER_LOG_FILE" 2>&1
                         fi
                     ;;
-                esac 
+                esac
                 if [ $? -ne 0 ]; then
                    log "ERROR:Failed to get repository"
                    ERR_FLG="false"
@@ -285,7 +285,7 @@ setting_file_format_check(){
 }
 
 cloud_repo_setting(){
-    yum repolist all &> /tmp/ita_repolist.txt 
+    yum repolist all &> /tmp/ita_repolist.txt
     if [ -e /tmp/ita_repolist.txt ]; then
         if [ "${LINUX_OS}" == "RHEL8" ]; then
             if grep -q codeready-builder-for-rhel-8-rhui-rpms /tmp/ita_repolist.txt ; then
@@ -308,7 +308,7 @@ codeready-builder-for-rhel-8-rhui-rpms"
                 CLOUD_REPO="RHEL7_RHUI3"
             elif grep -q rhel-7-server-optional-rpms /tmp/ita_repolist.txt ; then
                 CLOUD_REPO="physical"
-            else 
+            else
                 log "ERROR : The repository required to install ITA cannot be found.
 rhui-rhel-7-server-rhui-optional-rpms
 rhui-REGION-rhel-server-optional
@@ -337,7 +337,7 @@ read_setting_file() {
     IFS="
 "
     for line in $setting_text;do
-        # convert "foo: bar" to "foo=bar", and keep comment 
+        # convert "foo: bar" to "foo=bar", and keep comment
         if [ "$(echo "$line"|grep -E '^[^#: ]+:[ ]*[^ ]+[ ]*$')" != "" ];then
             setting_file_format_check
             key="$(echo "$line" | sed 's/[[:space:]]*$//' | sed -E "s/^([^:]+):[[:space:]]*(.+)$/\1/")"
@@ -351,7 +351,7 @@ read_setting_file() {
     #IFSリストア
     IFS="$SRC_IFS"
 
-    
+
 }
 
 
@@ -543,7 +543,7 @@ initialize_mariadb() {
             spawn ${SECURE_COMMAND}
             expect \"Enter current password for root \\(enter for none\\):\"
             send \"\\r\"
-            expect { 
+            expect {
                 -re \"Switch to unix_socket authentication.* $\" {
                     send \"n\\r\"
                     expect -re \"Change the root password\\?.* $\"
@@ -594,7 +594,7 @@ initialize_mariadb() {
 
     # copy MariaDB charset file
     copy_and_backup $ITA_EXT_FILE_DIR/etc_my.cnf.d/server.cnf /etc/my.cnf.d/ >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
+
     # restart MariaDB Server
     systemctl restart mariadb >> "$ITA_BUILDER_LOG_FILE" 2>&1
     error_check
@@ -658,11 +658,11 @@ configure_php() {
     fi
 
     # WORKAROUND! Symbolic link must exist.
-    ln -s /usr/share/pear-data/HTML_AJAX/js /usr/share/pear/HTML/js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
+    ln -s /usr/share/pear-data/HTML_AJAX/js /usr/share/pear/HTML/js >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
     # Change timeout of HTML_AJAX.
-    sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX.js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
-    sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX_lite.js >> "$ITA_BUILDER_LOG_FILE" 2>&1 
+    sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX.js >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    sed -i 's/timeout: 20000,/timeout: 600000,/g' /usr/share/pear-data/HTML_AJAX/js/HTML_AJAX_lite.js >> "$ITA_BUILDER_LOG_FILE" 2>&1
 
     # Install php-yaml.
     echo "----------Installation[php-yaml]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -685,7 +685,7 @@ configure_php() {
     # Install Composer.
     if [ "${exec_mode}" == "3" ]; then
         echo "----------Installation[Composer]----------" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        curl -sS $COMPOSER | php -- --install-dir=/usr/bin --version=1.10.16 >> "$ITA_BUILDER_LOG_FILE" 2>&1       
+        curl -sS $COMPOSER | php -- --install-dir=/usr/bin --version=1.10.16 >> "$ITA_BUILDER_LOG_FILE" 2>&1
         # install check Composer.
         if [ ! -e /usr/bin/composer.phar ]; then
             log "ERROR:Installation failed[Composer]"
@@ -703,7 +703,7 @@ configure_php() {
             log "ERROR:Installation failed[PhpSpreadsheet]"
             ERR_FLG="false"
             func_exit_and_delete_file
-        fi       
+        fi
         mv vendor /usr/share/php/  >> "$ITA_BUILDER_LOG_FILE" 2>&1;
     else
         mkdir -p /usr/share/php/vendor >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -713,7 +713,7 @@ configure_php() {
             log "ERROR:Installation failed[PhpSpreadsheet]"
             ERR_FLG="false"
             func_exit_and_delete_file
-        fi       
+        fi
     fi
 
     #clean
@@ -745,7 +745,7 @@ configure_ansible() {
 
     # Replace Ansible config file.
     copy_and_backup "$ITA_EXT_FILE_DIR/etc_ansible/ansible.cfg" "/etc/ansible/"
-    
+
     # Install some pip packages.
     if [ "${exec_mode}" == "3" ]; then
         pip3 install --upgrade pip requests >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -793,7 +793,7 @@ configure_ansible() {
 
 # Terraform
 configure_terraform() {
-    
+
     # Install some pip packages.
     if [ "${exec_mode}" == "3" ]; then
         pip3 install --upgrade pip requests >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -831,6 +831,13 @@ configure_terraform() {
 
 }
 
+# Terraform-CLI
+configure_terraformcli() {
+    # Install terraformcli packages.
+    yum_install ${YUM_PACKAGE["terraformcli"]}
+    # Check installation yum terraformcli packages.
+    yum_package_check ${YUM_PACKAGE["terraformcli"]}
+}
 
 # ITA
 configure_ita() {
@@ -894,24 +901,24 @@ make_ita() {
             install_rpm
         fi
     fi
-    
+
     log "OS setting"
     configure_os
-    
+
     log "MariaDB install and setting"
     configure_mariadb
 
     log "Apache install and setting"
     configure_httpd
-    
+
     log "php install and setting"
     configure_php
-        
+
     if [ "$ansible_driver" == "yes" ] || [ "$cicd_for_iac" == "yes" ]; then
         log "git install and setting"
         configure_git
     fi
-    
+
     if [ "$ansible_driver" == "yes" ]; then
         log "ansible install and setting"
         configure_ansible
@@ -920,6 +927,14 @@ make_ita() {
     if [ "$terraform_driver" == "yes" ]; then
         log "packages for terraform install and setting"
         configure_terraform
+    fi
+
+    if [ "$terraformcli_driver" == "yes" ]; then
+        log "packages for terraform CLI install and setting"
+        if [ "$terraform_driver" != "yes" ]; then
+            configure_terraform
+        fi
+        configure_terraformcli
     fi
 
     log "Running the ITA installer"
@@ -958,7 +973,7 @@ download() {
     fi
     # Enable mariadb repositories.
     mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
-    
+
     # MariaDB package names.
     if [ "${distro_mariadb}" = "yes" ]; then
         local MARIADB_PACKAGE_NAMES=(mariadb mariadb-server expect)
@@ -1000,21 +1015,21 @@ download() {
         local download_dir="${PHP_TAR_GZ_PACKAGE_DOWNLOAD_DIR[$key]}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         cd "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-    
+
         log "Download packages[php-yaml]"
         pecl channel-update pecl.php.net >> "$ITA_BUILDER_LOG_FILE" 2>&1
         pecl download ${PHP_TAR_GZ_PACKAGE[$key]} >> "$ITA_BUILDER_LOG_FILE" 2>&1
         download_check
     done
     cd $ITA_INSTALL_SCRIPTS_DIR >> "$ITA_BUILDER_LOG_FILE" 2>&1;
-    
+
     #----------------------------------------------------------------------
     # Download pip packages.
-    
+
     #pip install
     yum_install python3
     pip3 install --upgrade pip requests >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
+
     for key in ${!PIP_PACKAGE[@]}; do
         local download_dir="${DOWNLOAD_DIR["pip"]}/$key" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
@@ -1025,10 +1040,10 @@ download() {
 
     #----------------------------------------------------------------------
     # Download PhpSpreadsheet tar.gz packages
-    
+
     #Composer install
     yum_install php php-json php-zip php-xml php-gd php-mbstring unzip
-    
+
     mkdir -p vendor/composer
     curl -sS $COMPOSER | php -- --install-dir=vendor/composer --version=1.10.16 >> "$ITA_BUILDER_LOG_FILE" 2>&1
     # install check Composer.
@@ -1040,7 +1055,7 @@ download() {
 
     local download_dir="${PHPSPREADSHEET_TAR_GZ_PACKAGE_DOWNLOAD_DIR}" >> "$ITA_BUILDER_LOG_FILE" 2>&1
     mkdir -p "$download_dir" >> "$ITA_BUILDER_LOG_FILE" 2>&1
-    
+
     log "Download packages[phpspreadsheet]"
     ./vendor/composer/composer.phar require $PHPSPREADSHEET >> "$ITA_BUILDER_LOG_FILE" 2>&1
     download_check
@@ -1065,7 +1080,7 @@ download() {
             log "nothing to do"
         fi
     )
-    
+
 }
 
 ################################################################################
@@ -1116,6 +1131,12 @@ if [ "${exec_mode}" == "2" -o "${exec_mode}" == "3" ]; then
 
     if [ "${terraform_driver}" != 'yes' -a "${terraform_driver}" != 'no' ]; then
        log "ERROR:terraform_driver should be set to yes or no"
+       ERR_FLG="false"
+       func_exit_and_delete_file
+    fi
+
+    if [ "${terraformcli_driver}" != 'yes' -a "${terraformcli_driver}" != 'no' ]; then
+       log "ERROR:terraformcli_driver should be set to yes or no"
        ERR_FLG="false"
        func_exit_and_delete_file
     fi
@@ -1288,6 +1309,7 @@ YUM_PACKAGE=(
     ["php"]="php php-bcmath php-cli php-ldap php-mbstring php-mysqlnd php-pear php-pecl-zip php-process php-snmp php-xml zip telnet mailx unzip php-json php-gd python3 python3-pip php-devel libyaml libyaml-devel make sudo crontabs"
     ["git"]="git"
     ["ansible"]="sshpass expect nc"
+    ["terraformcli"]="terraform"
 )
 
 
@@ -1410,12 +1432,12 @@ if [ "$ACTION" == "Install" ]; then
     if [ "$exec_mode" == 2 ]; then
         log "==========[START ITA BUILDER OFFLINE]=========="
         END_MESSAGE="==========[END ITA BUILDER OFFLINE]=========="
-        
+
     elif [ "$exec_mode" == 3 ]; then
         log "==========[START ITA BUILDER ONLINE]=========="
         END_MESSAGE="==========[END ITA BUILDER ONLINE]=========="
     fi
-    
+
     make_ita
 elif [ "$ACTION" == "Download" ]; then
     log "==========[START ITA GATHER LIBRARY]=========="

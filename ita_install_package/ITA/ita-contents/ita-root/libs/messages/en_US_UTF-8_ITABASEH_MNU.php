@@ -103,7 +103,7 @@ $ary["ITABASEH-MNU-104141"]         = "Specified host format";
 $ary["ITABASEH-MNU-104142"]         = "Method to specify build node.";
 $ary["ITABASEH-MNU-104151"]         = "Authentication method";
 $ary["ITABASEH-MNU-104152"]         = "Set a method for authentication with SCARB.
-For Windows OS type systems, choose a version of powershell. 
+For Windows OS type systems, choose a version of powershell.
 PowerShell version 4 or earlier
 PowerShell version 5 or later
 For Linux OS type systems, choose an authentication method from the following.
@@ -219,7 +219,7 @@ $ary["ITABASEH-MNU-108310"]         = "Error retry timeout";
 $ary["ITABASEH-MNU-108320"]         = "If the error persists beyond the specified time (seconds), the status display error.";
 $ary["ITABASEH-MNU-109006"]         = "ssh private key file";
 $ary["ITABASEH-MNU-109007"]         = "ssh private key file for key authentication.
-The uploaded file is encrypted and saved. 
+The uploaded file is encrypted and saved.
 If you download after registration, the encrypted file will be downloaded.";
 $ary["ITABASEH-MNU-109008"]         = "Passphrase";
 $ary["ITABASEH-MNU-109009"]         = "Enter the passphrase set in the ssh private key file.";
@@ -235,6 +235,9 @@ $ary["ITABASEH-MNU-109090"]         = "Description";
 $ary["ITABASEH-MNU-111010"]         = "Terraform Dedicated information";
 $ary["ITABASEH-MNU-111020"]         = "Organization:Workspace";
 $ary["ITABASEH-MNU-111030"]         = "Target Organization:Workspace.";
+$ary["ITABASEH-MNU-111040"]         = "Terraform-CLI Dedicated information";
+$ary["ITABASEH-MNU-111050"]         = "Workspace";
+$ary["ITABASEH-MNU-111060"]         = "Target Workspace.";
 $ary["ITABASEH-MNU-120001"]         = "Item";
 $ary["ITABASEH-MNU-120002"]         = "Item type";
 $ary["ITABASEH-MNU-120003"]         = "Parent Item";
@@ -321,7 +324,7 @@ $ary["ITABASEH-MNU-205050"]         = "Clear filter.";
 $ary["ITABASEH-MNU-205060"]         = "Scheduling";
 $ary["ITABASEH-MNU-205065"]         = "The following Symphony executions are possible. <br>・Immediate execution<br>・Scheduled execution <br>Select the Symphony class ID and Operation ID to execute.
 ";
-$ary["ITABASEH-MNU-205070"]         = "Specify the scheduled date/time in (YYYY/MM/DD HH:MM) 
+$ary["ITABASEH-MNU-205070"]         = "Specify the scheduled date/time in (YYYY/MM/DD HH:MM)
 Immediately execute when blank.";
 $ary["ITABASEH-MNU-205080"]         = "Scheduled date/time.";
 $ary["ITABASEH-MNU-205090"]         = "Symphony [Filter]";
