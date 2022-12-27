@@ -1,0 +1,6 @@
+/ita-root/terraform_cli_work
+/ita-root/temp/terraform_cli_module_temp
+/ita-root/logs/terraform_cli_out_logs
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100140001
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100140001/old
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100140001/old/-000140001
