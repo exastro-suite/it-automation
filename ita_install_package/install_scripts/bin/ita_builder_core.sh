@@ -264,6 +264,24 @@ mariadb_repository() {
     fi
 }
 
+# enable terraformcli repository
+terraformcli_repository() {
+    #Not used for offline installation
+    if [ "${REPOSITORY}" != "yum_all" ]; then
+    	# Add repository
+        yum-config-manager "$@" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+
+        # Check Creating repository
+        create_repo_check hashicorp >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        if [ $? -ne 0 ]; then
+            log "ERROR:Failed to get repository"
+            ERR_FLG="false"
+            func_exit_and_delete_file
+        fi
+
+        yum clean all >> "$ITA_BUILDER_LOG_FILE" 2>&1
+    fi
+}
 
 cat_tar_gz() {
     local location=$1
@@ -833,6 +851,8 @@ configure_terraform() {
 
 # Terraform-CLI
 configure_terraformcli() {
+    # Add repository
+    terraformcli_repository ${YUM_REPO_PACKAGE["terraformcli"]}
     # Install terraformcli packages.
     yum_install ${YUM_PACKAGE["terraformcli"]}
     # Check installation yum terraformcli packages.
@@ -1267,6 +1287,16 @@ YUM_REPO_PACKAGE_PHP_CLOUD=(
     ["physical"]=""
 )
 
+# yum repository package (for terraform)
+declare -A YUM_REPO_PACKAGE_TERRAFORMCLI;
+YUM_REPO_PACKAGE_TERRAFORMCLI=(
+    ["RHEL8"]="--add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+    ["RHEL7"]="--add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+    ["CentOS8"]="--add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+    ["CentOS7"]="--add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+    ["yum_all"]=""
+)
+
 # all yum repository packages
 declare -A YUM_REPO_PACKAGE;
 YUM_REPO_PACKAGE=(
@@ -1274,6 +1304,7 @@ YUM_REPO_PACKAGE=(
     ["yum-env-disable-repo"]=${YUM_REPO_PACKAGE_YUM_ENV_DISABLE_REPO[${REPOSITORY}]}
     ["php"]=${YUM_REPO_PACKAGE_PHP[${LINUX_OS}]}
     ["php_cloud"]=${YUM_REPO_PACKAGE_PHP_CLOUD[${CLOUD_REPO}]}
+    ["terraformcli"]=${YUM_REPO_PACKAGE_TERRAFORMCLI[${LINUX_OS}]}
 )
 
 
