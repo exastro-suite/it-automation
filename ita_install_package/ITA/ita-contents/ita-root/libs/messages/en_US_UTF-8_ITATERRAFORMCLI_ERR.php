@@ -163,4 +163,35 @@ $ary["ITATERRAFORMCLI-ERR-207330"]     = "An error occurred at the time of endin
 $ary["ITATERRAFORMCLI-ERR-207340"]     = "Failed to get the permission role of master data.";
 $ary["ITATERRAFORMCLI-ERR-207350"]     = "Since the access permission roles of the operation list and movement list do not match, Skip processing this data.  (menu:{} column: {} operation: {}({}) movement: {}({}))";
 
+$ary["ITATERRAFORMCLI-ERR-208010"]       = "Error occurred (Execution No:{} [FILE]{}[LINE]{}[ETC-Code]{})";
+$ary["ITATERRAFORMCLI-ERR-208020"]       = "Failed to start transaction.(Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208030"]       = "Failed to auto-number journal sequence. (Execution No:{} Sequence:{})";
+$ary["ITATERRAFORMCLI-ERR-208040"]       = "Failed to commit.(Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208050"]       = "Rollback has failed.(Execution No:{})";
+
+$ary["ITATERRAFORMCLI-ERR-208100"]       = "Failed to get execute instance information.(Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208110"]       = "Failed to update status. (status:Preparing Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208120"]       = "Failed to update status. (status:Executing Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208130"]       = "Failed to update status. (status:Executing (delayed)  Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208140"]       = "Failed to update status. (status:Completed Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208150"]       = "Failed to update status. (status:Completed (error)  Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208160"]       = "Failed to update status. (status:Unexpected error Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208170"]       = "Failed to update status. (status:Emergency stop  Execution No:{})";
+$ary["ITATERRAFORMCLI-ERR-208180"]       = "Start confirmation of execution process of execute instance failed.";
+$ary["ITATERRAFORMCLI-ERR-208190"]       = "No Terraform interface information record";
+$ary["ITATERRAFORMCLI-ERR-208191"]       = "Terraform interface info record is not a single line";
+$ary["ITATERRAFORMCLI-ERR-208200"]       = "Failed to acquire operation instance from executed operation.";
+$ary["ITATERRAFORMCLI-ERR-208210"]       = "Failed to acquire operation instance from non-executed operation.";
+$ary["ITATERRAFORMCLI-ERR-208220"]       = "The operation status' run process has not started. (Execution No.:{}:{})";
+$ary["ITATERRAFORMCLI-ERR-208230"]       = "Movement ID is not registered in Movement module link(MovementID:{})";
+$ary["ITATERRAFORMCLI-ERR-208240"]       = "Module associated with Movement does not exist.(MovementID:{})";
+$ary["ITATERRAFORMCLI-ERR-208250"]     = "Failed to get Member Variable information. ID:{}";
+$ary["ITATERRAFORMCLI-ERR-208251"]     = "Failed to get Member Variable information. (FILE:{} LINE:{} ID:{})";
+$ary["ITATERRAFORMCLI-ERR-208260"]     = "Failed to get Variable information.";
+$ary["ITATERRAFORMCLI-ERR-208261"]     = "Failed to get Variable information.(FILE:{} LINE:{})";
+$ary["ITATERRAFORMCLI-ERR-208270"]     = "Update status has failed. (Execution No:{} ステータス:{})";
+
+$ary["ITATERRAFORMCLI-ERR-208300"]     = "Failed to create directory. (Execution No:{} workspace-id:{} FILE:{} LINE:{})";
+$ary["ITATERRAFORMCLI-ERR-208310"]     = "Failed to configure directory permission settings.(Execution No:{} workspace-id:{} FILE:{} LINE:{})";
+$ary["ITATERRAFORMCLI-ERR-208320"]     = "Failed to create zip file.(Execution No:{} FILE:{} LINE:{})";
 ?>
