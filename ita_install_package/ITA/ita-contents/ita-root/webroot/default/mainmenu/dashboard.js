@@ -2291,7 +2291,8 @@ function setPieChart( resultData, type ) {
     'ansible-legacy': '/default/menu/01_browse.php?no=2100020103',
     'ansible-pioneer': '/default/menu/01_browse.php?no=2100020203',
     'ansible-legacy-role': '/default/menu/01_browse.php?no=2100020306',
-    'terraform': '/default/menu/01_browse.php?no=2100080004'
+    'terraform': '/default/menu/01_browse.php?no=2100080004',
+    'terraform-cli': '/default/menu/01_browse.php?no=2100200003'
   };
       
   let widgetID, pieChartData, pieChartTitle = '';
