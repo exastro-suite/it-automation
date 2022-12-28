@@ -95,23 +95,27 @@ function cm_transactionStart($execution_no, &$FREE_LOG) {
 
     try {
         if( $objDBCA->transactionStart()===false ){
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50067",array($execution_no));
+            // トランザクションスタートが失敗しました。
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208020", array($execution_no));
             require ($root_dir_path . $log_output_php );
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50051",
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010",
                                                     array($execution_no,
                                                     basename(__FILE__),__LINE__));
             return false;
         }
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
-            //$ary[50057] = "[処理]トランザクション開始 (作業No.:{})";
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-50057",array($execution_no));
+            // "[処理]トランザクション開始 (作業No.:{})";
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204010", array($execution_no));
             require ($root_dir_path . $log_output_php );
         }
         return true;
     } catch (Exception $e){
-        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50067",array($execution_no));
+        // トランザクションスタートが失敗しました。
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208020", array($execution_no));
         require ($root_dir_path . $log_output_php );
+        // 例外メッセージ
         $FREE_LOG = $e->getMessage();
         return false;
     }
@@ -131,23 +135,27 @@ function cm_transactionCommit($execution_no, &$FREE_LOG) {
     try {
         $r = $objDBCA->transactionCommit();
         if (!$r){
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50068",array($execution_no));
+            // トランザクションのコミットに失敗しました。
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208040",array($execution_no));
             require ($root_dir_path . $log_output_php );
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50051",
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010",
                                                     array($execution_no,
-                                                    basename(__FILE__),__LINE__));
+                                                    basename(__FILE__), __LINE__));
             return false;
         }
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
-            //$ary[51077] = "[処理]コミット(作業No.:{})";
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-51077",$execution_no);
+            // "[処理]コミット(作業No.:{})";
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204020", array($execution_no));
             require ($root_dir_path . $log_output_php );
         }
         return true;
     } catch (Exception $e){
-        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50068",array($execution_no));
+        // トランザクションのコミットに失敗しました。
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208040",array($execution_no));
         require ($root_dir_path . $log_output_php );
+        // 例外メッセージ
         $FREE_LOG = $e->getMessage();
         return false;
     }
@@ -165,21 +173,24 @@ function cm_transactionRollBack($execution_no, &$FREE_LOG) {
 
     try {
         if ($objDBCA->transactionRollBack() === false){
-            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-60009", array($execution_no));
+            // ロールバックに失敗しました。
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208050", array($execution_no));
             require ($root_dir_path . $log_output_php );
 
             return false;
         }
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
-            //$ary[51081] = "[処理]ロールバック(作業No.:{})";
-            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-60010", $execution_no);
+            // "[処理]ロールバック(作業No.:{})";
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204030", array($execution_no));
             require ($root_dir_path . $log_output_php );
         }
         return true;
     } catch (Exception $e){
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-60009", array($execution_no));
+        // ロールバックに失敗しました。
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208050", array($execution_no));
         require ($root_dir_path . $log_output_php );
+        // 例外メッセージ
         $FREE_LOG = $e->getMessage();
         return false;
     }
@@ -199,8 +210,8 @@ function cm_transactionExit($execution_no) {
     $objDBCA->transactionExit();
     // トレースメッセージ
     if ( $log_level === 'DEBUG' ){
-        //$ary[51078] = "[処理]トランザクション終了(作業No.:{})";
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-60006",$execution_no);
+        // "[処理]トランザクション終了(作業No.:{})";
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-60006", array($execution_no));
         require ($root_dir_path . $log_output_php );
     }
     return true;
@@ -221,22 +232,21 @@ function cm_dbaccessGetSequence($dbobj, $table_seq_name, $execution_no, &$FREE_L
     $retArray = $dbobj->dbaccessGetSequence($table_seq_name);
     if($retArray === null) {
         // OK
-        //$ary[50060] = "[警告]履歴シーケンスの採番に失敗しました。(作業No.:{} Sequence:{})";
-        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50060",$execution_no,$table_seq_name);
+        // 履歴シーケンスの採番に失敗しました。(作業No.:{} Sequence:{});
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208030", array($execution_no, $table_seq_name));
         require($root_dir_path . $log_output_php);
-
-        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50051",
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010",
                                                                 array($execution_no,
-                                                                basename(__FILE__),__LINE__)),
+                                                                basename(__FILE__), __LINE__)),
                                                                 $dbobj->getLastErrorMsg());
         return false;
-
     }
     // トレースメッセージ
     if ( $log_level === 'DEBUG' ){
         // OK
-        // $ary[50061] = "[処理]履歴シーケンス採番 (作業No.:{} Sequence:{})";
-        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-50061",array($execution_no,$table_seq_name));
+        // "[処理]履歴シーケンス採番 (作業No.:{} Sequence:{})";
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204040", array($execution_no, $table_seq_name));
         require($root_dir_path . $log_output_php);
     }
     return $retArray;
@@ -274,12 +284,13 @@ function cm_getEexecutionInstanceRow($dbobj, $in_execution_no, $in_exe_ins_msg_t
     $objQueryUtn = null;
     $ret = $dbobj->dbaccessExecute($sqlUtnBody, $arrayBind, $objQueryUtn);
     if($ret === false) {
-        // ary[50061] = "作業インスタンスの情報取得に失敗しました。(作業No.:{})";
-        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50061", array($in_execution_no));
+        // "作業インスタンスの情報取得に失敗しました。(作業No.:{})";
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208100", array($in_execution_no));
         require($root_dir_path . $log_output_php);
 
         // ログ出力
-        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50051",
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010",
                                                                 array($in_execution_no,
                                                                 basename(__FILE__),__LINE__)),
                                                                 $dbobj->getLastErrorMsg());
@@ -306,21 +317,21 @@ function cm_InstanceRecodeUpdate($dbobj, $in_exe_ins_msg_table_name, $in_exe_ins
     global $arrayConfig;
 
     $StatusUpdMsgArry         = array();
-    $StatusUpdMsgArry['2']    = 'ITAANSIBLEH-STD-50062';
-    $StatusUpdMsgArry['3']    = 'ITAANSIBLEH-STD-50063';
-    $StatusUpdMsgArry['4']    = 'ITAANSIBLEH-STD-50064';
-    $StatusUpdMsgArry['5']    = 'ITAANSIBLEH-STD-50065';
-    $StatusUpdMsgArry['6']    = 'ITAANSIBLEH-STD-50066';
-    $StatusUpdMsgArry['7']    = 'ITAANSIBLEH-STD-50067';
-    $StatusUpdMsgArry['8']    = 'ITAANSIBLEH-STD-50068';
+    $StatusUpdMsgArry['2']    = 'ITATERRAFORMCLI-STD-204050';
+    $StatusUpdMsgArry['3']    = 'ITATERRAFORMCLI-STD-204060';
+    $StatusUpdMsgArry['4']    = 'ITATERRAFORMCLI-STD-204070';
+    $StatusUpdMsgArry['5']    = 'ITATERRAFORMCLI-STD-204080';
+    $StatusUpdMsgArry['6']    = 'ITATERRAFORMCLI-STD-204090';
+    $StatusUpdMsgArry['7']    = 'ITATERRAFORMCLI-STD-204100';
+    $StatusUpdMsgArry['8']    = 'ITATERRAFORMCLI-STD-204110';
     $StatusUpdErrMsgArry      = array();
-    $StatusUpdErrMsgArry['2'] = 'ITAANSIBLEH-ERR-50052';
-    $StatusUpdErrMsgArry['3'] = 'ITAANSIBLEH-ERR-50053';
-    $StatusUpdErrMsgArry['4'] = 'ITAANSIBLEH-ERR-50054';
-    $StatusUpdErrMsgArry['5'] = 'ITAANSIBLEH-ERR-50055';
-    $StatusUpdErrMsgArry['6'] = 'ITAANSIBLEH-ERR-50056';
-    $StatusUpdErrMsgArry['7'] = 'ITAANSIBLEH-ERR-50057';
-    $StatusUpdErrMsgArry['8'] = 'ITAANSIBLEH-ERR-50058';
+    $StatusUpdErrMsgArry['2'] = 'ITATERRAFORMCLI-ERR-208100';
+    $StatusUpdErrMsgArry['3'] = 'ITATERRAFORMCLI-ERR-208110';
+    $StatusUpdErrMsgArry['4'] = 'ITATERRAFORMCLI-ERR-208120';
+    $StatusUpdErrMsgArry['5'] = 'ITATERRAFORMCLI-ERR-208130';
+    $StatusUpdErrMsgArry['6'] = 'ITATERRAFORMCLI-ERR-208140';
+    $StatusUpdErrMsgArry['7'] = 'ITATERRAFORMCLI-ERR-208150';
+    $StatusUpdErrMsgArry['8'] = 'ITATERRAFORMCLI-ERR-208160';
 
 
     $retArray = makeSQLForUtnTableUpdate($db_model_ch,
@@ -342,7 +353,8 @@ function cm_InstanceRecodeUpdate($dbobj, $in_exe_ins_msg_table_name, $in_exe_ins
         require ($root_dir_path . $log_output_php );
 
         // ログ出力
-        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50051",
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010",
                                                               array($in_execution_row['EXECUTION_NO'],
                                                               basename(__FILE__),__LINE__)),
                                                               $dbobj->getLastErrorMsg());
@@ -354,7 +366,8 @@ function cm_InstanceRecodeUpdate($dbobj, $in_exe_ins_msg_table_name, $in_exe_ins
         require ($root_dir_path . $log_output_php );
 
         // ログ出力
-        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50051",
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010",
                                                               array($in_execution_row['EXECUTION_NO'],
                                                               basename(__FILE__),__LINE__)),
                                                               $dbobj->getLastErrorMsg());

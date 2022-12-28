@@ -79,10 +79,9 @@ try {
 
     // 開始メッセージ
     if ($log_level === 'DEBUG') {
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50001");
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-202010");
         require($root_dir_path . $log_output_php);
     }
-
 
     //----------------------------------------------
     // DBコネクト
@@ -92,7 +91,7 @@ try {
     // トレースメッセージ
     if ($log_level === 'DEBUG') {
         // DBコネクト完了
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50003");
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-202030");
         require($root_dir_path . $log_output_php);
     }
 
@@ -104,7 +103,7 @@ try {
     $ret = ChildProcessExistCheck($dbobj);
     if($ret === false) {
         // 作業インスタンスの実行プロセスの起動確認が失敗しました。(作業No.:{})
-        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50074");
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208180");
 
         // 異常フラグON
         $error_flag = 1;
@@ -125,7 +124,7 @@ try {
         // 異常フラグON
         $error_flag = 1;
         // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000100")));
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-101010", array(__FILE__, __LINE__, "00000100")));
     }
     //SQL発行
     $r = $objQuery->sqlExecute();
@@ -133,7 +132,7 @@ try {
         // 異常フラグON
         $error_flag = 1;
         // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000200")));
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-101010", array(__FILE__, __LINE__, "00000200")));
     }
 
     //行数を取得
@@ -143,14 +142,14 @@ try {
         // 異常フラグON
         $error_flag = 1;
         // 例外処理へ：TERRAFORMインタフェース情報レコード無し
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-111010"));
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208190"));
     }
     //「TERRAFORMインタフェース情報」が重複登録されている場合も以降の処理をスキップ
     else if ($num_of_rows > 1) {
         // 異常フラグON
         $error_flag = 1;
         // 例外処理へ：TERRAFORMインタフェース情報レコードが単一行でない
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-111020"));
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208191"));
     }
     //1レコード取得
     while ($row = $objQuery->resultFetch()) {
@@ -178,12 +177,14 @@ try {
     $objQuery = null;
     $ret = $dbobj->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
     if($ret === false) {
-        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50069");
+        // 実行中の作業インスタンスの取得に失敗しました。
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208200");
         require($root_dir_path . $log_output_php);
 
         // ログ出力
-        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",
-                                                                array(basename(__FILE__),__LINE__,"00000100")),
+        // 異常発生([FILE]{}[LINE]{}[ETC-Code]{})
+        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-101010",
+                                                                array(basename(__FILE__), __LINE__, "00000300")),
                                                                 $dbobj->getLastErrorMsg());
         // 異常フラグON
         $error_flag = 1;
@@ -206,8 +207,7 @@ try {
 
     // トレースメッセージ
     if ($log_level === 'DEBUG') {
-        //$FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50006");
-        $FREE_LOG = "実行中のインスタンス数:ワークスペースID -> ".$num_of_run_instance .":". implode(",", $executed_worksapce_array);
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204120", array($num_of_run_instance, implode(",", $executed_worksapce_array)));
         require($root_dir_path . $log_output_php);
     }
 
@@ -231,11 +231,12 @@ try {
     $ret = $dbobj->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
     if($ret === false) {
         // ログ出力
-        $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50064");
+        // 
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208210");
         require($root_dir_path . $log_output_php);
-
-        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",
-                                                                array(basename(__FILE__),__LINE__,"00000100")),
+        // 異常発生([FILE]{}[LINE]{}[ETC-Code]{})
+        $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-101010",
+                                                                array(basename(__FILE__),__LINE__,"00000400")),
                                                                 $dbobj->getLastErrorMsg());
         // 異常フラグON
         $error_flag = 1;
@@ -249,7 +250,7 @@ try {
     if ($objQuery->effectedRowCount() < 1) {
         // 例外処理へ(例外ではないが・・・)
         $no_error_flag = 1;
-        throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-STD-50004") );
+        throw new Exception( $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204130") );
     }
 
     //----------------------------------------------
@@ -283,15 +284,15 @@ try {
 
     // トレースメッセージ
     if ($log_level === 'DEBUG') {
-        // 処理対象レコード検出(EXECUTION_NO:{$tgt_execution_no_array})
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50005", implode(",", $tgt_execution_no_array));
+        // 処理対象候補のレコードを検出(EXECUTION_NOのリスト:{})
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204140", implode(",", $tgt_execution_no_array));
         require($root_dir_path . $log_output_php);
     }
 
     // トレースメッセージ
     if ($log_level === 'DEBUG') {
         // ステータス「準備中」へのUPDATEループ開始
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50006");
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204150");
         require($root_dir_path . $log_output_php);
     }
 
@@ -317,6 +318,12 @@ try {
         $num_of_run_instance++;
 
         // 対象作業インスタンスを実行（ワークスペースを配列にキャッシュ）
+        // トレースメッセージ
+        if ($log_level === 'DEBUG') {
+            // 処理対象レコードを検出(EXECUTION_NO:{} workspace-id:{})
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204160", array($execution_no, $workspace_id));
+            require($root_dir_path . $log_output_php);
+        }
         $executed_worksapce_array[] = $workspace_id;
         $ret = InstanceExecution($tgt_data);
         if($ret === false) {
@@ -326,12 +333,12 @@ try {
             //----------------------------------------------
             // 異常フラグON
             $error_flag = 1;
-            // 作業インスタンスの実行が失敗しました。(作業No.:{})
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50071",array($execution_no));
+            // 作業インスタンスの実行プロセスが起動していません。(作業No.:{}:{})
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208220", array($execution_no, $workspace_id));
             require ($root_dir_path . $log_output_php );
 
-            // ステータスを想定外エラーに設定出来ませんでした。(作業No.:{})
-            $ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50072",array($execution_no));
+            // ステータスの更新に失敗しました。 (ステータス: 想定外エラー 作業No.:{})
+            $ErrorMsg = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208160",array($execution_no));
             //----------------------------------------------
             // トランザクション開始
             //----------------------------------------------
@@ -386,8 +393,8 @@ try {
             //----------------------------------------------
             cm_transactionExit($execution_no);
 
-            // ステータスを想定外エラーに設定しました。(作業No.:{}:{})
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50075",array($execution_no));
+            // [処理]ステータスの更新 (ステータス: 想定外エラー 作業No.:{})
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204100", array($execution_no));
             require ($root_dir_path . $log_output_php );
 
             break;
@@ -430,7 +437,7 @@ if ($error_flag != 0) {
     // 終了メッセージ
     if ($log_level === 'DEBUG') {
         // プロシージャ終了(異常)
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-101090");
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-206030");
         require($root_dir_path . $log_output_php);
     }
 
@@ -441,7 +448,7 @@ if ($error_flag != 0) {
     // 終了メッセージ
     if ($log_level === 'DEBUG') {
         // プロシージャ終了(正常)
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50002");
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-202020");
         require($root_dir_path . $log_output_php);
     }
 
@@ -493,13 +500,14 @@ function ChildProcessExistCheck($dbobj) {
         $ret = $dbobj->dbaccessExecute($sqlBody, $arrayBind, $objQuery);
         if($ret === false) {
             // ログ出力
-            $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50003",
-                                                                   array(basename(__FILE__),__LINE__,"00000100")),
+            // 異常発生([FILE]{}[LINE]{}[ETC-Code]{})
+            $FREE_LOG = sprintf("%s\n%s", $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-101010",
+                                                                   array(basename(__FILE__),__LINE__,"00000500")),
                                                                    $dbobj->getLastErrorMsg());
 
             require ($root_dir_path . $log_output_php );
 
-            throw new Exception($objMTS->getSomeMessage("ITAANSIBLEH-ERR-50069")); 
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208200")); 
         }
         while( $row = $objQuery->resultFetch() ){
             $execution_no = $row['EXECUTION_NO'];
@@ -534,8 +542,11 @@ function ChildProcessExistCheck($dbobj) {
                 }
             }
             if($is_hit === true) {
-                $FREE_LOG = "死んでいる実行中インスタンスはない";
-                require($root_dir_path . $log_output_php);
+                if ($log_level === 'DEBUG') {
+                    // "実行中インスタンスの子プロセスが存在していることを確認しました。(作業No.:{})
+                    $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204170", array($execution_no));
+                    require($root_dir_path . $log_output_php);
+                }
                 continue;
             }
 
@@ -545,11 +556,11 @@ function ChildProcessExistCheck($dbobj) {
             //----------------------------------------------
 
             // 作業インスタンスの実行プロセスが起動していません。(作業No.:{})
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50071",array($execution_no));
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208220", array($execution_no, $workspace_id));
             require ($root_dir_path . $log_output_php );
 
-            // ステータスを想定外エラーに設定出来ませんでした。(作業No.:{})
-            $ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50072",array($execution_no));
+            // ステータスの更新に失敗しました。 (ステータス: 想定外エラー 作業No.:{})
+            $ErrorMsg = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208160", array($execution_no));
             //----------------------------------------------
             // トランザクション開始
             //----------------------------------------------
@@ -609,8 +620,8 @@ function ChildProcessExistCheck($dbobj) {
             //----------------------------------------------
             cm_transactionExit($execution_no);
 
-            // ステータスを想定外エラーに設定しました。(作業No.:{}:{})
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50075",array($execution_no));
+            // [処理]ステータスの更新 (ステータス: 想定外エラー 作業No.:{})
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204100", array($execution_no));
             require ($root_dir_path . $log_output_php );
         }
         return true;
@@ -648,8 +659,8 @@ function InstanceExecution($execution_instance) {
     try {
         $dbobj = new CommonDBAccessCoreClass($db_model_ch,$objDBCA,$objMTS, $db_access_user_id);
 
-        // ステータスを準備中に出来ませんでした。(作業No.:{})
-        $ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50072",array($execution_no));
+        // ステータスの更新に失敗しました。 (ステータス: 準備中 作業No.:{})
+        $ErrorMsg = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208110",array($execution_no));
         //----------------------------------------------
         // トランザクション開始
         //----------------------------------------------
@@ -722,22 +733,22 @@ function InstanceExecution($execution_instance) {
         if (!file_exists($workspace_dir)) {
             if (!mkdir($workspace_dir, 0777, true)) {
                 // 例外処理へ
-                throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010", array($execution_no, $workspace_id, __FILE__, __LINE__)));
+                throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208300", array($execution_no, $workspace_id, __FILE__, __LINE__)));
             }
             if (!chmod($workspace_dir, 0777)) {// mkdirのpermissisonは失敗するケースがある
                 // 例外処理へ
-                throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, $workspace_id, __FILE__, __LINE__)));
+                throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208310", array($execution_no, $workspace_id, __FILE__, __LINE__)));
             }
         }
         $workspace_work_dir = $workspace_dir . "/" . $exec_base_work_dir;
         if (!file_exists($workspace_work_dir)) {
             if (!mkdir($workspace_work_dir, 0777, true)) {
                 // 例外処理へ
-                throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010", array($execution_no, $workspace_id, __FILE__, __LINE__)));
+                throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208300", array($execution_no, $workspace_id, __FILE__, __LINE__)));
             }
             if (!chmod($workspace_work_dir, 0777)) {// mkdirのpermissisonは失敗するケースがある
                 // 例外処理へ
-                throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, $workspace_id, __FILE__, __LINE__)));
+                throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208310", array($execution_no, $workspace_id, __FILE__, __LINE__)));
             }
         }
         //----------------------------------------------
@@ -767,8 +778,8 @@ function InstanceExecution($execution_instance) {
 
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
-            // [処理]処理対象インスタンス 実行プロセス起動(作業No.:workspace_name:execution_no)
-            $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-50077",array($workspace_name, $execution_no));
+            // "[処理]処理対象インスタンス 実行プロセス起動開始(作業No.:{} workspace-name:{})"
+            $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204180",array($execution_no, $workspace_name));
             require($root_dir_path . $log_output_php);
         }
 
