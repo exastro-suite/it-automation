@@ -1212,7 +1212,7 @@ $tmpFx = function ($objOLA, $aryProperParameter=array()){
     $strFxName = "<noname:[GROUP]getThemeColorName,[FILE]".__FILE__.">";
 
     //----オーケストレータ別の設定記述
-    $strColorName = 'terraformblue';
+    $strColorName = 'terraformcliblue';
     //オーケストレータ別の設定記述----
 
     $retArray = array($strColorName,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);

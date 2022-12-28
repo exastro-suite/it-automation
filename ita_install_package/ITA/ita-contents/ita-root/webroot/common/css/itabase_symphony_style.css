@@ -604,6 +604,12 @@ border-top: none;border-radius: 0 0 4px 4px;
 }
 /* ------- Terraform */
 
+/* TerraformCLI ------- */
+.terraformcliblue {
+  background: #5c78e5;
+}
+/* ------- TerraformCLI */
+
 /* unknown ------- */
 .unknowngray {
   background: #808080;
