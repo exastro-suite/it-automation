@@ -30,9 +30,9 @@ $execution_no = intval($execution_no_str); // execution no
 $workspace_id_str = preg_replace('/^wsid=/', "", $argv[2]); // workspace_id 10桁
 $workspace_id = intval($workspace_id_str); // workspace_id
 $execution_info = $argv[3];  // workspace_id 10桁:execution no 10桁
-var_dump("execution_no=".$execution_no);
-var_dump("workspace_id=".$workspace_id);
-var_dump($execution_info);
+// var_dump("execution_no=".$execution_no);
+// var_dump("workspace_id=".$workspace_id);
+// var_dump($execution_info);
 
 /////////////////////////////
 // ルートディレクトリを取得
@@ -131,7 +131,7 @@ try {
 
     // 開始メッセージ
     if ($log_level === 'DEBUG') {
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50001");
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204190", $execution_no);
         require($root_dir_path . $log_output_php);
     }
 
@@ -144,7 +144,7 @@ try {
     // トレースメッセージ
     if ($log_level === 'DEBUG') {
         // DBコネクト完了
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50003");
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-202030");
         require($root_dir_path . $log_output_php);
     }
 
@@ -158,7 +158,7 @@ try {
         // 異常フラグON
         $error_flag = 1;
         // 例外処理へ
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, __FILE__, __LINE__)));
+        throw new Exception($FREE_LOG);
     }
     // var_dump($execution_row);
     // 更新用にクローン作製
@@ -180,8 +180,8 @@ try {
 
     // トレースメッセージ
     if ($log_level === 'DEBUG') {
-        // [処理]レコードロック(作業No.:{$execution_no})要変更
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50012", $execution_no);
+        // 作業インスタンス情報を取得しました。(作業No.:{})
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204220", $execution_no);
         require($root_dir_path . $log_output_php);
     }
 
@@ -201,13 +201,13 @@ try {
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010", array($execution_no, __FILE__, __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208300", array($execution_no, $workspace_id, __FILE__, __LINE__)));
         }
         if (!chmod($log_path, 0777)) {// mkdirのpermissisonは失敗するケースがある
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, __FILE__, __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208310", array($execution_no, $workspace_id, __FILE__, __LINE__)));
         }
     }
 
@@ -230,8 +230,8 @@ try {
     if(file_exists($workspace_work_dir) === false) {
         // 異常フラグON
         $error_flag = 1;
-        // 例外処理へ
-        throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000051");
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
 
     //----------------------------------------------
@@ -241,7 +241,7 @@ try {
     //----------------------------------------------
     chdir($workspace_work_dir);
     // ロックファイル, 実行結果ファイル
-    $rm_list = [$exe_lock_file_path, $resut_file_path];
+    $rm_list = [$exe_lock_file_path, $resut_file_path, $emergency_stop_file_path];
     if ($run_mode != $RUN_MODE_DESTROY) {
         $cp_cmd = sprintf('/bin/rm -fr *.tf *.tfvars %s', implode(" ", $rm_list));
     }else{
@@ -252,7 +252,7 @@ try {
     // 緊急停止のチェック
     $ret = IsEmergencyStop();
     if($ret == false) {
-        throw new Exception("緊急停止");
+        throw new Exception($FREE_LOG);
     }
 
     //----------------------------------------------
@@ -267,8 +267,8 @@ try {
     if ($objQuery->getStatus() === false) {
         // 異常フラグON
         $error_flag = 1;
-        // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00002400")));
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
 
     // SQL発行
@@ -276,15 +276,19 @@ try {
     if (!$r) {
         // 異常フラグON
         $error_flag = 1;
-        // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00002500")));
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
     // fetch行数を取得
     $fetch_counter = $objQuery->effectedRowCount();
     if ($fetch_counter < 1) {
         $error_flag = 1;
-        // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00002600")));
+        //error_logにメッセージを追記
+        $message = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__));
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        LocalLogPrint($error_log, $message);
+
+        throw new Exception($message);
     }
 
     // レコードFETCH
@@ -308,8 +312,8 @@ try {
         if ($objQuery->getStatus() === false) {
             // 異常フラグON
             $error_flag = 1;
-            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00002200")));
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
         }
 
         // SQL発行
@@ -317,14 +321,14 @@ try {
         if (!$r) {
             // 異常フラグON
             $error_flag = 1;
-            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00002300")));
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
         }
         // fetch行数を取得
         $fetch_counter = $objQuery->effectedRowCount();
         if ($fetch_counter < 1) {
             //error_logにメッセージを追記
-            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-131010", $pattern_id);
+            $message = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208230", $pattern_id);
             LocalLogPrint($error_log, $message);
 
             // 異常フラグON
@@ -368,8 +372,8 @@ try {
         if ($objQuery->getStatus() === false) {
             // 異常フラグON
             $error_flag = 1;
-            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00004200")));
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
         }
 
         // SQL発行
@@ -377,8 +381,8 @@ try {
         if (!$r) {
             // 異常フラグON
             $error_flag = 1;
-            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00004300")));
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
         }
 
         // fetch行数を取得
@@ -392,11 +396,13 @@ try {
                 );
             }
         } else {
-            //error_logにメッセージを追記
-            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-131040", $pattern_id); //Movementに紐づくModuleが存在しません(MovementID:{})
-
             // 警告フラグON
             $error_flag = 1;
+
+            //error_logにメッセージを追記
+            //Movementに紐づくModuleが存在しません(MovementID:{})
+            $message = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208240", $pattern_id);
+            LocalLogPrint($error_log, $message);
             // 例外処理へ
             throw new Exception($message);
         }
@@ -445,8 +451,8 @@ try {
         if ($objQuery->getStatus() === false) {
             // 異常フラグON
             $error_flag = 1;
-            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00003000")));
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
         }
 
         // SQL発行
@@ -454,8 +460,8 @@ try {
         if (!$r) {
             // 異常フラグON
             $error_flag = 1;
-            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00003100")));
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
         }
         // fetch行数を取得
         $fetch_counter = $objQuery->effectedRowCount();
@@ -681,14 +687,15 @@ try {
                         }
                         if (!empty($err_id_list)) {
                             $ids_string = json_encode($err_id_list);
-                            //error_logにメッセージを追記
-                            $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221140", array($ids_string)); //メンバー変数の取得に失敗しました。ID:[]
+                            // error_logにメッセージを追記
+                            // メンバー変数の取得に失敗しました。ID:[]
+                            $message = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208250", array($ids_string));
                             LocalLogPrint($error_log, $message);
 
                             // 異常フラグON
                             $error_flag = 1;
-                            // 例外処理へ
-                            $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221141", array(__FILE__, __LINE__, $ids_string));
+                            // メンバー変数の取得に失敗しました。(FILE:{} LINE:{} ID:{})
+                            $backyard_log = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208251", array(__FILE__, __LINE__, $ids_string));
                             throw new Exception($backyard_log);
                         }
 
@@ -703,14 +710,15 @@ try {
 
                 // 変数エラーキャッチ(ID変換失敗時)
                 if ($var_key == NULL) {
-                    //error_logにメッセージを追記
-                    $message = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221130"); //変数名の取得に失敗しました。
+                    // error_logにメッセージを追記
+                    // 変数名の取得に失敗しました。
+                    $message = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208260");
                     LocalLogPrint($error_log, $message);
 
                     // 異常フラグON
                     $error_flag = 1;
-                    // 例外処理へ
-                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORM-ERR-221131", array(__FILE__, __LINE__));
+                    // 変数の取得に失敗しました。(FILE:{} LINE:{})
+                    $backyard_log = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208261", array(__FILE__, __LINE__));
                     throw new Exception($backyard_log);
                 }
 
@@ -751,27 +759,27 @@ try {
     $delay_flag = 0;
 
     // ステータスが準備中(2)、かつ制限時間が設定されている場合のみ遅延判定する
-    if( $execution_row['STATUS_ID'] == $STATUS_PREPARE && $time_limit != "" ){
-        // 開始時刻(「UNIXタイム.マイクロ秒」)を生成
-        $varTimeDotMirco = convFromStrDateToUnixtime($execution_row['TIME_START'], true);
-        // 開始時刻(マイクロ秒)＋制限時間(分→秒)＝制限時刻(マイクロ秒)
-        $varTimeDotMirco_limit = $varTimeDotMirco + ($time_limit * 60); //単位（秒）
+    // if( $execution_row['STATUS_ID'] == $STATUS_PREPARE && $time_limit != "" ){
+    //     // 開始時刻(「UNIXタイム.マイクロ秒」)を生成
+    //     $varTimeDotMirco = convFromStrDateToUnixtime($execution_row['TIME_START'], true);
+    //     // 開始時刻(マイクロ秒)＋制限時間(分→秒)＝制限時刻(マイクロ秒)
+    //     $varTimeDotMirco_limit = $varTimeDotMirco + ($time_limit * 60); //単位（秒）
 
-        // 現在時刻(「UNIXタイム.マイクロ秒」)を生成
-        $varTimeDotNowStd = getMircotime(0);
+    //     // 現在時刻(「UNIXタイム.マイクロ秒」)を生成
+    //     $varTimeDotNowStd = getMircotime(0);
 
-        // 制限時刻と現在時刻を比較
-        if( $varTimeDotMirco_limit < $varTimeDotNowStd ){
-            $delay_flag = 1;
+    //     // 制限時刻と現在時刻を比較
+    //     if( $varTimeDotMirco_limit < $varTimeDotNowStd ){
+    //         $delay_flag = 1;
 
-            // トレースメッセージ
-            if ( $log_level === 'DEBUG' ){
-                //$ary[50030] = "[処理]遅延を検出しました。(作業No.:{})";
-                $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-STD-50030",$in_execution_no);
-                require ($root_dir_path . $log_output_php );
-            }
-        }
-    }
+    //         // トレースメッセージ
+    //         if ( $log_level === 'DEBUG' ){
+    //             // "[処理]遅延を検出しました。(作業No.:{})";
+    //             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204230", $execution_no);
+    //             require ($root_dir_path . $log_output_php );
+    //         }
+    //     }
+    // }
     // 遅延が発生の場合
     if( $delay_flag == 1 ){
         $cln_execution_row['STATUS_ID'] = $STATUS_PROCESS_DELAYED;
@@ -787,7 +795,7 @@ try {
         // 異常フラグON
         $error_flag = 1;
         // 例外処理へ
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, __FILE__, __LINE__)));
+        throw new Exception($FREE_LOG);
     }
     $cln_execution_row['JOURNAL_SEQ_NO'] = $intJournalSeqNo;
     // ステータス更新
@@ -796,13 +804,13 @@ try {
         // 異常フラグON
         $error_flag = 1;
         // 例外処理へ
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, __FILE__, __LINE__)));
+        throw new Exception($FREE_LOG);
     }
 
     // 緊急停止のチェック
     $ret = IsEmergencyStop();
     if($ret == false) {
-        throw new Exception("緊急停止");
+        throw new Exception($FREE_LOG);
     }
 
     //----------------------------------------------
@@ -815,8 +823,8 @@ try {
     if($exec_lock === false){
         // 異常フラグON
         $error_flag = 1;
-        // 例外処理へ
-        throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000051");
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
     flock($exec_lock, LOCK_EX, $wouldblock);
 
@@ -829,7 +837,7 @@ try {
     // initの実行
     //----------------------------------------------
     $command = "terraform init";
-    $ret = ExecCommand($command, $init_log, true);
+    $ret = ExecCommand($command, $init_log, true, $FREE_LOG);
     if( $ret !== $STATUS_COMPLETE ){
         // 異常フラグON
         $error_flag = 1;
@@ -844,7 +852,7 @@ try {
         $ret = IsEmergencyStop();
         if($ret == false) {
             fclose($exec_lock);
-            throw new Exception("緊急停止");
+            throw new Exception($FREE_LOG);
         }
 
         //----------------------------------------------
@@ -855,7 +863,7 @@ try {
         } else {
             $command = "terraform plan -destroy";
         }
-        $ret = ExecCommand($command, $plan_log);
+        $ret = ExecCommand($command, $plan_log, false, $FREE_LOG);
         if( $ret !== $STATUS_COMPLETE ){
             // 異常フラグON
             $error_flag = 1;
@@ -869,7 +877,7 @@ try {
         $ret = IsEmergencyStop();
         if($ret == false) {
             fclose($exec_lock);
-            throw new Exception("緊急停止");
+            throw new Exception($FREE_LOG);
         }
 
         //----------------------------------------------
@@ -881,13 +889,13 @@ try {
                 array_push($command_options, "-var-file secure.tfvars");
             }
             $command = "terraform apply -auto-approve ".implode(" ", $command_options);
-            $ret = ExecCommand($command, $apply_log);
+            $ret = ExecCommand($command, $apply_log, false, $FREE_LOG);
         //----------------------------------------------
         // destroyの実行
         //----------------------------------------------
         } elseif ($run_mode == $RUN_MODE_DESTROY){
             $command = "terraform destroy -auto-approve";
-            $ret = ExecCommand($command, $apply_log);
+            $ret = ExecCommand($command, $apply_log, false, $FREE_LOG);
         }
 
         if( $ret !== $STATUS_COMPLETE ){
@@ -899,7 +907,7 @@ try {
             array_push($ary_result_matter, $apply_log);
         }
         //stateファイルの暗号化
-        SaveEncryptStateFile();
+        SaveEncryptStateFile($FREE_LOG);
     }
 
     // ファイルによる排他ロック解除
@@ -936,8 +944,8 @@ try {
         if( $objQuery->getStatus()===false ){
             // 異常フラグON
             $error_flag = 1;
-            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-            throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000100")) );
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
         }
 
         //SQL発行
@@ -945,8 +953,8 @@ try {
         if (!$r){
             // 異常フラグON
             $error_flag = 1;
-            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-            throw new Exception( $objMTS->getSomeMessage("ITATERRAFORM-ERR-101010",array(__FILE__,__LINE__,"00000200")) );
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
         }
 
         //呼び出し元ConductorのインスタンスNoを取得
@@ -966,16 +974,16 @@ try {
         $ary_pipe = [];
         $res_process = proc_open($command, $obj_descriptor_spec, $ary_pipe);
         if (is_resource($res_process)===false ){
-            // 異常発生 ([FILE]{}[LINE]{}[ETC-Code]{})
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00002200")));
+            // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
         }
     }
 
     //----------------------------------------------
     // 最終ステータスを更新
     //----------------------------------------------
-    // ステータスを更新出来ませんでした。(作業No.:{})
-    $ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50072",array($execution_no));
+    // ステータスを更新出来ませんでした。(作業No.:{} ステータス:{})
+    $ErrorMsg = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208270", array($execution_no, $update_status));
     //----------------------------------------------
     // トランザクション開始
     //----------------------------------------------
@@ -1054,7 +1062,7 @@ try {
     }
 
     // メッセージ出力
-    if($emergency_flg == 0) {
+    if($emergency_flg == 0 && $error_flag == 0) {
         $FREE_LOG = $e->getMessage();
         require($root_dir_path . $log_output_php);
     }
@@ -1076,8 +1084,8 @@ try {
         //----------------------------------------------
         // 処理中にエラーがあった場合、ステータスを「想定外エラー」に設定
         //----------------------------------------------
-        // ステータスを想定外エラーに設定出来ませんでした。(作業No.:{})
-        $ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50072",array($execution_no));
+        // ステータスの更新に失敗しました。 (ステータス: 想定外エラー 作業No.:{})
+        $ErrorMsg = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208160", array($execution_no));
         //----------------------------------------------
         // トランザクション開始
         //----------------------------------------------
@@ -1150,8 +1158,8 @@ try {
 if ($error_flag != 0) {
     // 終了メッセージ
     if ($log_level === 'DEBUG') {
-        // プロシージャ終了(異常)
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-ERR-101090");
+        // [処理]プロシージャ終了(異常) (作業No.:{})
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204210", array($execution_no));
         require($root_dir_path . $log_output_php);
     }
 
@@ -1159,8 +1167,8 @@ if ($error_flag != 0) {
 } else {
     // 終了メッセージ
     if ($log_level === 'DEBUG') {
-        // プロシージャ終了(正常)
-        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORM-STD-50002");
+        // [処理]プロシージャ終了(正常) (作業No.:{})
+        $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204200", array($execution_no));
         require($root_dir_path . $log_output_php);
     }
 
@@ -1171,18 +1179,23 @@ if ($error_flag != 0) {
 //----------------------------------------------
 // terraformコマンドの発行
 //----------------------------------------------
-function ExecCommand($command, $cmd_log, $is_make_file = false) {
+function ExecCommand($command, $cmd_log, $is_make_file = false, &$FREE_LOG) {
     global $terraform_env;
 
+    global $objMTS;
+    global $db_model_ch;
     global $root_dir_path;
     global $log_output_php;
     global $log_output_dir;
     global $log_file_prefix;
+    global $log_level;
+    global $db_access_user_id;
 
     // global $workspace_work_dir;
     global $execution_no;
     global $resut_file_path;
     global $error_log;
+    global $error_flag;
 
     //----------------------------------------------
     // 変数・function定義
@@ -1209,7 +1222,7 @@ function ExecCommand($command, $cmd_log, $is_make_file = false) {
         // 起動できたかを確認する
         if (is_resource($res_process)===false ){
             // 例外処理へ
-            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000100");
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__);
         }
 
         // コマンドの実行ステータスを取得
@@ -1220,7 +1233,7 @@ function ExecCommand($command, $cmd_log, $is_make_file = false) {
         // すでにファイルが存在していた
         if( $is_make_file === true && is_file($resut_file_path) === true ){
             // 例外処理へ
-            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000300");
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__);
         }
 
         // コマンドとPIDを書き込む
@@ -1232,7 +1245,7 @@ function ExecCommand($command, $cmd_log, $is_make_file = false) {
         }
         if( $is_write_result_file === false ){
             // 例外処理へ
-            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000400");
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__);
         }
 
         // 終了するまで待つ
@@ -1260,7 +1273,7 @@ function ExecCommand($command, $cmd_log, $is_make_file = false) {
         $is_write_result_file = file_put_contents($resut_file_path, $str_body, FILE_APPEND | LOCK_EX);
         if( $is_write_result_file === false ){
             // 例外処理へ
-            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__.',[PLACE]'."00000400");
+            throw new Exception('[FILE]'.__FILE__.',[LINE]'.__LINE__);
         }
 
         return $update_status;
@@ -1276,14 +1289,19 @@ function ExecCommand($command, $cmd_log, $is_make_file = false) {
 //----------------------------------------------
 // stateファイルを、一時格納先ディレクトリに暗号化して保存
 //----------------------------------------------
-function SaveEncryptStateFile() {
+function SaveEncryptStateFile(&$FREE_LOG) {
+    global $objMTS;
+    global $db_model_ch;
     global $root_dir_path;
     global $log_output_php;
     global $log_output_dir;
     global $log_file_prefix;
+    global $log_level;
+    global $db_access_user_id;
 
     global $tar_temp_save_dir;
 
+    global $error_log;
     global $error_flag;
     global $workspace_work_dir;
     global $ary_result_matter;
@@ -1295,13 +1313,13 @@ function SaveEncryptStateFile() {
         if (!file_exists($tar_temp_save_dir)) {
             if (!mkdir($tar_temp_save_dir, 0777, true)) {
                 // 例外処理へ
-                throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010", array($execution_no, __FILE__, __LINE__)));
+                throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208300", array($execution_no, $workspace_id, __FILE__, __LINE__)));
             }
             if (!chmod($tar_temp_save_dir, 0777)) {// mkdirのpermissisonは失敗するケースがある
                 // 異常フラグON
                 $error_flag = 1;
                 // 例外処理へ
-                throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, __FILE__, __LINE__)));
+                throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208310", array($execution_no, $workspace_id, __FILE__, __LINE__)));
             }
         }
 
@@ -1311,13 +1329,13 @@ function SaveEncryptStateFile() {
         //作業実行Noのディレクトリを作成
         if (!mkdir($tgt_execution_dir, 0777, true)) {
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010", array($execution_no, __FILE__, __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208300", array($execution_no, $workspace_id, __FILE__, __LINE__)));
         }
         if (!chmod($tgt_execution_dir, 0777)) {// mkdirのpermissisonは失敗するケースがある
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, __FILE__, __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208310", array($execution_no, $workspace_id, __FILE__, __LINE__)));
         }
 
         //1:tfstate
@@ -1334,11 +1352,11 @@ function SaveEncryptStateFile() {
         //空ファイルを生成
         if(!touch($encrypt_state_file)){
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($execution_no, __FILE__ , __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208300",array($execution_no, $workspace_id, __FILE__ , __LINE__)));
         }else{
             if(!chmod($encrypt_state_file, 0777)){
                 // 例外処理へ
-                throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($execution_no, __FILE__ , __LINE__)));
+                throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208310",array($execution_no, $workspace_id, __FILE__ , __LINE__)));
             }
         }
         //ファイルに中身を追記
@@ -1359,11 +1377,11 @@ function SaveEncryptStateFile() {
         //空ファイルを生成
         if(!touch($encrypt_state_file)){
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010",array($execution_no, __FILE__ , __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208300",array($execution_no, $workspace_id, __FILE__ , __LINE__)));
         }else{
             if(!chmod($encrypt_state_file, 0777)){
                 // 例外処理へ
-                throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020",array($execution_no, __FILE__ , __LINE__)));
+                throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208310",array($execution_no, $workspace_id, __FILE__ , __LINE__)));
             }
         }
         //ファイルに中身を追記
@@ -1386,9 +1404,20 @@ function SaveEncryptStateFile() {
 // 投入ファイル:ZIPファイルを作成する(ITAダウンロード用)
 //----------------------------------------------
 function MakeInputZipFile() {
+    global $objMTS;
+    global $db_model_ch;
+    global $root_dir_path;
+    global $log_output_php;
+    global $log_output_dir;
+    global $log_file_prefix;
+    global $log_level;
+    global $db_access_user_id;
+
     global $vg_exe_ins_input_file_dir;
 
+    global $error_log;
     global $error_flag;
+    global $execution_no;
     global $execution_no_str;
     global $ary_input_matter;
     global $input_zip_file_name;
@@ -1401,13 +1430,13 @@ function MakeInputZipFile() {
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010", array($execution_no, __FILE__, __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208300", array($execution_no, $workspace_id, __FILE__, __LINE__)));
         }
         if (!chmod($in_utn_file_dir, 0777)) {// mkdirのpermissisonは失敗するケースがある
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, __FILE__, __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208310", array($execution_no, $workspace_id, __FILE__, __LINE__)));
         }
     }
     //ZIPファイル名を定義
@@ -1423,17 +1452,20 @@ function MakeInputZipFile() {
     if (!file_exists($in_utn_file_dir . "/" . $input_zip_file_name)) {
         // 異常フラグON
         $error_flag = 1;
-        // 例外処理へ
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121040", array($execution_no, __FILE__, __LINE__)));
+        // zipファイルの作成に失敗しました。(作業No:{} FILE:{} LINE:{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208320", array($execution_no, __FILE__, __LINE__)));
     }
 }
 //----------------------------------------------
 // 結果ファイルの格納:ZIPファイルを作成する(ITAダウンロード用)
 //----------------------------------------------
 function MakeResultZipFile() {
+    global $objMTS;
+
     global $vg_exe_ins_result_file_dir;
 
     global $error_flag;
+    global $execution_no;
     global $execution_no_str;
     global $ary_result_matter;
     global $result_zip_file_name;
@@ -1446,13 +1478,13 @@ function MakeResultZipFile() {
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121010", array($execution_no, __FILE__, __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208300", array($execution_no, $workspace_id, __FILE__, __LINE__)));
         }
         if (!chmod($in_utn_file_dir, 0777)) {// mkdirのpermissisonは失敗するケースがある
             // 異常フラグON
             $error_flag = 1;
             // 例外処理へ
-            throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121020", array($execution_no, __FILE__, __LINE__)));
+            throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208310", array($execution_no, $workspace_id, __FILE__, __LINE__)));
         }
     }
 
@@ -1469,8 +1501,8 @@ function MakeResultZipFile() {
     if (!file_exists($in_utn_file_dir . "/" . $result_zip_file_name)) {
         // 異常フラグON
         $error_flag = 1;
-        // 例外処理へ
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-121040", array($execution_no, __FILE__, __LINE__)));
+        // zipファイルの作成に失敗しました。(作業No:{} FILE:{} LINE:{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208320", array($execution_no, __FILE__, __LINE__)));
     }
 }
 //----------------------------------------------
@@ -1484,6 +1516,7 @@ function IsEmergencyStop() {
     global $log_output_dir;
     global $log_file_prefix;
     global $log_level;
+    global $FREE_LOG;
 
     global $vg_exe_ins_msg_table_name;
     global $vg_exe_ins_msg_table_jnl_seq;
@@ -1507,25 +1540,26 @@ function IsEmergencyStop() {
     }
 
     // 緊急停止を検知しました。
-    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50071",array($execution_no));
+    $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204240", array($execution_no));
     require ($root_dir_path . $log_output_php );
     // 緊急停止フラグON
     $emergency_flg = 1;
 
     // 結果ファイルがあれば作る
     if(count($ary_result_matter) > 0){
-        array_push($ary_result_matter, $emergency_stop_file_path);
+        // array_push($ary_result_matter, $emergency_stop_file_path);
         MakeResultZipFile();
     }
 
     // ステータスを「緊急停止」に更新
-    // ステータスを緊急停止に設定出来ませんでした。(作業No.:{})
-    $ErrorMsg = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-50072",array($execution_no));
+    // ステータスの更新に失敗しました。 (ステータス: 緊急停止 作業No.:{})
+    $ErrorMsg = $objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208170", array($execution_no));
     //----------------------------------------------
     // トランザクション開始
     //----------------------------------------------
     $ret = cm_transactionStart($execution_no, $FREE_LOG);
     if($ret === false) {
+        $error_flag = 1;
         require($root_dir_path . $log_output_php);
         return false;
     }
@@ -1535,6 +1569,7 @@ function IsEmergencyStop() {
     //----------------------------------------------
     $ret = cm_getEexecutionInstanceRow($dbobj, $execution_no, $vg_exe_ins_msg_table_name, $vg_exe_ins_msg_table_jnl_name, $cln_execution_row, $FREE_LOG);
     if($ret === false) {
+        $error_flag = 1;
         require($root_dir_path . $log_output_php);
         return false;
     }
@@ -1545,6 +1580,7 @@ function IsEmergencyStop() {
     $dbobj->ClearLastErrorMsg();
     $intJournalSeqNo = cm_dbaccessGetSequence($dbobj, $vg_exe_ins_msg_table_jnl_seq, $execution_no, $FREE_LOG);
     if($intJournalSeqNo === false) {
+        $error_flag = 1;
         require($root_dir_path . $log_output_php);
         return false;
     }
@@ -1566,6 +1602,7 @@ function IsEmergencyStop() {
 
     $ret = cm_InstanceRecodeUpdate($dbobj, $vg_exe_ins_msg_table_name, $vg_exe_ins_msg_table_jnl_name, $cln_execution_row, $FREE_LOG);
     if($ret === false) {
+        $error_flag = 1;
         require($root_dir_path . $log_output_php);
         return false;
     }
@@ -1575,6 +1612,7 @@ function IsEmergencyStop() {
     //----------------------------------------------
     $ret = cm_transactionCommit($execution_no, $FREE_LOG);
     if($ret === false) {
+        $error_flag = 1;
         require($root_dir_path . $log_output_php);
         return false;
     }
@@ -1587,21 +1625,26 @@ function IsEmergencyStop() {
     return false;
 }
 
-
-
-
-
-
-
-
 //----------------------------------------------
 // Typeの情報を取得する
 //----------------------------------------------
 function getTypeInfo($typeID)
 {
-    global $objDBCA, $vg_terraform_types_master;
+    global $objDBCA;
+    global $objMTS;
+    global $db_model_ch;
+    global $root_dir_path;
+    global $log_output_php;
+    global $log_output_dir;
+    global $log_file_prefix;
+    global $log_level;
     global $root_dir_path;
 
+    global $vg_terraform_types_master;
+
+    global $error_flag;
+
+    $typeID = $typeID? $typeID : "1";
     $typeInfo = [];
 
     $sqlUtnBody = "SELECT "
@@ -1627,7 +1670,8 @@ function getTypeInfo($typeID)
         require($root_dir_path . $log_output_php);
         // 異常フラグON  例外処理へ
         $error_flag = 1;
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
     if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
         $FREE_LOG = sprintf(
@@ -1639,8 +1683,8 @@ function getTypeInfo($typeID)
         require($root_dir_path . $log_output_php);
         // 異常フラグON
         $error_flag = 1;
-        // 例外処理へ
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000400")));
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
     //----------------------------------------------
     // SQL実行
@@ -1656,7 +1700,8 @@ function getTypeInfo($typeID)
         require($root_dir_path . $log_output_php);
         // 異常フラグON  例外処理へ
         $error_flag = 1;
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
     //----------------------------------------------
     // 格納
@@ -1684,7 +1729,10 @@ function encodeHCL($array)
 //----------------------------------------------
 function getMemberVarsByModuleVarsLinkIDForHCL($moduleVarsLinkID)
 {
-    global $objDBCA, $objMTS, $vg_terraform_var_member_view_name, $log_output_php;
+    global $objDBCA;
+    global $objMTS;
+    global $vg_terraform_var_member_view_name;
+    global $log_output_php;
     global $root_dir_path;
     $res = [];
 
@@ -1713,7 +1761,8 @@ function getMemberVarsByModuleVarsLinkIDForHCL($moduleVarsLinkID)
         require($root_dir_path . $log_output_php);
         // 異常フラグON  例外処理へ
         $error_flag = 1;
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000300")));
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
     if ($objQueryUtn->sqlBind($arrayUtnBind) != "") {
         $FREE_LOG = sprintf(
@@ -1725,8 +1774,8 @@ function getMemberVarsByModuleVarsLinkIDForHCL($moduleVarsLinkID)
         require($root_dir_path . $log_output_php);
         // 異常フラグON
         $error_flag = 1;
-        // 例外処理へ
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000400")));
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
     //----------------------------------------------
     // SQL実行 メンバー変数管理(B_TERRAFORM_VAR_MEMBER)
@@ -1742,7 +1791,8 @@ function getMemberVarsByModuleVarsLinkIDForHCL($moduleVarsLinkID)
         require($root_dir_path . $log_output_php);
         // 異常フラグON  例外処理へ
         $error_flag = 1;
-        throw new Exception($objMTS->getSomeMessage("ITATERRAFORM-ERR-101010", array(__FILE__, __LINE__, "00000500")));
+        // 異常発生(作業No.:{} [FILE]{}[LINE]{})
+        throw new Exception($objMTS->getSomeMessage("ITATERRAFORMCLI-ERR-208010", array($execution_no, __FILE__, __LINE__)));
     }
     //----------------------------------------------
     // リソース（Module素材)ファイル名格納
@@ -1751,8 +1801,6 @@ function getMemberVarsByModuleVarsLinkIDForHCL($moduleVarsLinkID)
         $row["VARS_ENTRY_FLAG"] = 0;
         $res[] = $row;
     }
-    // fetch行数を取得
-    // $intFetchedFromTerraformMatterFile = $objQueryUtn->effectedRowCount();
 
     // DBアクセス事後処理
     unset($objQueryUtn);
@@ -1896,6 +1944,7 @@ function makeKVStrRow($key, $value, $type_id){
     $str_row = '';
     switch( $type_id ) {
         case '1':
+        case '18':
             $str_row = $key .'="'. $value .'"';
             break;
         default:

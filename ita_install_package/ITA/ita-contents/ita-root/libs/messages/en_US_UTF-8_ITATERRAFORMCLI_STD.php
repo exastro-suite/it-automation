@@ -60,4 +60,29 @@ $ary["ITATERRAFORMCLI-STD-203180"]      = "[Process] End transaction";
 $ary["ITATERRAFORMCLI-STD-203190"]      = "[Process] Commit";
 $ary["ITATERRAFORMCLI-STD-203200"]      = "[Process] Rollback";
 
+$ary["ITATERRAFORMCLI-STD-204010"]      = "[Process] Start transaction (Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204020"]      = "[Process] Commit(Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204030"]      = "[Process] Rollback(Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204040"]      = "[Process] Auto numbering of journal sequence. (Execution No.:{} Sequence:{})";
+$ary["ITATERRAFORMCLI-STD-204050"]      = "[Process] Change the status. (status:Preparing Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204060"]      = "[Process] Change the status. (status:Executing Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204070"]      = "[Process] Change the status. (status:Executing (delayed) Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204080"]      = "[Process] Change the status. (status:Completed Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204090"]      = "[Process] Change the status. (status:Completed (error) Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204100"]      = "[Process] Change the status. (status:Unexpected error Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204110"]      = "[Process] Change the status. (status:Emergency stop Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204120"]      = "Instance is executed (num:{} workspace:{})";
+$ary["ITATERRAFORMCLI-STD-204130"]      = "[Process] No target record";
+$ary["ITATERRAFORMCLI-STD-204140"]      = "Detect target record list (EXECUTION NO LIST:{})";
+$ary["ITATERRAFORMCLI-STD-204150"]      = "Start UPDATE loop for status \"Preparing\"";
+$ary["ITATERRAFORMCLI-STD-204160"]      = "[Process] Detect target record (EXECUTION_NO:{} workspace-id:{})";
+$ary["ITATERRAFORMCLI-STD-204170"]      = "Process of executing instance exist (Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204180"]      = "[Process] Process target execut instance execution process start.(Execution No.:{} workspace-name:{})";
+
+$ary["ITATERRAFORMCLI-STD-204190"]       = "[Process] Start procedure. (Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204200"]       = "[Process] End procedure (normal). (Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204210"]       = "[Process] End procedure (error).  (Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204220"]       = "[Process] get target record (Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204230"]       = "[Process] Delay was detected. (Execution No.:{})";
+$ary["ITATERRAFORMCLI-STD-204240"]       = "[Process] Emergency stop was detected. (Execution No.:{})";
 ?>
