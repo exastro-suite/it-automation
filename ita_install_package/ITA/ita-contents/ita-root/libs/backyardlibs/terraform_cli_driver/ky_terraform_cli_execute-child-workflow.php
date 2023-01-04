@@ -241,7 +241,7 @@ try {
     //----------------------------------------------
     chdir($workspace_work_dir);
     // ロックファイル, 実行結果ファイル
-    $rm_list = [$exe_lock_file_path, $resut_file_path];
+    $rm_list = [$exe_lock_file_path, $resut_file_path, $emergency_stop_file_path];
     if ($run_mode != $RUN_MODE_DESTROY) {
         $cp_cmd = sprintf('/bin/rm -fr *.tf *.tfvars %s', implode(" ", $rm_list));
     }else{
@@ -1547,7 +1547,7 @@ function IsEmergencyStop() {
 
     // 結果ファイルがあれば作る
     if(count($ary_result_matter) > 0){
-        array_push($ary_result_matter, $emergency_stop_file_path);
+        // array_push($ary_result_matter, $emergency_stop_file_path);
         MakeResultZipFile();
     }
 
