@@ -60,10 +60,10 @@ $log_level = getenv('LOG_LEVEL');
 ////////////////////////////////
 // 作業状態確認インターバル   //
 ////////////////////////////////
-$interval  = getenv('INTERVAL');
-if($interval === false) {
-    $interval = 3;
-}
+// $interval  = getenv('INTERVAL');
+// if($interval === false) {
+//     $interval = 3;
+// }
 
 // PHP エラー時のログ出力先を設定
 $tmpVarTimeStamp = time();
@@ -84,15 +84,6 @@ $php_req_gate_php                 = '/libs/commonlibs/common_php_req_gate.php';
 $db_connect_php                   = '/libs/commonlibs/common_db_connect.php';
 $db_access_php                    = '/libs/backyardlibs/common/common_db_access.php';
 
-$workspace_work_dir = "";
-$secure_tfvars_file_path = "";
-
-$exe_lock_file_path = "";
-$resut_file_path = "";
-
-$in_zip_file_name = "";
-$result_zip_file_name = "";
-
 //----------------------------------------------
 // ローカル変数(全体)宣言
 //----------------------------------------------
@@ -109,8 +100,20 @@ $result_zip_file_name           = "";
 $vars_set_flag                  = false; //変数追加処理を行うかの判定
 $ary_vars_data                  = []; //対象の変数を格納する配列
 
-$variable_tfvars                = [];
-$secure_tfvars                  = [];
+$variable_tfvars                = []; // terraform.tfvarsに書き込むkey=value
+$secure_tfvars                  = []; // secure.tfvarsに書き込むkey=value
+
+$workspace_work_dir = ""; // CLI実行場所
+$exe_lock_file_path = ""; // ロックファイル
+$resut_file_path = ""; // 実行内容を記録したファイル
+$default_tfvars_file_path = ""; // terraform.tfvars
+$secure_tfvars_flg = false; // secure.tfvarsファイルの作成要件
+$secure_tfvars_file_path = ""; // secure.tfvars
+$emergency_stop_file_path = ""; // 緊急停止ファイル
+
+$in_zip_file_name = ""; // 投入ファイル
+$result_zip_file_name = ""; // 結果ファイル
+
 
 //----------------------------------------------
 // function定義
@@ -214,17 +217,16 @@ try {
     //----------------------------------------------
     // ディレクトリを準備
     //----------------------------------------------
-    // 実行用のワークスペース毎のディレクトリの存在をチェック → なければエラー
+    // 実行用のワークスペースのディレクトリの存在をチェック → なければエラー
     $workspace_dir = $exec_base_dir . "/" . $workspace_id_str;
     $workspace_work_dir = $workspace_dir . $exec_base_work_dir; // CLI実行場所
 
     $exe_lock_file_path = "{$workspace_work_dir}/.tf_exec_lock"; // ロックファイル
     $resut_file_path = "{$workspace_work_dir}/result.txt"; // 実行内容を記録したファイル
 
-    $default_tfvars_file_path = "{$workspace_work_dir}/terraform.tfvars";
-    $secure_tfvars_flg = false;
-    $secure_tfvars_file_path = "{$workspace_work_dir}/secure.tfvars";
-    $emergency_stop_file_path = "{$workspace_work_dir}/emergency_stop";
+    $default_tfvars_file_path = "{$workspace_work_dir}/terraform.tfvars"; // terraform.tfvars
+    $secure_tfvars_file_path = "{$workspace_work_dir}/secure.tfvars"; // secure.tfvars
+    $emergency_stop_file_path = "{$workspace_work_dir}/emergency_stop"; // 緊急停止ファイル
 
     // var_dump($workspace_work_dir);
     if(file_exists($workspace_work_dir) === false) {
@@ -754,39 +756,8 @@ try {
     //----------------------------------------------
     // ステータスを実行中に更新
     //----------------------------------------------
-    // 遅延タイマを取得
-    $time_limit = $execution_row['I_TIME_LIMIT'];
-    $delay_flag = 0;
-
-    // ステータスが準備中(2)、かつ制限時間が設定されている場合のみ遅延判定する
-    // if( $execution_row['STATUS_ID'] == $STATUS_PREPARE && $time_limit != "" ){
-    //     // 開始時刻(「UNIXタイム.マイクロ秒」)を生成
-    //     $varTimeDotMirco = convFromStrDateToUnixtime($execution_row['TIME_START'], true);
-    //     // 開始時刻(マイクロ秒)＋制限時間(分→秒)＝制限時刻(マイクロ秒)
-    //     $varTimeDotMirco_limit = $varTimeDotMirco + ($time_limit * 60); //単位（秒）
-
-    //     // 現在時刻(「UNIXタイム.マイクロ秒」)を生成
-    //     $varTimeDotNowStd = getMircotime(0);
-
-    //     // 制限時刻と現在時刻を比較
-    //     if( $varTimeDotMirco_limit < $varTimeDotNowStd ){
-    //         $delay_flag = 1;
-
-    //         // トレースメッセージ
-    //         if ( $log_level === 'DEBUG' ){
-    //             // "[処理]遅延を検出しました。(作業No.:{})";
-    //             $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204230", $execution_no);
-    //             require ($root_dir_path . $log_output_php );
-    //         }
-    //     }
-    // }
-    // 遅延が発生の場合
-    if( $delay_flag == 1 ){
-        $cln_execution_row['STATUS_ID'] = $STATUS_PROCESS_DELAYED;
-    } else {
-        $cln_execution_row['STATUS_ID'] = $STATUS_PROCESSING;
-    }
-    $cln_execution_row["FILE_INPUT"]    = $input_zip_file_name;
+    $cln_execution_row['STATUS_ID'] = $STATUS_PROCESSING;
+    $cln_execution_row["FILE_INPUT"] = $input_zip_file_name;
 
     // 履歴シーケンス採番
     $dbobj->ClearLastErrorMsg();
@@ -1307,6 +1278,7 @@ function SaveEncryptStateFile(&$FREE_LOG) {
     global $ary_result_matter;
     global $execution_no;
     global $execution_no_str;
+    global $workspace_id;
 
     try {
         //一時利用ディレクトリの存在をチェックし、なければ作成
@@ -1419,6 +1391,7 @@ function MakeInputZipFile() {
     global $error_flag;
     global $execution_no;
     global $execution_no_str;
+    global $workspace_id;
     global $ary_input_matter;
     global $input_zip_file_name;
 
@@ -1467,6 +1440,7 @@ function MakeResultZipFile() {
     global $error_flag;
     global $execution_no;
     global $execution_no_str;
+    global $workspace_id;
     global $ary_result_matter;
     global $result_zip_file_name;
 
