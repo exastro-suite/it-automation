@@ -787,6 +787,21 @@ function InstanceExecution($execution_instance) {
         // var_dump($build_command);
         exec($build_command, $arry_out, $return_var);
 
+        // 遅延タイマを取得
+        $time_limit = $execution_row['I_TIME_LIMIT'];
+        if(!$time_limit){
+            return true;
+        }
+        // 制限時間が設定されている場合は、遅延判定チェックプロセスを走らせる。
+        $build_command = sprintf("%s %s %010s wsid=%010s %s > /dev/null &",
+            $php_command,
+            $root_dir_path."/libs/backyardlibs/terraform_cli_driver/ky_terraform_cli_checkdelayed-child-workflow.php",
+            $execution_no,
+            $workspace_id,
+            $child_process_name);
+
+        exec($build_command, $arry_out_checkdelayed, $return_var_checkdelayed);
+
         return true;
     } catch (Exception $e){
         // メッセージ出力
