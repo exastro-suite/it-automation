@@ -42,8 +42,18 @@
     // 共通HTMLステートメントパーツ
     require_once ( $g['root_dir_path'] . "/libs/webcommonlibs/web_parts_html_statement.php");
 
+print <<< EOD
+    <script>const gLoginUserID = {$g['login_id']};</script>
+EOD;
+
     // browse系共通ロジックパーツ02
     require_once ( $root_dir_path . "/libs/webcommonlibs/web_parts_for_browse_02.php");
+
+    //----メッセージtmpl作成準備
+    $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath("ITAWDCC","STD","_js");
+    $aryImportFilePath[] = $g['objMTS']->getTemplateFilePath("ITABASEC","STD","_js");
+    $strJscriptTemplateBody = getJscriptMessageTemplate($aryImportFilePath,$g['objMTS']);
+    //メッセージtmpl作成準備----
 
     //リリースファイル読み込み
     $releaseFile=array();
@@ -101,6 +111,7 @@ EOD;
     <div id="privilege" style="display:none" class="text">{$privilege}</div>
     <div id="sysJSCmdText01" style="display:none" class="text">{$strCmdWordAreaOpen}</div>
     <div id="sysJSCmdText02" style="display:none" class="text">{$strCmdWordAreaClose}</div>
+    <div id="messageTemplate" style="display:none" class="text">{$strJscriptTemplateBody}</div>
     <!-------------------------------- ユーザ・コンテンツ情報 -------------------------------->
     <!-------------------------------- 説明 -------------------------------->
 
