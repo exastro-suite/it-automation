@@ -1169,9 +1169,9 @@ transform: translate(-50%,-50%) rotate(-45deg);
 .add-node.terraform,
 .node-terraform .node-circle .node-gem { background-color: #5c4ee5; }
 
-.node-terraform-cli .node-type  { background-color: #5c78e5; }
+.node-terraform-cli .node-type  { background-color: #4682b4; }
 .add-node.terraform-cli,
-.node-terraform-cli .node-circle .node-gem { background-color: #5c78e5; }
+.node-terraform-cli .node-circle .node-gem { background-color: #4682b4; }
 
 /* Running */
 #editor[data-editor-mode="checking"] .node {
