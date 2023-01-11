@@ -184,7 +184,7 @@ $ary["ITATERRAFORMCLI-MNU-108130"]     = "Movementを選択して下さい";
 $ary["ITATERRAFORMCLI-MNU-108140"]     = "具体値";
 $ary["ITATERRAFORMCLI-MNU-108150"]     = "[最大長]8192バイト";
 $ary["ITATERRAFORMCLI-MNU-108160"]     = "Secure設定";
-$ary["ITATERRAFORMCLI-MNU-108170"]     = "「ON」の場合、「代入値管理」メニュー上での具体値の表示を隠します。\nまた「作業状態確認」「作業管理」メニューから取得できる「結果データ」に格納されなくなります。\nTerraformが出力するPlanやApplyのログ上で値を非表示にする場合は、登録したModule素材のvariableブロックの中で『sensitive = true』を指定する必要があります。";
+$ary["ITATERRAFORMCLI-MNU-108170"]     = "「ON」の場合、「代入値管理」メニュー上での具体値の表示を隠します。\nまた「作業状態確認」「作業管理」メニューから取得できる「投入データ」に格納されなくなります。\nTerraformが出力するPlanやApplyのログ上で値を非表示にする場合は、登録したModule素材のvariableブロックの中で『sensitive = true』を指定する必要があります。";
 $ary["ITATERRAFORMCLI-MNU-108180"]     = "HCL設定";
 $ary["ITATERRAFORMCLI-MNU-108190"]     = "「ON」の場合、具体値を HashiCorp Configuration Language (HCL)として解析し、実行時に値を補完できます。";
 $ary["ITATERRAFORMCLI-MNU-108200"]     = "メンバー変数";
