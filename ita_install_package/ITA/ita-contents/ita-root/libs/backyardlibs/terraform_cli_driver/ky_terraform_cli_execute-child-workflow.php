@@ -1922,7 +1922,11 @@ function makeKVStrRow($key, $value, $type_id){
             $str_row = $key .'="'. $value .'"';
             break;
         default:
-            $str_row = $key .'='. $value;
+            if($value){
+                $str_row = $key .'='. $value;
+            }else{
+                $str_row = $key .'=""';
+            }
     }
 
     return $str_row;
