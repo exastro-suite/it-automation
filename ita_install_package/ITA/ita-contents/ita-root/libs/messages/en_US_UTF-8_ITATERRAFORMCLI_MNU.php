@@ -184,7 +184,7 @@ $ary["ITATERRAFORMCLI-MNU-108130"]     = "Please select a Movement";
 $ary["ITATERRAFORMCLI-MNU-108140"]     = "Specific value";
 $ary["ITATERRAFORMCLI-MNU-108150"]     = "[Maximum length] 8192 bytes";
 $ary["ITATERRAFORMCLI-MNU-108160"]     = "Secure setting";
-$ary["ITATERRAFORMCLI-MNU-108170"]     = "When \"ON\", hides the display of concrete values on the \"Substitution value list\" menu. \nAlso, it will not be stored in \"Result data\" that can be obtained from the \"Confirm execution status\" and \"Execution list\" menus. \nIf you want to hide the value on the Plan and Apply logs, you need to specify \"sensitive = true\" in the variable block of the registered Module material.";
+$ary["ITATERRAFORMCLI-MNU-108170"]     = "When \"ON\", hides the display of concrete values on the \"Substitution value list\" menu. \nAlso, it will not be stored in \"Populated data\" that can be obtained from the \"Confirm execution status\" and \"Execution list\" menus. \nIf you want to hide the value on the Plan and Apply logs, you need to specify \"sensitive = true\" in the variable block of the registered Module material.";
 $ary["ITATERRAFORMCLI-MNU-108180"]     = "HCL setting";
 $ary["ITATERRAFORMCLI-MNU-108190"]     = "If \"ON\", parse this value as HashiCorp Configuration Language (HCL). This allows you to interpolate values at runtime.";
 $ary["ITATERRAFORMCLI-MNU-108200"]     = "Member variable";
