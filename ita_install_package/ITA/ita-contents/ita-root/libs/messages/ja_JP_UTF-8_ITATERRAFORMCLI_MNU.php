@@ -81,8 +81,8 @@ $ary["ITATERRAFORMCLI-MNU-105080"]     = "[元データ]Module素材集";
 
 $ary["ITATERRAFORMCLI-MNU-106010"]     = "Terraformの変数ネストでは、Module素材集で登録したtfファイルで定義されている変数のタイプがlist,setかつ、その変数の中でlist,set,tuple,objectが定義されている場合、メンバー変数の最大繰返数をメンテナンス(閲覧/更新)できます。";
 $ary["ITATERRAFORMCLI-MNU-106020"]     = "項番";
-$ary["ITATERRAFORMCLI-MNU-106030"]     = "Terraform_変数ネスト管理";
-$ary["ITATERRAFORMCLI-MNU-106040"]     = "Terraform_変数ネスト管理";
+$ary["ITATERRAFORMCLI-MNU-106030"]     = "Terraform-CLI_変数ネスト管理";
+$ary["ITATERRAFORMCLI-MNU-106040"]     = "Terraform-CLI_変数ネスト管理";
 $ary["ITATERRAFORMCLI-MNU-106050"]     = "変数名";
 $ary["ITATERRAFORMCLI-MNU-106060"]     = "variableブロックに定義された名前";
 $ary["ITATERRAFORMCLI-MNU-106070"]     = "メンバー変数名（繰返し有）";
@@ -92,8 +92,8 @@ $ary["ITATERRAFORMCLI-MNU-106100"]     = "対象の変数もしくはメンバ�
 
 $ary["ITATERRAFORMCLI-MNU-107010"]     = "紐付対象メニューに登録されているオぺーションの項目の設定値を紐付けるMovementと変数がメンテナンス(閲覧/登録/更新/廃止)できます。<br><br>項目の設定値の登録方法には3種類あります。<br>Value型:項目の設定値を紐付けた変数の具体値として代入値管理に登録されます。<br>Key-Value型:項目の名称(Key)と設定値(Value)を紐付けた変数の具体値として代入値管理に登録されます。<br>Key型:項目の名称を紐付けた変数の具体値として代入値管理に登録されます。項目の設定値が空白の場合に代入値管理に登録されません";
 $ary["ITATERRAFORMCLI-MNU-107020"]     = "項番";
-$ary["ITATERRAFORMCLI-MNU-107030"]     = "Terraform_代入値自動登録設定";
-$ary["ITATERRAFORMCLI-MNU-107040"]     = "Terraform_代入値自動登録設定";
+$ary["ITATERRAFORMCLI-MNU-107030"]     = "Terraform-CLI_代入値自動登録設定";
+$ary["ITATERRAFORMCLI-MNU-107040"]     = "Terraform-CLI_代入値自動登録設定";
 $ary["ITATERRAFORMCLI-MNU-107050"]     = "パラメータシート(From)";
 $ary["ITATERRAFORMCLI-MNU-107060"]     = "メニューグループ";
 $ary["ITATERRAFORMCLI-MNU-107070"]     = "ID";
@@ -170,8 +170,8 @@ $ary["ITATERRAFORMCLI-MNU-107770"]     = "変数のタイプがlist,setの場合
 
 $ary["ITATERRAFORMCLI-MNU-108010"]     = "オペレーションごとに、対象のMovementで利用されるModuleの変数に代入する具体値をメンテナンス(閲覧/登録/更新/廃止)できます。";
 $ary["ITATERRAFORMCLI-MNU-108020"]     = "項番";
-$ary["ITATERRAFORMCLI-MNU-108030"]     = "Terraform_代入値管理";
-$ary["ITATERRAFORMCLI-MNU-108040"]     = "Terraform_代入値管理";
+$ary["ITATERRAFORMCLI-MNU-108030"]     = "Terraform-CLI_代入値管理";
+$ary["ITATERRAFORMCLI-MNU-108040"]     = "Terraform-CLI_代入値管理";
 $ary["ITATERRAFORMCLI-MNU-108050"]     = "オペレーション";
 $ary["ITATERRAFORMCLI-MNU-108060"]     = "[元データ]基本コンソール/オペレーション一覧";
 $ary["ITATERRAFORMCLI-MNU-108070"]     = "Movement：変数";
@@ -208,8 +208,8 @@ $ary["ITATERRAFORMCLI-MNU-108370"]     = "default内で変数に紐付いてい�
 
 $ary["ITATERRAFORMCLI-MNU-109010"]     = "作業一覧(実行履歴)を閲覧できます。<br>「作業状態確認」を押下すると作業状態確認メニューに遷移します。";
 $ary["ITATERRAFORMCLI-MNU-109020"]     = "作業No.";
-$ary["ITATERRAFORMCLI-MNU-109030"]     = "Terraform_作業管理";
-$ary["ITATERRAFORMCLI-MNU-109040"]     = "Terraform_作業管理";
+$ary["ITATERRAFORMCLI-MNU-109030"]     = "Terraform-CLI_作業管理";
+$ary["ITATERRAFORMCLI-MNU-109040"]     = "Terraform-CLI_作業管理";
 $ary["ITATERRAFORMCLI-MNU-109050"]     = "作業状態確認";
 $ary["ITATERRAFORMCLI-MNU-109060"]     = "実行種別";
 $ary["ITATERRAFORMCLI-MNU-109070"]     = "実行種別には以下の状態が存在します。
@@ -268,8 +268,8 @@ $ary["ITATERRAFORMCLI-MNU-109470"]     = "[元データ]Conductorクラス一覧
 
 $ary["ITATERRAFORMCLI-MNU-110010"]     = "Terraform代入変数名管理";
 $ary["ITATERRAFORMCLI-MNU-110020"]     = "項番";
-$ary["ITATERRAFORMCLI-MNU-110030"]     = "Terraform_Module変数紐付管理";
-$ary["ITATERRAFORMCLI-MNU-110040"]     = "Terraform_Module変数紐付管理";
+$ary["ITATERRAFORMCLI-MNU-110030"]     = "Terraform-CLI_Module変数紐付管理";
+$ary["ITATERRAFORMCLI-MNU-110040"]     = "Terraform-CLI_Module変数紐付管理";
 $ary["ITATERRAFORMCLI-MNU-110050"]     = "Module素材";
 $ary["ITATERRAFORMCLI-MNU-110060"]     = "[元データ]Module素材集";
 $ary["ITATERRAFORMCLI-MNU-110070"]     = "変数名";
@@ -283,8 +283,8 @@ $ary["ITATERRAFORMCLI-MNU-110140"]     = "変数ブロック内で定義され�
 
 $ary["ITATERRAFORMCLI-MNU-120010"]     = "Terraformのメンバー変数をメンテナンス(閲覧/登録/更新/廃止)できます。";
 $ary["ITATERRAFORMCLI-MNU-120020"]     = "項番";
-$ary["ITATERRAFORMCLI-MNU-120030"]     = "Terraform_メンバー変数管理";
-$ary["ITATERRAFORMCLI-MNU-120040"]     = "Terraform_メンバー変数管理";
+$ary["ITATERRAFORMCLI-MNU-120030"]     = "Terraform-CLI_メンバー変数管理";
+$ary["ITATERRAFORMCLI-MNU-120040"]     = "Terraform-CLI_メンバー変数管理";
 $ary["ITATERRAFORMCLI-MNU-120050"]     = "元変数";
 $ary["ITATERRAFORMCLI-MNU-120060"]     = "親の変数名";
 $ary["ITATERRAFORMCLI-MNU-120070"]     = "親メンバー変数のID";
@@ -306,8 +306,8 @@ $ary["ITATERRAFORMCLI-MNU-120220"]     = "有(1)/無(0)";
 
 $ary["ITATERRAFORMCLI-MNU-130010"]     = "Movementと変数名の紐付けを閲覧できます。";
 $ary["ITATERRAFORMCLI-MNU-130020"]     = "項番";
-$ary["ITATERRAFORMCLI-MNU-130030"]     = "Terraform_Movement変数紐付管理";
-$ary["ITATERRAFORMCLI-MNU-130040"]     = "Terraform_Movement変数紐付管理";
+$ary["ITATERRAFORMCLI-MNU-130030"]     = "Terraform-CLI_Movement変数紐付管理";
+$ary["ITATERRAFORMCLI-MNU-130040"]     = "Terraform-CLI_Movement変数紐付管理";
 $ary["ITATERRAFORMCLI-MNU-130050"]     = "Movement名";
 $ary["ITATERRAFORMCLI-MNU-130060"]     = "Movement名";
 $ary["ITATERRAFORMCLI-MNU-130070"]     = "変数名";

@@ -16,8 +16,8 @@
 ////en_US_UTF-8_ITATERRAFORMCLI_MNU
 $ary["ITATERRAFORMCLI-MNU-101010"]     = "You can perform maintenance (View/Update) for connection interface information<br>This menu should be one record.";
 $ary["ITATERRAFORMCLI-MNU-101020"]     = "No.";
-$ary["ITATERRAFORMCLI-MNU-101030"]     = "Terraform_Interface information";
-$ary["ITATERRAFORMCLI-MNU-101040"]     = "Terraform_Interface information";
+$ary["ITATERRAFORMCLI-MNU-101030"]     = "Terraform-CLI_Interface information";
+$ary["ITATERRAFORMCLI-MNU-101040"]     = "Terraform-CLI_Interface information";
 $ary["ITATERRAFORMCLI-MNU-101050"]     = "Proxy";
 $ary["ITATERRAFORMCLI-MNU-101060"]     = "Address";
 $ary["ITATERRAFORMCLI-MNU-101070"]     = "Proxy server address";
@@ -34,8 +34,8 @@ $ary["ITATERRAFORMCLI-MNU-101170"]     = "The maximum number of Movements (Terra
 
 $ary["ITATERRAFORMCLI-MNU-102010"]     = "You can perform maintenance (View/Register/Update/Discard) for Workspaces information.";
 $ary["ITATERRAFORMCLI-MNU-102020"]     = "Workspace ID";
-$ary["ITATERRAFORMCLI-MNU-102030"]     = "Terraform_Workspaces list";
-$ary["ITATERRAFORMCLI-MNU-102040"]     = "Terraform_Workspaces list";
+$ary["ITATERRAFORMCLI-MNU-102030"]     = "Terraform-CLI_Workspaces list";
+$ary["ITATERRAFORMCLI-MNU-102040"]     = "Terraform-CLI_Workspaces list";
 $ary["ITATERRAFORMCLI-MNU-102050"]     = "Workspace Name";
 $ary["ITATERRAFORMCLI-MNU-102060"]     = "Workspace Name. Alphanumeric characters and valid symbols(_-).[Maximum length] 90 bytes";
 $ary["ITATERRAFORMCLI-MNU-102070"]     = "Alphanumeric characters and valid symbols(_-)";
@@ -72,8 +72,8 @@ $ary["ITATERRAFORMCLI-MNU-104090"]     = "Movement-Module link";
 
 $ary["ITATERRAFORMCLI-MNU-105010"]     = "You can perform maintenance (View/Register/Update/Discard) for Module to be included for Movement.";
 $ary["ITATERRAFORMCLI-MNU-105020"]     = "Associated item number";
-$ary["ITATERRAFORMCLI-MNU-105030"]     = "Terraform_Movement module link";
-$ary["ITATERRAFORMCLI-MNU-105040"]     = "Terraform_Movement module link";
+$ary["ITATERRAFORMCLI-MNU-105030"]     = "Terraform-CLI_Movement module link";
+$ary["ITATERRAFORMCLI-MNU-105040"]     = "Terraform-CLI_Movement module link";
 $ary["ITATERRAFORMCLI-MNU-105050"]     = "Movement";
 $ary["ITATERRAFORMCLI-MNU-105060"]     = "[Original data]Movement list";
 $ary["ITATERRAFORMCLI-MNU-105070"]     = "Mocule file";
@@ -81,8 +81,8 @@ $ary["ITATERRAFORMCLI-MNU-105080"]     = "[Original data]Module files";
 
 $ary["ITATERRAFORMCLI-MNU-106010"]     = "In the variable nesting of Terraform, if the type of the variable defined in the tf file registered in the Module material collection is list, set and list, set, tuple, object is defined in that variable, the member variable You can maintain (view / update) the maximum number of iterations.";
 $ary["ITATERRAFORMCLI-MNU-106020"]     = "Item No.";
-$ary["ITATERRAFORMCLI-MNU-106030"]     = "Terraform_Nested variable list";
-$ary["ITATERRAFORMCLI-MNU-106040"]     = "Terraform_Nested variable list";
+$ary["ITATERRAFORMCLI-MNU-106030"]     = "Terraform-CLI_Nested variable list";
+$ary["ITATERRAFORMCLI-MNU-106040"]     = "Terraform-CLI_Nested variable list";
 $ary["ITATERRAFORMCLI-MNU-106050"]     = "Variable name";
 $ary["ITATERRAFORMCLI-MNU-106060"]     = "The name defined in the variable block";
 $ary["ITATERRAFORMCLI-MNU-106070"]     = "Member variable name (iteration)";
@@ -92,8 +92,8 @@ $ary["ITATERRAFORMCLI-MNU-106100"]     = "The number of times the target variabl
 
 $ary["ITATERRAFORMCLI-MNU-107010"]     = "You can perform maintenance (view/register/update/discard) for operations registered in the associated menu, and Movement and variables associated with the setting value of item. <br><br> There are three methods to register the setting value of item. <br> Value type: Setting value of item is registered in the substitution value list as a specific value of associated variable. <br>Key-Value type: Name (Key) and setting value (Value) of item are registered in the substitution value list as a specific value of associated variable. <br> Key type: Item name is registered in the substitution value list as a specific value of associated variable. When the setting value of the item is blank, it is not registered in the substitution value list";
 $ary["ITATERRAFORMCLI-MNU-107020"]     = "No.";
-$ary["ITATERRAFORMCLI-MNU-107030"]     = "Terraform_Substitution val auto-reg setting";
-$ary["ITATERRAFORMCLI-MNU-107040"]     = "Terraform_Substitution val auto-reg setting";
+$ary["ITATERRAFORMCLI-MNU-107030"]     = "Terraform-CLI_Substitution val auto-reg setting";
+$ary["ITATERRAFORMCLI-MNU-107040"]     = "Terraform-CLI_Substitution val auto-reg setting";
 $ary["ITATERRAFORMCLI-MNU-107050"]     = "Parameter sheet(From)";
 $ary["ITATERRAFORMCLI-MNU-107060"]     = "Menu group";
 $ary["ITATERRAFORMCLI-MNU-107070"]     = "ID";
@@ -170,8 +170,8 @@ $ary["ITATERRAFORMCLI-MNU-107770"]     = "If the variable type is list, set, ent
 
 $ary["ITATERRAFORMCLI-MNU-108010"]     = "Maintenance (view/register/update/discard) can be performed on specific values that are substituted for the variable in Module files that are used by the target Movement for each operation.";
 $ary["ITATERRAFORMCLI-MNU-108020"]     = "Item number";
-$ary["ITATERRAFORMCLI-MNU-108030"]     = "Terraform_Substitution value list";
-$ary["ITATERRAFORMCLI-MNU-108040"]     = "Terraform_Substitution value list";
+$ary["ITATERRAFORMCLI-MNU-108030"]     = "Terraform-CLI_Substitution value list";
+$ary["ITATERRAFORMCLI-MNU-108040"]     = "Terraform-CLI_Substitution value list";
 $ary["ITATERRAFORMCLI-MNU-108050"]     = "Operation";
 $ary["ITATERRAFORMCLI-MNU-108060"]     = "[Original data] Basic console/Operation list";
 $ary["ITATERRAFORMCLI-MNU-108070"]     = "Movement：variable";
@@ -208,8 +208,8 @@ $ary["ITATERRAFORMCLI-MNU-108370"]     = "Specific value associated with variabl
 
 $ary["ITATERRAFORMCLI-MNU-109010"]     = "The execution list (execution history) can be viewed. <br>Click \"Confirm execution status\" to ｔransition to the execution checking menu.";
 $ary["ITATERRAFORMCLI-MNU-109020"]     = "Execution No.";
-$ary["ITATERRAFORMCLI-MNU-109030"]     = "Terraform_Execution list";
-$ary["ITATERRAFORMCLI-MNU-109040"]     = "Terraform_Execution list";
+$ary["ITATERRAFORMCLI-MNU-109030"]     = "Terraform-CLI_Execution list";
+$ary["ITATERRAFORMCLI-MNU-109040"]     = "Terraform-CLI_Execution list";
 $ary["ITATERRAFORMCLI-MNU-109050"]     = "Confirm execution status";
 $ary["ITATERRAFORMCLI-MNU-109060"]     = "Execution type";
 $ary["ITATERRAFORMCLI-MNU-109070"]     = "The following states exist for execution type.
@@ -268,8 +268,8 @@ $ary["ITATERRAFORMCLI-MNU-109470"]     = "[Original data]Conductor class List";
 
 $ary["ITATERRAFORMCLI-MNU-110010"]     = "Terraform substitution variable name management";
 $ary["ITATERRAFORMCLI-MNU-110020"]     = "Item No.";
-$ary["ITATERRAFORMCLI-MNU-110030"]     = "Terraform_Module variable association list";
-$ary["ITATERRAFORMCLI-MNU-110040"]     = "Terraform_Module variable association list";
+$ary["ITATERRAFORMCLI-MNU-110030"]     = "Terraform-CLI_Module variable association list";
+$ary["ITATERRAFORMCLI-MNU-110040"]     = "Terraform-CLI_Module variable association list";
 $ary["ITATERRAFORMCLI-MNU-110050"]     = "Module file";
 $ary["ITATERRAFORMCLI-MNU-110060"]     = "[Original data]Module files";
 $ary["ITATERRAFORMCLI-MNU-110070"]     = "Variable name";
@@ -283,8 +283,8 @@ $ary["ITATERRAFORMCLI-MNU-110140"]     = "Default value defined in the variable 
 
 $ary["ITATERRAFORMCLI-MNU-120010"]     = "You can perform maintenance (view/register/update/discard) for member variables of Terraform.";
 $ary["ITATERRAFORMCLI-MNU-120020"]     = "Item No.";
-$ary["ITATERRAFORMCLI-MNU-120030"]     = "Terraform_Member variable list";
-$ary["ITATERRAFORMCLI-MNU-120040"]     = "Terraform_Member variable list";
+$ary["ITATERRAFORMCLI-MNU-120030"]     = "Terraform-CLI_Member variable list";
+$ary["ITATERRAFORMCLI-MNU-120040"]     = "Terraform-CLI_Member variable list";
 $ary["ITATERRAFORMCLI-MNU-120050"]     = "Original variable";
 $ary["ITATERRAFORMCLI-MNU-120060"]     = "Parent variable name";
 $ary["ITATERRAFORMCLI-MNU-120070"]     = "Id of parent member variable";
@@ -306,8 +306,8 @@ $ary["ITATERRAFORMCLI-MNU-120220"]     = "Yes (1)/No (0)";
 
 $ary["ITATERRAFORMCLI-MNU-130010"]     = "The association between Movement and Variable can be viewed.";
 $ary["ITATERRAFORMCLI-MNU-130020"]     = "ID";
-$ary["ITATERRAFORMCLI-MNU-130030"]     = "Terraform_Movement variable association list";
-$ary["ITATERRAFORMCLI-MNU-130040"]     = "Terraform_Movement variable association list";
+$ary["ITATERRAFORMCLI-MNU-130030"]     = "Terraform-CLI_Movement variable association list";
+$ary["ITATERRAFORMCLI-MNU-130040"]     = "Terraform-CLI_Movement variable association list";
 $ary["ITATERRAFORMCLI-MNU-130050"]     = "Movement name";
 $ary["ITATERRAFORMCLI-MNU-130060"]     = "Movement name";
 $ary["ITATERRAFORMCLI-MNU-130070"]     = "Variable name";

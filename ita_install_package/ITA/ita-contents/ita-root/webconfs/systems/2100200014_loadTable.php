@@ -53,7 +53,7 @@ Terraform-CLI Movement変数紐付管理
     $table->setAccessAuth(true);    // データごとのRBAC設定
 
     //Movement
-    $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITATERRAFORMCLI-MNU-130050"),'E_TERRAFORM_PATTERN','PATTERN_ID','PATTERN');
+    $c = new IDColumn('PATTERN_ID',$g['objMTS']->getSomeMessage("ITATERRAFORMCLI-MNU-130050"),'E_TERRAFORM_CLI_PATTERN','PATTERN_ID','PATTERN');
     $c->setDescription($g['objMTS']->getSomeMessage("ITATERRAFORMCLI-MNU-130060")); //エクセル・ヘッダでの説明
     $table->addColumn($c);
 
