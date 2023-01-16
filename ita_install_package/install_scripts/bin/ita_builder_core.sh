@@ -851,12 +851,14 @@ configure_terraform() {
 
 # Terraform-CLI
 configure_terraformcli() {
-    # Add repository
-    terraformcli_repository ${YUM_REPO_PACKAGE["terraformcli"]}
-    # Install terraformcli packages.
-    yum_install ${YUM_PACKAGE["terraformcli"]}
-    # Check installation yum terraformcli packages.
-    yum_package_check ${YUM_PACKAGE["terraformcli"]}
+    if [ "${exec_mode}" == "3" ]; then
+        # Add repository
+        terraformcli_repository ${YUM_REPO_PACKAGE["terraformcli"]}
+        # Install terraformcli packages.
+        yum_install ${YUM_PACKAGE["terraformcli"]}
+        # Check installation yum terraformcli packages.
+        yum_package_check ${YUM_PACKAGE["terraformcli"]}
+    fi
 }
 
 # ITA
@@ -994,6 +996,9 @@ download() {
     # Enable mariadb repositories.
     mariadb_repository ${YUM_REPO_PACKAGE_MARIADB[${REPOSITORY}]}
 
+    # Add terraform repository
+    terraformcli_repository ${YUM_REPO_PACKAGE["terraformcli"]}
+
     # MariaDB package names.
     if [ "${distro_mariadb}" = "yes" ]; then
         local MARIADB_PACKAGE_NAMES=(mariadb mariadb-server expect)
@@ -1013,7 +1018,7 @@ download() {
     # Download php.
     if [ "${LINUX_OS}" == "CentOS8" -o "${LINUX_OS}" == "RHEL8" ]; then
         dnf module -y reset php >> "$ITA_BUILDER_LOG_FILE" 2>&1
-        dnf module install --downloadonly --resolve --downloaddir=${YUM_ALL_PACKAGE_DOWNLOAD_DIR} php:7.4 >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        dnf module -y enable php:7.4 >> "$ITA_BUILDER_LOG_FILE" 2>&1
     fi
 
     # Download packages.
