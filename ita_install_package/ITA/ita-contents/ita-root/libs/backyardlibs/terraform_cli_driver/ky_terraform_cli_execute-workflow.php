@@ -216,7 +216,6 @@ try {
     //----------------------------------------------
     // 未実行の作業インスタンス取得
     //----------------------------------------------
-    $execute_list = [];
     $sqlBody = "SELECT *
                 FROM   $vg_exe_ins_msg_table_name
                 WHERE  DISUSE_FLAG = '0' AND

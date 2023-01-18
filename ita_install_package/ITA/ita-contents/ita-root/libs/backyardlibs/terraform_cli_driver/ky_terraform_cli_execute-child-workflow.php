@@ -252,9 +252,9 @@ try {
     system($cp_cmd);
 
     // 緊急停止のチェック
-    $ret = IsEmergencyStop();
-    if($ret == false) {
-        throw new Exception($FREE_LOG);
+    $ret_emgy = IsEmergencyStop();
+    if($ret_emgy == false) {
+        throw new Exception($ErrorMsg);
     }
 
     //----------------------------------------------
@@ -779,9 +779,9 @@ try {
     }
 
     // 緊急停止のチェック
-    $ret = IsEmergencyStop();
-    if($ret == false) {
-        throw new Exception($FREE_LOG);
+    $ret_emgy = IsEmergencyStop();
+    if($ret_emgy == false) {
+        throw new Exception($ErrorMsg);
     }
 
     //----------------------------------------------
@@ -820,10 +820,10 @@ try {
 
     if ($error_flag == 0) {
         // 緊急停止のチェック
-        $ret = IsEmergencyStop();
-        if($ret == false) {
+        $ret_emgy = IsEmergencyStop();
+        if($ret_emgy == false) {
             fclose($exec_lock);
-            throw new Exception($FREE_LOG);
+            throw new Exception($ErrorMsg);
         }
 
         //----------------------------------------------
@@ -845,10 +845,10 @@ try {
 
     if ($error_flag == 0) {
         // 緊急停止のチェック
-        $ret = IsEmergencyStop();
-        if($ret == false) {
+        $ret_emgy = IsEmergencyStop();
+        if($ret_emgy == false) {
             fclose($exec_lock);
-            throw new Exception($FREE_LOG);
+            throw new Exception($ErrorMsg);
         }
 
         //----------------------------------------------
@@ -877,8 +877,9 @@ try {
             $update_status = $STATUS_COMPLETE;
             array_push($ary_result_matter, $apply_log);
         }
+
         //stateファイルの暗号化
-        SaveEncryptStateFile($FREE_LOG);
+        SaveEncryptStateFile();
     }
 
     // ファイルによる排他ロック解除
@@ -1033,7 +1034,7 @@ try {
     }
 
     // メッセージ出力
-    if($emergency_flg == 0 && $error_flag == 0) {
+    if($emergency_flg == 0 && $error_flag == 1) {
         $FREE_LOG = $e->getMessage();
         require($root_dir_path . $log_output_php);
     }
@@ -1169,7 +1170,7 @@ function ExecCommand($command, $cmd_log, $is_make_file = false, &$FREE_LOG) {
     global $error_flag;
 
     //----------------------------------------------
-    // 変数・function定義
+    // ステータスなどの変数定義
     //----------------------------------------------
     require($root_dir_path . $terraform_env);
 
@@ -1260,7 +1261,7 @@ function ExecCommand($command, $cmd_log, $is_make_file = false, &$FREE_LOG) {
 //----------------------------------------------
 // stateファイルを、一時格納先ディレクトリに暗号化して保存
 //----------------------------------------------
-function SaveEncryptStateFile(&$FREE_LOG) {
+function SaveEncryptStateFile() {
     global $objMTS;
     global $db_model_ch;
     global $root_dir_path;
@@ -1269,6 +1270,7 @@ function SaveEncryptStateFile(&$FREE_LOG) {
     global $log_file_prefix;
     global $log_level;
     global $db_access_user_id;
+    global $FREE_LOG;
 
     global $tar_temp_save_dir;
 
@@ -1491,6 +1493,7 @@ function IsEmergencyStop() {
     global $log_file_prefix;
     global $log_level;
     global $FREE_LOG;
+    global $ErrorMsg;
 
     global $vg_exe_ins_msg_table_name;
     global $vg_exe_ins_msg_table_jnl_seq;
@@ -1515,7 +1518,7 @@ function IsEmergencyStop() {
 
     // 緊急停止を検知しました。
     $FREE_LOG = $objMTS->getSomeMessage("ITATERRAFORMCLI-STD-204240", array($execution_no));
-    require ($root_dir_path . $log_output_php );
+    require($root_dir_path . $log_output_php);
     // 緊急停止フラグON
     $emergency_flg = 1;
 
