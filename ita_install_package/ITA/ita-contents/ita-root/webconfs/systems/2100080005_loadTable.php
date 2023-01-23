@@ -170,21 +170,23 @@ Module素材集
 
         if($strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister"){
             if(!empty($tmpFile)){
-                // tfファイルチェッククラス呼び出し
-                require_once ($root_dir_path . '/libs/commonlibs/common_terraform_hcl2json_parse.php');
-                $objWSRA = new CommonTerraformHCL2JSONParse($root_dir_path, $strTempFileFullname);
-                // チェック関数
-                $parseResult = $objWSRA->getParsedResult();
+                if (preg_match('/\.(tf)$/i',$tffile)){
+                    // tfファイルチェッククラス呼び出し
+                    require_once ($root_dir_path . '/libs/commonlibs/common_terraform_hcl2json_parse.php');
+                    $objWSRA = new CommonTerraformHCL2JSONParse($root_dir_path, $strTempFileFullname);
+                    // チェック関数
+                    $parseResult = $objWSRA->getParsedResult();
 
-                $retBool = $parseResult["res"];
-                // エラーの場合はエラー文の取得
-                if (!$retBool) {
-                    $retStrBody = $parseResult["err"];
+                    $retBool = $parseResult["res"];
+                    // エラーの場合はエラー文の取得
+                    if (!$retBool) {
+                        $retStrBody = $parseResult["err"];
+                    }
+                    unset($objWSRA);
+
+                    // システムエラーではない
+                    $boolSystemErrorFlag = false;
                 }
-                unset($objWSRA);
-
-                // システムエラーではない
-                $boolSystemErrorFlag = false;
             };
         };
 
