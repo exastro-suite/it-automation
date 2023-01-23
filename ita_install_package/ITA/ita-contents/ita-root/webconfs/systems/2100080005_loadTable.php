@@ -168,14 +168,6 @@ Module素材集
             }
         }
 
-
-        if (preg_match('/\.(tf)$/i',$tffile)){
-            $retBool = true;
-        }else{
-            $retBool = false;
-            $retStrBody = $g['objMTS']->getSomeMessage("ITATERRAFORM-ERR-211800");
-        }
-
         if($strModeId == "DTUP_singleRecUpdate" || $strModeId == "DTUP_singleRecRegister"){
             if(!empty($tmpFile)){
                 // tfファイルチェッククラス呼び出し
