@@ -48,10 +48,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
         $terraform_driver = true;
     }
-    $wanted_filename = "ita_terraform_cli-driver";
-    $terraform_cli_driver  = false;
+    $wanted_filename = "ita_terraformcli-driver";
+    $terraformcli_driver  = false;
     if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
-        $terraform_cli_driver = true;
+        $terraformcli_driver = true;
     }
 
     $arrayWebSetting = array();
@@ -413,7 +413,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $chkarry[true][false][true]   = "B_CICD_MATERIAL_TYPE_NAME_ANS_TERRACLI";
         $chkarry[false][true][true]   = "B_CICD_MATERIAL_TYPE_NAME_TERRA_TERRACLI";
         $chkarry[false][false][false] = "B_CICD_MATERIAL_TYPE_NAME_NULL";
-        $view_name = $chkarry[$ansible_driver][$terraform_driver][$terraform_cli_driver];
+        $view_name = $chkarry[$ansible_driver][$terraform_driver][$terraformcli_driver];
         /////////////////////////////////////////////////////////
         // 資材タイプ  必須入力:true ユニーク:false
         /////////////////////////////////////////////////////////
@@ -852,7 +852,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $chkarry[false][true][true]   = "D_CICD_MATL_PATTERN_LIST_TERRA_TERRACLI";
         $chkarry[false][false][false] = "D_CICD_MATL_PATTERN_LIST_NULL";
 
-        $view_name = $chkarry[$ansible_driver][$terraform_driver][$terraform_cli_driver];
+        $view_name = $chkarry[$ansible_driver][$terraform_driver][$terraformcli_driver];
 
         $c = new IDColumn('REST_DEL_MOVE_ID',$g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031700"),$view_name,'MATL_PTN_NAME_PULLKEY','MATL_PTN_NAME_PULLDOWN','',array('SELECT_ADD_FOR_ORDER'=>array('MATL_PTN_NAME_PULLDOWN'), 'ORDER'=>'ORDER BY ADD_SELECT_1'));
         $c->setDescription($g['objMTS']->getSomeMessage("ITACICDFORIAC-MNU-1200031701"));//エクセル・ヘッダでの説明
@@ -1370,10 +1370,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
             $terraform_driver = true;
         }
-        $wanted_filename = "ita_terraform_cli-driver";
-        $terraform_cli_driver  = false;
+        $wanted_filename = "ita_terraformcli-driver";
+        $terraformcli_driver  = false;
         if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
-            $terraform_cli_driver = true;
+            $terraformcli_driver = true;
         }
 
         $getColumnDataFunction = function($strModeId,$columnName,$Type,$arrayVariant,$arrayRegData) {
@@ -1571,6 +1571,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CONTENT:      //ファイル管理
                 case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_MODULE:       //Module素材
                 case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY:       //Policy管理
+                case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE:   //Module素材(Terraform-CLI)
                 case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_TEMPLATE:     //テンプレート管理
                     if(strlen($ColumnValueArray['OS_TYPE_ID']['COMMIT']) != 0) {
                         // 資材紐付先タイプがAnsible-Pioneerコンソール/対話ファイル素材集以外の場合は入力不要な項目です。(項目:OS種別)
@@ -1592,6 +1593,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CONTENT:      //ファイル管理
                 case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_MODULE:       //Module素材
                 case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY:       //Policy管理
+                case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE:   //Module素材(Terraform-CLI)
                 case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_PIONEER:      //対話ファイル素材集
                     if(strlen($ColumnValueArray['TEMPLATE_FILE_VARS_LIST']['COMMIT']) != 0) {
                         // 資材紐付先タイプがAnsible共通コンソール/テンプレート管理以外の場合は入力不要な項目です。(項目:変数定義)
@@ -1626,11 +1628,11 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 }
                 if($retBool===true){
                     // 選択されている紐付先資材タイプとインストールされているドライバーの妥当性チェック
-                    $retBool = MatlLinkColumnValidator4($ColumnValueArray['REPO_ROW_ID']['COMMIT'],$PkeyID,$ColumnValueArray['MATL_TYPE_ROW_ID']['COMMIT'],$g['objMTS'],$retStrBody,$ansible_driver,$terraform_driver,$terraform_cli_driver);
+                    $retBool = MatlLinkColumnValidator4($ColumnValueArray['REPO_ROW_ID']['COMMIT'],$PkeyID,$ColumnValueArray['MATL_TYPE_ROW_ID']['COMMIT'],$g['objMTS'],$retStrBody,$ansible_driver,$terraform_driver,$terraformcli_driver);
                 }
                 if($retBool===true){
                     // 入力チェック処理
-                    $retBool = MatlLinkColumnValidator1($ColumnValueArray,$ColumnValueArray['REPO_ROW_ID']['COMMIT'],$PkeyID,$g['objMTS'],$retStrBody,$ansible_driver,$terraform_driver,$terraform_cli_driver);
+                    $retBool = MatlLinkColumnValidator1($ColumnValueArray,$ColumnValueArray['REPO_ROW_ID']['COMMIT'],$PkeyID,$g['objMTS'],$retStrBody,$ansible_driver,$terraform_driver,$terraformcli_driver);
                 }
             }
             if($retBool === true) {
