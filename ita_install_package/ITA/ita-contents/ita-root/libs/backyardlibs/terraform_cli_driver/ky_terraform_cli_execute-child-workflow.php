@@ -745,7 +745,11 @@ try {
     }else{
         array_push($ary_input_matter, $workspace_work_dir . '/*.tf');
         array_push($ary_input_matter, $default_tfvars_file_path);
-        array_push($ary_input_matter, $secure_tfvars_file_path);
+
+        if(file_exists($secure_tfvars_file_path) === true) {
+            array_push($ary_input_matter, $secure_tfvars_file_path);
+            $secure_tfvars_flg = true;
+        }
     }
 
     //----------------------------------------------
@@ -829,10 +833,14 @@ try {
         //----------------------------------------------
         // planの実行
         //----------------------------------------------
+        $command_options = ["-input=false"];//対話入力の回避
+        if($secure_tfvars_flg === true){
+            array_push($command_options, "-var-file secure.tfvars");
+        }
         if ($run_mode != $RUN_MODE_DESTROY) {
-            $command = "terraform plan";
+            $command = "terraform plan ".implode(" ", $command_options);
         } else {
-            $command = "terraform plan -destroy";
+            $command = "terraform plan -destroy ".implode(" ", $command_options);
         }
         $ret = ExecCommand($command, $plan_log, false, $FREE_LOG);
         if( $ret !== $STATUS_COMPLETE ){
@@ -854,18 +862,18 @@ try {
         //----------------------------------------------
         // applyの実行
         //----------------------------------------------
+        $command_options = [];
+        if($secure_tfvars_flg === true){
+            array_push($command_options, "-var-file secure.tfvars");
+        }
         if ($run_mode == $RUN_MODE_APPLY) {
-            $command_options = [];
-            if($secure_tfvars_flg === true){
-                array_push($command_options, "-var-file secure.tfvars");
-            }
             $command = "terraform apply -auto-approve ".implode(" ", $command_options);
             $ret = ExecCommand($command, $apply_log, false, $FREE_LOG);
         //----------------------------------------------
         // destroyの実行
         //----------------------------------------------
         } elseif ($run_mode == $RUN_MODE_DESTROY){
-            $command = "terraform destroy -auto-approve";
+            $command = "terraform destroy -auto-approve ".implode(" ", $command_options);
             $ret = ExecCommand($command, $apply_log, false, $FREE_LOG);
         }
 
@@ -1920,6 +1928,8 @@ function generateMemberVarsArray($member_vars_array, $member_vars_key, $member_v
 function makeKVStrRow($key, $value, $type_id){
     $str_row = '';
     switch( $type_id ) {
+        // case NULL:
+        case '':
         case '1':
         case '18':
             $str_row = $key .'="'. $value .'"';
