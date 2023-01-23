@@ -333,8 +333,10 @@
         // リソース（Module素材)ファイル名格納
         //----------------------------------------------
         while ( $row = $objQueryUtn->resultFetch() ){
-           // moduleIDをkeyにし、module素材ファイル名を配列に追加
-            $aryMatterFilePerMatterId[$row["MATTER_ID"]] = $row["MATTER_FILE"];
+            // moduleIDをkeyにし、module素材ファイル名を配列に追加(拡張子が.tfのファイルのみ対象)
+            if (preg_match('/\.(tf)$/i',$row["MATTER_FILE"])){
+                $aryMatterFilePerMatterId[$row["MATTER_ID"]] = $row["MATTER_FILE"];
+            }
             //アクセス許可情報追加
             $aryAccessAuth[$row["MATTER_ID"]] = $row["ACCESS_AUTH"];
         }
