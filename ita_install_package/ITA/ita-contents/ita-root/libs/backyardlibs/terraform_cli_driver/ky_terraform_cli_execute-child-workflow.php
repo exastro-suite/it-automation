@@ -736,7 +736,6 @@ try {
                 file_put_contents($default_tfvars_file_path, $str_variable_tfvars, FILE_APPEND | LOCK_EX);
             }
             if( count($secure_tfvars) > 0 ){
-                array_push($ary_input_matter, $secure_tfvars_file_path);
                 $str_secure_tfvars = implode("\n", $secure_tfvars);
                 file_put_contents($secure_tfvars_file_path, $str_secure_tfvars, FILE_APPEND | LOCK_EX);
                 $secure_tfvars_flg = true;
@@ -747,7 +746,6 @@ try {
         array_push($ary_input_matter, $default_tfvars_file_path);
 
         if(file_exists($secure_tfvars_file_path) === true) {
-            array_push($ary_input_matter, $secure_tfvars_file_path);
             $secure_tfvars_flg = true;
         }
     }
