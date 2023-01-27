@@ -1,3 +1,25 @@
+Exastro IT Automation 1.11.0 (2023-01-27)
+==================================================
+
+
+Installer
+---------------
+Updated to Version 1.11.0 #2010
+Fixed an issue where the php packages would not be downloaded correctly when using Gather_Library #2044
+
+Management console
+---------------
+Fixed an issue where the "Role" button in the "Version" page would not function properly #2048
+
+Terraform-Driver
+---------------
+Added the ability to link with OSS version of Terraform. #1995
+Fixed an issue where pressing the "Delete resources" button for Terraform type driver operation tables, the registered records would be deleted #2064
+
+
+*******************************************************************************************************
+
+
 Exastro IT Automation 1.10.2 (2022-12-26)
 ==================================================
 
