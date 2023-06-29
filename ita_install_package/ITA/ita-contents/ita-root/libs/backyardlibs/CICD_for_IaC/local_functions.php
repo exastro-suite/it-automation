@@ -35,7 +35,7 @@ function debuglog($file,$line,$title,$data) {
     error_log($log);
 }
 // 資材紐付管理 入力チェックバリデータ  インストール状態でチェックが変わるので、インストール状態でチェックが変わるので、資材紐付時にも通す。
-function MatlLinkColumnValidator1($ColumnValueArray,$RepoId,$MatlLinkId,$objMTS,&$retStrBody,$ansible_driver,$terraform_driver) {
+function MatlLinkColumnValidator1($ColumnValueArray,$RepoId,$MatlLinkId,$objMTS,&$retStrBody,$ansible_driver,$terraform_driver,$terraform_cli_driver) {
     $retBool = true;
     // 紐付け先 素材集タイプ毎の必須入力チェック
     switch($ColumnValueArray['MATL_TYPE_ROW_ID']['COMMIT']) {
@@ -94,8 +94,10 @@ function MatlLinkColumnValidator1($ColumnValueArray,$RepoId,$MatlLinkId,$objMTS,
             }
         }
         break;
-    }  
-        
+    case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE:       //Module素材(Terraform-CLI)
+        break;
+    }
+
     // オペレーションIDとMovementの未入力チェック
     $ColumnNameOpe  = $objMTS->getSomeMessage("ITACICDFORIAC-MNU-1200031600");
     $ColumnNameMove = $objMTS->getSomeMessage("ITACICDFORIAC-MNU-1200031700");
@@ -106,7 +108,7 @@ function MatlLinkColumnValidator1($ColumnValueArray,$RepoId,$MatlLinkId,$objMTS,
             $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2024",array($ColumnNameMove,$MatlLinkId));
             $retBool = false;
         }
-    } 
+    }
     if(strlen($ColumnValueArray['DEL_MOVE_ID']['COMMIT']) != 0) {
         if(strlen($ColumnValueArray['DEL_OPE_ID']['COMMIT']) == 0) {
             if(strlen($retStrBody) != 0) { $retStrBody .= "\n"; }
@@ -114,7 +116,7 @@ function MatlLinkColumnValidator1($ColumnValueArray,$RepoId,$MatlLinkId,$objMTS,
             $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2026",array($ColumnNameOpe,$MatlLinkId));
             $retBool = false;
         }
-    } 
+    }
     return $retBool;
 }
 // 紐付先資材タイプと資材パスの組み合わせチェック
@@ -201,7 +203,7 @@ function MatlLinkColumnValidator3($row,$objMTS,&$retStrBody) {
             $retBool = false;
         }
     }
-    
+
     // 紐付先資材タイプが対話ファイル素材集の場合 対話種別とOS種別の廃止レコードか判定
     switch($row['MATL_TYPE_ROW_ID']) {   // 紐付先資材タイプが対話ファイル素材集
     case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_PIONEER:
@@ -224,7 +226,7 @@ function MatlLinkColumnValidator3($row,$objMTS,&$retStrBody) {
     return $retBool;
 }
 // 資材紐付管理 紐付先資材タイプとインストール状態をチェック  インストール状態でチェックが変わるので、資材紐付時にも通す。
-function MatlLinkColumnValidator4($RepoId,$MatlLinkId,$MatlTypeId,$objMTS,&$retStrBody,$ansible_driver,$terraform_driver) {
+function MatlLinkColumnValidator4($RepoId,$MatlLinkId,$MatlTypeId,$objMTS,&$retStrBody,$ansible_driver,$terraform_driver,$terraform_cli_driver) {
     $retBool = true;
     if($ansible_driver === false) {
         switch($MatlTypeId) {
@@ -247,9 +249,17 @@ function MatlLinkColumnValidator4($RepoId,$MatlLinkId,$MatlTypeId,$objMTS,&$retS
              return false;
         }
     }
+    if($terraform_cli_driver === false) {
+        switch($MatlTypeId) {
+        case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE:       //Module素材
+             // Terrahome-CLIドライバーがインストールされていないので、選択されている紐付先資材タイプは処理出来ません。(リモートリポジトリ管理:{} 資材紐付管理 項番:{})
+             $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2029",array($RepoId,$MatlLinkId));
+             return false;
+        }
+    }
     return true;
 }
-// 資材紐付管理 紐付先資材タイプとMovementタイプをチェック  
+// 資材紐付管理 紐付先資材タイプとMovementタイプをチェック
 function MatlLinkColumnValidator5($RepoId,$MatlLinkId,$ExtStnId,$MatlTypeId,$objMTS,&$retStrBody) {
     if(strlen($ExtStnId) == 0) {
         return true;
@@ -262,21 +272,21 @@ function MatlLinkColumnValidator5($RepoId,$MatlLinkId,$ExtStnId,$MatlTypeId,$obj
              $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2046",array($RepoId,$MatlLinkId));
              return false;
         }
-        break;  
+        break;
     case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_PIONEER:      //対話ファイル素材集
         if($ExtStnId != TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_PIONEER) {
              // 選択されている紐付先資材タイプとMovementの組み合わせが不正です。(リモートリポジトリ管理 項番:{} 資材紐付管理 項番:{})
              $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2046",array($RepoId,$MatlLinkId));
              return false;
         }
-        break;  
+        break;
     case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_ROLE:         //ロールパッケージ管理
         if($ExtStnId != TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_ROLE) {
              // 選択されている紐付先資材タイプとMovementの組み合わせが不正です。(リモートリポジトリ管理 項番:{} 資材紐付管理 項番:{})
              $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2046",array($RepoId,$MatlLinkId));
              return false;
         }
-        break;  
+        break;
     case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CONTENT:      //ファイル管理
     case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_TEMPLATE:     //テンプレート管理
         if(($ExtStnId != TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_LEGACY)  &&
@@ -286,7 +296,7 @@ function MatlLinkColumnValidator5($RepoId,$MatlLinkId,$ExtStnId,$MatlTypeId,$obj
              $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2046",array($RepoId,$MatlLinkId));
              return false;
         }
-        break;  
+        break;
     case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_MODULE:       //Module素材
     case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_POLICY:       //Policy管理
         if($ExtStnId != TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_TERRAFORM) {
@@ -294,7 +304,14 @@ function MatlLinkColumnValidator5($RepoId,$MatlLinkId,$ExtStnId,$MatlTypeId,$obj
              $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2046",array($RepoId,$MatlLinkId));
              return false;
         }
-        break;  
+        break;
+    case TD_B_CICD_MATERIAL_TYPE_NAME::C_MATL_TYPE_ROW_ID_CLI_MODULE:       //Module素材(Terraform-CLI)
+        if($ExtStnId != TD_C_PATTERN_PER_ORCH::C_EXT_STM_ID_TERRAFORM_CLI) {
+                // 選択されている紐付先資材タイプとMovementの組み合わせが不正です。(リモートリポジトリ管理 項番:{} 資材紐付管理 項番:{})
+                $retStrBody .= $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2046",array($RepoId,$MatlLinkId));
+                return false;
+        }
+        break;
     }
     return true;
 }

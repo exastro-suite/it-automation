@@ -3,6 +3,7 @@
 /ita-root/logs/restapilogs
 /ita-root/logs/restapilogs/ansible_driver
 /ita-root/logs/terraform_out_logs
+/ita-root/logs/terraform_cli_out_logs
 /ita-root/logs/update_by_file
 /ita-root/logs/webaplogs
 /ita-root/temp
@@ -30,6 +31,7 @@
 /ita-root/temp/sym_ope_import/upload
 /ita-root/temp/terraform_download_temp
 /ita-root/temp/terraform_module_temp
+/ita-root/temp/terraform_cli_module_temp
 /ita-root/temp/update_by_file_error
 /ita-root/temp/ansible_driver_temp
 /ita-root/uploadfiles
@@ -53,6 +55,7 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100090001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100100001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100120001
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100140001
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000002/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000003/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000004/old
@@ -70,6 +73,7 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100090001/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100100001/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100120001/old
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100140001/old
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000002/old/-000000002
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000003/old/-000000003
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100000004/old/-000000004
@@ -87,8 +91,10 @@
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100090001/old/-000000005
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100100001/old/-000000006
 /ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100120001/old/-000160015
+/ita-root/webroot/uploadfiles/2100000204/MENU_GROUP_ICON/2100140001/old/-000140001
 /ita-root/uploadfiles/2100040702
 /ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE
 /ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001
 /ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old
 /ita-root/uploadfiles/2100040702/ANS_GIT_SSH_KEY_FILE/0000000001/old/0000000001
+/ita-root/terraform_cli_work

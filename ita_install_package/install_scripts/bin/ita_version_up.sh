@@ -142,6 +142,10 @@ func_install_messasge() {
         MESSAGE="CI/CD for IaC"
     fi
 
+    if [ TERRAFORMCLI_FLG = ${1} ]; then
+        MESSAGE="Terraform CLI driver"
+    fi
+
     echo "$MESSAGE"
 }
 
@@ -171,6 +175,7 @@ CREATEPARAM2_FLG=0
 CREATEPARAM3_FLG=0
 HOSTGROUP_FLG=0
 CICD_FLG=0
+TERRAFORMCLI_FLG=0
 
 #インストール済みフラグ配列
 INSTALLED_FLG_LIST=(
@@ -183,6 +188,7 @@ INSTALLED_FLG_LIST=(
     CREATEPARAM3_FLG
     HOSTGROUP_FLG
     CICD_FLG
+    TERRAFORMCLI_FLG
 )
 
 #リリースファイル設置作成関数用配列
@@ -195,6 +201,7 @@ RELEASE_PLASE=(
     ita_createparam
     ita_hostgroup
     ita_cicd
+    ita_terraformcli-driver
 )
 
 #ディレクトリ変数定義
@@ -438,6 +445,9 @@ if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_hostgroup" ; then
 fi
 if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_cicd" ; then
     CICD_FLG=1
+fi
+if test -e "${ITA_DIRECTORY}/ita-root/libs/release/ita_terraformcli-driver" ; then
+    TERRAFORMCLI_FLG=1
 fi
 
 

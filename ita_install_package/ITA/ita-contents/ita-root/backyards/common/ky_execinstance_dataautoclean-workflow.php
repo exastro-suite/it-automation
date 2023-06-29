@@ -26,27 +26,27 @@
     //  【パラメータファイル】
     //      定義内容
     //        p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11
-    //        
+    //
     //        p1: 廃止までの日数(1～)
-    //        
+    //
     //        p2: 物理削除までの日数(1～)
     //        ※起算日は投入オペレーション一覧の実施予定日
-    //        
+    //
     //        np3: 物理テーブル名        (Ansible Legacy 作業インスタンスの場合:C_ANSIBLE_LNS_EXE_INS_MNG)
-    //        
+    //
     //        p4: 主キー名              (Ansible Legacy 作業インスタンスの場合:EXECUTION_NO)
-    //        
+    //
     //        p5: オペレーションID      (Ansible Legacy 作業インスタンスの場合:OPERATION_NO_UAPK)
-    //        
+    //
     //        p6: 最終更新者ID          (Ansible Legacy の場合                :-100015)
-    //        
+    //
     //        p7: 履歴データパス1～4でインターフェース情報のデータストレージ配下のパスを指定している場合
     //            インターフェース情報のデータストレージ情報を取得するSELECT文を記載します。
     //            データストレージ配下のパスを指定していない場合は省略可能です。
     //              exp)
     //                select ANSIBLE_STORAGE_PATH_LNX AS PATH from B_ANSIBLE_IF_INFO where DISUSE_FLAG='0';
     //                ※必ずエーリアス名にPPATHを設定して下さい。
-    //        
+    //
     //        p8: 履歴データパス1(省略可能)
     //              ・作業インスタンスディレクトリの投入データ履歴や結果データ履歴など、/???/ita-root/配下のパスの場合は
     //                /???/ita-oot/からの相対パスを記載します。
@@ -55,23 +55,23 @@
     //                      uploadfiles/ansible_driver/legacy/ns/execution_management/FILE_INPUT
     //                    Ansible Legacy 結果データ履歴の場合
     //                      uploadfiles/ansible_driver/legacy/ns/execution_management/FILE_RESULT
-    //        
+    //
     //              ・作業インスタンスディレクトリ(データストレージ)など、インターフェース情報のデータストレージ配下
     //                のパスの場合はデータストレージを示すキーワード「/__data_relay_storage__/」を付けたパスを記載します。
     //                  exp)
     //                    Ansible Legacy 作業インスタンスディレクトリの場合
     //                     /__data_relay_storage__/legacy/ns/
-    //        
+    //
     //              ・/???/ita-root/配下またはデータストレージ配下以外のパスの場合は絶対パスを記載します。
     //                  exp)
     //                    /var/log/hoge
-    //        
+    //
     //              履歴データパス2～履歴データパス4も同様
-    //        
+    //
     //        p9: 履歴データパス2(省略可能)
     //        p10:履歴データパス3(省略可能)
     //        p11:履歴データパス4(省略可能)
-    //        
+    //
     //  【特記事項】
     //      パラメータファイルの行数に関係なく、定義されているテーブル毎にロック(A_SEQUENCE)
     //      しトランザクション処理する。
@@ -88,10 +88,10 @@
     // F0004  PhysicalDeleteDB
     // F0005  WorkDirectoryDelete
     //////////////////////////////////////////////////////////////////////
-    
+
     // 起動しているshellの起動判定を正常にするための待ち時間
     sleep(5);
-    
+
     ////////////////////////////////
     // ルートディレクトリを取得   //
     ////////////////////////////////
@@ -199,7 +199,7 @@
 
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
-            $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_001);  
+            $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_001);
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
 
@@ -209,7 +209,7 @@
         require ($root_dir_path . $db_connect_php );
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
-            $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_002);  
+            $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_002);
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
 
@@ -244,14 +244,14 @@
                 $error_flag = 1;
                 throw new Exception( $FREE_LOG );
             }
-            
+
             // トレースメッセージ
             if ( $log_level === 'DEBUG' ){
                 // テーブル毎の開始メッセージ
                 $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_008,array($table_info['TABLE_NAME']));
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
             }
-            
+
             // 該当テーブルから保管期限切のデータ削除
             $ret = ExpireDataDelete($table_info);
             if($ret === false){
@@ -309,7 +309,7 @@
                     $error_flag = 1;
                     throw new Exception( $FREE_LOG );
                 }
-            } 
+            }
 
         }
         if(($warning_flag == 1) && ($nomal_flag == 0)){
@@ -326,7 +326,7 @@
         // 例外メッセージ出力
         $FREE_LOG = $e->getMessage();
         LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-        
+
         // トランザクションが発生しそうなロジックに入ってからのexceptionの場合は
         // 念のためロールバック/トランザクション終了
         if( $objDBCA->getTransactionMode() ){
@@ -342,7 +342,7 @@
             if ( $log_level === 'DEBUG' ){
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
             }
-            
+
             // トランザクション終了
             if( $objDBCA->transactionExit()=== true ){
                 $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_005);
@@ -375,7 +375,7 @@
         if ( $log_level === 'DEBUG' ){
             $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_ERR_005);
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-        }        
+        }
         // cron起動なので exit-code 1 で終了
         exit(1);
     }
@@ -502,7 +502,7 @@
             /////////////////////////////////////////////////////////////////////
             // インターフェース情報からデータストレージパスを取得する。
             /////////////////////////////////////////////////////////////////////
-            $tbl_info['DATA_STORAGE'] = ""; 
+            $tbl_info['DATA_STORAGE'] = "";
             if(trim($delData['GET_DATA_STRAGE_SQL']) != ""){
                 $sql = $delData['GET_DATA_STRAGE_SQL'];
                 $objQuery = $objDBCA->sqlPrepare($sql);
@@ -617,7 +617,7 @@
         global $log_output_dir;
         global $log_file_prefix;
         global $root_dir_path;
-        
+
         $CurTable          = $in_table_info['TABLE_NAME'];  //テーブル名
         $JnlTable          = $CurTable . "_JNL";            //ジャーナルテーブル名
         $SeqOfCurTable     = $CurTable . "_RIC";            //テーブルシーケンス名
@@ -645,7 +645,7 @@
             }
         }
         //デッドロック防止のために、昇順でロック----
-    
+
         ////////////////////////////////////////////////////
         // 廃止対象レコード抽出条件
         ////////////////////////////////////////////////////
@@ -666,7 +666,7 @@
             $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_010,array($in_table_info['TABLE_NAME']));
             LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
         }
- 
+
         if($log_level === 'DEBUG' ){
             LocalLogPrint(basename(__FILE__),__LINE__,$objMTS->getSomeMessage(DF_MSG_STD_015,
                                                                    array($CurTable,$in_table_info['LG_DATE'])));
@@ -695,7 +695,7 @@
         //////////////////////////////////////////////////////////////////
         $arr_table_list = array($CurTable,
                                 $JnlTable);
-    
+
         foreach($arr_table_list as $table_name){
             if($log_level === 'DEBUG' ){
                 LocalLogPrint(basename(__FILE__),__LINE__,$objMTS->getSomeMessage(DF_MSG_STD_015,
@@ -731,17 +731,17 @@
     // F0003
     // 処理内容
     //   作業対象ホスト管理から保管期限切れのレコードを廃止する。
-    //   
+    //
     // パラメータ
-    //   $in_strCurTable:                テーブル名  
+    //   $in_strCurTable:                テーブル名
     //   $in_strJnlTable:                ジャーナルテーブル名
     //   $in_strSeqOfCurTable:           テーブルシーケンス名
     //   $in_strSeqOfJnlTable:           ジャーナルシーケンス名
     //   $in_arrwhere:                   Where条件
     //   $in_pkey:                       Pkey項目名
     //   $in_ope_id:                     オペレーションID(Pkey)項目名
-    //   $in_access_user_id:             データベース更新ユーザーID 
-    // 
+    //   $in_access_user_id:             データベース更新ユーザーID
+    //
     // 戻り値
     //   True:正常　　False:異常
     ////////////////////////////////////////////////////////////////////////////////
@@ -762,13 +762,13 @@
 
         $arrayValue = array(
              "JOURNAL_SEQ_NO"=>""
-            ,"JOURNAL_REG_DATETIME"=>"" 
-            ,"JOURNAL_ACTION_CLASS"=>"" 
-            ,"DISP_SEQ"=>""             
-            ,"NOTE"=>""                 
-            ,"DISUSE_FLAG"=>""          
+            ,"JOURNAL_REG_DATETIME"=>""
+            ,"JOURNAL_ACTION_CLASS"=>""
+            ,"DISP_SEQ"=>""
+            ,"NOTE"=>""
+            ,"DISUSE_FLAG"=>""
             ,"LAST_UPDATE_TIMESTAMP"=>""
-            ,"LAST_UPDATE_USER"=>""     
+            ,"LAST_UPDATE_USER"=>""
             );
         $arrayValue[$in_pkey] = "";
         $arrayValue[$in_ope_id] = "";
@@ -813,7 +813,7 @@
             if(0 === count($arrayConfig)){
                 $arrayConfig = array(
                      "JOURNAL_SEQ_NO"=>""
-                    ,"JOURNAL_REG_DATETIME"=>"" 
+                    ,"JOURNAL_REG_DATETIME"=>""
                     ,"JOURNAL_ACTION_CLASS"=>""
                     );
 
@@ -845,7 +845,7 @@
             $temp_array = array();
             $retArray = makeSQLForUtnTableUpdate($db_model_ch,
                                                  "UPDATE",
-                                                 $in_pkey,   
+                                                 $in_pkey,
                                                  $in_strCurTable,
                                                  $in_strJnlTable,
                                                  $arrayConfig,
@@ -935,16 +935,31 @@
         /////////////////////////////////////////////////////////////////////
         // オペレーションIDの紐づかないデータを物理削除
         /////////////////////////////////////////////////////////////////////
-        $strsql = " delete TAB_A from %s TAB_A "   .
-                   " where NOT EXISTS "      .
-                   "   (select "             .
-                   "      * "                .
-                   "    from "               .
-                   "      (select * from C_OPERATION_LIST) TAB_B " .
-                   "    where "              .
-                   "      TAB_A.%s = TAB_B.OPERATION_NO_UAPK " .
-                   "   ) ";
-                   
+        if ($in_strTable == "C_TERRAFORM_EXE_INS_MNG" ||
+            $in_strTable == "C_TERRAFORM_EXE_INS_MNG_JNL" ||
+            $in_strTable == "C_TERRAFORM_CLI_EXE_INS_MNG" ||
+            $in_strTable == "C_TERRAFORM_CLI_EXE_INS_MNG_JNL"){
+            # Terraform作業管理系テーブルについて、RUN_MODE:3(リソース削除)の場合オペレーションIDが指定されないので、削除対象として除外する。
+            $strsql = " delete TAB_A from %s TAB_A "   .
+            " where NOT EXISTS "      .
+            "   (select "             .
+            "      * "                .
+            "    from "               .
+            "      (select * from C_OPERATION_LIST) TAB_B " .
+            "    where "              .
+            "      TAB_A.%s = TAB_B.OPERATION_NO_UAPK " .
+            "   ) AND NOT TAB_A.RUN_MODE = '3'";
+        }else{
+            $strsql = " delete TAB_A from %s TAB_A "   .
+            " where NOT EXISTS "      .
+            "   (select "             .
+            "      * "                .
+            "    from "               .
+            "      (select * from C_OPERATION_LIST) TAB_B " .
+            "    where "              .
+            "      TAB_A.%s = TAB_B.OPERATION_NO_UAPK " .
+            "   ) ";
+        }
 
         $sql = sprintf($strsql, $in_strTable, $in_ope_col_name);
 
@@ -985,9 +1000,9 @@
                                  ") ";
 
         $sql = sprintf($strsql,$in_strTable,$in_ope_col_name,$in_tgt_date);
-        
+
         $objQuery = $objDBCA->sqlPrepare($sql);
-        
+
         if($objQuery->getStatus()===false){
             LocalLogPrint(basename(__FILE__),__LINE__,$sql);
             LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
@@ -1032,9 +1047,9 @@
         // 該当テーブルに登録されているレコードを取得
         /////////////////////////////////////////////////////////////////////
         $sql = sprintf("SELECT %s FROM %s\n",$in_table_info['PKEY_NAME'],$in_table_info['TABLE_NAME']);
-        
+
         $objQuery = $objDBCA->sqlPrepare($sql);
-        
+
         if($objQuery->getStatus()===false){
             LocalLogPrint(basename(__FILE__),__LINE__,$sql);
             LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
@@ -1053,7 +1068,7 @@
         }
         while ( $row = $objQuery->resultFetch() ){
             $no = sprintf("%010d",$row[$in_table_info['PKEY_NAME']]);
-            $pkey_list[$no] = 1; 
+            $pkey_list[$no] = 1;
         }
         unset($objQuery);
 
@@ -1136,7 +1151,7 @@
             $FREE = $objMTS->getSomeMessage(DF_MSG_ERR_010,array($table_name));
             return $FREE ;
         }
-        
+
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ){
             $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_004);
@@ -1167,7 +1182,7 @@
                 $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_006);
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
             }
-        
+
             ////////////////////////////////
             // トランザクション終了       //
             ////////////////////////////////
@@ -1204,7 +1219,7 @@
                 $FREE_LOG = $objMTS->getSomeMessage(DF_MSG_STD_007);
                 LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
             }
-            
+
             ////////////////////////////////
             // トランザクション終了       //
             ////////////////////////////////
@@ -1227,14 +1242,14 @@
             return true;
         }
         $pattern = "/^\/__data_relay_storage__\//";
-        $ret = preg_match($pattern,$in_csvdata); 
+        $ret = preg_match($pattern,$in_csvdata);
         if($ret != 0){
 
             $in_outdata = preg_replace($pattern,$in_storage_path . "/",$in_csvdata);
             return true;
         }
         // 絶対パス判定
-        $ret = preg_match("/^\//",$in_csvdata); 
+        $ret = preg_match("/^\//",$in_csvdata);
         if($ret != 0){
             $in_outdata       = $in_csvdata;
         }
@@ -1251,7 +1266,7 @@
         global $log_level;
         global $root_dir_path;
         global $log_output_php;
- 
+
         $FREE_LOG = "FILE:$p1 LINE:$p2 $p3";
         require ($root_dir_path . $log_output_php);
     }
@@ -1263,7 +1278,7 @@
         global $log_level;
         global $root_dir_path;
         global $log_output_php;
- 
+
         $FREE_LOG = "FILE:$p1 LINE:$p2\n" . print_r($p3,true);
         echo $FREE_LOG;
     }

@@ -47,7 +47,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     // マルチユニーク制約
     //$table->addUniqueColumnSet(array('HOST_ID','OPERATION_ID'));
 ★★★UNIQUE_CONSTRAINT★★★
-     
+
     // QMファイル名プレフィックス
     $table->setDBMainTableLabel('★★★MENU★★★');
     // エクセルのシート名
@@ -74,7 +74,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
        $query = "SELECT ACCESS_AUTH FROM " . $objTable->getDBMainTableHiddenID() . " T1 WHERE T1.".$objTable->getRequiredDisuseColumnID() ." IN ('0','1') ";
        $aryForBind = array();
        $aryRetBody = singleSQLExecuteAgent($query, $aryForBind, $strFxName);
-       
+
        if( $aryRetBody[0] === true ){
            $objQuery = $aryRetBody[1];
            // RBAC対応
@@ -116,7 +116,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
 
                 $strQuery = "UPDATE A_PROC_LOADED_LIST "
                            ."SET LOADED_FLG = :LOADED_FLG, LAST_UPDATE_TIMESTAMP = :LAST_UPDATE_TIMESTAMP "
-                           ."WHERE ROW_ID IN (2100020002, 2100020004, 2100020006, 2100080002)";
+                           ."WHERE ROW_ID IN (2100020002, 2100020004, 2100020006, 2100080002, 2100080004)";
 
                 $g['objDBCA']->setQueryTime();
                 $aryForBind = array('LOADED_FLG' => "0", 'LAST_UPDATE_TIMESTAMP' => $g['objDBCA']->getQueryTime());

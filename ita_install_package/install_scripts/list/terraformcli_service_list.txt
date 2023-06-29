@@ -1,0 +1,3 @@
+/ita-root/backyards/terraform_cli_driver/ky_terraform_cli_execute-workflow
+/ita-root/backyards/terraform_cli_driver/ky_terraform_cli_varsautolistup-workflow
+/ita-root/backyards/terraform_cli_driver/ky_terraform_cli_valautosetup-workflow

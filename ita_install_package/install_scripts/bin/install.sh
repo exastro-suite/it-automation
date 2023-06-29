@@ -70,7 +70,7 @@ func_answer_format_check() {
 # @return   なし
 ############################################################
 func_set_total_cnt() {
-    
+
     PROCCESS_TOTAL_CNT=0
 
     if [ "$BASE_FLG" -eq 1 ]; then
@@ -107,6 +107,10 @@ func_set_total_cnt() {
 
     if [ "$CICD_FLG" -eq 1 ]; then
         PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+4))
+    fi
+
+    if [ "$TERRAFORMCLI_FLG" -eq 1 ]; then
+        PROCCESS_TOTAL_CNT=$((PROCCESS_TOTAL_CNT+3))
     fi
 
     echo $PROCCESS_TOTAL_CNT
@@ -154,6 +158,10 @@ func_install_messasge() {
         MESSAGE="CI/CD for IaC"
     fi
 
+    if [ TERRAFORMCLI_FLG = ${1} ]; then
+        MESSAGE="Terraform CLI driver"
+    fi
+
     echo "$MESSAGE"
 }
 
@@ -165,7 +173,7 @@ func_install_messasge() {
 func_create_datarelaystorage() {
     MESSAGE=`func_install_messasge ${1}`
     DRIVER=`echo ${1} | cut -d "_" -f 1 | sed 's/^ \(.*\) $/\1/'`
-    
+
     if [ ${!1} -eq 1 ]; then
         log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Create data relay storage for $MESSAGE."
         if test -d "$ITA_DIRECTORY"/data_relay_storage/${DRIVER,,}_driver ; then
@@ -185,7 +193,7 @@ func_create_datarelaystorage() {
 func_create_tables() {
     MESSAGE=`func_install_messasge ${1}`
     DRIVER=`echo ${1} | cut -d "_" -f 1 | sed 's/^ \(.*\) $/\1/'`
-    
+
     if [ ${!1} -eq 1 ]; then
         log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Create tables for $MESSAGE."
         if ! test -e "$LIST_DIR/${DRIVER,,}_table_list.txt" ; then
@@ -237,7 +245,7 @@ func_release_place() {
 func_config_place() {
     MESSAGE=`func_install_messasge ${1}`
     DRIVER=`echo ${1} | cut -d "_" -f 1 | sed 's/^ \(.*\) $/\1/'`
-    
+
     if [ ${!1} -eq 1 ]; then
         log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Place config files for $MESSAGE."
         if ! test -e "$LIST_DIR/${DRIVER,,}_config_list.txt" ; then
@@ -261,10 +269,10 @@ func_config_place() {
 func_services_set() {
     MESSAGE=`func_install_messasge ${1}`
     DRIVER=`echo ${1} | cut -d "_" -f 1 | sed 's/^ \(.*\) $/\1/'`
-        
+
     if [ ${!1} -eq 1 ]; then
         log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Set up services for $MESSAGE."
-        
+
         if ! test -e "$LIST_DIR/${DRIVER,,}_service_list.txt"; then
             log "WARNING : ${DRIVER,,}_service_list.txt does not be found."
         else
@@ -291,7 +299,7 @@ func_services_set() {
 func_crontab_set() {
     MESSAGE=`func_install_messasge ${1}`
     DRIVER=`echo ${1} | cut -d "_" -f 1 | sed 's/^ \(.*\) $/\1/'`
-    
+
     if [ ${!1} -eq 1 ]; then
         log "INFO : `printf %02d $PROCCESS_CNT`/$PROCCESS_TOTAL_CNT Set up crontab for $MESSAGE."
         if ! test -e "$LIST_DIR/${DRIVER,,}_crontab_list.txt" ; then
@@ -341,6 +349,7 @@ CREATE_TABLES=(
     CREATEPARAM3_FLG
     HOSTGROUP_FLG
     CICD_FLG
+    TERRAFORMCLI_FLG
 )
 
 #リリースファイル設置作成関数用配列
@@ -352,6 +361,7 @@ RELEASE_PLASE=(
     ita_createparam
     ita_hostgroup
     ita_cicd
+    ita_terraformcli-driver
 )
 
 #コンフィグファイル設置確認作成関数用配列
@@ -373,6 +383,7 @@ SERVICES_SET=(
     CREATEPARAM2_FLG
     HOSTGROUP_FLG
     CICD_FLG
+    TERRAFORMCLI_FLG
 )
 
 #クーロンタブ設定関数用配列
@@ -399,6 +410,7 @@ CREATEPARAM2_FLG=0
 CREATEPARAM3_FLG=0
 HOSTGROUP_FLG=0
 CICD_FLG=0
+TERRAFORMCLI_FLG=0
 
 declare -A REPLACE_CHAR;
 REPLACE_CHAR=(
@@ -410,7 +422,7 @@ REPLACE_CHAR=(
 
 DRIVER_CNT=0
 ANSWER_DRIVER_CNT=0
-ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'terraform_driver' 'createparam' 'hostgroup' 'cicd_for_iac')
+ARR_DRIVER_CHK=('ita_base' 'ansible_driver' 'cobbler_driver' 'terraform_driver' 'createparam' 'hostgroup' 'cicd_for_iac' 'terraformcli_driver')
 
 CERTIFICATE_FILE=''
 PRIVATE_KEY_FILE=''
@@ -429,7 +441,7 @@ while read LINE; do
 
         key=`echo $DRIVER | cut -d ":" -f 1 | sed 's/^ \(.*\) $/\1/'`
         val=`echo $DRIVER | cut -d ":" -f 2 | sed 's/^ \(.*\) $/\1/'`
-       
+
         if [ "$key" = 'ita_base' -a "$val" = 'no' ]; then
             func_answer_format_check
             if ! test -d "$ITA_DIRECTORY"/ita-root ; then
@@ -448,7 +460,7 @@ while read LINE; do
                     func_exit_and_delete_file
                 fi
             fi
-            
+
             BASE_FLG=1
         elif [ "$key" = 'ansible_driver' ]; then
             func_answer_format_check
@@ -479,6 +491,11 @@ while read LINE; do
             func_answer_format_check
             if [ "$val" = 'yes' ]; then
                 CICD_FLG=1
+            fi
+        elif [ "$key" = 'terraformcli_driver' ]; then
+            func_answer_format_check
+            if [ "$val" = 'yes' ]; then
+                TERRAFORMCLI_FLG=1
             fi
         fi
     fi
@@ -528,6 +545,9 @@ if [ $HOSTGROUP_FLG -eq 1 ]; then
 fi
 if [ $CICD_FLG -eq 1 ]; then
     log "INFO : Installation target : CI/CD for IaC"
+fi
+if [ $TERRAFORMCLI_FLG -eq 1 ]; then
+    log "INFO : Installation target : terraformcli_driver"
 fi
 
 
@@ -594,6 +614,13 @@ if [ "$CICD_FLG" -eq 1 ]; then
     fi
 fi
 
+if [ "$TERRAFORMCLI_FLG" -eq 1 ]; then
+    if test -e "$ITA_DIRECTORY"/ita-root/libs/release/ita_terraformcli ; then
+        log 'WARNING : Terraform  CLI driver has already been installed.'
+        TERRAFORMCLI_FLG=0
+    fi
+fi
+
 #秘密鍵と証明書のファイル名を取得（ITA自己証明書を作成する場合は証明書署名要求ファイル名も設定）
 if [ "$CERTIFICATE_PATH" != "" -a "$PRIVATE_KEY_PATH" != "" ]; then
     CERTIFICATE_FILE=$(echo $(basename ${CERTIFICATE_PATH})) 2>> "$LOG_FILE"
@@ -616,7 +643,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         log 'ERROR : app_msg_language.txt does not be found.'
     else
         if [ ${ITA_LANGUAGE} = 'en_US' ]; then
-            sed -i -e "s/ja_JP/en_US/g" ../ITA/ita-confs/commonconfs/app_msg_language.txt 2>> "$LOG_FILE" 
+            sed -i -e "s/ja_JP/en_US/g" ../ITA/ita-confs/commonconfs/app_msg_language.txt 2>> "$LOG_FILE"
         else
             sed -i -e "s/en_US/ja_JP/g" ../ITA/ita-confs/commonconfs/app_msg_language.txt 2>> "$LOG_FILE"
         fi
@@ -677,7 +704,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
                 ERR_FLG="false"
                 func_exit_and_delete_file
             fi
-        else 
+        else
             # 指定のパスにファイルがない場合は異常終了
             log "ERORR : ${CERTIFICATE_PATH} does not be found."
             log 'INFO : Abort installation.'
@@ -685,7 +712,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
             func_exit_and_delete_file
         fi
     elif [ "${CERTIFICATE_PATH}" = "" -a "${PRIVATE_KEY_PATH}" = "" ]; then
-        # CERTIFICATE_PATH と PRIVATE_KEY_PATH がどちらも入力されていない場合は、ITAで作成する自己証明書・秘密鍵を設置 
+        # CERTIFICATE_PATH と PRIVATE_KEY_PATH がどちらも入力されていない場合は、ITAで作成する自己証明書・秘密鍵を設置
         # 秘密鍵を生成
         openssl genrsa 2048 > /tmp/"$PRIVATE_KEY_FILE" 2>> "$LOG_FILE"
         # 証明書署名要求を生成
@@ -761,7 +788,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     if ! test -e /etc/php.ini ; then
         log 'WARNING : Failed to place /etc/php.ini.'
     fi
-    
+
     if [ ${LINUX_OS} = 'RHEL8' -o ${LINUX_OS} = 'CentOS8' ]; then
         mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.conf_original 2>> "$LOG_FILE"
         if ! test -e /etc/php-fpm.d/www.conf_original ; then
@@ -817,7 +844,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     PARENT_DIR=$(dirname "$ITA_DIRECTORY")
     #親ディレクトリの権限のOthersに実行権限があるかチェックする(PARENT_DIRが"/"になるまで繰り返し)
     while [ "$PARENT_DIR" != "/" ] ; do
-        ls -ld "$PARENT_DIR" | awk '{print substr($0, 8, 3)}' | grep -q x 
+        ls -ld "$PARENT_DIR" | awk '{print substr($0, 8, 3)}' | grep -q x
         if [ $? != 0 ]; then
             log "ERROR : The parent directory of ITA does not have execute permission for \"Other users\".(dir:$PARENT_DIR)"
             log 'INFO : Abort installation.'
@@ -877,7 +904,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
     if ! test -d "$ITA_DIRECTORY"/ita-root ; then
         log 'WARNING : Failed to place ITA full functions.'
     fi
-    
+
     if ! test -e "$LIST_DIR/create_dir_list.txt" ; then
         log "WARNING : create_dir_list.txt does not be found."
     else
@@ -921,16 +948,16 @@ if [ "$BASE_FLG" -eq 1 ]; then
     #Place ITA release file for base functions."
     ##################################################################################################
     func_release_place ita_base
-    
+
     ################################################################################################
     #Place ITA config files for base functions."
     ################################################################################################
     cp -rp ../ITA/ita-confs/* "$ITA_DIRECTORY"/ita-root/confs/ 2>> "$LOG_FILE"
-    
+
     for file in `find "$ITA_DIRECTORY"/ita-root/confs/ -type f`; do
         sed -i -e "s:${REPLACE_CHAR["ita_directory"]}:$ITA_DIRECTORY:g" "$file" 2>> "$LOG_FILE"
     done
-    
+
     func_config_place BASE_FLG
 
     DB_NAME_ENC=`func_str_encode "mysql:dbname=$DB_NAME;host=localhost"`

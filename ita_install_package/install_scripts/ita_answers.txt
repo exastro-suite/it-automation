@@ -59,6 +59,7 @@ ansible_driver:yes
 cobbler_driver:no
 terraform_driver:yes
 cicd_for_iac:no
+terraformcli_driver:yes
 
 # Enter the ita domain name.
 # e.g) ita_domain:exastro-it-automation.local

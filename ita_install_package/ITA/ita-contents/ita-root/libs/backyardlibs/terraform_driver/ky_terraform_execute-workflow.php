@@ -3115,6 +3115,7 @@ function getTypeInfo($typeID)
     global $objDBCA, $vg_terraform_types_master;
     global $root_dir_path;
 
+    $typeID = $typeID? $typeID : "1";
     $typeInfo = [];
 
     $sqlUtnBody = "SELECT "

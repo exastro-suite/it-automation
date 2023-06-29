@@ -18,7 +18,7 @@
 //  【概要】
 //      CICD For IaC Git リモートリポジトリ同期処理　子プロセス(リモートリポジトリ単位)
 //
-//   function 
+//   function
 //      ExceptionRecive
 //      getRolesPath
 //      getLocalCloneFileList
@@ -169,7 +169,7 @@
 
         $DBobj = new LocalDBAccessClass($db_model_ch,$cmDBobj,$objDBCA,$objMTS,$db_access_user_id,$logfile,$log_level,$RepoId);
 
-        $LFCobj = new LocalFilesControl();       
+        $LFCobj = new LocalFilesControl();
 
         $TDMatlobj = new TD_B_CICD_MATERIAL_LIST();
 
@@ -251,10 +251,10 @@
             setDefaultUIDisplayMsg();
 
             // ファイル読み込み失敗
-            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1014",array($GitCmdRsltParsStrFileNamePath)); 
+            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1014",array($GitCmdRsltParsStrFileNamePath));
             $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$TDMatlobj->GetLastErrorMsg());
             throw new Exception($FREE_LOG);
-        } 
+        }
 
         ///////////////////////////////////////////////////
         // トランザクション開始
@@ -301,7 +301,7 @@
             // exit
             exit(0);
         }
-        // 同期状態が異常でないことを確認する。 
+        // 同期状態が異常でないことを確認する。
         if($RepoListRow['SYNC_STATUS_ROW_ID'] == $SyncStatusNameobj->ERROR()) {
             // exit
             exit(0);
@@ -310,7 +310,7 @@
         if(($RepoListRow['SYNC_STATUS_ROW_ID'] == $SyncStatusNameobj->RESTART()) ||
            (strlen($RepoListRow['SYNC_STATUS_ROW_ID']) == 0)) {
             $MatlListUpdateExeFlg = true;
-        } 
+        }
 
         $cloneRepoDir = $LFCobj->getLocalCloneDir($RepoId);
         $libPath      = $LFCobj->getLocalShellDir();
@@ -360,7 +360,7 @@
                 if($ret === false) {
                     // ブランチ不一致
                     $CloneExeFlg  = true;
- 
+
                     // トレースメッセージ
                     if ( $log_level === 'DEBUG' ){
                         // [処理]リモートリポジトリ管理のブランチの変更検出 (リモートリポジトリ項番:{})
@@ -389,7 +389,7 @@
 
             } else {
                 /////////////////////////////////////////////////////////////////
-                // Git差分抽出(git pull) 
+                // Git差分抽出(git pull)
                 /////////////////////////////////////////////////////////////////
                 $pullResultAry = array();
                 $UpdateFiles   = array();
@@ -452,7 +452,7 @@
                 if($ret !== true) {
                     // 異常フラグON
                     $error_flag = 1;
-        
+
                     // "トランザクション処理に失敗しました。";
                     $logstr  = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1003");  // 2002
                     $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
@@ -591,7 +591,7 @@
         ///////////////////////////////////////////////////
         $ret = $DBobj->transactionExit();
         ///////////////////////////////////////////////////
-        // トランザクション開始  
+        // トランザクション開始
         // シーケンスロックはしないて、資材紐付管理に登録
         // されている資材を展開
         ///////////////////////////////////////////////////
@@ -612,13 +612,13 @@
         ///////////////////////////////////////////////////
         //$MargeExeFlg          = true;
         //$MatlListUpdateExeFlg = false;
-     
+
         $ret = MatlLinkExecute($RepoId,$MargeExeFlg,$MatlListUpdateExeFlg);
         if($ret !== true) {
             // 異常フラグON
             $error_flag = 1;
 
-            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2003");  
+            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2003");
             $logaddstr = $ret;
             $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$logaddstr);
             throw new Exception($FREE_LOG);
@@ -643,7 +643,7 @@
         // メッセージ出力
         $FREE_LOG = $e->getMessage();
         require ($root_dir_path . $log_output_php );
-        
+
         // トランザクションが発生しそうなロジックに入ってからのexceptionの場合は
         // 念のためロールバック/トランザクション終了
         if( $objDBCA->getTransactionMode() ){
@@ -695,7 +695,7 @@
             require ($root_dir_path . $log_output_php );
         }
     }
-    
+
     ////////////////////////////////
     //// 結果出力               ////
     ////////////////////////////////
@@ -706,7 +706,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-ERR-50001");
             require ($root_dir_path . $log_output_php );
         }
-        
+
         exit(2);
     }
     elseif( $warning_flag != 0 ){
@@ -723,7 +723,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITAWDCH-STD-50002");
             require ($root_dir_path . $log_output_php );
         }
-        
+
         exit(0);
     }
 
@@ -1144,7 +1144,7 @@
         global $TDSyncStsobj;
 
         // 廃止かは判定しない。
-        $sqlBody   = "SELECT 
+        $sqlBody   = "SELECT
                         TAB_A.*
                       FROM
                         %s TAB_A
@@ -1206,7 +1206,7 @@
         $Logstr  = $retAry['log'];
         $UIMsg   = $retAry['UImsg'];
     }
-    
+
     function LockPkeySequence($aryTgtOfSequenceLock) {
         global $cmDBobj;
         global $DBobj;
@@ -1224,7 +1224,7 @@
         global $objMTS;
 
         // デッドロック防止のために、昇順でロック
-        // キーと値の関係を維持しつつ、値を基準に、昇順で並べ替える 
+        // キーと値の関係を維持しつつ、値を基準に、昇順で並べ替える
         asort($aryTgtOfSequenceLock);
         foreach($aryTgtOfSequenceLock as $strSeqName){
             //シーケンスロック
@@ -1580,23 +1580,23 @@
 
         global $TDMatlobj;
 
-        $sqlBody   = "SELECT 
+        $sqlBody   = "SELECT
                           TAB_A.*,
-                          (  
-                              SELECT 
-                                  COUNT(*) 
-                              FROM 
-                                  %s TAB_B 
-                              WHERE 
-                                    TAB_B.MATL_FILE_PATH LIKE CONCAT(TAB_A.MATL_FILE_PATH,'/%s') 
+                          (
+                              SELECT
+                                  COUNT(*)
+                              FROM
+                                  %s TAB_B
+                              WHERE
+                                    TAB_B.MATL_FILE_PATH LIKE CONCAT(TAB_A.MATL_FILE_PATH,'/%s')
                                 AND TAB_B.MATL_FILE_TYPE_ROW_ID=:FILE_TYPE_ID
                                 AND TAB_B.REPO_ROW_ID=:REPO_ROW_ID
                                 AND TAB_B.DISUSE_FLAG ='0'
                          ) AS FILE_COUNTT
                       FROM
-                         %s TAB_A 
-                      WHERE 
-                             TAB_A.MATL_FILE_TYPE_ROW_ID=:ROLRS_TYPE_ID 
+                         %s TAB_A
+                      WHERE
+                             TAB_A.MATL_FILE_TYPE_ROW_ID=:ROLRS_TYPE_ID
                          AND TAB_A.REPO_ROW_ID = :REPO_ROW_ID";
         $sqlBody   = sprintf($sqlBody,$TDMatlobj->getTableName(),"%",$TDMatlobj->getTableName());
         $arrayBind = array();
@@ -1641,21 +1641,21 @@
                 unset($row['FILE_COUNTT']);
                 $ColumnValueArray                 = $row;
                 $JnlInsert_Flag                   = true;   // 履歴出力あり
-    
+
                 $BindArray = array();
                 $ret = $DBobj->UpdateRow($BindArray,$TDMatlobj,$ColumnConfigArray,$ColumnValueArray,$JnlInsert_Flag);
                 if($ret === false) {
                     // 異常フラグON
                     $error_flag = 1;
-    
+
                     // "データベースのアクセスに失敗しました。";
                     $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1005");  //2004
                     $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
-    
+
                     // UIに表示するメッセージ
                     // 想定外のエラーか発生しました。
                     $UIDisplayMsg = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-4000");
-    
+
                     // 戻り値編集
                     $retary = array();
                     $RetCode = -1;
@@ -1704,7 +1704,7 @@
         $wherestr = "";
         foreach($UpdateColumnAry as $column=>$value) {
             if($column == 'ROW_ID') {
-                $wherestr = " WHERE ROW_ID=:ROW_ID "; 
+                $wherestr = " WHERE ROW_ID=:ROW_ID ";
                 continue;
             }
             if(strlen($columnstr) != 0) { $columnstr = $columnstr . " , "; }
@@ -1722,7 +1722,7 @@
             $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1005");   // 2004
             $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
             return $FREE_LOG;
-        }        
+        }
 
         //トレースメッセージ
         if ( $log_level === 'DEBUG' ){
@@ -1903,8 +1903,8 @@
         if($ret !== true) {
             // 異常フラグON
             $error_flag = 1;
-            
-            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2002"); 
+
+            $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2002");
             $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$ret);
             return $FREE_LOG;
         }
@@ -1970,26 +1970,26 @@
 
         // トレースメッセージ
         if ( $log_level === 'DEBUG' ) {
-            $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2010",array($RepoId,$MatlLinkId)); 
+            $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2010",array($RepoId,$MatlLinkId));
             require ($root_dir_path . $log_output_php );
         }
-        // 孫プロセス起動 
+        // 孫プロセス起動
         $output     = array();
         $return_var = "";
         exec($cmd,$output,$return_var);
         if($return_var == 0) {
             // トレースメッセージ
             if ( $log_level === 'DEBUG' ) {
-                $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2019",array($RepoId,$MatlLinkId)); 
+                $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-STD-2019",array($RepoId,$MatlLinkId));
                 require ($root_dir_path . $log_output_php );
             }
         } else {
-            // 孫プロセスのエラーを検出してもログだけ出して先に進む 
+            // 孫プロセスのエラーを検出してもログだけ出して先に進む
             // ワーニングフラグON
             $warning_flag =1;
- 
+
             $logaddstr = implode("\n",$output);
-            $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2001",array($RepoId,$MatlLinkId,$logaddstr)); 
+            $FREE_LOG = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-2001",array($RepoId,$MatlLinkId,$logaddstr));
             require ($root_dir_path . $log_output_php );
         }
         return true;
@@ -2011,7 +2011,7 @@
         global $TDMatlLinkobj;
 
         $tgtRepoListRow = array();
-        
+
         // ansible/terraformのリリースファイル有無確認(インストール状態確認)
         $wanted_filename = "ita_ansible-driver";
         $ansible_driver  = false;
@@ -2023,14 +2023,19 @@
         if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
             $terraform_driver = true;
         }
+        $wanted_filename = "ita_terraform_cli-driver";
+        $terraform_cli_driver  = false;
+        if(file_exists($root_dir_path . "/libs/release/" . $wanted_filename)) {
+            $terraform_cli_driver = true;
+        }
 
         // 資材紐付管理取得
         // 条件: 廃止レコード以外　自動同期が有効　
         // 同期状態は呼出元で判定
-        $Tobj = new TQ_REPO_LIST_ALL_JOIN($ansible_driver,$terraform_driver);
-        $sqlBody = $Tobj->getSql($ansible_driver,$terraform_driver);
-        $sqlBody = $sqlBody . 
-                   " WHERE 
+        $Tobj = new TQ_REPO_LIST_ALL_JOIN($ansible_driver,$terraform_driver,$terraform_cli_driver);
+        $sqlBody = $Tobj->getSql($ansible_driver,$terraform_driver,$terraform_cli_driver);
+        $sqlBody = $sqlBody .
+                   " WHERE
                           T1.REPO_ROW_ID       =  :REPO_ROW_ID
                       AND T1.DISUSE_FLAG       =  '0'
                       AND T1.AUTO_SYNC_FLG     =  :AUTO_SYNC_FLG";
@@ -2043,7 +2048,7 @@
         if($objQuery === false) {
             // 異常フラグON
             $error_flag = 1;
-            
+
             // データベースのアクセスに失敗しました。
             $logstr  = $logstr = $objMTS->getSomeMessage("ITACICDFORIAC-ERR-1005");
             $FREE_LOG = makeLogiFileOutputString(basename(__FILE__),__LINE__,$logstr,$DBobj->GetLastErrorMsg());
@@ -2057,7 +2062,7 @@
         unset($objQuery);
         return true;
     }
-    
+
     // 資材一覧を廃止
     function MatlListRecodeDisuse($RepoId) {
         global $cmDBobj;

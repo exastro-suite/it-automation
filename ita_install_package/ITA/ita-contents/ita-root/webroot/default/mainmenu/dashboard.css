@@ -1203,6 +1203,9 @@ display: block;
 /* Terraform */
 .circle-terraform { stroke: #6C60E8; }
 .movement-terraform { background-color: #6C60E8; }
+/* TerraformCLI */
+.circle-terraform-cli { stroke: #889dd8; }
+.movement-terraform-cli { background-color: #889dd8; }
 /* 実行中 */
 .circle-runing { stroke: #002B62; }
 .status-runing { background-color: #002B62; }
