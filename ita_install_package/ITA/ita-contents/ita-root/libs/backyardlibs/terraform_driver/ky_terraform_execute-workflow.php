@@ -1349,8 +1349,9 @@ try {
                     elseif($varsTypeInfo["MEMBER_VARS_FLAG"] == 0 && $varsTypeInfo["ASSIGN_SEQ_FLAG"] == 1 && $varsTypeInfo["ENCODE_FLAG"] == 1) {
                         // HCL組み立て(メンバー変数)
                         if (count($vars_list) > 0) {
+                            // キーでソート（代入順序）
+                            ksort($vars_list);
                             // HCLに変換
-                            asort($vars_list);
                             $temp_ary = [];
                             foreach($vars_list as $vars_data) {
                                 $temp_ary[] = $vars_data;
@@ -1383,8 +1384,7 @@ try {
                                             $temp_ary[$member_vars_data["ASSIGN_SEQ"]] = $member_vars_data["VARS_ENTRY"];
                                         }
                                     }
-                                    // 降順に並べ替え
-                                    asort($temp_ary);
+
                                     $sensitive_flag = false;
                                     if (isset($trgMemberVarsRecords[$key]["SENSITIVE_FLAG"])) {
                                         $sensitive_flag = $trgMemberVarsRecords[$key]["SENSITIVE_FLAG"];
@@ -3045,7 +3045,7 @@ function makeParentIDMap($memberVarsRecords)
                 $key = $match[1];
             }
             // タイプ情報の取得
-            $typeInfo = getTypeInfo($memberVarsRecord["CHILD_VARS_TYPE_ID"]);
+            // $typeInfo = getTypeInfo($memberVarsRecord["CHILD_VARS_TYPE_ID"]);
             if ($memberVarsRecord["ARRAY_NEST_LEVEL"] == $array_nest_level) {
                 // 親のネストリストを取得
                 // インデックスを検索
@@ -3088,8 +3088,6 @@ function generateMemberVarsArrayForHCL($memberVarsRecords)
     rsort($array_nest_level_list);
     // 階層リストから重複の削除
     $array_nest_level_list = array_unique($array_nest_level_list);
-
-    $member_vars_array = [];
 
     foreach ($memberVarsRecords as $memberVarsRecord) {
         // $temp_member_vars_res = [];
@@ -3202,7 +3200,7 @@ function generateMemberVarsArray($member_vars_array, $member_vars_key, $member_v
             $res = [];
             // 仮配列
             $temp_array = [];
-            $temp = [];
+            // $temp = [];
             $ref = &$temp_array;
 
             // 多次元配列作成
@@ -3213,11 +3211,6 @@ function generateMemberVarsArray($member_vars_array, $member_vars_key, $member_v
             // メンバー変数を設定・具体値を代入
             if ($typeInfo["ENCODE_FLAG"] == 1) {
                 $member_vars_value = decodeHCL($member_vars_value);
-            }
-            if ($typeInfo["MEMBER_VARS_FLAG"] == 1 && $typeInfo["MEMBER_VARS_FLAG"] != 1) {
-                $ref[$member_vars_key] = [];
-            } else {
-                $ref[$member_vars_key] = $member_vars_value;
             }
 
             // 仮配列と返却用配列をマージ
@@ -3270,7 +3263,7 @@ function getMemberVarsByModuleVarsLinkIDForHCL($moduleVarsLinkID)
     . "FROM {$vg_terraform_var_member_view_name} "     // メンバー変数テーブル(B_TERRAFORM_VAR_MEMBER)
         . "WHERE DISUSE_FLAG = '0' "
         . "AND PARENT_VARS_ID = :PARENT_VARS_ID " // or is null
-        . "ORDER BY ARRAY_NEST_LEVEL, ASSIGN_SEQ ASC ";
+        . "ORDER BY ARRAY_NEST_LEVEL, ASSIGN_SEQ , CHILD_MEMBER_VARS_KEY, CHILD_MEMBER_VARS_NEST ASC";
 
     $arrayUtnBind = array(
         "PARENT_VARS_ID" => $moduleVarsLinkID,
