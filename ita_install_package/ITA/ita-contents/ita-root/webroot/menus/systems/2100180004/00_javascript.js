@@ -926,13 +926,15 @@ function symphonyLoadForExecute(conductor_class_id){
 }
 
 function operationLoadForExecute(operation_no){
-    var operationID = $('#Mix2_Nakami #cell_print_table_' + operation_no + '_2').text(),
-        operationName = $('#Mix2_Nakami #cell_print_table_' + operation_no + '_3').text();
-    //カンマを削除
-    operationID = operationID.replace(/,/g, '');
-    $('#select-operation-id').text( operationID );
-    $('#select-operation-name').text( operationName );
-    executeButtonCheck();
+    if ( conductorGetMode !== 'starting') {
+        var operationID = $('#Mix2_Nakami #cell_print_table_' + operation_no + '_2').text(),
+            operationName = $('#Mix2_Nakami #cell_print_table_' + operation_no + '_3').text();
+        //カンマを削除
+        operationID = operationID.replace(/,/g, '');
+        $('#select-operation-id').text( operationID );
+        $('#select-operation-name').text( operationName );
+        executeButtonCheck();
+    }
 }
 
 function executeButtonCheck() {
