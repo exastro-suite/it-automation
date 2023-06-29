@@ -919,8 +919,10 @@ function Filter2Tbl_print_async( intPrintMode ){
 
 //---- ここからカスタマイズした場合の一般メソッド配置域
 function symphonyLoadForExecute(conductor_class_id){
-    proxy.printNoticeList( conductor_class_id );
-    proxy.printconductorClass( conductor_class_id );
+    if ( conductorGetMode !== 'starting') {
+      proxy.printNoticeList( conductor_class_id );
+      proxy.printconductorClass( conductor_class_id );
+    }
 }
 
 function operationLoadForExecute(operation_no){

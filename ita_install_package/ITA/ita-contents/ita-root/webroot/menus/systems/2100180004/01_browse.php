@@ -90,6 +90,8 @@ print <<< EOD
       #KIZI { height: auto; padding: 24px 24px 48px; }
       #editor { height: 800px; }
       #KIZI .midashi_class.conductor_midashi:hover { cursor: default; font-weight: normal; }
+      .standbyConductor input[name="symNo"],
+      .standbyConductor input[name="opeNo"] { display: none!important; }
     </style>
 EOD;
 
@@ -237,7 +239,7 @@ EOD;
             </tr>
         </table>
     </h2>
-    <div id="Mix1_Nakami" style="display:block" class="text">
+    <div id="Mix1_Nakami" style="display:block" class="text standbyConductor">
         <div style="margin-left:10px">
             <div id="table_alert_area" class="alert_area" style="display:none" ></div>
             <div id="table_area" class="table_area" ></div>
@@ -291,7 +293,7 @@ EOD;
             </tr>
         </table>
     </h2>
-    <div id="Mix2_Nakami" style="display:block" class="text">
+    <div id="Mix2_Nakami" style="display:block" class="text standbyConductor">
         <div style="margin-left:10px">
             <div id="register_alert_area" class="alert_area" style="display:none" ></div>
             <div id="register_area" class="table_area" ></div>
