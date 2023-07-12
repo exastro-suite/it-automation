@@ -682,7 +682,7 @@ function backupTable($tableAry){
     // dump取得
     $tableNames = implode(' ', $tableNameAry);
     $filePath = BACKUP_PATH  . 'backup.sql';
-    $cmd  = 'mysqldump -u ' . DB_USER . ' -p' . DB_PW;
+    $cmd  = 'mariadb-dump -u ' . DB_USER . ' -p' . DB_PW;
     $cmd .= ' -h' . DB_HOST;
     $cmd .= ' ' . DB_NAME . ' ' . $tableNames;
     $cmd .= ' 2>/dev/null > ' . $filePath;
@@ -892,7 +892,7 @@ function restoreTables(){
         return;
     }
 
-    $cmd  = 'mysql -u ' . DB_USER . ' -p' . DB_PW;
+    $cmd  = 'mariadb -u ' . DB_USER . ' -p' . DB_PW;
     $cmd .= ' -h' . DB_HOST;
     $cmd .= ' ' . DB_NAME;
     $cmd .= ' 2>/dev/null < ' . $filePath;
@@ -920,7 +920,7 @@ function insertTable($tableName, $filePath){
                                                       array(basename(__FILE__), __LINE__)));
     }
 
-    $cmd  = 'mysql -u ' . DB_USER . ' -p' . DB_PW;
+    $cmd  = 'mariadb -u ' . DB_USER . ' -p' . DB_PW;
     $cmd .= ' -h' . DB_HOST;
     $cmd .= ' ' . DB_NAME;
     $cmd .= ' 2>&1 < ' . $filePath;
@@ -997,7 +997,7 @@ function insertTable($tableName, $filePath){
 function insertView($filePath){
     global $objDBCA, $objMTS;
 
-    $cmd  = 'mysql -u ' . DB_USER . ' -p' . DB_PW;
+    $cmd  = 'mariadb -u ' . DB_USER . ' -p' . DB_PW;
     $cmd .= ' -h' . DB_HOST;
     $cmd .= ' ' . DB_NAME;
     $cmd .= ' 2>&1 < ' . $filePath;
@@ -1768,7 +1768,7 @@ function exportData($record){
         $filePath = "{$exportPath}/{$key}_" . $value['TABLE_NAME'];
         if ( $dpMode == 1 && $abolishedType == 1 ) {
             // 環境移行/廃止を含む
-            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd  = 'mariadb-dump --single-transaction --opt';
             $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
             $cmd .= ' -h' . DB_HOST;
             $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'];
@@ -1778,7 +1778,7 @@ function exportData($record){
             $sql = "";
         } elseif ( $dpMode == 1 && $abolishedType == 2 ) {
             // 環境移行/廃止を含まない
-            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd  = 'mariadb-dump --single-transaction --opt';
             $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
             $cmd .= ' -h' . DB_HOST;
             $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'];
@@ -1789,7 +1789,7 @@ function exportData($record){
             $sql = "";
         } elseif ( $dpMode == 2 && $abolishedType == 1 ) {
             // 時刻指定/廃止を含む
-            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd  = 'mariadb-dump --single-transaction --opt';
             $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
             $cmd .= ' -h' . DB_HOST;
             $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'] . " --skip-add-drop-table --replace";
@@ -1802,7 +1802,7 @@ function exportData($record){
                     WHERE LAST_UPDATE_TIMESTAMP >= '{$specifiedTimestamp}'";
         } elseif ( $dpMode == 2 && $abolishedType == 2 ) {
             // 時刻指定/廃止を含まない
-            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd  = 'mariadb-dump --single-transaction --opt';
             $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
             $cmd .= ' -h' . DB_HOST;
             $cmd .= ' ' . DB_NAME . ' ' . $value['TABLE_NAME'] . " --skip-add-drop-table --replace";
@@ -1825,7 +1825,7 @@ function exportData($record){
         exec($cmd, $output, $return_var);
 
         if(0 != $return_var){
-            outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
+            outputLog(LOG_PREFIX, "An error occurred in mariadb-dump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
             return false;
         }
 
@@ -1833,7 +1833,7 @@ function exportData($record){
         if("" != $value['VIEW_NAME']){
 
             $filePath = "{$exportPath}/{$key}_" . $value['VIEW_NAME'];
-            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd  = 'mariadb-dump --single-transaction --opt';
             $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
             $cmd .= ' -h' . DB_HOST;
             $cmd .= ' ' . DB_NAME . ' ' . $value['VIEW_NAME'];
@@ -1844,7 +1844,7 @@ function exportData($record){
             exec($cmd, $output, $return_var);
 
             if(0 != $return_var){
-                outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
+                outputLog(LOG_PREFIX, "An error occurred in mariadb-dump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
                 return false;
             }
         }
@@ -1853,7 +1853,7 @@ function exportData($record){
             $filePath = "{$exportPath}/{$key}_" . $value['JNL_TABLE_NAME'];
             if ( $dpMode == 1 && $abolishedType == 1 ) {
                 // 環境移行/廃止を含む
-                $cmd  = 'mysqldump --single-transaction --opt';
+                $cmd  = 'mariadb-dump --single-transaction --opt';
                 $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
                 $cmd .= ' -h' . DB_HOST;
                 $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
@@ -1863,7 +1863,7 @@ function exportData($record){
                 $sql = "";
             } elseif ( $dpMode == 1 && $abolishedType == 2 ) {
                 // 環境移行/廃止を含まない
-                $cmd  = 'mysqldump --single-transaction --opt';
+                $cmd  = 'mariadb-dump --single-transaction --opt';
                 $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
                 $cmd .= ' -h' . DB_HOST;
                 $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'];
@@ -1874,7 +1874,7 @@ function exportData($record){
                 $sql = "";
             } elseif ( $dpMode == 2 && $abolishedType == 1 ) {
                 // 時刻指定/廃止を含む
-                $cmd  = 'mysqldump --single-transaction --opt';
+                $cmd  = 'mariadb-dump --single-transaction --opt';
                 $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
                 $cmd .= ' -h' . DB_HOST;
                 $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME'] . " --skip-add-drop-table --replace";
@@ -1887,7 +1887,7 @@ function exportData($record){
                         WHERE LAST_UPDATE_TIMESTAMP >= '{$specifiedTimestamp}'";
             } elseif ( $dpMode == 2 && $abolishedType == 2 ) {
                 // 時刻指定/廃止を含まない
-                $cmd  = 'mysqldump --single-transaction --opt';
+                $cmd  = 'mariadb-dump --single-transaction --opt';
                 $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
                 $cmd .= ' -h' . DB_HOST;
                 $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_TABLE_NAME']. " --skip-add-drop-table --replace";
@@ -1910,7 +1910,7 @@ function exportData($record){
             exec($cmd, $output, $return_var);
 
             if(0 != $return_var){
-                outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
+                outputLog(LOG_PREFIX, "An error occurred in mariadb-dump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
                 return false;
             }
         }
@@ -1918,7 +1918,7 @@ function exportData($record){
         // JNLのdump取得（VIEW）
         if("" != $value['JNL_VIEW_NAME']){
             $filePath = "{$exportPath}/{$key}_" . $value['JNL_VIEW_NAME'];
-            $cmd  = 'mysqldump --single-transaction --opt';
+            $cmd  = 'mariadb-dump --single-transaction --opt';
             $cmd .= ' -u ' . DB_USER . ' -p' . DB_PW;
             $cmd .= ' -h' . DB_HOST;
             $cmd .= ' ' . DB_NAME . ' ' . $value['JNL_VIEW_NAME'];
@@ -1929,7 +1929,7 @@ function exportData($record){
             exec($cmd, $output, $return_var);
 
             if(0 != $return_var){
-                outputLog(LOG_PREFIX, "An error occurred in mysqldump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
+                outputLog(LOG_PREFIX, "An error occurred in mariadb-dump.Command=[$cmd].Error=[" . print_r($output, true) . "]");
                 return false;
             }
         }
