@@ -493,7 +493,7 @@ configure_mariadb() {
         initialize_mariadb
     else
         log "Confirm whether root password has been changed"
-        env MYSQL_PWD="$db_root_password" mysql -uroot -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
+        mariadb -uroot -p"$db_root_password" -e "show databases" >> "$ITA_BUILDER_LOG_FILE" 2>&1
         if [ $? == 0 ]; then
             log "Root password of MariaDB is already setting."
         else
