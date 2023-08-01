@@ -1,3 +1,29 @@
+Exastro IT Automation 1.11.1 (2023-08-01)
+==================================================
+
+
+Installer
+---------------
+ * Fixed an issue where updating MariaDB in v11.0.2 would stop when a warning message displayed #2083
+ * Updated to Version v1.11.1 #2089
+
+Conductor
+---------------
+ * Fixed an issue where an error would display when trying to register an "Operation select" Operation to the Conductor Regularly execution menu #2072
+ * Fixed an issue where if the user selects a a Conductor from the Conductor list in the Conductor Execution menu before the Conductor screen displays, the Conductor screen will change to View mode #2076
+
+Terraform-Driver
+---------------
+ * Fixed an issue where the user would not be able to create variables in the Substitution value auto-registration setting's substitution order #2079
+
+Terraform-CLI-Driver
+---------------
+ * Fixed an issue where an unexpected error would occur when executing an operation with hierarchical variables (Member variables) #2077
+
+
+*******************************************************************************************************
+
+
 Exastro IT Automation 1.11.0 (2023-01-27)
 ==================================================
 
