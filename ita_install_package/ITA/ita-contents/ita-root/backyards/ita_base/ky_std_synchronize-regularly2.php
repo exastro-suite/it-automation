@@ -568,7 +568,7 @@
 
                         //シンフォニーインスタンスを新規登録処理
                         $aryOptionOrder = null;
-                        $aryOptionOrderOverride = array();
+                        $aryOptionOrderOverride = $tmpReceptData;
                         $retArray = $objOLA->registerConductorInstance($symphonyClassNo, $opertionNoIdbh, $nextExecutionDate, "", $aryOptionOrderOverride, $executionUserId, $executionUserName);
 
                         if($retArray[0] !== true){

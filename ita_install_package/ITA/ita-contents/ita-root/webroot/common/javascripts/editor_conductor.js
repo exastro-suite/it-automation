@@ -240,6 +240,9 @@ function conductorEditor() {
 
 'use strict';
 
+// 表示時class削除
+$('.standbyConductor').removeClass('standbyConductor');
+
 // 言語
 const language = editor.getLang();
 

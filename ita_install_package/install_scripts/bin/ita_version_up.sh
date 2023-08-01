@@ -485,16 +485,16 @@ if [ "${INSTALL_MODE}" = "Versionup_All" ] ; then
     #RHEL8用アーキテクチャ判定用変数定義
     ARCH=$(arch)
     #リポジトリを有効にする
-    yum install -y yum-utils dnf-utils >> "$LOG_FILE" 2>&1
-    yum-config-manager --enable rhel-7-server-optional-rpms >> "$LOG_FILE" 2>&1
-    yum-config-manager --enable rhui-rhel-7-server-rhui-optional-rpms >> "$LOG_FILE" 2>&1
-    yum-config-manager --enable rhui-REGION-rhel-server-optional >> "$LOG_FILE" 2>&1
-    yum-config-manager --enable rhel-7-server-rhui-optional-rpms >> "$LOG_FILE" 2>&1
-    dnf config-manager --set-enabled PowerTools >> "$LOG_FILE" 2>&1
-    dnf config-manager --set-enabled powertools >> "$LOG_FILE" 2>&1
-    dnf config-manager --set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms >> "$LOG_FILE" 2>&1
-    dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms >> "$LOG_FILE" 2>&1
-    pip3 install --upgrade pip >> "$LOG_FILE" 2>&1
+    yum install -y yum-utils dnf-utils >> "$LOG_FILE" 2>/dev/null
+    yum-config-manager --enable rhel-7-server-optional-rpms >> "$LOG_FILE" 2>/dev/null
+    yum-config-manager --enable rhui-rhel-7-server-rhui-optional-rpms >> "$LOG_FILE" 2>/dev/null
+    yum-config-manager --enable rhui-REGION-rhel-server-optional >> "$LOG_FILE" 2>/dev/null
+    yum-config-manager --enable rhel-7-server-rhui-optional-rpms >> "$LOG_FILE" 2>/dev/null
+    dnf config-manager --set-enabled PowerTools >> "$LOG_FILE" 2>/dev/null
+    dnf config-manager --set-enabled powertools >> "$LOG_FILE" 2>/dev/null
+    dnf config-manager --set-enabled codeready-builder-for-rhel-8-${ARCH}-rpms >> "$LOG_FILE" 2>/dev/null
+    dnf config-manager --set-enabled codeready-builder-for-rhel-8-rhui-rpms >> "$LOG_FILE" 2>/dev/null
+    pip3 install --upgrade pip >> "$LOG_FILE" 2>/dev/null
 
     #バージョンアップリストに記載されているバージョンごとにライブラリのインストールを行う
     EXEC_VERSION=${NOW_VERSION}
@@ -615,7 +615,7 @@ while read LIST_VERSION || [ -n "${LIST_VERSION}" ] ; do
                 sed -i -e "s:%%%%%ITA_DIRECTORY%%%%%:${ITA_DIRECTORY}:g" ${SQL_REPLACE}
 
                 #SQLの実行
-                env MYSQL_PWD=${DB_PASSWORD} mysql -u${DB_USERNAME} ${DB_NAME} -h ${DB_HOST} < "$SQL_REPLACE" 1>${SQL_LOGFILE} 2>&1
+                mariadb -u"${DB_USERNAME}" -p"${DB_PASSWORD}" ${DB_NAME} -h ${DB_HOST} < "$SQL_REPLACE" 1>${SQL_LOGFILE} 2>&1
 
                 rm -rf ${SQL_REPLACE}
 

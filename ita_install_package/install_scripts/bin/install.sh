@@ -660,7 +660,7 @@ if [ "$BASE_FLG" -eq 1 ]; then
         sed -i -e "s/ITA_DB/$DB_NAME/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
         sed -i -e "s/ITA_USER/$DB_USERNAME/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
         sed -i -e "s/ITA_PASSWD/$DB_PASSWORD/g" /tmp/create-db-and-user_for_MySQL.sql 2>> "$LOG_FILE"
-        RES=$(env MYSQL_PWD="$DB_ROOT_PASSWORD" mysql -uroot < /tmp/create-db-and-user_for_MySQL.sql 2>&1 | tee -a "$LOG_FILE")
+        RES=$(mariadb -uroot -p"$DB_ROOT_PASSWORD" < /tmp/create-db-and-user_for_MySQL.sql 2>&1 | tee -a "$LOG_FILE")
         if echo "$RES" | grep ERROR ; then
             log 'ERROR : Failed to connect to the database.'
             log 'INFO : Abort installation.'
