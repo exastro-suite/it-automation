@@ -6605,16 +6605,8 @@ LocalLogPrint(basename(__FILE__),__LINE__,$objMTS->getSomeMessage("ITAANSIBLEH-E
             $role_package_id          = $DeviceListRow['ROLE_PACKAGE_ID'];
             $host_name                = $DeviceListRow['IP_ADDRESS'];
 
-            $out_yaml_array = "";
-            $error_line     = "";
-            $ret = $obj->InventryFileAddOptionCheckFormat($InventryFileAddOptionStr,$out_yaml_array,$error_line);
-            if($ret === false) {
-                if ( $log_level === 'DEBUG' ){
-                    $FREE_LOG = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000076",array($host_name,$error_line));
-                    LocalLogPrint(basename(__FILE__),__LINE__,$FREE_LOG);
-                    return false;
-                }
-            }
+            // 機器一覧でインベントリ追加オプションのyaml構文でチェック済み
+
             $local_vars = array();
             $varsLineArray = array();
             $varsArray     = array();
