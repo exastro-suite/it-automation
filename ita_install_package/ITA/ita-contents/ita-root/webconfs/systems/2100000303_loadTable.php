@@ -27,6 +27,10 @@ if ( empty($root_dir_path) ){
 
 // 共通モジュールをロード
 require_once ($root_dir_path . "/libs/commonlibs/common_required_check.php");
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/AnsibleCommonLib.php');
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/ky_ansible_common_setenv.php');
+require_once ($root_dir_path . '/libs/backyardlibs/ansible_driver/WrappedStringReplaceAdmin.php');
+
 
 $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
     global $g;
@@ -698,38 +702,6 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
         $table->addColumn($cg);
     }
 
-    // 登録/更新/廃止/復活があった場合、データベースを更新した事をマークする。
-    $tmpObjFunction = function($objColumn, $strEventKey, &$exeQueryData, &$reqOrgData=array(), &$aryVariant=array()){
-        $boolRet = true;
-        $intErrorType = null;
-        $aryErrMsgBody = array();
-        $strErrMsg = "";
-        $strErrorBuf = "";
-        $strFxName = "";
-
-        $modeValue = $aryVariant["TCA_PRESERVED"]["TCA_ACTION"]["ACTION_MODE"];
-        if( $modeValue=="DTUP_singleRecRegister" || $modeValue=="DTUP_singleRecUpdate" || $modeValue=="DTUP_singleRecDelete" ){
-
-            $strQuery = "UPDATE A_PROC_LOADED_LIST "
-                       ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
-                       ."WHERE ROW_ID IN (2100020001,2100020005,2100020002,2100020004,2100020006,2100080002) ";
-
-            $aryForBind = array();
-
-            $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
-
-            if( $aryRetBody[0] !== true ){
-                $boolRet = false;
-                $strErrMsg = $aryRetBody[2];
-                $intErrorType = 500;
-            }
-        }
-        $retArray = array($boolRet,$intErrorType,$aryErrMsgBody,$strErrMsg,$strErrorBuf);
-        return $retArray;
-    };
-    $tmpAryColumn = $table->getColumns();
-    $tmpAryColumn['SYSTEM_ID']->setFunctionForEvent('beforeTableIUDAction',$tmpObjFunction);
-
     $table->fixColumn();
 
     //----組み合わせバリデータ----
@@ -791,6 +763,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             $strProtocolID = array_key_exists('PROTOCOL_ID',$arrayRegData)?
                                 $arrayRegData['PROTOCOL_ID']:null;
 
+            // インベントリ追加オプションの設定値取得
+            $strHostExtArgs = array_key_exists('HOSTS_EXTRA_ARGS',$arrayRegData)?
+                                 $arrayRegData['HOSTS_EXTRA_ARGS']:null;
+
         } elseif ($strModeId == "DTUP_singleRecDelete") {
 
             // ホスト名
@@ -824,6 +800,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             // Pioneerプロトコルの設定値取得
             $strProtocolID      = isset($arrayVariant['edit_target_row']['PROTOCOL_ID'])?
                                         $arrayVariant['edit_target_row']['PROTOCOL_ID']:null;
+
+            // インベントリ追加オプションの設定値取得
+            $strHostExtArgs      = isset($arrayVariant['edit_target_row']['HOSTS_EXTRA_ARGS'])?
+                                        $arrayVariant['edit_target_row']['HOSTS_EXTRA_ARGS']:null;
 
         } elseif ($strModeId == "DTUP_singleRecUpdate") {
 
@@ -867,6 +847,7 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
                 $strPassphrase = isset($arrayVariant['edit_target_row']['SSH_KEY_FILE_PASSPHRASE'])?
                                        $arrayVariant['edit_target_row']['SSH_KEY_FILE_PASSPHRASE']:null;
             }
+
             // 公開鍵ファイルの設定値取得
             // FileUploadColumnはファイルの更新がないと$arrayRegDataの設定は空になっているので
             // ダウンロード済みのファイルが削除されていると$arrayRegData['del_flag_COL_IDSOP_xx']がonになる
@@ -888,6 +869,10 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             // Pioneerプロトコルの設定値取得
             $strProtocolID = array_key_exists('PROTOCOL_ID',$arrayRegData)?
                                 $arrayRegData['PROTOCOL_ID']:null;
+
+            // インベントリ追加オプションの設定値取得
+            $strHostExtArgs = array_key_exists('HOSTS_EXTRA_ARGS',$arrayRegData)?
+                                 $arrayRegData['HOSTS_EXTRA_ARGS']:null;
         }
 
         switch($strModeId) {
@@ -914,11 +899,101 @@ $tmpFx = function (&$aryVariant=array(),&$arySetting=array()){
             }
             break;
         }
+        // インベントリ追加オプションのyaml文法確認
+        if($retBool===true){
+            switch($strModeId) {
+            case "DTUP_singleRecUpdate":
+            case "DTUP_singleRecRegister":
+                if ($strHostExtArgs != "") {
+                    $tmpfilepath = '/tmp/2100000303_loadTable_' . getmypid() . ".yaml";
+                    $fd = fopen($tmpfilepath, 'w');
+                    fputs($fd, $strHostExtArgs);
+                    fclose($fd);
+                    $obj = new YAMLParse($g['objMTS']);
+                    $yaml_parse_array = array();
+                    $ret = $obj->yaml_file_parse($tmpfilepath,$yaml_parse_array);
+                    $errmsg = $obj->GetLastError();
+                    unset($obj);
+                    if($ret === false) {
+                        $retStrBody = $g['objMTS']->getSomeMessage("ITAANSIBLEH-ERR-6040041",array($errmsg));
+                        $retBool = false;
+                    }
+                    unlink($tmpfilepath);
+                }
+            }
+        }
+         
+        // A_PROC_LOADED_LISTの各フラグ設定の条件を追加
+        if($retBool===true){
+            $dbUpdate = false;
+            switch($strModeId) {
+            // 更新の場合、インベントリ追加オプションの変更がある場合にフラグ設定
+            case "DTUP_singleRecUpdate":
+                $strAfter  = array_key_exists('HOSTS_EXTRA_ARGS',$arrayRegData)?
+                                         $arrayRegData['HOSTS_EXTRA_ARGS']:null;
+                // After(0x0d 0x0a)とBefore(0x0a)で改行コードに差異があるのでBefore(0x0a)に合わせる
+                $strAfter = str_replace("\r","",$strAfter);
+                $local_vars = array();
+                $varsLineArray = array();
+                $varsArray     = array();
+                $FillterVars   = false;
+                // インベントリ追加オプションに定義されている変数を抜き出す。
+                SimpleFillterVerSearch(DF_HOST_VAR_HED,$strAfter,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+                $AfterCount =  count($varsLineArray);
+
+                $strBefore = isset($arrayVariant['edit_target_row']['HOSTS_EXTRA_ARGS'])?
+                                   $arrayVariant['edit_target_row']['HOSTS_EXTRA_ARGS']:null;
+                $local_vars = array();
+                $varsLineArray = array();
+                $varsArray     = array();
+                $FillterVars   = false;
+                // インベントリ追加オプションに定義されている変数を抜き出す。
+                SimpleFillterVerSearch(DF_HOST_VAR_HED,$strBefore,$varsLineArray,$varsArray,$local_vars,$FillterVars);
+                $BeforeCount =  count($varsLineArray);
+
+                // 差分判定
+                if ($strAfter != $strBefore) {
+                     // 変数定義がない場合
+                     if (($AfterCount + $BeforeCount) == 0) {
+                         $dbUpdate = false;
+                     } else {
+                         $dbUpdate = true;
+                     }
+                }
+                break;
+            // 新規の場合、フラグ設定しない
+            case "DTUP_singleRecRegister":
+                break;
+            // 廃止・復活の場合、フラグ設定
+            case "DTUP_singleRecDelete":
+                $dbUpdate = true;
+                break;
+            }
+            if ($dbUpdate === true) {
+                $strQuery = "UPDATE A_PROC_LOADED_LIST "
+                           ."SET LOADED_FLG='0' ,LAST_UPDATE_TIMESTAMP = NOW(6) "
+                           ."WHERE ROW_ID IN (2100020001,2100020005,2100020002,2100020004,2100020006) ";
+
+                $aryForBind = array();
+    
+                $strFxName = "";
+
+                $aryRetBody = singleSQLExecuteAgent($strQuery, $aryForBind, $strFxName);
+
+                if( $aryRetBody[0] !== true ){
+                    $retBool = false;
+                    $retStrBody = $g['objMTS']->getSomeMessage('ITABASEH-ERR-900055',array(basename(__FILE__), __LINE__, 'A_PROC_LOADED_LIST'));
+                    # エラーログ
+                    web_log(sprintf("%s\Error details:%s",$retStrBody,var_export($aryRetBody,true)));
+                }
+            }
+        }
         if($retBool===false){
             $objClientValidator->setValidRule($retStrBody);
         }
         return $retBool;
     };
+
 
     $objVarVali = new VariableValidator();
     $objVarVali->setErrShowPrefix(false);
