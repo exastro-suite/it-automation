@@ -1178,28 +1178,6 @@ class InventryFileAddOptionContlorl {
     function __construct($objDBCA){
         $this->objDBCA     = $objDBCA;
     }
-    function InventryFileAddOptionCheckFormat($in_string,&$out_yaml_array,&$error_line) {
-        $out_yaml_array = array();
-        $SplitVarKageName = array();
-        // インベントリファイル追加オプションをYAML形式を検査する
-        $String = $in_string;
-        $out_yaml_array = explode("\n", $String);
-        $error_line = 0;
-        foreach($out_yaml_array as $record) {
-            $error_line++;
-            $VarKageName  = trim($record);
-            if(empty($VarKageName)){ // 空文字列 正常
-                // スペースを取り除くと空の時
-                continue;
-            }
-            $ret = preg_match("/^(\S)+(\s)*:(\s)+(\S)/", $record);
-            if($ret !== 1){
-                // 式が正しくない
-                return false;
-            }
-        }
-        return true;
-    }
     function getVariablesDefinedInDeviceList($PHOLinkTbl,&$la_InventryFileAddOptionAry) {
 
         $la_InventryFileAddOptionAry = array();

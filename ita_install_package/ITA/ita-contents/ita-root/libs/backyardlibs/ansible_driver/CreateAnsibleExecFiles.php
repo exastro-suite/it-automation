@@ -1999,13 +1999,8 @@ class CreateAnsibleExecFiles {
             case DF_LEGACY_ROLE_DRIVER_ID:
                 // hosts_extra_argsの設定の有無を判定しhosts_extra_argsの内容を退避
                 if(strlen(trim($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'])) != 0){
-                    $error_line = "";
-                    $ret = $this->InventryFileAddOptionCheckFormat($ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS'],$hosts_extra_args,$error_line);
-                    if($ret === false) {
-                        $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000076",array($host_name,$error_line));
-                        $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                        return false;
-                    }
+                    // 文字列->arrayに変換
+                    $hosts_extra_args = explode("\n", $ina_hostinfolist[$host_name]['HOSTS_EXTRA_ARGS']);
                     // array->文字列に変換
                     $hosts_extra_args = implode("<<<__TAB__>>>",$hosts_extra_args);
                     $hosts_extra_args = str_replace('<<<__TAB__>>>' , "\n          ",$hosts_extra_args);
@@ -2252,29 +2247,6 @@ class CreateAnsibleExecFiles {
         }
         return true;
     } 
-
-    function InventryFileAddOptionCheckFormat($in_string,&$out_yaml_array,&$error_line) {
-        $out_yaml_array = array();
-        $SplitVarKageName = array();
-        // インベントリファイル追加オプションをYAML形式を検査する
-        $String = $in_string;
-        $out_yaml_array = explode("\n", $String);
-        $error_line = 0;
-        foreach($out_yaml_array as $record) {
-            $error_line++;
-            $VarKageName  = trim($record);
-            if(empty($VarKageName)){ // 空文字列 正常
-                // スペースを取り除くと空の時
-                continue;
-            }
-            $ret = preg_match("/^(\S)+(\s)*:(\s)+(\S)/", $record);
-            if($ret !== 1){
-                // 式が正しくない
-                return false;
-            }
-        }
-        return true;
-    }
 
     ////////////////////////////////////////////////////////////////////////////////
     // F0004-1
@@ -3554,20 +3526,10 @@ class CreateAnsibleExecFiles {
     ////////////////////////////////////////////////////////////////////////////////
     function CheckVariablesDefinedInDeviceList($ina_hostinfolist,$ina_host_vars) {
         $result_code = true;
-        $obj = new InventryFileAddOptionContlorl($this->lv_objDBCA);
         foreach( $ina_hostinfolist as $host_name => $row ){
             // 機器一覧のインベントファイル追加オプションを取得
             $InventryFileAddOptionStr = $row['HOSTS_EXTRA_ARGS'];
-            if(strlen(trim($InventryFileAddOptionStr)) != 0) {
-                continue;
-            }
-            $out_yaml_array = "";
-            $error_line     = "";
-            $ret = $obj->InventryFileAddOptionCheckFormat($InventryFileAddOptionStr,$out_yaml_array,$error_line);
-            if($ret === false) {
-                $msgstr = $this->lv_objMTS->getSomeMessage("ITAANSIBLEH-ERR-6000076",array($host_name,$error_line));
-                $this->LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                $result_code = false;
+            if(strlen(trim($InventryFileAddOptionStr)) == 0) {
                 continue;
             }
             // ローカル変数のリスト作成
