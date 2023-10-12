@@ -1549,6 +1549,8 @@ function getCMDBdata($in_tableNameToSqlList,
         $root_dir_path = $root_dir_temp[0] . "ita-root";
     }
 
+    $refTableRows = array();
+
     $VariableColumnAry = array();           // 変数カラムリスト
     $VariableColumnAry['B_ANS_TEMPLATE_FILE']['ANS_TEMPLATE_VARS_NAME']  = 0;
     $VariableColumnAry['B_ANS_CONTENTS_FILE']['CONTENTS_FILE_VARS_NAME'] = 0;
@@ -1678,47 +1680,46 @@ function getCMDBdata($in_tableNameToSqlList,
                     // 該当レコードのアクセス権退避
                     $access_auth = $row['ACCESS_AUTH'];
 
-                    // IDcolumnの場合は参照元から具体値を取得する
                     if("" != $col_data['REF_TABLE_NAME']){
-                        $sql = "";
-                        $sql = $sql . "SELECT " . $col_data['REF_COL_NAME'] . " ";
-                        $sql = $sql . "FROM   " . $col_data['REF_TABLE_NAME'] . " ";
-                        $sql = $sql . "WHERE " . $col_data['REF_PKEY_NAME'] . "=:" . $col_data['REF_PKEY_NAME'] . " ";
-                        $sql = $sql . " AND DISUSE_FLAG='0'";
+                        if( ! isset($refTableRows[$col_data['REF_TABLE_NAME']])) {
+                            $refTableRows[$col_data['REF_TABLE_NAME']] = array();
 
-                        $objQuery = $objDBCA->sqlPrepare($sql);
-                        if($objQuery->getStatus()===false){
-                            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
-                            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            LocalLogPrint(basename(__FILE__),__LINE__,$sql);
-                            LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+                            $sql = sprintf("SELECT * FROM %s WHERE DISUSE_FLAG='0'", $col_data['REF_TABLE_NAME']);
+                                
+                            $objQuery = $objDBCA->sqlPrepare($sql);
+                            if($objQuery->getStatus()===false){
+                                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+                                LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
 
-                            unset($objQuery);
-                            continue;
+                                unset($objQuery);
+                                continue;
+                            }
+
+                            $r = $objQuery->sqlExecute();
+                            if (!$r){
+                                $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
+                                LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
+                                LocalLogPrint(basename(__FILE__),__LINE__,$sql);
+                                LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
+    
+                                unset($objQuery);
+                                continue;
+                            }
+
+                            // fetch行数を取得
+                            $count = $objQuery->effectedRowCount();
+
+                            if( $count !== 0 ){
+                                while ( $IDdata = $objQuery->resultFetch() ){
+                                    $refTableRows[$col_data['REF_TABLE_NAME']][$IDdata[$col_data['REF_PKEY_NAME']]] = $IDdata;
+                                }
+                            }
                         }
-
-                        $objQuery->sqlBind(array($col_data['REF_PKEY_NAME'] => $col_val_key));
-
-                        $r = $objQuery->sqlExecute();
-                        if (!$r){
-                            $msgstr = $objMTS->getSomeMessage("ITAANSIBLEH-ERR-80000",array(basename(__FILE__),__LINE__));
-                            LocalLogPrint(basename(__FILE__),__LINE__,$msgstr);
-                            LocalLogPrint(basename(__FILE__),__LINE__,$sql);
-                            LocalLogPrint(basename(__FILE__),__LINE__,$objQuery->getLastError());
-
-                            unset($objQuery);
-                            continue;
-                        }
-
-                        // fetch行数を取得
-                        $count = $objQuery->effectedRowCount();
-
                         $col_val = "";
-                        // 0件ではない場合
-                        if(0 != $count){
-                            // fetch行を取得
-                            $tgt_row = $objQuery->resultFetch();
-                            $col_val = $tgt_row[$col_data['REF_COL_NAME']];
+                        if ( isset($refTableRows[$col_data['REF_TABLE_NAME']][$col_val_key])) {
+                            $col_val = $refTableRows[$col_data['REF_TABLE_NAME']][$col_val_key][$col_data['REF_COL_NAME']];
                             // TPF/CPF変数カラム判定
                             if(isset($VariableColumnAry[$col_data['REF_TABLE_NAME']][$col_data['REF_COL_NAME']])) {
                                 $col_val = "'{{ $col_val }}'";
