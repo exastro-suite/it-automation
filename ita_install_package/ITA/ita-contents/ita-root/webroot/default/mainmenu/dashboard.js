@@ -2912,12 +2912,16 @@ for ( let i = historyLength - 1; i >= 0; i-- ) {
               + '<div class="number-table-wrap"><table class="number-table"><thead>';
             // thead
             tableHTML += '<tr><th>Result</th><th>CON</th><th>SYM</th><th>SUM</th></tr></thead><tbody>';
+            // histryDay
+            const histryStartDate = new Date(histryDay[dataID][0], histryDay[dataID][1] - 1, histryDay[dataID][2]),
+                  histryEndDate = new Date(histryDay[dataID][0], histryDay[dataID][1] - 1, histryDay[dataID][2]);
+            histryEndDate.setDate(histryDay[dataID][2] + 1);
             // tbody
             const resultTextLength = resultText.length,
                   param = '&filter=on',
                   paramDate = ''
-                  + '&' + StartDateID + '=' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + histryDay[dataID][2]
-                  + '&' + EndDataID + '=' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + ( histryDay[dataID][2] + 1 );
+                  + '&' + StartDateID + '=' + histryStartDate.getFullYear() + '/' + (histryStartDate.getMonth() + 1).toString().padStart(2, '0') + '/' +  histryStartDate.getDate().toString().padStart(2, '0')
+                  + '&' + EndDataID + '=' + histryEndDate.getFullYear() + '/' + (histryEndDate.getMonth() + 1).toString().padStart(2, '0') + '/' +  histryEndDate.getDate().toString().padStart(2, '0');
             for( let i = 1; i < resultTextLength; i++ ) {
               const paramTarget = '&' + statusInputID + '=' + encodeURIComponent( resultText[i][0] );
               // Status
