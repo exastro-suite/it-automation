@@ -2901,8 +2901,10 @@ for ( let i = historyLength - 1; i >= 0; i-- ) {
         const conductorListURL = '/default/menu/01_browse.php?no=2100180006',
               symphonyListURL = '/default/menu/01_browse.php?no=2100000310',
               statusInputID = 'Filter1Tbl_4',
-              StartDateID = 'Filter1Tbl_11__S',
-              EndDataID = 'Filter1Tbl_11__E';
+              conStartDateID = 'Filter1Tbl_13__S',
+              conEndDataID = 'Filter1Tbl_13__E',
+              symStartDateID = 'Filter1Tbl_11__S',
+              symEndDataID = 'Filter1Tbl_11__E';
         
         const setResult = function(){
             // Table
@@ -2912,26 +2914,29 @@ for ( let i = historyLength - 1; i >= 0; i-- ) {
               + '<div class="number-table-wrap"><table class="number-table"><thead>';
             // thead
             tableHTML += '<tr><th>Result</th><th>CON</th><th>SYM</th><th>SUM</th></tr></thead><tbody>';
+            // histryDay
+            const histryStartDate = new Date(histryDay[dataID][0], histryDay[dataID][1] - 1, histryDay[dataID][2]),
+                  histryEndDate = new Date(histryDay[dataID][0], histryDay[dataID][1] - 1, histryDay[dataID][2]);
+            histryEndDate.setDate(histryDay[dataID][2] + 1);
             // tbody
             const resultTextLength = resultText.length,
                   param = '&filter=on',
-                  paramDate = ''
-                  + '&' + StartDateID + '=' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + histryDay[dataID][2]
-                  + '&' + EndDataID + '=' + histryDay[dataID][0] + '/' + histryDay[dataID][1] + '/' + ( histryDay[dataID][2] + 1 );
+                  paramStartDate = '=' + histryStartDate.getFullYear() + '/' + (histryStartDate.getMonth() + 1).toString().padStart(2, '0') + '/' +  histryStartDate.getDate().toString().padStart(2, '0'),
+                  paramEndDate = '=' + histryEndDate.getFullYear() + '/' + (histryEndDate.getMonth() + 1).toString().padStart(2, '0') + '/' +  histryEndDate.getDate().toString().padStart(2, '0');
             for( let i = 1; i < resultTextLength; i++ ) {
               const paramTarget = '&' + statusInputID + '=' + encodeURIComponent( resultText[i][0] );
               // Status
               tableHTML += '<tr><th><span class="pie-chart-usage result-' + resultText[i][1] + '"></span>' + resultText[i][0] + '</th>';
               // Conductor
               if ( resultData[1][i] !== 0 ) {
-                tableHTML += '<td><a href="' + conductorListURL + param + paramTarget + paramDate + '" target="_blank" title="' + resultText[i][0] + '">'
+                tableHTML += '<td><a href="' + conductorListURL + param + paramTarget + '&' + conStartDateID + paramStartDate+ '&' + conEndDataID + paramEndDate + '" target="_blank" title="' + resultText[i][0] + '">'
                 + resultData[1][i] + '</a></td>';
               } else {
                 tableHTML += '<td>' + zeroCheck( resultData[1][i] ) + '</td>';
               }
               // Symphony
               if ( resultData[2][i] !== 0 ) {
-                tableHTML += '<td><a href="' + symphonyListURL + param + paramTarget + paramDate + '" target="_blank" title="' + resultText[i][0] + '">'
+                tableHTML += '<td><a href="' + symphonyListURL + param + paramTarget + '&' + symStartDateID + paramStartDate+ '&' + symEndDataID + paramEndDate + '" target="_blank" title="' + resultText[i][0] + '">'
                 + resultData[2][i] + '</a></td>';
               } else {
                 tableHTML += '<td>' + zeroCheck( resultData[2][i] ) + '</td>';
@@ -2942,8 +2947,8 @@ for ( let i = historyLength - 1; i >= 0; i-- ) {
             // 計
             tableHTML += '<tr>'
               + '<th>' + resultText[0][0] + '</th>'
-              + '<td><a href="' + conductorListURL + param + paramDate + '" target="_blank" title="' + resultText[0][0] + '">' + resultData[1][0] + '</a></td>'
-              + '<td><a href="' + symphonyListURL + param + paramDate + '" target="_blank" title="' + resultText[0][0] + '">' + resultData[2][0] + '</a></td>'
+              + '<td><a href="' + conductorListURL + param + '&' + conStartDateID + paramStartDate+ '&' + conEndDataID + paramEndDate + '" target="_blank" title="' + resultText[0][0] + '">' + resultData[1][0] + '</a></td>'
+              + '<td><a href="' + symphonyListURL + param + '&' + symStartDateID + paramStartDate+ '&' + symEndDataID + paramEndDate + '" target="_blank" title="' + resultText[0][0] + '">' + resultData[2][0] + '</a></td>'
               + '<td>' + zeroCheck( resultData[0][0] ) + '</td>'
               + '</tr>';
             
