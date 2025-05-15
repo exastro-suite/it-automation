@@ -707,7 +707,6 @@ $ary["ITAANSIBLEH-ERR-6040037"]     = "Ansible Automation Controllerに展開し
 $ary["ITAANSIBLEH-ERR-6040038"]     = "実行環境の取得に失敗しました。(実行環境:{})";
 $ary["ITAANSIBLEH-ERR-6040039"]     = "実行環境がAnsible Automation Controllerに登録されていません。(実行環境:{})";
 $ary["ITAANSIBLEH-ERR-6040040"]     = "Git 認証情報の作成に失敗しました。";
-$ary["ITAANSIBLEH-ERR-6040041"]     = "インベントリファイル追加オプションがYAML形式で記述されているか確認して下さい。\n{}";
 $ary["ITAANSIBLEH-ERR-6101010"]     = "REST API接続function定義なし";
 $ary["ITAANSIBLEH-ERR-6101100"]     = "緊急停止できませんでした。Ansible/Ansible Automation Controllerの状況をご確認ください。(作業No.:{})";
 ?>
