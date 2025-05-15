@@ -1,3 +1,19 @@
+Exastro IT Automation 1.11.2 (2025-05-16)
+==================================================
+
+
+Installer
+---------------
+ * Updated to Version v1.11.2 #2115
+
+Dashboard
+---------------
+ * When transitioning from the dashboard graph to the work list screen, the period specification condition becomes strange and a validation error occurs. #2113
+
+
+*******************************************************************************************************
+
+
 Exastro IT Automation 1.11.1 (2023-08-01)
 ==================================================
 
@@ -185,7 +201,7 @@ Ansible-Driver
  * Fixed an issue where some of the ITA variables would not function as variables in the pioneer driver. #1766
  * Fixed an error that would occur when running ansible to the key authentication host after the execution user was changed. #1835
  * Improved the description in the variable translation table. #1840
- * Fixed an issue where the backyard log would output PHP notice messages.ÅB #1849
+ * Fixed an issue where the backyard log would output PHP notice messages.ÔøΩB #1849
  * Fixed an issue where if the file names of files uploaded to the file list or template list contained either a space or a paranthese would cause an error when executing them.#1854
  * Fixed an issue where connecting to a different tower after connecting to the Tower in the virtualenv settings would cause an "ID Conversion" error for any past virtualenv items. #1915
  * [Collect function]Fixed an issue where data set in parameter sheets in the Exastro collect function would not be displayed properly. #1767
@@ -407,7 +423,7 @@ Installer
 General
 ---------------
  * Added a menu that allows users to link with OASE roles #1380
- * [Aubstitution value auto-registration settings]Fixed an issue where the menu would not display the updated values when the pulldown menu's reference source was updated. #1437 
+ * [Aubstitution value auto-registration settings]Fixed an issue where the menu would not display the updated values when the pulldown menu's reference source was updated. #1437
 
 Management Console
 ---------------
@@ -622,7 +638,7 @@ Export/Import
  * Fixed REST Error #975
  * Fixed an issue where selecting "Time specification" would not import the history table's sequence number correctly #1025
  * Fixed an issue where the "Sequence list" menu would not display menu's imported to a different menu #1035
- 
+
 Symphony
 ---------------
  * Changed "Default skip" to "Pause" in the Symphony Class edit screen #989
@@ -933,7 +949,7 @@ General
 Management Console
 ---------------
  * Added menu that allows users to adjust Sequences #180
- 
+
 Export/Import
 ---------------
  * Improved the stop service process when importing #399
@@ -951,7 +967,7 @@ Conductor
  * Fixed an issue where the Conductor class name items and items in other menus would have different names #255
  * Fixed an issue where abolished conductors could be executed #287
  * Fixed an issue where the Conductor Operation Check screen would say that the operation is still running even when the operation has ended #332
- * Added RESTAPI(INFO) items for the Operation Check menu #478 
+ * Added RESTAPI(INFO) items for the Operation Check menu #478
 
 File link list
 ---------------
@@ -1088,7 +1104,7 @@ Ansible-Driver
 DSC-driver
 ---------------
  * Fixed an issue in the Automatic registration settings screen where the user could register both Key and value variables when "Value type" is selected #134
- 
+
 Terraform-Driver
 ---------------
  * Added Terraform-Driver support #82
@@ -1245,7 +1261,7 @@ Create Menu
  * Combined Parameter sheet creation and Master creation into Menu creation.
  * Added function that allows users to create Data sheets (Menus that are not used in Substitution value auto-registration settings)
 
-Ansible-Driver 
+Ansible-Driver
 ---------------
  * Added function that allows the users to encrypt password items with Ansible-Vault
  * Changed the hosts file extension to .yaml
