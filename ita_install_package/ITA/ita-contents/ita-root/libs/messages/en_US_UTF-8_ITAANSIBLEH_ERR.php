@@ -709,5 +709,4 @@ $ary["ITAANSIBLEH-ERR-6040039"]     = "Faild to get execution environment data f
 $ary["ITAANSIBLEH-ERR-6101010"]     = "Function to connect with REST API is not defined.";
 $ary["ITAANSIBLEH-ERR-6101100"]     = "Faild to initiate emergency stop. Check Ansible/Ansible Automation Controller state. (Execution No.:{})";
 $ary["ITAANSIBLEH-ERR-6040040"]     = "Failed to create Git authentication information.";
-$ary["ITAANSIBLEH-ERR-6040041"]     = "Please check whether the inventory file addition option is written in YAML format.\n{}";
 ?>
