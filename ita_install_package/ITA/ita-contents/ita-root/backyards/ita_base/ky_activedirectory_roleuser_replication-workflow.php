@@ -151,7 +151,7 @@ try {
     $groupDnToInfo = makeGroupDnToInfo($groupListFromAD);
     $userListFromAD = getUserSyncData($ldapconn, $baseDn, $groupDnToInfo);
     $excludedGroupListFromAD = getGroupNotSyncData($ldapconn, $baseDn);
-
+    
     ////////////////////////////////
     // 共通モジュールの呼び出し   //
     ////////////////////////////////
@@ -339,56 +339,102 @@ function getUserSyncData($ldapconn, $baseDn, $groupDnToInfo) {
 
     global $log_level;
 
+    $pageSize = 1000;
+    $cookie = "";
+    $userData = array();
     $filter = "(&(objectClass=user)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))";
     $attribute = array("objectsid", "userprincipalname", "displayname", "mail", "memberof", "dn");
-    $searchResult = ldap_search($ldapconn, $baseDn, $filter, $attribute) ;
 
-    /* 「ldap_search」の結果から、エントリを取得する */
-    ldap_sort($ldapconn , $searchResult , "userprincipalname"); // 検索結果をソート
-    $result = ldap_get_entries($ldapconn , $searchResult);
+    if($log_level === "DEBUG") {
+        backyardLog("ldap_search->ldap_get_entries start");
+    }
+    
+    do {
+        // ldap_control_paged_result でページングコントロールを設定
+        if (!ldap_control_paged_result($ldapconn, $pageSize, true, $cookie)) {
+            backyardLog('Error setting paged result control: ' . ldap_error($ldapconn));
+            return $userData;
+        }
 
-    $userData = array();
-    for($u = 0; $u < $result['count']; $u++) {
-        // userprincipalnameが存在しないユーザは連携対象外(ログインできない)
-        if(array_key_exists("userprincipalname", $result[$u]) === false) {
-            if($log_level === "DEBUG") {
-                backyardLog("Ignore replicate user. Cause: 'userprincipalname' is not found." . $result[$u]['dn']);
+        // ツリーを検索
+        $searchResult = ldap_search($ldapconn, $baseDn, $filter, $attribute);
+        if ($searchResult === false) {
+            backyardLog('Error performing LDAP search: ' . ldap_error($ldapconn));
+            return $userData;
+        }
+        
+        /* 「ldap_search」の結果から、エントリを取得する */
+        $result = ldap_get_entries($ldapconn , $searchResult);
+        if($log_level === "DEBUG") {
+            backyardLog("ldap_get_entries count = " . strval($result['count']));
+        }
+        
+        // 既存の取得データ分の処理
+        for($u = 0; $u < $result['count']; $u++) {
+            // userprincipalnameが存在しないユーザは連携対象外(ログインできない)
+            if(array_key_exists("userprincipalname", $result[$u]) === false) {
+                if($log_level === "DEBUG") {
+                    backyardLog("Ignore replicate user. Cause: 'userprincipalname' is not found." . $result[$u]['dn']);
+                }
+                continue;
             }
-            continue;
-        }
+      
+            $data = array();
+            $data['uniqueUserName'] = strstr($result[$u]['userprincipalname'][0], "@", true);
+            $data['objectsid']      = bin2strSID($result[$u]['objectsid'][0]);
+            
+            if(array_key_exists("displayname", $result[$u]) === true) {
+                $data['displayname']    = $result[$u]['displayname'][0];
+            } else {
+                $data['displayname']    = $data['uniqueUserName'];
+            }
 
-        $data = array();
-        $data['uniqueUserName'] = strstr($result[$u]['userprincipalname'][0], "@", true);
-        $data['objectsid']      = bin2strSID($result[$u]['objectsid'][0]);
+            if(array_key_exists("mail", $result[$u]) === true) {
+                $data['mail']    = $result[$u]['mail'][0];
+            } else {
+                $data['mail']    = "";
+            }
 
-        if(array_key_exists("displayname", $result[$u]) === true) {
-            $data['displayname']    = $result[$u]['displayname'][0];
-        } else {
-            $data['displayname']    = $data['uniqueUserName'];
-        }
-
-        if(array_key_exists("mail", $result[$u]) === true) {
-            $data['mail']    = $result[$u]['mail'][0];
-        } else {
-            $data['mail']    = "";
-        }
-
-        $groups = array();
-        if(array_key_exists("memberof", $result[$u])) {
-            for($g = 0; $g < $result[$u]['memberof']['count']; $g++) {
-                $groupDn = $result[$u]['memberof'][$g];
-                if(array_key_exists($groupDn, $groupDnToInfo) === true) {
-                    $groupInfo = $groupDnToInfo[$groupDn];
-                    $groups[] = $groupInfo;
-                } else{
-                    if($log_level === "DEBUG") {
-                        backyardLog("Ignore user's group. ($groupDn) Cause: Not march replicated group.");
+            $groups = array();
+            if(array_key_exists("memberof", $result[$u])) {
+                for($g = 0; $g < $result[$u]['memberof']['count']; $g++) {
+                    $groupDn = $result[$u]['memberof'][$g];
+                    if(array_key_exists($groupDn, $groupDnToInfo) === true) {
+                        $groupInfo = $groupDnToInfo[$groupDn];
+                        $groups[] = $groupInfo;
+                    } else{
+                        if($log_level === "DEBUG") {
+                            backyardLog("Ignore user's group. ($groupDn) Cause: Not march replicated group.");
+                        }
                     }
                 }
             }
+            $data['memberof'] = $groups;
+            $userData[] = $data;
+            
         }
-        $data['memberof'] = $groups;
-        $userData[] = $data;
+
+        // ldap_control_paged_result_response からクッキー取得
+		ldap_control_paged_result_response($ldapconn, $searchResult, $cookie);
+
+        if ($log_level === "DEBUG") {
+            if (!empty($cookie)) {
+                backyardLog("next page_result");
+            } else {
+                backyardLog("ldap_search->ldap_get_entries break: No more cookies (last page)");
+            }
+        }
+        // 検索結果リソースを解放
+        ldap_free_result($searchResult);
+        
+    } while (!empty($cookie));
+     
+    // ldap_sort 代替
+    array_multisort(array_column($userData, 'uniqueUserName'), SORT_ASC, $userData);
+
+    if($log_level === "DEBUG") {
+        backyardLog("ldap_search->ldap_get_entries end");
+        backyardLog("userData count = " . strval(count($userData)));
     }
 
     return $userData ;
@@ -400,6 +446,8 @@ function getUserSyncData($ldapconn, $baseDn, $groupDnToInfo) {
  **/
 function getGroupSyncData($ldapconn, $baseDn) {
 
+    global $log_level;
+    
     // group type の値
     $array_createdBy = array("user" => 0, "system" => 1);
     $array_class = array("security" => -2147483648, /* 配布は除外 "distribution" => 0*/);
@@ -418,21 +466,62 @@ function getGroupSyncData($ldapconn, $baseDn) {
         $strGroupTypeFilter .= "(grouptype=$typeValue)";
     }
 
+    $pageSize = 1000;
+    $cookie = "";
+    $groupData = array();    
     $filter = "(&(objectClass=group)($strGroupTypeFilter))";
     $attribute = array("objectsid", "samaccountname", "dn");
-    $searchResult = ldap_search($ldapconn, $baseDn, $filter, $attribute) ;
 
-    /* 「ldap_search」の結果から、エントリを取得する */
-    ldap_sort($ldapconn , $searchResult , "samaccountname"); // 検索結果をソート
-    $result = ldap_get_entries($ldapconn , $searchResult);
+    do {
+        // ldap_control_paged_result でページングコントロールを設定
+        if (!ldap_control_paged_result($ldapconn, $pageSize, true, $cookie)) {
+            backyardLog('Error setting paged result control: ' . ldap_error($ldapconn));
+            return $groupData;
+        }
+        
+        // ツリーを検索
+        $searchResult = ldap_search($ldapconn, $baseDn, $filter, $attribute);
+        if ($searchResult === false) {
+            backyardLog('Error performing LDAP search: ' . ldap_error($ldapconn));
+            return $groupData;
+        }
+        
+        /* 「ldap_search」の結果から、エントリを取得する */
+        $result = ldap_get_entries($ldapconn , $searchResult);
+        if($log_level === "DEBUG") {
+            backyardLog("ldap_get_entries count = " . strval($result['count']));
+        }
+        
+        // 既存の取得データ分の処理
+        for($g = 0; $g < $result["count"]; $g++) {
+            $data = array();
+            $data['samaccountname'] = $result[$g]['samaccountname'][0];
+            $data['dn'] = $result[$g]['dn'];
+            $data['objectsid'] = bin2strSID($result[$g]['objectsid'][0]);
+            $groupData[] = $data;
+        }
 
-    $groupData = array();
-    for($g = 0; $g < $result["count"]; $g++) {
-        $data = array();
-        $data['samaccountname'] = $result[$g]['samaccountname'][0];
-        $data['dn'] = $result[$g]['dn'];
-        $data['objectsid'] = bin2strSID($result[$g]['objectsid'][0]);
-        $groupData[] = $data;
+        // ldap_control_paged_result_response からクッキー取得
+		ldap_control_paged_result_response($ldapconn, $searchResult, $cookie);
+
+        if ($log_level === "DEBUG") {
+            if (!empty($cookie)) {
+                backyardLog("next page_result");
+            } else {
+                backyardLog("ldap_search->ldap_get_entries break: No more cookies (last page)");
+            }
+        }
+        // 検索結果リソースを解放
+        ldap_free_result($searchResult);
+
+    } while (!empty($cookie));
+
+    // ldap_sort 代替
+    array_multisort(array_column($groupData, 'samaccountname'), SORT_ASC, $groupData);
+    
+    if($log_level === "DEBUG") {
+        backyardLog("ldap_search->ldap_get_entries end");
+        backyardLog("groupData count = " . strval(count($groupData)));
     }
 
     return $groupData;
@@ -444,6 +533,8 @@ function getGroupSyncData($ldapconn, $baseDn) {
  **/
 function getGroupNotSyncData($ldapconn, $baseDn) {
 
+    global $log_level;
+    
     // group type の値
     $array_createdBy = array("user" => 0, "system" => 1);
     $array_class = array("distribution" => 0); // 配布グループを除外対象とする
@@ -462,19 +553,59 @@ function getGroupNotSyncData($ldapconn, $baseDn) {
         $strGroupTypeFilter .= "(grouptype=$typeValue)";
     }
 
+    $pageSize = 1000;
+    $cookie = "";
+    $excludedGroupData = array(); 
     $filter = "(&(objectClass=group)($strGroupTypeFilter))";
     $attribute = array("objectsid");
-    $searchResult = ldap_search($ldapconn, $baseDn, $filter, $attribute) ;
 
-    /* 「ldap_search」の結果から、エントリを取得する */
-    ldap_sort($ldapconn , $searchResult , "objectsid"); // 検索結果をソート
-    $result = ldap_get_entries($ldapconn , $searchResult);
+    do {
+        // ldap_control_paged_result でページングコントロールを設定
+        if (!ldap_control_paged_result($ldapconn, $pageSize, true, $cookie)) {
+            backyardLog('Error setting paged result control: ' . ldap_error($ldapconn));
+            return $excludedGroupData;
+        }
 
-    $excludedGroupData = array();
-    for($g = 0; $g < $result["count"]; $g++) {
-        $excludedGroupData[] = bin2strSID($result[$g]['objectsid'][0]);
+        // ツリーを検索
+        $searchResult = ldap_search($ldapconn, $baseDn, $filter, $attribute);
+        if ($searchResult === false) {
+            backyardLog('Error performing LDAP search: ' . ldap_error($ldapconn));
+            return $excludedGroupData;
+        }
+        
+        /* 「ldap_search」の結果から、エントリを取得する */
+        $result = ldap_get_entries($ldapconn , $searchResult);
+        if($log_level === "DEBUG") {
+            backyardLog("ldap_get_entries count = " . strval($result['count']));
+        }
+        
+        // 既存の取得データ分の処理
+        for($g = 0; $g < $result["count"]; $g++) {
+            $excludedGroupData[] = bin2strSID($result[$g]['objectsid'][0]);
+        }
+
+        // ldap_control_paged_result_response からクッキー取得
+		ldap_control_paged_result_response($ldapconn, $searchResult, $cookie);
+
+        if ($log_level === "DEBUG") {
+            if (!empty($cookie)) {
+                backyardLog("next page_result");
+            } else {
+                backyardLog("ldap_search->ldap_get_entries break: No more cookies (last page)");
+            }
+        }
+        // 検索結果リソースを解放
+        ldap_free_result($searchResult);
+        
+    } while (!empty($cookie));
+
+    // ldap_sort 代替
+    asort($excludedGroupData);
+
+    if($log_level === "DEBUG") {
+        backyardLog("ldap_search->ldap_get_entries end");
+        backyardLog("excludedGroupData count = " . strval(count($excludedGroupData)));
     }
-
     return $excludedGroupData;
 }
 
