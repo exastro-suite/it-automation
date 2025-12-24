@@ -22,17 +22,17 @@
         $root_dir_temp = explode( "ita-root", dirname(__FILE__) );
         $root_dir_path = $root_dir_temp[0] . "ita-root";
     }
-    
+
     ////////////////////////////////
     // $log_output_dirを取得      //
     ////////////////////////////////
     $log_output_dir = getenv('LOG_DIR');
-    
+
     ////////////////////////////////
     // $log_file_prefixを作成     //
     ////////////////////////////////
     $log_file_prefix = basename( __FILE__, '.php' ) . "_";
-    
+
     ////////////////////////////////
     // $log_levelを取得           //
     ////////////////////////////////
@@ -166,12 +166,12 @@
         $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-STD-160001"); //[処理]プロシージャ(開始)
         require ($root_dir_path . $log_output_php );
     }
-    
+
     ////////////////////////////////
     // DBコネクト                 //
     ////////////////////////////////
     require ($root_dir_path . $db_connect_php );
-    
+
     // トレースメッセージ
     if ( $log_level === 'DEBUG' ){
         $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-STD-160003"); //[処理]DBコネクト完了
@@ -199,7 +199,7 @@
     if($sc_interval_time < 1 || $sc_interval_time > 525600){
         $sc_interval_time=3;
     }
-    
+
     $strIntervalTime    = $sc_interval_time . " MINUTE"; //Symphony作業一覧に実行するどれくらい前に登録をするか
 
     ////////////////////////////////////////
@@ -356,7 +356,7 @@
             $FREE_LOG = $e->getMessage();
             require ($root_dir_path . $log_output_php );
         }
-        
+
         // DBアクセス事後処理
         if (isset($aryCreateFirstNextDate)) unset($aryCreateFirstNextDate);
         if (isset($objQueryUtn)) unset($objQueryUtn);
@@ -537,7 +537,7 @@
                     }
 
                     if($beforeExecuteCheckFlag == false){
-                        //--- Conductorクラス状態保存 
+                        //--- Conductorクラス状態保存
                         $arrayResult = $objOLA->convertConductorClassJson($tmpsymphonyClassNo,1);
 
                         // JSON形式の変換、不要項目の削除
@@ -551,10 +551,10 @@
                             }
                         }
                         unset($strSortedData['conductor']);
-                        unset($strSortedData['config']); 
+                        unset($strSortedData['config']);
 
                         // アクセス権の上書き#519
-                        $arrayReceptData['ACCESS_AUTH']=$strOpeConAccessAuth; 
+                        $arrayReceptData['ACCESS_AUTH']=$strOpeConAccessAuth;
 
                         $arrayResult = $objOLA->conductorClassRegister(null, $arrayReceptData, $strSortedData, null);
 
@@ -603,7 +603,7 @@
                                 }
                                 if( 0 < strlen($strSysErrMsgBody)){
                                     $FREE_LOG = $strSysErrMsgBody;
-                                    require ($root_dir_path . $log_output_php );  
+                                    require ($root_dir_path . $log_output_php );
                                 }
 
                                 $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160003", array($regularlyId)); //[処理]symphonyINSTANCEの登録に失敗しました(定期実行ID:{})。
@@ -739,7 +739,7 @@
             $FREE_LOG = $e->getMessage();
             require ($root_dir_path . $log_output_php );
         }
-        
+
         // DBアクセス事後処理
         if (isset($objQuery)) unset($objQuery);
         if (isset($objQueryUtn)) unset($objQueryUtn);
@@ -929,7 +929,7 @@
             $FREE_LOG = $e->getMessage();
             require ($root_dir_path . $log_output_php );
         }
-        
+
         // DBアクセス事後処理
         if (isset($aryAbolishedCheck)) unset($aryAbolishedCheck);
         if (isset($objQueryUtn)) unset($objQueryUtn);
@@ -958,7 +958,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160001"); //[処理]プロシージャ終了(異常)
             require ($root_dir_path . $log_output_php );
         }
-        
+
         // リターンコード
         exit(1);
     }
@@ -968,7 +968,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-ERR-160002"); //[処理]プロシージャ終了(警告)
             require ($root_dir_path . $log_output_php );
         }
-        
+
         // リターンコード
         exit(2);
     }
@@ -978,7 +978,7 @@
             $FREE_LOG = $objMTS->getSomeMessage("ITABASEH-STD-160002"); //[処理]プロシージャ終了(正常)
             require ($root_dir_path . $log_output_php );
         }
-        
+
         // リターンコード
         exit(0);
     }
@@ -1115,7 +1115,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 //次回実行日付がある(2回目以降の登録の場合)
                 }else{
                     //次回実行日付を基準に間隔(時)を加算する
-                    $newNextExecutionDate = date('Y/m/d H:i', strtotime($nextExecutionDate.$addHourStr));     
+                    $newNextExecutionDate = date('Y/m/d H:i', strtotime($nextExecutionDate.$addHourStr));
                 }
 
                 //次回実行日付が作業停止期間中ではないかどうかをチェック
@@ -1317,7 +1317,7 @@ function getNextExecutionDate($rowOfReguralyList){
                 }else{
                      //次回実行日付を基準に間隔(週)を加算する
                     $newNextExecutionDate = date('Y/m/d H:i', strtotime($nextExecutionDate.$addWeekStr));
-     
+
                 }
 
                 //次回実行日付が作業停止期間中ではないかどうかをチェック
@@ -1355,103 +1355,70 @@ function getNextExecutionDate($rowOfReguralyList){
                     }
                 }
 
-                //整合性チェック用
-                $dateCheck = false;
-                //月計算用
-                $addMonthStr = '+'.$exeInterval.' month';
-
-                //次回実行日付がnull(初回登録の場合)
-                if($nextExecutionDate == null){
-                    //開始日付のYmd+patternTimeを生成
-                    $startYmdPatternTime = date('Y/m/d', strtotime($startDate)).' '.$patternTime;
-                    //開始日付のYm+patternDay+patternTimeを生成
-                    $startYmPatternDay = date('Y/m/', strtotime($startDate)).$patternDay;
-                    $startYmPatternDayTime = $startYmPatternDay.' '.$patternTime;
-                    //$startYmPatternDayの整合性をチェック
-                    list($Y, $m, $d) = explode('/', $startYmPatternDay);
-                    $dateCheck = checkdate((int)$m, (int)$d, (int)$Y);
-
-                    //開始日付が現在日付より未来かつ、$startYmPatternDayTimeが開始日付よりも未来かつ、$startYmPatternDayTimeが存在する日付である場合
-                    if(strtotime($startDate) > strtotime($nowDate) && strtotime($startYmPatternDayTime) >= strtotime($startDate) && $dateCheck == true){
-                        //$startYmPatternDayTimeを次回実行日付にする
-                        $newNextExecutionDate = $startYmPatternDayTime;
-                    //開始日付が現在日付より過去かつ、$startYmPatternDayTimeが現在日付よりも未来かつ、$startYmPatternDayTimeが存在する日付である場合
-                    }elseif(strtotime($nowDate) > strtotime($startDate) && strtotime($startYmPatternDayTime) >= strtotime($nowDate) && $dateCheck == true){
-                        //$startYmPatternDayTimeを次回実行日付にする
-                        $newNextExecutionDate = $startYmPatternDayTime;   
-                    }else{
-                        //$startYmPatternDayTimeを基準に現在日付よりも未来になるまで間隔(月)を加算する（存在しない日付の場合は加算を続行）
-                        $loopCheckDate = $startYmPatternDayTime;
-                        $dateCheck = false;
-                        $addIntervalStartYmPatternDayTime = $startYmPatternDayTime;
-                        while(strtotime($startDate) > strtotime($addIntervalStartYmPatternDayTime) || $dateCheck == false){
-                            list($Y, $m, $d) = explode('/', $addIntervalStartYmPatternDayTime);
-                            $addIntervalStartYm1 = $Y.'/'.$m.'/'.'1';
-                            $addIntervalYm = date('Y/m', strtotime($addIntervalStartYm1.$addMonthStr));
-                            $addIntervalStartYmPatternDay = $addIntervalYm.'/'.$patternDay;
-                            $addIntervalStartYmPatternDayTime = $addIntervalStartYmPatternDay.' '.$patternTime;
-                            //整合性をチェック
-                            list($Y, $m, $d) = explode('/', $addIntervalStartYmPatternDay);
-                            $dateCheck = checkdate((int)$m, (int)$d, (int)$Y);
-                            //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
-                            if(strtotime($loopCheckDate) >= strtotime($addIntervalStartYmPatternDayTime)){
-                                $newNextExecutionDate = null;
-                                $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
-                                break 2; //switchを抜ける
-                            }
-                        }
-                        $newNextExecutionDate = $addIntervalStartYmPatternDayTime;
+                // 計算の基準日（開始地点）を決定
+                // $calcDate に「今の年月」と「指定の日時」をセットしてループの起点にする
+                if ($nextExecutionDate === null) {
+                    // 初回：開始日か現在日の遅い方を基準にする
+                    $baseTimestamp = max(strtotime($startDate), strtotime($nowDate));
+                    $currentYear = date('Y', $baseTimestamp);
+                    $currentMonth = date('n', $baseTimestamp);
+                } else {
+                    // 2回目以降：前回の次回実行日に間隔を足したところからスタート
+                    $currentYear = date('Y', strtotime($nextExecutionDate));
+                    $currentMonth = date('n', strtotime($nextExecutionDate));
+                    // 間隔（月）を足す
+                    $currentMonth += $exeInterval;
+                    // 年をまたぐ処理
+                    if ($currentMonth > 12) {
+                        $currentYear += floor(($currentMonth - 1) / 12);
+                        $currentMonth = ($currentMonth - 1) % 12 + 1;
                     }
-
-                //次回実行日付がある(2回目以降の登録の場合)
-                }else{
-                     //次回実行日付を基準に間隔(月)を加算する（存在しない日付の場合は加算を続行）
-                    $loopCheckDate = $nextExecutionDate;
-                    $dateCheck = false;
-                    $addIntervalNextYmPatternDayTime = $nextExecutionDate;
-                    while($dateCheck == false){
-                        list($Y, $m, $d) = explode('/', $addIntervalNextYmPatternDayTime);
-                        $addIntervalNextYm1 = $Y.'/'.$m.'/'.'1';
-                        $addIntervalYm = date('Y/m', strtotime($addIntervalNextYm1.$addMonthStr));
-                        $addIntervalNextYmPatternDay = $addIntervalYm.'/'.$patternDay;
-                        $addIntervalNextYmPatternDayTime = $addIntervalNextYmPatternDay.' '.$patternTime;
-                        //整合性をチェック
-                        list($Y, $m, $d) = explode('/', $addIntervalNextYmPatternDay);
-                        $dateCheck = checkdate((int)$m, (int)$d, (int)$Y);
-                        //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
-                        if(strtotime($loopCheckDate) >= strtotime($addIntervalNextYmPatternDayTime)){
-                            $newNextExecutionDate = null;
-                            $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
-                            break 2; //switchを抜ける
-                        }
-                    }
-                    $newNextExecutionDate = $addIntervalNextYmPatternDayTime;
-     
                 }
 
-                //次回実行日付が作業停止期間中ではないかどうかをチェック
-                if(strtotime($newNextExecutionDate) >= strtotime($exeStopStartDate) && strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate)){
-                    //次回実行日付を基準に作業停止終了日付よりも未来になるまで間隔(月)を加算する（存在しない日付の場合は加算を続行）
-                    $loopCheckDate = $newNextExecutionDate;
-                    $dateCheck = false;
-                    while(strtotime($exeStopEndDate) >= strtotime($newNextExecutionDate) || $dateCheck == false){
-                        list($Y, $m, $d) = explode('/', $newNextExecutionDate);
-                        $nextExecutionYm1 = $Y.'/'.$m.'/'.'1';
-                        $addNextExecutionYm = date('Y/m', strtotime($nextExecutionYm1.$addMonthStr));
-                        $newNextExecutionDateYmd = $addNextExecutionYm.'/'.$patternDay;
-                        $newNextExecutionDate = $newNextExecutionDateYmd.' '.$patternTime;
-                        //整合性をチェック
-                        list($Y, $m, $d) = explode('/', $newNextExecutionDateYmd);
-                        $dateCheck = checkdate((int)$m, (int)$d, (int)$Y);
-                        //基準にした日付にたいして加算がうまくできていない場合、ループを終了する
-                        if(strtotime($loopCheckDate) >= strtotime($newNextExecutionDate)){
+                // 条件を満たす日付が見つかるまでループ
+                $loopCount = 0;
+                $maxLoops = 600; // 無限ループ防止（50年分）
+
+                while (true) {
+                    // 現在の年月から、指定の日付を生成
+                    $targetDateStr = sprintf('%04d/%02d/%02d', $currentYear, $currentMonth, $patternDay);
+                    $targetDateTimeStr = $targetDateStr . ' ' . $patternTime;
+                    $targetTimestamp = strtotime($targetDateTimeStr);
+
+                    // 判定フラグ
+                    // 実在する日付
+                    $isValidDate = checkdate((int)date('m', strtotime($targetDateStr)), (int)$patternDay, (int)$currentYear);
+                    // 開始日付より未来 かつ 現在日付より未来
+                    $isFuture = ($nextExecutionDate === null) ? ($targetTimestamp >= strtotime($startDate) && $targetTimestamp >= strtotime($nowDate)) : true;
+                    // 次回実行日付が作業停止期間中ではない
+                    $isNotInStopPeriod = true;
+                    if ($exeStopStartDate && $exeStopEndDate) {
+                        if ($targetTimestamp >= strtotime($exeStopStartDate) && $targetTimestamp <= strtotime($exeStopEndDate)) {
+                            $isNotInStopPeriod = false;
+                        }
+                    }
+
+                    // すべての条件（実在する日付、未来、停止期間外）を満たせば決定
+                    if ($isValidDate && $isFuture && $isNotInStopPeriod) {
+                        $newNextExecutionDate = $targetDateTimeStr;
+                        break;
+                    }
+
+                    // 条件を満たさない場合は間隔（月）を足す
+                    $currentMonth += $exeInterval;
+                    // 年をまたぐ処理
+                    if ($currentMonth > 12) {
+                        $currentYear += floor(($currentMonth - 1) / 12);
+                        $currentMonth = ($currentMonth - 1) % 12 + 1;
+                    }
+
+                    // 異常検知
+                    if ($loopCount++ > $maxLoops) {
                         $newNextExecutionDate = null;
-                        $regStatusId = STATUS_MISMATCH_ERROR; //ステータス：不整合エラー
-                        break 2; //switchを抜ける
-                        }
+                        $regStatusId = STATUS_MISMATCH_ERROR; // ステータス：不整合エラー
+                        break 2; // switchを抜ける
                     }
                 }
-
                 break;
 
             ////////////////////////
@@ -1545,7 +1512,7 @@ function getNextExecutionDate($rowOfReguralyList){
                     $nextMonthWeekNumberYmd = getWeekNnumberDate($patternDayOfWeek, $patternWeekNumber, $m, $Y);
                     //patternTimeを追記
                     $newNextExecutionDate = $nextMonthWeekNumberYmd.' '.$patternTime;
-         
+
                 }
 
                 //次回実行日付が作業停止期間中ではないかどうかをチェック
@@ -1655,7 +1622,7 @@ function getNextExecutionDate($rowOfReguralyList){
                     $Ym1 = $Y.'/'.$m.'/'.'1';
                     $addIntervalYm1 = date('Y/m/d', strtotime($Ym1.$addMonthStr));
                     $newNextExecutionDate = date('Y/m/t', strtotime($addIntervalYm1)).' '.$patternTime;
-     
+
                 }
 
                 //次回実行日付が作業停止期間中ではないかどうかをチェック
@@ -1747,5 +1714,5 @@ function getWeekNnumberDate($patternDayOfWeek, $patternWeekNumber, $targetMonth,
     return $targetMonthWeekNumberYmd;
 }
 
-    
+
 ?>

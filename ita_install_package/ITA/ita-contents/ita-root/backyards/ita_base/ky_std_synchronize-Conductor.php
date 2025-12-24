@@ -3525,6 +3525,7 @@
                     $intNextJobStopflg = 2;
                 }elseif( count($arrOfFocusMovement) == 0 && $intFocusMovementSeq != 0  && count($arrOfErrMovement) == 0 ){
                     $arySymInsUpdateTgtSource['STATUS_ID'] = 5;
+                    $arySymInsUpdateTgtSource['TIME_END'] = "DATETIMEAUTO(6)";
                     $strAfterStatusNumeric = $arySymInsUpdateTgtSource['STATUS_ID'];
                 }else{
                     //通常
